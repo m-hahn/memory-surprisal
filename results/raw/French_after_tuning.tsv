@@ -1,0 +1,14 @@
+Model	Language	Code	Drop1	Emb	Dim	Layers	lr	Type	Drop2	Batch	Length	Balanced	Memory	Residual	Duration	NonUniformity	ModelID	MI
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	French	French	0.4	100	1024	2	0.005	REAL_REAL	0.4	16	20	54.8336212168	2.91756540461	2.59580279061	17	NA	9478681	1.6604642246
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	French	French	0.4	100	1024	2	0.005	REAL_REAL	0.4	16	20	54.4097454024	3.00053350623	2.57046059481	22	NA	8430636	1.68271421007
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	French	French	0.4	100	1024	2	0.005	REAL_REAL	0.4	16	20	54.9883892294	2.90695377513	2.60407177271	16	NA	3304793	1.66211541381
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	French	French	0.4	100	1024	2	0.005	REAL_REAL	0.4	16	20	54.5679368562	2.95785966827	2.5805038594	20	NA	5269583	1.67809136524
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	French	French	0.4	100	1024	2	0.005	RANDOM_BY_TYPE	0.4	16	20	60.0105742514	3.25175584957	2.83794092009	15	NA	4763177	1.42462629584
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	French	French	0.4	100	1024	2	0.005	RANDOM_BY_TYPE	0.4	16	20	58.5198636207	3.06997375197	2.77249449344	20	NA	6479760	1.47859302933
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	French	French	0.4	100	1024	2	0.005	RANDOM_BY_TYPE	0.4	16	20	58.7999332748	3.0075821838	2.78961755455	17	NA	8797448	1.46531446469
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	French	French	0.4	100	1024	2	0.005	RANDOM_BY_TYPE	0.4	16	20	58.9777373325	2.82129643027	2.80782204511	11	NA	536426	1.46134209838
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	French	French	0.4	100	1024	2	0.005	RANDOM_BY_TYPE	0.4	16	20	56.3064424116	2.986567041	2.66599376853	20	NA	921100136	1.58538393815
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	French	French	0.4	100	1024	2	0.005	RANDOM_BY_TYPE	0.4	16	20	59.9191073967	2.95919842722	2.84799544848	12	NA	5227555	1.41463904171
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	French	French	0.4	100	1024	2	0.005	RANDOM_BY_TYPE	0.4	16	20	57.2394573275	3.12299025556	2.7058233536	23	NA	169858305	1.54745181442
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	French	French	0.4	100	1024	2	0.005	RANDOM_BY_TYPE	0.4	16	20	61.1224428249	3.07602076733	2.90232110288	14	NA	2648513	1.35327674522
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	French	French	0.4	100	1024	2	0.005	RANDOM_BY_TYPE	0.4	16	20	60.6703142571	3.26183782323	2.87042382169	17	NA	5812931	1.38126099804

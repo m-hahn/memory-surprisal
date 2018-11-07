@@ -1,0 +1,10 @@
+Model	Language	Code	Drop1	Emb	Dim	Layers	lr	Type	Drop2	Batch	Length	Balanced	Memory	Residual	Duration	NonUniformity	ModelID	MI
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Hebrew	Hebrew	0.2	50	256	2	0.01	REAL_REAL	0.35	32	20	65.7208045786	1.81891090729	3.19509468357	5	NA	2708984	1.22501282285
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Hebrew	Hebrew	0.2	50	256	2	0.01	REAL_REAL	0.35	32	20	65.8435480615	1.80361832769	3.20199648669	6	NA	3198169	1.22078395651
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Hebrew	Hebrew	0.2	50	256	2	0.01	REAL_REAL	0.35	32	20	66.1525597571	1.7555672828	3.21984962372	4	NA	2283659	1.20465425101
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Hebrew	Hebrew	0.2	50	256	2	0.01	RANDOM_BY_TYPE	0.35	32	20	67.9789847018	1.75025204666	3.31143663276	7	NA	167799861	1.0900071295
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Hebrew	Hebrew	0.2	50	256	2	0.01	RANDOM_BY_TYPE	0.35	32	20	69.1801400978	1.62071850724	3.37797107953	5	NA	583230918	1.04844786499
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Hebrew	Hebrew	0.2	50	256	2	0.01	RANDOM_BY_TYPE	0.35	32	20	69.8342540277	1.74928615847	3.40424839346	5	NA	953938	1.00649383107
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Hebrew	Hebrew	0.2	50	256	2	0.01	RANDOM_BY_TYPE	0.35	32	20	69.6186043247	1.76237956478	3.392811238	6	NA	240320	1.01673541075
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Hebrew	Hebrew	0.2	50	256	2	0.01	RANDOM_BY_TYPE	0.35	32	20	68.8410888213	1.65519644737	3.3592946187	7	NA	1155585	1.04570772152
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Hebrew	Hebrew	0.2	50	256	2	0.01	RANDOM_BY_TYPE	0.35	32	20	70.1951617107	1.77357472688	3.42107934919	5	NA	428291148	0.997569439531

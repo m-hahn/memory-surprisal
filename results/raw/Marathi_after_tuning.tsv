@@ -1,0 +1,13 @@
+Model	Language	Code	Drop1	Emb	Dim	Layers	lr	Type	Drop2	Batch	Length	Balanced	Memory	Residual	Duration	NonUniformity	ModelID	MI
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_Adap.py	Marathi	Marathi	0.25	150	64	1	0.001	REAL_REAL	0.2	4	20	97.8736733198	1.43399851219	4.82198374038	8	NA	7874145	0.956500500441
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_Adap.py	Marathi	Marathi	0.25	150	64	1	0.001	REAL_REAL	0.2	4	20	97.837588892	0.275163651808	4.87812126201	7	NA	1370961	0.881972575965
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_Adap.py	Marathi	Marathi	0.25	150	64	1	0.001	REAL_REAL	0.2	4	20	98.8899582139	1.33379096894	4.87780836225	6	NA	3477772	0.946029090363
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_Adap.py	Marathi	Marathi	0.25	150	64	1	0.001	REAL_REAL	0.2	4	20	102.113922	-0.137351730595	5.11256368653	4	NA	1871449	0.745938726093
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_Adap.py	Marathi	Marathi	0.25	150	64	1	0.001	REAL_REAL	0.2	4	20	98.5000837095	0.221404431955	4.91393396388	8	NA	8375600	0.776778133019
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Marathi	Marathi	0.25	150	64	1	0.001	RANDOM_BY_TYPE	0.2	4	20	105.748650664	-0.422488322724	5.30855694931	7	NA	833480693	0.407613500305
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_Adap.py	Marathi	Marathi	0.25	150	64	1	0.001	RANDOM_BY_TYPE	0.2	4	20	105.588380256	-0.190032471781	5.28892063641	5	NA	2078889	0.526270662961
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Marathi	Marathi	0.25	150	64	1	0.001	RANDOM_BY_TYPE	0.2	4	20	102.252635914	2.07651201538	5.00880619495	8	NA	55910395	0.71766393081
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_Adap.py	Marathi	Marathi	0.25	150	64	1	0.001	RANDOM_BY_TYPE	0.2	4	20	105.489085698	1.45386426928	5.20176107145	8	NA	4639293	0.576992816899
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_Adap.py	Marathi	Marathi	0.25	150	64	1	0.001	RANDOM_BY_TYPE	0.2	4	20	103.527230545	0.567263782024	5.14799833816	10	NA	1687857	0.543862493142
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_Adap.py	Marathi	Marathi	0.25	150	64	1	0.001	RANDOM_BY_TYPE	0.2	4	20	100.190754883	2.24390399262	4.89734254453	8	NA	2903118	0.874047466594
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Marathi	Marathi	0.25	150	64	1	0.001	RANDOM_BY_TYPE	0.2	4	20	100.757580532	0.524755848491	5.01164123416	9	NA	169130140	0.70719415079

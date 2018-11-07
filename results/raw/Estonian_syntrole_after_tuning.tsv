@@ -1,0 +1,17 @@
+Model	Language	Code	Drop1	Emb	Dim	Layers	lr	Type	Drop2	Batch	Length	Balanced	Memory	Residual	Duration
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_SyntRoleLabeling.py	Estonian	Estonian	0.05	150	512	2	0.05	REAL	0.2	8	20	13.0764985692	0.830510478307	0.612299404545	2
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_SyntRoleLabeling.py	Estonian	Estonian	0.05	150	512	2	0.05	REAL	0.2	8	20	13.0880513649	0.835056140981	0.612649761197	3
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_SyntRoleLabeling.py	Estonian	Estonian	0.05	150	512	2	0.05	RANDOM_BY_TYPE	0.2	8	20	13.8874743024	0.591490485842	0.664799190827	3
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_SyntRoleLabeling.py	Estonian	Estonian	0.05	150	512	2	0.05	RANDOM_BY_TYPE	0.2	8	20	12.9564034551	0.598472897035	0.617896527901	3
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_SyntRoleLabeling.py	Estonian	Estonian	0.05	150	512	2	0.05	RANDOM_BY_TYPE	0.2	8	20	14.5410837392	0.463512875183	0.703878543203	2
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_SyntRoleLabeling.py	Estonian	Estonian	0.05	150	512	2	0.05	RANDOM_BY_TYPE	0.2	8	20	12.9859042137	0.599634228113	0.619313499279	2
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_SyntRoleLabeling.py	Estonian	Estonian	0.05	150	512	2	0.05	RANDOM_BY_TYPE	0.2	8	20	13.1293651925	0.446849576935	0.634125780779	1
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_SyntRoleLabeling.py	Estonian	Estonian	0.05	150	512	2	0.05	RANDOM_BY_TYPE	0.2	8	20	8.88500773105	0.935300235452	0.39748537478	3
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_SyntRoleLabeling.py	Estonian	Estonian	0.05	150	512	2	0.05	RANDOM_BY_TYPE	0.2	8	20	11.0257821459	0.76521563495	0.513028325549	3
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_SyntRoleLabeling.py	Estonian	Estonian	0.05	150	512	2	0.05	RANDOM_BY_TYPE	0.2	8	20	13.0804687421	0.787475651962	0.614649654509	3
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_SyntRoleLabeling.py	Estonian	Estonian	0.05	150	512	2	0.05	RANDOM_BY_TYPE	0.2	8	20	13.5966399796	0.71639452044	0.644012272957	2
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_SyntRoleLabeling.py	Estonian	Estonian	0.05	150	512	2	0.05	RANDOM_BY_TYPE	0.2	8	20	11.8920304307	0.729762511851	0.558113395943	2
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_SyntRoleLabeling.py	Estonian	Estonian	0.05	150	512	2	0.05	RANDOM_BY_TYPE	0.2	8	20	11.3608037047	0.91198852366	0.522440759054	2
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_SyntRoleLabeling.py	Estonian	Estonian	0.05	150	512	2	0.05	RANDOM_BY_TYPE	0.2	8	20	13.2294688704	0.538560642056	0.634545411418	2
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_SyntRoleLabeling.py	Estonian	Estonian	0.05	150	512	2	0.05	RANDOM_BY_TYPE	0.2	8	20	12.4933951337	0.675567415364	0.590891385918	1
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_SyntRoleLabeling.py	Estonian	Estonian	0.05	150	512	2	0.05	RANDOM_BY_TYPE	0.2	8	20	11.3565583433	0.869025468876	0.524376643723	3

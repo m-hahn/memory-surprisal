@@ -1,0 +1,5 @@
+Model	Language	Code	Drop1	Emb	Dim	Layers	lr	Type	Drop2	Batch	Length	Balanced	Memory	Residual	Duration	NonUniformity	ModelID	MI
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_OnlyMorph_Adap.py	Afrikaans	Afrikaans	0.45	50	512	1	0.005	REAL_REAL	0.1	4	20	40.5427069722	2.65184982262	1.89454285748	6	NA	8664169	1.21951868801
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_OnlyMorph_Adap.py	Afrikaans	Afrikaans	0.45	50	512	1	0.005	REAL_REAL	0.1	4	20	42.5205595214	2.05116543255	2.02346970444	4	NA	5422056	1.08626920974
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_OnlyMorph_Adap.py	Afrikaans	Afrikaans	0.45	50	512	1	0.005	RANDOM_BY_TYPE	0.1	4	20	44.0399815389	1.78806967087	2.1126270913	4	NA	2056270	1.00436377792
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_OnlyMorph_Adap.py	Afrikaans	Afrikaans	0.45	50	512	1	0.005	RANDOM_BY_TYPE	0.1	4	20	44.0818547734	2.20382086995	2.09390169517	5	NA	4275638	1.02668333768
