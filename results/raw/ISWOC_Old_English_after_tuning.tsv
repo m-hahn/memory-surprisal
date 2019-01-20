@@ -1,5 +1,0 @@
-Model	Language	Code	Drop1	Emb	Dim	Layers	lr	Type	Drop2	Batch	Length	Balanced	Memory	Residual	Duration	NonUniformity	ModelID	MI
-yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	ISWOC_Old_English	ISWOC_Old_English	0.3	50	256	1	0.001	RANDOM_BY_TYPE	0.3	4	20	75.5225493293	2.4229989253	3.6549775202	16	NA	898087167	1.51795704193
-yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	ISWOC_Old_English	ISWOC_Old_English	0.3	50	256	1	0.001	RANDOM_BY_TYPE	0.3	4	20	76.3377409043	2.14193749159	3.70979017063	15	NA	676543166	1.44984948559
-yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	ISWOC_Old_English	ISWOC_Old_English	0.3	50	256	1	0.001	RANDOM_BY_TYPE	0.3	4	20	75.2105473904	2.54066912894	3.63349391307	19	NA	145489015	1.53175111416
-yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	ISWOC_Old_English	ISWOC_Old_English	0.3	50	256	1	0.001	RANDOM_BY_TYPE	0.3	4	20	76.051928744	2.08305232685	3.69844382086	14	NA	497149848	1.45519186528
