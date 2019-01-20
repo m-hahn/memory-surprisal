@@ -76,6 +76,7 @@ yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Esto
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL	0.1	32	20	76.1013674509	1.62235434148	3.72395065547	5	NA	5286719	0.9857769639
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL	0.1	32	20	76.545895585	1.59380664951	3.74760444677	4	NA	4941821	0.964548801916
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.3415980543	1.54795848923	3.73968197825	5	NA	9952455	0.963992259246
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	75.9333637835	1.55409682002	3.71896334818	3	NA	988273486	0.974063247142
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.2465553791	1.60871697102	3.7318919204	5	NA	3176276	0.972186309779
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.1245847418	1.61079595948	3.72568943912	5	NA	2696924	0.978630194878
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.3536780107	1.59326110555	3.73802084526	5	NA	3570690	0.976570694189
@@ -173,6 +174,7 @@ yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Esto
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.3641942138	1.60970857784	3.7377242818	5	NA	7720902	0.969664297098
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.5240348363	1.57298333573	3.74755257503	4	NA	8431133	0.957780778908
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.0781151608	1.61934576699	3.72293846969	5	NA	3036245	0.980076250014
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.3419472912	1.5496805711	3.739613336	4	NA	161290733	0.949925574655
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	75.9980071204	1.61286024469	3.71925734379	5	NA	118689	0.984763162198
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.4085115799	1.51696284115	3.74457743694	6	NA	305648	0.947478194565
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.3443811361	1.66156536816	3.7341407884	5	NA	5522937	0.984205268673
@@ -207,6 +209,7 @@ yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Esto
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.3142438736	1.55916331328	3.73775402802	4	NA	2325204	0.965992746937
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.1985557014	1.61666955749	3.72909430719	5	NA	3212439	0.978018088679
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.2580773475	1.58436310776	3.73368571199	5	NA	3962503	0.968859136455
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	75.9768843651	1.55190575545	3.72124893048	3	NA	604051315	0.972903247948
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.3022616125	1.55139369948	3.73754339565	5	NA	6760878	0.968723292069
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	75.9316812092	1.58052131999	3.71755799446	5	NA	1056710	0.978212727946
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.5450085231	1.54918206333	3.74979132299	5	NA	9032500	0.954863111695
@@ -258,6 +261,7 @@ yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Esto
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.3464618295	1.55943032834	3.73935157506	4	NA	4726435	0.963753548645
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.3310020396	1.59933627392	3.73658328828	5	NA	4941733	0.971623135893
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.7235073657	1.52390468636	3.75998013397	4	NA	966251	0.962591723508
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.2532566	1.58851514849	3.73323707258	3	NA	765527352	0.969300945608
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.2047088625	1.55980632094	3.73224512708	5	NA	129735	0.973802986861
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.3093515657	1.54116413997	3.73840937128	4	NA	1203336	0.970134244369
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.5393771267	1.53751098025	3.75009330732	4	NA	7244702	0.961614999545
@@ -277,6 +281,7 @@ yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Esto
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.2409595266	1.57763101016	3.73316642582	5	NA	5590834	0.969236122832
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.1625448306	1.62671809498	3.72679133678	5	NA	7698374	0.979548476086
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.1958282045	1.63476362914	3.72805322877	5	NA	1124770	0.973265783899
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.2103546594	1.55707269292	3.73266409833	4	NA	464787159	0.957446225163
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.4978581468	1.52464859448	3.74866047762	5	NA	2856511	0.962360559594
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.428962567	1.56070852345	3.74341270218	5	NA	8343148	0.956492124438
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.4311377138	1.59098938748	3.74200741632	5	NA	8628873	0.964064793099
@@ -311,6 +316,8 @@ yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Esto
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.3191932692	1.58578824502	3.73667025121	5	NA	2420747	0.975438465158
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.4296408153	1.57814192142	3.74257494469	4	NA	7031477	0.963869945515
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.1984613126	1.59977254337	3.72993443846	5	NA	7308885	0.970912960052
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.0504052086	1.58247280976	3.72339661994	4	NA	273543648	0.968288889617
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.2106929641	1.55056389506	3.73300645345	4	NA	563009200	0.955689234922
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.3822571898	1.61416276434	3.73840472127	4	NA	1867914	0.974058096391
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.4911729334	1.55854915582	3.74663118888	4	NA	6139481	0.95999392117
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	REAL_REAL	0.1	32	20	76.1133064962	1.60575782818	3.7253774334	5	NA	1313258	0.979286907603
@@ -576,6 +583,7 @@ yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Esto
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	77.8857961198	1.58334606451	3.81512250276	3	NA	5793234	0.884603263648
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.8736253776	1.59860750343	3.76375089371	5	NA	1155247	0.936137861853
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	77.1292146601	1.60017044957	3.77645221053	5	NA	5438910	0.926989379895
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	77.3363324565	1.52529137302	3.79055205418	3	NA	291535801	0.912621129829
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.6609050603	1.70321065803	3.74788472011	5	NA	7962640	0.964461902794
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	75.5092397386	1.52461772732	3.69923110056	4	NA	6013465	1.00383651422
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.9316006983	1.52282208269	3.77043893078	4	NA	4759247	0.932587767857
@@ -640,6 +648,7 @@ yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Esto
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.1694759728	1.57052090179	3.72994775355	4	NA	5694487	0.968305433557
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.7614940085	1.47375586209	3.76438690732	5	NA	3563712	0.947698892063
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.4499289813	1.45488840082	3.74975202903	3	NA	1591975	0.945616294474
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.1765685879	1.48177081024	3.73473988888	3	NA	924426920	0.963598044827
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	75.682289587	1.67243441944	3.70049275838	4	NA	2766346	0.997561202053
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	77.0646648677	1.56351521291	3.77505748274	4	NA	9366688	0.94084341359
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	77.6407631659	1.51497548834	3.80628938388	4	NA	3751945	0.896931949478
@@ -706,6 +715,7 @@ yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Esto
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	75.8408570399	1.58914096593	3.7125858037	5	NA	7929104	0.992019119979
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.8795139407	1.53248067565	3.76735166325	4	NA	251167	0.937235531841
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	77.2060517694	1.62291130234	3.77915702335	5	NA	6939498	0.927378443264
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.7223453028	1.67224434611	3.75250504783	3	NA	307405361	0.946057319166
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	75.824055178	1.67232009718	3.70758675404	5	NA	272721	0.99090885976
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	77.2226528428	1.74742693014	3.77376129563	4	NA	1975787	0.934496418542
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	77.2084089626	1.60179747256	3.7803305745	4	NA	2584647	0.927917187746
@@ -728,8 +738,10 @@ yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Esto
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.6286464904	1.48599849131	3.75713239995	6	NA	920958	0.945233695909
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	77.824902965	1.66471716992	3.80800928976	3	NA	187318	0.89909132495
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	75.9682436749	1.64775585088	3.7160243912	5	NA	2323852	0.987247271976
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.2062049639	1.68174201775	3.72622314731	3	NA	863723609	0.964143660145
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.9457735529	1.63310492274	3.76563343151	5	NA	7065003	0.950243110375
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	77.8858670688	1.70611840822	3.80898743303	5	NA	8790790	0.904481690202
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	75.5984431277	1.50088725094	3.70487779384	4	NA	415234040	0.980044009201
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.237132372	1.5876949091	3.73247187315	5	NA	9974793	0.973270573222
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.7860867165	1.62241389202	3.75818364122	3	NA	5930582	0.953196909254
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.6159987472	1.54629468243	3.75348520324	5	NA	6900582	0.944663456572
@@ -773,6 +785,7 @@ yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Esto
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.7413929073	1.68243786218	3.75294775226	5	NA	2519469	0.951902848912
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.2552582888	1.55283835415	3.73512099673	5	NA	6349405	0.97329582504
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.9886914203	1.76813741433	3.7610277003	5	NA	6770522	0.943133447444
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	77.0701639849	1.57870851002	3.77457277374	3	NA	964949562	0.937407629077
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.3003784761	1.63732049874	3.73315289887	3	NA	5027986	0.97511446616
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	75.6061738704	1.47790697347	3.70641334485	5	NA	9800632	1.00211602034
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.5512127154	1.57395579666	3.74886284594	3	NA	1790988	0.95397798532
@@ -800,3 +813,7 @@ yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Esto
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	76.5987414909	1.59593804341	3.75014017237	5	NA	2255925	0.94766984675
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	75.5688535018	1.52883899102	3.70200072554	3	NA	8521335	0.997899568071
 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast.py	Estonian	Estonian	0.16	200	256	1	0.0055	RANDOM_BY_TYPE	0.1	32	20	77.3333084319	1.55194826129	3.78906800853	4	NA	2150244	0.913078017083
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Estonian	Estonian	0.16	200	256	1	0.0055	GROUND	0.1	32	20	74.1903444139	1.55249967611	3.63189223689	3	NA	9261918	1.06187348748
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Estonian	Estonian	0.16	200	256	1	0.0055	GROUND	0.1	32	20	74.5745190581	1.57633551948	3.64990917693	4	NA	7211395	1.04759360975
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Estonian	Estonian	0.16	200	256	1	0.0055	GROUND	0.1	32	20	74.8712879918	1.5441487298	3.6663569631	4	NA	4743180	1.03769271806
+yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py	Estonian	Estonian	0.16	200	256	1	0.0055	GROUND	0.1	32	20	74.5425307781	1.54206343245	3.65002336728	3	NA	9578428	1.05046621705
