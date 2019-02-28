@@ -585,60 +585,160 @@ We will define a class of baseline languages that serve as a comparison class of
 
 
 
+\paragraph{Dependency Data}
+We draw on dependency corpora.
+
+Universal Dependencies has compiled dependency corpora for several dozen languages
+
+
+
 \paragraph{Ordering Grammrs}
 We define ordering grammars, small interpretable models of dependency tree linearization.
+Our formalism of ordering grammars adapts the method of \cite{gildea-optimizing-2007, gildea-grammars-2010, gildea-human-2015} to the setting of dependency corpora.
 
-Every dependency type $\tau$ is assigned a parameter $a_\tau \in [0,1]$.
-Dependency trees are linearized by the following algorithm:
+Universal dependencies defines 37 universal syntactic relations that are used to label dependency arcs across all corpora.
+These relations encode cross-linguistically meaningful relations such as subjects, objects, and adjectival modifiers.
+We define ordering grammars by assigning a parameter $a_\tau \in [-1,1]$ to every one of these 37 universal syntactic relations.
+Relations sometimes have language-specific subtypes; we do not distinguish these subtypes.
 
+This parameter defines how dependents are ordered relative to their head:
+Given a head and a set of dependents, we order each dependents by the parameter $a_\tau$ assigned to the syntactic relation linking it to the head.
+Dependents with negative weights are placed to the left of the head; dependents with positive weights are placed to the right.
 
-%Every dependency type $\tau$ is assigned a direction parameter $\alpha_\tau$ and a distance parameter $\beta_\tau$.
+Ordering grammars describe languages that have consistent word order:
+For instance, the subject is consistently ordered before or after the verb, depending on whether the parameter for the verb-subject dependency is positive or negative.
 
 
 \paragraph{Baseline Languages}
 We define baseline grammars by randomly sampling the parameters $a_\tau$.
 
+Such baseline grammars define languages that have consistent word order, but do not exhibit any systematic correlations between the orderings of different dependents.
 
 
 
 \subsection{Method}
-The small size of available syntactic data for many languages means that estimating mutual information is problematic.
-
-
-In general, we expect a bias-variance tradeoff:
-
-A method that estimates on a coarse-grained level (e.g. POS) will result in estimates with relatively higher fidelity and lower variance, potentially making it easier to localize the actual language in the space of counterfactual languages.
-However, it introduces \emph{bias} by describing a simplified version of the language.
-
-
-
-
-
-We propose to therefore compute the quantities on levels less likely to suffer from data sparseness: part-of-speech and morphology.
-
-In the UD treebanks, each word has part-of-speech and morphological information.
-The UD treebanks encode morphology by providing, for each word in a sentence, a sequence of feature-value pairs (e.g., NUMBER=Singular).
-We encode each word into (1) its POS tag, (2) the sequence of these morphological feature-value pairs, (3) a special end-of-word token that indicates that information related to the word ends.
-We further provide the word's lemma after its POS tag, if it is one of the 50 most frequent lemmas of the language.
-Each POS tag and morphological feature-value pair is encoded as an atomic token.
-The rationale for including frequent lemmas is that such words often are strongly grammaticalized and may provide grammatical information (and frequent words are less likely to be affected by data sparseness).
-
+%The small size of available syntactic data for many languages means that estimating mutual information is problematic.
+%
+%
+%In general, we expect a bias-variance tradeoff:
+%
+%A method that estimates on a coarse-grained level (e.g. POS) will result in estimates with relatively higher fidelity and lower variance, potentially making it easier to localize the actual language in the space of counterfactual languages.
+%However, it introduces \emph{bias} by describing a simplified version of the language.
+%
+%
+%
+%
+%
+%We propose to therefore compute the quantities on levels less likely to suffer from data sparseness: part-of-speech and morphology.
+%
+%In the UD treebanks, each word has part-of-speech and morphological information.
+%The UD treebanks encode morphology by providing, for each word in a sentence, a sequence of feature-value pairs (e.g., NUMBER=Singular).
+%We encode each word into (1) its POS tag, (2) the sequence of these morphological feature-value pairs, (3) a special end-of-word token that indicates that information related to the word ends.
+%We further provide the word's lemma after its POS tag, if it is one of the 50 most frequent lemmas of the language.
+%Each POS tag and morphological feature-value pair is encoded as an atomic token.
+%The rationale for including frequent lemmas is that such words often are strongly grammaticalized and may provide grammatical information (and frequent words are less likely to be affected by data sparseness).
+%
 
 To estimate mutual informations, we use LSTM recurrent neural networks, the basis of the state of the art in modeling sequences such as natural language.
-We will discuss alternative estimation methods below.
+We model language on the level of individual word forms.
+We provide data from alternative estimation methods in the SI.
 
-During incremental prediction, the LSTM sequentially reads these tokens and computes a distribution over the next word.
-The probability that the LSTM assigns to a word -- encoded as a bundle of POS and morphological features -- in a context is the product of the contextual probabilities of the POS tag, the feature-value pairs, and the end-of-word token (the purpose of the end-of-word token is to make this possible -- we couldn't compute the probability of a word directly without this).
+
+\paragraph{Data Split}
+
+UD models predefined with train, dev, and test splits.
+Small datasets sometimes not.
+
+\paragraph{Model}
+We use a recurrent neural network with Long-Short-Term Memory cells.
+%Given a sequence of input words $w_1, ..., w_n \in V$, the model 
+%
+The first component of such a model is an \emph{embedding matrix} $W_{emb} \in \mathbb{R}^{|V| \times d_{emb}}$, where the \emph{vocabulary} $\mathcal{V}$ is a set, containing the words that occur in the corpus, and $d_{emb} \in \mathbb{N}$ is a fixed parameter.
+This matrix assigns a $d_{emb}$-dimensional vector to each word occurring in the corpus.
+The second component is an LSTM cell $f_{LSTM}$, a nonlinear transformation mapping an \emph{input} vector $x_{i} \in \mathbb{R}^{d_{emb}}$ a \emph{hidden state} $h_i \in \mathbb{R}^{d_{LSTM}}$ and a \emph{cell state} $c_i \in \mathbb{R}^{d_{LSTM}}$ to a new pair of hidden state and cell states $h_{i+1}, c_{i+1} \in \mathbb{R}^{d_{LSTM}}$.
+The LSTM cell $f_{LSTM}$ is parameterized by a matrix of numerical parameters $W_{LSTM}$.
+
+%Such networks estimate the probability of a word in context as follows.
+Given a sequence of input words $w_1, ..., w_n \in V$, the model first retrieves fixed-dimensionality vector representations $x_1, ..., x_n$, where $x_i$ is the row of $W_{emb}$ corresponding to the word $w_i$.
+It then computes a sequence of hidden and cell states by the following recurrent computation:
+\begin{align*}
+	h_1, c_1 &:= 0 \\
+	h_2, c_2 &:= f_{LSTM}(x_1, h_1, c_1) \\
+	\dots \\
+	h_{n+1}, c_{n+1} &:= f_{LSTM}(x_n, h_n, c_n) \\
+\end{align*}
+The vector $h_i$ encodes the result of reading the words $w_1, ..., w_{i-1}$.
+We will write $LSTM(w_1, ..., w_{i-1})$ for $h_i$.
+
+The third component of the recurrent language model is the matrix $W_{output} \in \mathbb{R}^{|V| \times d_{LSTM}}$.
+We obtain per-word predictions of the next word by computing
+\begin{align*}
+	s_i := W_{output} h_i \in \mathbb{R}^{|V|} \\
+	p_i := \operatorname{softmax}(s_i)\in \mathbb{R}^{|V|} 
+\end{align*}
+where the softmax transformation normalizes vectors into probability distributions as follows
+\begin{equation}
+	\operatorname{softmax}(x)_i := \frac{\exp(x_i)}{\sum_{j=1}^{|V|} \exp(x_j)}
+\end{equation}
+Finally, the probability of the word $w_n$ in the context $w_1, ..., w_{n-1}$ is computed as
+\begin{equation}
+	p_\theta(w_n|w_1...w_{n-1}) := \frac{\exp((p_n)_{w_n})}{\sum_{w \in V} \exp(x_w)}
+\end{equation}
+and thus the surprisal is estimated as
+\begin{equation}
+- \log	p_\theta(w_n|w_1...w_{n-1}) := -\log \frac{\exp((p_n)_{w_n})}{\sum_{w \in V} \exp(x_w)}
+\end{equation}
+We discuss the choice of the numerical parameters in the next section.
+
+
+
+\paragraph{Training}
+Given a corpus, the numeral parameters of the LSTM are chosen so as to minimize the average surprisal across the training corpus.
+We can think of the LSTM parameters as forming one large vector $\theta$.
+At the beginning of training, the parameters $\theta$ are randomly initialized.
+If $\theta_n$ consists of the LSTM parameters after $n$ training steps, we randomly select a word sequence $w_1 ... w_T$ from the training corpus, and use the LSTM using the current parameter setting $\theta_n$ to compute the per-word surprisals.
+We then update the parameter vector:
+\begin{equation}\label{eq:train}
+	\theta_{n+1} := \theta_n + \alpha \partial_\theta \left(\sum_{i=1}^T \log p_\theta(w_i|w_1...w_{i-1})\right)
+\end{equation}
+where $\alpha \in \mathbb{R}_+$ is the \emph{learning rate}.
+
+Word sequences are sampled without replacement.
+Once all sequences have been processed, we start another pass through the training data.
+
+After each pass through the training data, the average surprisal at the current parameter setting $\theta_n$ is evaluated on the development partition.
+We terminate training once this development partition surprisal does not improve over the one computed after the previous pass any more.
+
+\paragraph{Regularization}
+%Dropout, Word dropout, Word noising
+%Any statistical estimation problem faces the 
+The quality of neural network models is improved by regularization, improving generalization to the full data distribution.
+In the case of neural networks, the most successful regularization methods typically take the form of random modifications to the input and internal activations when computing the gradients in the training updates~(\ref{eq:train}).
+We use three common methods of regularization.
+First, we apply \emph{dropout} both to the input vectors $x_i$ and to the output vectos $h_i$, randomly setting individual elements to zero with rate $p_{embedding} \in [0,1]$.
+
+
+\paragraph{Choice of Hyperparameters}
+
+The LSTM model has a set of numerical parameters that need to be specified before training, namely the dimensionalities of the embeddings $d_{emb}$, the dimensionality of the hidden states $d_{LSTM}$, and the number of LSTM layers $d_{layer}$, the learning rate $\alpha$, and the regularization parameters $p_{embedding}, p_{word}, p_{noising}$.
+%We do this using the standard method 
 
 
 Given a corpus, we estimate a language model by training the LSTM on a training partition to maximize the data likelihood, and stopping training once the data likelihood on a held-out partition drops.
 The hyperparameters (number of hidden units, learning rate, etc.) are chosen so as to maximize the likelihood of the held-out partition.
 This procedure helps prevent overfitting the model to the training data, and ensure that it generalizes to unseen data. 
 
+
+
+\paragraph{Estimating the Memory-Surprisal Tradeoff Curve}
+
+
+
 Note that the quantities $\operatorname{I}[X_t, X_0 | X_1, ..., X_{t-1}]$ in~(\ref{eq:memory-bound}) are equal to difference between conditional entropies $H[X_t|X_1, ..., X_{t-1}] - H[X_t|X_0, X_1, ..., X_{t-1}]$.
 Therefore, to compute this quantity, we compute the differences between the surprisals
 $-\log P[X_t | X_0, X_1, ..., X_{t-1}]$ and $-\log P[X_t | X_1, ..., X_{t-1}]$ for each word in the held-out partition, and take the average over these.
 We cut $T$ off at 30.
+
 
 
 \paragraph{Alternative Models}
