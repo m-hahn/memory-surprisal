@@ -644,7 +644,20 @@ We model language on the level of individual word forms.
 We provide data from alternative estimation methods in the SI.
 
 
-\paragraph{Data Split}
+\paragraph{Data}
+
+
+We considered all languages for which there are Universal Dependencies 2.2 treebanks with a total of at least 400 sentences of training data.
+We excluded data from historical languages.\footnote{Ancient Greek, Coptic, Gothic, Latin, Old Church Slavonic, Old French.}
+We excluded four languages for a later confirmatory experiment (English, Korean, Russian). % Irish
+This resulted in X languages.
+
+For most language, we used the predefined data split.
+For some languages, where there was no training partition, or where the training partition was smaller than the test partition, we redefined the split to obtain more training data:
+For these languages, we randomly pooled all the available partitions, used 100 sentences as held-out data, and used the remainder as training data.\footnote{This affects Amharic, Armenian, Breton, Buryat, Cantonese, Faroese, Kazakh, Kurmanji, Naija, Thai, and Uyghur.}
+
+
+
 
 UD models predefined with train, dev, and test splits.
 Small datasets sometimes not.
@@ -712,21 +725,26 @@ We terminate training once this development partition surprisal does not improve
 \paragraph{Regularization}
 %Dropout, Word dropout, Word noising
 %Any statistical estimation problem faces the 
-The quality of neural network models is improved by regularization, improving generalization to the full data distribution.
-In the case of neural networks, the most successful regularization methods typically take the form of random modifications to the input and internal activations when computing the gradients in the training updates~(\ref{eq:train}).
-We use three common methods of regularization.
-First, we apply \emph{dropout} both to the input vectors $x_i$ and to the output vectos $h_i$, randomly setting individual elements to zero with rate $p_{embedding} \in [0,1]$.
-
+The quality of neural network models is further improved by regularization, improving generalization to the full data distribution.
+%In the case of neural networks, the most successful regularization methods typically take the form of random modifications to the input and internal activations when computing the gradients in the training updates~(\ref{eq:train}).
+We use three standard methods of regularization that have been shown to improve neural language modeling: dropout (CITE), word dropout (CITE), and word noising (CITE).
+%First, we apply \emph{dropout} both to the input vectors $x_i$ and to the output vectos $h_i$, randomly setting individual elements to zero with rate $p_{embedding} \in [0,1]$.
+%Second, we apply \emph{word dropout}, randomly zeroing out entire input vectors $x_i$ at rate $p_{word}$.
 
 \paragraph{Choice of Hyperparameters}
 
-The LSTM model has a set of numerical parameters that need to be specified before training, namely the dimensionalities of the embeddings $d_{emb}$, the dimensionality of the hidden states $d_{LSTM}$, and the number of LSTM layers $d_{layer}$, the learning rate $\alpha$, and the regularization parameters $p_{embedding}, p_{word}, p_{noising}$.
-%We do this using the standard method 
+The LSTM model has a set of numerical parameters that need to be specified before training, namely the dimensionalities of the embeddings $d_{emb}$, the dimensionality of the hidden states $d_{LSTM}$, and the number of LSTM layers $d_{layer}$, the learning rate $\alpha$, and the regularization parameters (dropout rate $p_{embedding}$, word dropout rate $p_{word}$, word noising rate $p_{noising}$.
+We choose these parameters so as to minimize the average surprisal on the held-out partition resulting from a fully trained model.
+
+For each language, we used Bayesian optimization using the Expected Improvement acquisition function (CITE) \citep{snoek-practical-2012} to find a good setting of the hyperparameters, taking average surprisal on random grammars as the objective.
+This biases the hyperparameters towards modeling counterfactual grammars better, biasing them against our hypothesis.
 
 
-Given a corpus, we estimate a language model by training the LSTM on a training partition to maximize the data likelihood, and stopping training once the data likelihood on a held-out partition drops.
-The hyperparameters (number of hidden units, learning rate, etc.) are chosen so as to maximize the likelihood of the held-out partition.
-This procedure helps prevent overfitting the model to the training data, and ensure that it generalizes to unseen data. 
+
+
+%Given a corpus, we estimate a language model by training the LSTM on a training partition to maximize the data likelihood, and stopping training once the data likelihood on a held-out partition drops.
+%The hyperparameters (number of hidden units, learning rate, etc.) are chosen so as to maximize the likelihood of the held-out partition.
+%This procedure helps prevent overfitting the model to the training data, and ensure that it generalizes to unseen data. 
 
 
 
@@ -734,41 +752,43 @@ This procedure helps prevent overfitting the model to the training data, and ens
 
 
 
-Note that the quantities $\operatorname{I}[X_t, X_0 | X_1, ..., X_{t-1}]$ in~(\ref{eq:memory-bound}) are equal to difference between conditional entropies $H[X_t|X_1, ..., X_{t-1}] - H[X_t|X_0, X_1, ..., X_{t-1}]$.
-Therefore, to compute this quantity, we compute the differences between the surprisals
-$-\log P[X_t | X_0, X_1, ..., X_{t-1}]$ and $-\log P[X_t | X_1, ..., X_{t-1}]$ for each word in the held-out partition, and take the average over these.
+The quantity $\operatorname{I}[X_t, X_0 | X_1, ..., X_{t-1}]$ in~(\ref{eq:memory-bound}) is equal to the difference 
+\begin{equation}
+H[X_t|X_1, ..., X_{t-1}] - H[X_t|X_0, X_1, ..., X_{t-1}]
+\end{equation}
+For each word in the held-out partition, we compute the difference
+\begin{equation}
+	-\log P_\theta[X_t | X_0, X_1, ..., X_{t-1}] - P_\theta[X_t | X_1, ..., X_{t-1}]
+\end{equation}
+and take the average over these.
 We cut $T$ off at 30.
 
 
 
-\paragraph{Alternative Models}
+\subsection{Discussion: Alternative Models}
 Recent research has proven strong theoretical learnability guarantees for neural network models (CITE), supporting their success in practice.
-They also provide the strongest predictors of the surprisal effect on human reading times \citep{frank-insensitivity-2011, goodkind-predictive-2018}.
+They also provide strong predictors of the surprisal effect on human reading times \citep{frank-insensitivity-2011, goodkind-predictive-2018}.
 
 In view of the NLP literature, the following are the main other options that exist for estimating mutual information and probabilities in sequences:
 
-First, an n-gram model: Here, the problem is that n-grams do not express any morphosyntactic generalizations. Furthermore, standard n-gram models do not express any generalizations about pairs of words that are not adjacent -- e.g., encoding a generalization about morphological agreement between two words is hard for such a model to capture if the two words are not always adjacent. Both the small scale of available corpora in many languages and free word order in many languages with rich morphology thus seem to make such models unattractive.
+A traditional model uses n-gram models. A challenge of n-gram models is that they do not express any morphosyntactic generalizations. Furthermore, standard n-gram models do not express any generalizations about pairs of words that are not adjacent -- e.g., encoding a generalization about morphological agreement between two words is hard for such a model to capture if the two words are not always adjacent. Both the small scale of available corpora in many languages and free word order in many languages with rich morphology thus seem to make such models unattractive.
+We evaluate our hypothesis using n-gram models in SI Section X, confirming the conclusions obtained from neural models.
 
-A statistical grammar: It may sound natural to model morphosyntax with a hierarchical grammar. The challenge is to encode statistical morphosyntactic generalizations, and to decide which independence assumptions to put into the model. One can either decide on a language-specific basis which generalizations to put in (laborious and might introduce bias), or choose a general model family that is rich enough to learn generalizations. The second option will make this a machine learning model that, for our purposes, does not seem to be superior to a recurrent neural network.
+A second option is to construct a statistical grammar, such as PCFG.
+The challenge is to encode statistical morphosyntactic generalizations, and to decide which independence assumptions to put into the model.
+One can either decide on a language-specific basis which generalizations to put in (laborious and might introduce bias), or choose a general model family that is rich enough to learn generalizations.
+The second option will make this a machine learning model that, for our purposes, does not seem to be superior to a recurrent neural network.
 
 
 
 
-\subsection{Data}
-We considered all languages for which there are Universal Dependencies 2.2 treebanks with a total of at least 400 sentences of training data.
-We excluded data from historical languages.\footnote{Ancient Greek, Coptic, Gothic, Latin, Old Church Slavonic, Old French.}
-We excluded four languages for a later confirmatory experiment (English, Korean, Russian). % Irish
-This resulted in X languages.
-
-For most language, we used the predefined data split.
-For some languages, where there was no training partition, or where the training partition was smaller than the test partition, we redefined the split to obtain more training data:
-For these languages, we randomly pooled all the available partitions, used 100 sentences as held-out data, and used the remainder as training data.\footnote{This affects Amharic, Armenian, Breton, Buryat, Cantonese, Faroese, Kazakh, Kurmanji, Naija, Thai, and Uyghur.}
+%\subsection{Data}
+%\subsection{Setup}
+%The recurrent neural network architecture has a range of adjustable parameters such as the number of neurons.
+%For each language, we used Bayesian optimization using the Expected Improvement acquisition function (CITE) \citep{snoek-practical-2012} to find a good setting of the hyperparameters, taking average surprisal on random grammars as the objective.
+%This biases the hyperparameters towards favoring counterfactual grammars.
 
 \subsection{Setup}
-The recurrent neural network architecture has a range of adjustable parameters such as the number of neurons.
-For each language, we used Bayesian optimization using the Expected Improvement acquisition function (CITE) \citep{snoek-practical-2012} to find a good setting of the hyperparameters, taking average surprisal on random grammars as the objective.
-This biases the hyperparameters towards favoring counterfactual grammars.
-
 
 For each language, we collected data from the actual orderings and from random grammars.
 We collect multiple samples for the actual orderings to control for variation due to the random initialization of the neural network.
@@ -780,11 +800,21 @@ The stopping criterion will be described below.
 \paragraph{Listener Memory: Surprisal-Memory Tradeoff}
 We want to test whether languages' surprisal-memory tradeoffs better than those of most baseline languages.
 For each model for each language, we interpolate the surprisal-memory tradeoff curves given by Proposition~\ref{prop:suboptimal} linearly.
-For each sample $x$ from real orderings, we look at the proportion $W(x)$ of samples from the baseline languages that are below $x$ throughout the entire range where both curves are defined.
+We estimate the unigram entropy $H[X_0]$ by averaging over all models.
+We view surprisal as a function of memory load, so that the curve is defined on all of $\mathbb{R}_+$.
+For each sample $x$ from real orderings, we look at the proportions $W_+(x)$ of samples from the baseline languages that are more optimal than $x$ throughout the entire range where both curves are defined, and the proportion $W_-(x)$ of baseline samples that are consistently less optimal.
 
-We test by considering the null hypothesis that $\E_{x \sim P_1}[W(x)] \leq 1/2$ where $P_1$ is the distribution over values obtained for real orderings.
+We consider the null hypothesis that, on average, not more baseline languages are consistently less optimal than are consistently more optimal than the real orderings:
+\begin{equation}
+	\E_{x \sim P_1}[W_+(x)] \geq \E_{x \sim P_1}[W_-(x)]
+\end{equation}
+where $P_1$ is the distribution over values obtained for real orderings.
 
-We use a bootstrapped confidence interval for $\E[W]$ for testing and for quantifying the degree of optimization.
+We estimate the quotient
+\begin{equation}
+	G :=	\frac{\E_{x \sim P_1}[W_+(x)]}{\E_{x \sim P_1}[W_+(x) + W_-(x)]}
+\end{equation}
+We use a bootstrapped confidence interval for $\E[G]$ for testing and for quantifying the degree of optimization.
 
 %- bootstrapping
 %- subsampling
@@ -794,8 +824,10 @@ We use a bootstrapped confidence interval for $\E[W]$ for testing and for quanti
 
 \paragraph{Stopping Criterion}
 
-For each language, we collected at least 20 data points for real and baseline orderings each, and continued collecting until the CI for $W$ had width $\leq 0.15$.
-We chose these thresholds based on preliminary simulations which had suggested that these widths were achievable at acceptable computational cost.
+For each language, we collected at least 5 data points for real orderings and at least 10 data points for baseline orderings.
+We continued obtaining new data points until the CI for $G$ had width $\leq 0.15$, or there were 100 samples from $P_1$ and 300 samples from $P_2$.
+Up to the end, we chose the next sample to be from $P_0$ with probability 2/3, and $P_1$ otherwise.
+%We chose these thresholds based on preliminary simulations which had suggested that these widths were achievable at acceptable computational cost.
 
 %- at least 30 samples from both baseline and real
 %
@@ -815,11 +847,15 @@ We chose these thresholds based on preliminary simulations which had suggested t
 
 
 
-In all but X languages $\E[W] > 0.5$ significantly.
+In all but X languages $\E[G] > 0.5$ significantly.
 
 
 
-\section{Experiments on Further Treebanks}
+\subsection{Discussion}
+
+
+Word Order Freedom and Memory Efficiency
+
 
 
 \bibliographystyle{apalike}
