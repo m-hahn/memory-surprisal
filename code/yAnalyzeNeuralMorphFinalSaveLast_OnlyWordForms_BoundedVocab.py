@@ -1,6 +1,6 @@
 import os
 
-path = "/u/scr/mhahn/deps/memory-need-neural-wordforms/"
+path = "../results/per-run/memory-need-neural-wordforms/"
 files = os.listdir(path)
 import sys
 sortBy = int(sys.argv[1])
@@ -140,12 +140,12 @@ for fileName in files:
 #     else:
 #        assert False, typeOfResult
 
-outpath1 = "/u/scr/mhahn/"+language+"_after_tuning_onlyWordForms_boundedVocab.tsv"
+outpath1 = "../results/raw/"+language+"_after_tuning_onlyWordForms_boundedVocab.tsv"
 
 header = ["Model", "Language", "Code", "Drop1", "Emb", "Dim", "Layers", "lr", "Type", "Drop2", "Batch", "Length", "Balanced", "Memory", "Residual", "Duration", "NonUniformity", "ModelID", "MI"]
 headerDecay = ["Model", "Language", "Code", "Type", "Distance", "ConditionalMI", "TotalMI", "ModelID", "UnigramCE"]
 with open(outpath1, "w") as outFile:
- with open("/u/scr/mhahn/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", "w") as outFileDecay:
+ with open("../results/raw/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", "w") as outFileDecay:
 
   print >> outFile, "\t".join(header)
   print >> outFileDecay, "\t".join(headerDecay)

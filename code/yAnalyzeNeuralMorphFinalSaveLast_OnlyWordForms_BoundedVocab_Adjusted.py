@@ -155,19 +155,19 @@ for fileName in files:
 
 if averageUnigramCE[1] == 0:
     print("no results")
-    print("/u/scr/mhahn/"+language+"_after_tuning_onlyWordForms_boundedVocab.tsv")
-    print("/u/scr/mhahn/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv")
+    print("../results/raw"+language+"_after_tuning_onlyWordForms_boundedVocab.tsv")
+    print("../results/raw"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv")
     quit()
 
 averageUnigramCE = averageUnigramCE[0] / averageUnigramCE[1]
 
 
-outpath1 = "/u/scr/mhahn/"+language+"_after_tuning_onlyWordForms_boundedVocab.tsv"
+outpath1 = "../results/raw"+language+"_after_tuning_onlyWordForms_boundedVocab.tsv"
 
 header = ["Model", "Language", "Code", "Drop1", "Emb", "Dim", "Layers", "lr", "Type", "Drop2", "Batch", "Length", "Balanced", "Memory", "Residual", "Duration", "NonUniformity", "ModelID", "MI"]
 headerDecay = ["Model", "Language", "Code", "Type", "Distance", "ConditionalMI", "TotalMI", "ModelID", "UnigramCE"]
 with open(outpath1, "w") as outFile:
- with open("/u/scr/mhahn/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", "w") as outFileDecay:
+ with open("../results/raw"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", "w") as outFileDecay:
 
   print >> outFile, "\t".join(header)
   print >> outFileDecay, "\t".join(headerDecay)
@@ -206,4 +206,4 @@ with open(outpath1, "w") as outFile:
  
   #yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast.py	Basque	eu	0.1	100	512	1	0.002	RANDOM_MODEL	0.23	16	20	43.3432767303	1.55933869897	4.17839380314
 print outpath1
-print "/afs/cs.stanford.edu/u/mhahn/scr/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv"
+print "../results/raw/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv"
