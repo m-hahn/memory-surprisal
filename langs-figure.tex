@@ -1,0 +1,89 @@
+\documentclass[8pt,letterpaper]{article}
+
+
+\usepackage{pslatex}
+%\usepackage{latexsym}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{url}
+%\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{rotating}
+\usepackage{natbib}
+\usepackage{amssymb}
+
+\usepackage{tikz-dependency}
+\usepackage{longtable}
+
+
+\newcommand{\R}[0]{\mathbb{R}}
+\newcommand{\E}[0]{\mathbb{E}}
+\newcommand{\Ff}[0]{\mathcal{F}}
+
+\usepackage{multirow}
+
+\newcommand{\soft}[1]{}
+\newcommand{\nopreview}[1]{}
+\newcommand\comment[1]{{\color{red}#1}}
+\newcommand\mhahn[1]{{\color{red}(#1)}}
+
+\usepackage{amsthm}
+
+\newcommand{\thetad}[0]{{\theta_d}}
+\newcommand{\thetal}[0]{{\theta_{LM}}}
+
+\newcounter{theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{question}[theorem]{Question}
+\newtheorem{example}[theorem]{Example}
+
+
+\frenchspacing
+%\def\baselinestretch{0.975}
+
+%\emnlpfinalcopy
+%\def\emnlppaperid{496}
+
+\title{Word Orders Trade Off Predictability and Memory Load Across Languages}%  Word Order Minimizes  Across Languages
+\author{Michael Hahn}
+\date{2018}
+
+\begin{document}
+
+\maketitle
+
+
+\begin{tabular}{cccccccccccccc}
+Afrikaans & Amharic & Arabic & Armenian & Basque & Breton & Bulgarian & Buryat \\
+\includegraphics[width=0.12\textwidth]{figures/Afrikaans-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Amharic-Adap-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Arabic-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Armenian-Adap-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Basque-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Breton-Adap-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Bulgarian-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Buryat-Adap-listener-surprisal-memory.pdf}
+\\
+Cantonese & Catalan & Chinese & Croatian & Czech & Danish & Dutch & Estonian \\
+\includegraphics[width=0.12\textwidth]{figures/Cantonese-Adap-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Catalan-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Chinese-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Croatian-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Czech-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Danish-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Dutch-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Estonian-listener-surprisal-memory.pdf}
+\\
+Faroese & Finnish & French & German & Greek & Hebrew & Hindi & Hungarian \\
+\includegraphics[width=0.12\textwidth]{figures/Faroese-Adap-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Finnish-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/French-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/German-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Greek-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Hebrew-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Hindi-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Hungarian-listener-surprisal-memory.pdf}
+\\
+Indonesian & Japanese & Kazakh & Kurmanji & Latvian & Naija & North Sami & Norwegian \\
+\includegraphics[width=0.12\textwidth]{figures/Indonesian-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Japanese-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Kazakh-Adap-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Kurmanji-Adap-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Latvian-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Naija-Adap-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/North_Sami-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Norwegian-listener-surprisal-memory.pdf}
+\\
+Persian & Polish & Romanian & Serbian & Slovak & Slovenian & Spanish & Swedish \\
+\includegraphics[width=0.12\textwidth]{figures/Persian-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Polish-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Romanian-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Serbian-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Slovak-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Slovenian-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Spanish-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Swedish-listener-surprisal-memory.pdf}
+\\
+Tamil & Thai & Turkish & Ukrainian & Uyghur & Vietnamese \\
+\includegraphics[width=0.12\textwidth]{figures/Tamil-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Thai-Adap-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Turkish-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Ukrainian-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Uyghur-Adap-listener-surprisal-memory.pdf} & \includegraphics[width=0.12\textwidth]{figures/Vietnamese-listener-surprisal-memory.pdf}
+\\\end{tabular}
+
+
+
+\end{document}
+
+
+
+
+
+
