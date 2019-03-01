@@ -21,7 +21,7 @@ def readTSV(x):
           data[i][column] = vals[i]
     return (header, data)
 try:
-  with open("/u/scr/mhahn/"+language+"_after_tuning_onlyWordForms_boundedVocab.tsv", "r") as inFile:
+  with open("../results/raw/word-level/"+language+"_after_tuning_onlyWordForms_boundedVocab.tsv", "r") as inFile:
      data = readTSV(inFile)
 except IOError:
    print("\t".join(map(str, [language, 0,0  ])))
@@ -31,8 +31,6 @@ except IOError:
 
 
 #data = data %>% group_by(ModelID) %>% mutate(CumulativeMemory = cumsum(Distance*ConditionalMI), CumulativeMI = cumsum(ConditionalMI))
-
-import torch
 
 def g(frame, name, i):
     return frame[1][i][frame[0][name]]
