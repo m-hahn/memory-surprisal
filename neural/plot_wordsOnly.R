@@ -11,18 +11,27 @@ memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
     data2 = data %>% filter(Distance==1) %>% mutate(ConditionalMI=0, Distance=0)
     data = rbind(data2, data)
 
-
 #data$UnigramCE = mean(data$UnigramCE, na.rm=TRUE)
 
     data = data %>% group_by(ModelID) %>% mutate(CumulativeMemory = cumsum(Distance*ConditionalMI), CumulativeMI = cumsum(ConditionalMI), Surprisal=UnigramCE-CumulativeMI)
+
+
+    
 
 #    plot = ggplot(data, aes(x=Surprisal, y=CumulativeMemory, group=Type, fill=Type, color=Type, alpha=0.5)) + geom_smooth()+ theme_classic() + theme(legend.position="none")
 #    ggsave(plot, file=paste("figures/",language,"-listener-reverse-surprisal-memory_onlyWordForms_boundedVocab.pdf", sep=""))
 #    plot = ggplot(data, aes(x=Surprisal, y=CumulativeMemory, group=ModelID, fill=Type, color=Type, alpha=0.5)) + geom_line()+ theme_classic() + theme(legend.position="none")
 #    ggsave(plot, file=paste("figures/",language,"-listener-reverse-surprisal-memory-by-run_onlyWordForms_boundedVocab.pdf", sep=""))
 
+
+
+#    data3 = data %>% group_by(ModelID, Type) %>% summarise(Surprisal=min(Surprisal), CumulativeMI = max(CumulativeMI))
+#    data3$CumulativeMemory = max(data$CumulativeMemory)
+#    data = rbind(data %>% select(ModelID, Type, Surprisal, CumulativeMemory), data3)
+#
     plot = ggplot(data, aes(x=CumulativeMemory, y=Surprisal, group=ModelID, fill=Type, color=Type, alpha=0.5)) + geom_line()+ theme_classic() + theme(legend.position="none")
     ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory-by-run_onlyWordForms_boundedVocab.pdf", sep=""))
+
 
     plot = ggplot(data, aes(x=CumulativeMemory, y=Surprisal, group=Type, fill=Type, color=Type, alpha=0.5)) + geom_smooth()+ theme_classic() + theme(legend.position="none")
     ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory_onlyWordForms_boundedVocab.pdf", sep=""))

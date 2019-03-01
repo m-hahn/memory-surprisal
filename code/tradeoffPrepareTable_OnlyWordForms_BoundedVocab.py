@@ -1,15 +1,7 @@
 # tradeoff/effectSize.tsv
 
-
-languages = []
-languages += ["Arabic", "Catalan", "Czech", "Dutch", "Finnish", "French", "German", "Hindi", "Norwegian", "Spanish"]
-languages += ["Basque", "Bulgarian", "Croatian", "Estonian", "Hebrew", "Japanese", "Polish", "Romanian", "Slovak", "Slovenian", "Swedish"]
-languages += ["Afrikaans", "Chinese", "Danish", "Greek", "Hungarian",  "North_Sami", "Persian", "Serbian", "Turkish", "Ukrainian", "Vietnamese"]
-languages += ["Amharic-Adap", "Armenian-Adap",  "Breton-Adap",  "Buryat-Adap", "Cantonese-Adap","Faroese-Adap", "Kazakh-Adap", "Kurmanji-Adap", "Naija-Adap","Thai-Adap", "Uyghur-Adap"]
-languages += ["Bambara-Adap", "Erzya-Adap", "Maltese", "Latvian"]
-
-languages += ["Indonesian", "Urdu", "Portuguese"]
-	
+with open("../ud_languages.txt", "r") as inFile:
+   languages = inFile.read().strip().split("\n")
 
 languages = sorted(list(set(languages)))
 
@@ -40,13 +32,13 @@ def h(frame, line, name):
     return line[frame[0][name]]
 
 
-with open("tradeoff/effectSize.tsv", "r") as inFile:
-   effectSize = readTSV(inFile)
+#with open("tradeoff/effectSize.tsv", "r") as inFile:
+#   effectSize = readTSV(inFile)
 
-with open("tradeoff/effectSize_diff.tsv", "r") as inFile:
-   effectSize_diff = readTSV(inFile)
+#with open("tradeoff/effectSize_diff.tsv", "r") as inFile:
+#   effectSize_diff = readTSV(inFile)
 
-with open("tradeoff/stats.tsv", "r") as inFile:
+with open("../results/tradeoff/stats-onlyWordForms-boundedVocab_REAL.tsv", "r") as inFile:
    stats = readTSV(inFile)
 languageKey_stats = dict([(h(stats, line, "Language"), line) for line in stats[1]])
 
@@ -56,7 +48,7 @@ languageKey = dict([(h(effectSize, line, "Language"), line) for line in effectSi
 
 languageKey_diff = dict([(h(effectSize_diff, line, "Language"), line) for line in effectSize_diff[1]])
 
-with open("tradeoff/listener-curve.tsv", "r") as inFile:
+with open("../results/tradeoff/listener-curve-onlyWordForms-boundedVocab_REAL.tsv", "r") as inFile:
    listener_curve = readTSV(inFile)
 
 languageKey_listener_curve = dict([(h(listener_curve, line, "language"), line) for line in listener_curve[1]])
