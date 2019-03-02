@@ -49,3 +49,5 @@ Indonesian
 Urdu
 Portuguese
 English
+Italian
+Russian
