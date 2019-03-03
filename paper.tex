@@ -49,7 +49,7 @@
 %\emnlpfinalcopy
 %\def\emnlppaperid{496}
 
-\title{Crosslinguistic Word Orders Enable and Efficient Tradeoff between Memory and Surprisal}
+\title{Crosslinguistic Word Orders Enable an Efficient Tradeoff between Memory and Surprisal}
 \author{Michael Hahn, Judith Degen, Richard Futrell}
 \date{2018}
 
@@ -851,16 +851,50 @@ Up to the end, we chose the next sample to be from $P_0$ with probability 2/3, a
 
 In all but X languages $\E[G] > 0.5$ significantly.
 
+$\E[G]$ was not estimated to be significantly above $>5$ for four languages: Latvian, North Sami, Polish, and Slovak.
 
 \begin{longtable}{lllllllllllllll}
 \input{results-table-word-level.tex}
 \end{longtable}
 
 
+
+
+\begin{figure}
+\includegraphics[width=0.95\textwidth]{neural/figures/full-REAL-listener-surprisal-memory-HIST_byMem_onlyWordForms_boundedVocab.pdf}
+	\caption{Histogram}\label{fig:hist-real}
+\end{figure}
+
 \subsection{Discussion}
 
+All four languages have relatively strong word order freedom.
+We hypothesized that freedom of word order freedm may be responsible for the difference between these languages and the other languages.
+We quantified word order freedom as the branching direction entropy~\cite{futrell-quantifying-2015}.
+We found that branching direction entropy was strongly correlated with the surprisal difference between real and baseline orderings (Spearman correlations -0.58, $p = 7.414e-6$).
 
-Word Order Freedom and Memory Efficiency
+
+
+\begin{figure}
+\includegraphics[width=0.95\textwidth]{neural/figures/surprisal-branching-entropy-REAL.pdf}
+	\caption{Surprisal Difference vs Branching Direction Entropy.}\label{fig:hist-real}
+\end{figure}
+
+
+
+
+
+
+\section{Fixed Word Orders}
+
+We test this hypothesis by comparing baseline languages to \emph{fixed-order} versions of the real languages.
+This enables us to tease apart the impact of the languages' word order rules from the impact of more specific ordering choices.
+
+
+\begin{figure}
+\includegraphics[width=0.95\textwidth]{neural/figures/full-GROUND-listener-surprisal-memory-HIST_byMem_onlyWordForms_boundedVocab.pdf}
+	\caption{Histogram}\label{fig:hist-real}
+\end{figure}
+
 
 
 
