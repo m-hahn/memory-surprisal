@@ -29,12 +29,14 @@ memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
 #    data3$CumulativeMemory = max(data$CumulativeMemory)
 #    data = rbind(data %>% select(ModelID, Type, Surprisal, CumulativeMemory), data3)
 #
-    plot = ggplot(data, aes(x=CumulativeMemory, y=Surprisal, group=ModelID, fill=Type, color=Type, alpha=0.5)) + geom_line()+ theme_classic() + theme(legend.position="none")
-    ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory-by-run_onlyWordForms_boundedVocab.pdf", sep=""))
-
 
     plot = ggplot(data, aes(x=CumulativeMemory, y=Surprisal, group=Type, fill=Type, color=Type, alpha=0.5)) + geom_smooth()+ theme_classic() + theme(legend.position="none")
     ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory_onlyWordForms_boundedVocab.pdf", sep=""))
+
+    plot = ggplot(data, aes(x=CumulativeMemory, y=Surprisal, group=ModelID, fill=Type, color=Type)) + geom_line(alpha=0.2)+ theme_classic() + theme(legend.position="none")
+    ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory-by-run_onlyWordForms_boundedVocab.pdf", sep=""))
+
+
 
 
     return(plot)
