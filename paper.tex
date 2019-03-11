@@ -49,7 +49,7 @@
 %\emnlpfinalcopy
 %\def\emnlppaperid{496}
 
-\title{Word Orders Trade Off Predictability and Memory Load Across Languages}%  Word Order Minimizes  Across Languages
+\title{Crosslinguistic Word Orders Enable an Efficient Tradeoff between Memory and Surprisal}
 \author{Michael Hahn, Judith Degen, Richard Futrell}
 \date{2018}
 
@@ -61,11 +61,13 @@
 %
 \begin{abstract}
 
-Are languages optimized for processing with limited memory?
-Memory limitations are well-established as a factor impacting sentence processing, and have been argued to account for crosslinguistic word order regularities.
-Computational models of language processing implementing memory constraints take various forms and make different kinds of assumptions about the architecture underlying human language processing.
-We first  establish general information-theoretic lower bounds on memory that hold in any model of language processing, applying both to speakers and listeners. %assuming only that listeners perform incremental prediction.
-Applying these results to corpora from over 50 languages, we then provide evidence that word orders in human language are optimized for memory demands of speakers and listeners. % producing language and listeners predicting input.
+Online memory limitations are well-established as a factor impacting sentence processing and have been argued to account for crosslinguistic word order regularities. Building off expectation-based models of language processing, we provide an information-theoretic formalization of these memory limitations. We introduce the idea of a memory-surprisal tradeoff: comprehenders can achieve lower average surprisal per word at the cost of storing more information about past context. We show that the shape of the tradeoff is determined in part by word order. In particular, languages will enable more efficient tradeoffs when they exhibit information locality: when predictive information about a word is concentrated in the word’s recent past. We show evidence from corpora of 52 real languages showing that languages allow for more efficient memory-surprisal tradeoffs than random baseline word order grammars. 
+
+%Are languages optimized for processing with limited memory?
+%Memory limitations are well-established as a factor impacting sentence processing, and have been argued to account for crosslinguistic word order regularities.
+%Computational models of language processing implementing memory constraints take various forms and make different kinds of assumptions about the architecture underlying human language processing.
+%We first  establish general information-theoretic lower bounds on memory that hold in any model of language processing, applying both to speakers and listeners. %assuming only that listeners perform incremental prediction.
+%Applying these results to corpora from over 50 languages, we then provide evidence that word orders in human language are optimized for memory demands of speakers and listeners. % producing language and listeners predicting input.
 \end{abstract}
 
 
@@ -856,12 +858,50 @@ Up to the end, we chose the next sample to be from $P_0$ with probability 2/3, a
 
 In all but X languages $\E[G] > 0.5$ significantly.
 
+$\E[G]$ was not estimated to be significantly above $>5$ for four languages: Latvian, North Sami, Polish, and Slovak.
 
+\begin{longtable}{lllllllllllllll}
+\input{results-table-word-level.tex}
+\end{longtable}
+
+
+
+
+\begin{figure}
+\includegraphics[width=0.95\textwidth]{neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
+	\caption{Histogram}\label{fig:hist-real}
+\end{figure}
 
 \subsection{Discussion}
 
+All four languages have relatively strong word order freedom.
+We hypothesized that freedom of word order freedm may be responsible for the difference between these languages and the other languages.
+We quantified word order freedom as the branching direction entropy~\cite{futrell-quantifying-2015}.
+We found that branching direction entropy was strongly correlated with the surprisal difference between real and baseline orderings (Spearman correlations -0.58, $p = 7.414e-6$).
 
-Word Order Freedom and Memory Efficiency
+
+
+\begin{figure}
+\includegraphics[width=0.95\textwidth]{neural/figures/surprisal-branching-entropy-REAL.pdf}
+	\caption{Surprisal Difference vs Branching Direction Entropy.}\label{fig:hist-real}
+\end{figure}
+
+
+
+
+
+
+\section{Fixed Word Orders}
+
+We test this hypothesis by comparing baseline languages to \emph{fixed-order} versions of the real languages.
+This enables us to tease apart the impact of the languages' word order rules from the impact of more specific ordering choices.
+
+
+\begin{figure}
+\includegraphics[width=0.95\textwidth]{neural/figures/full-GROUND-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
+	\caption{Histogram}\label{fig:hist-real}
+\end{figure}
+
 
 
 
@@ -973,200 +1013,6 @@ Therefore
 	Rearranging shows that the listener's surprisal is at least $H[X_t|L_t] \geq H[X_t | X_{<t}] + \sum_{t > T} I_t$, as claimed.
 \end{proof}
 
-
-
-
-\section{Results (Morphology on UD Treebanks)}\label{sec:results-table}
-
-Statistics reported:
-
-\begin{enumerate}
-%	\item CIs for $C_x := B_x - A_x$ may be a resonable stopping criterion
-	\item $A_x := P_0(\{X : X_1 \leq x_1 \wedge X_2 \leq x_2\})$
-	\item $B_x := P_0(\{X : X_1 \geq x_1 \wedge X_2 \geq x_2\})$
-	\item  $E := \frac{\E_{x \sim P_1}[A_x]}{\E_{x \sim P_1}[A_x+B_x]}$
-	\item Compute $A_{x'}$ for each $x'$ in the baseline distribution, and then calculate the percentile rank of $A_x$ among these values:
-$D := P_0(A_X \leq \E_{x \sim P_1}[A_x])$
-\item For each sample $x$ from real orderings, we look at the proportion $W(x)$ of samples from the baseline languages that are below $x$ throughout the entire range where both curves are defined.
-
-\end{enumerate}
-
-
-For each language, we show the number of sentences in the training partition, the surprisal-speaker memory tradeoff plane, the listener's surprisal-memory tradeoff curves (smoothed means), and the statistics defined above with bootstraped CIs.
-
-Languages where the stopping criterion hasn't been reached are marked with asterisks.
-
-\begin{longtable}{lllllllllllllll}
-Afrikaans  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Afrikaans-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Afrikaans-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.13  &  [0.05, 0.28]  \\ 
-1315  &    &    &  $B_x-A_x$  &  0.0  &  [-0.0, 0.01]  \\ 
-  &    &    &  $E_x$  &  0.42  &  [0.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  0.99  &  [0.96, 1.0]  \\ [10.25ex] \hline
-Amharic-Adap  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Amharic-Adap-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Amharic-Adap-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.16  &  [0.06, 0.29]  \\ 
-974  &    &    &  $B_x-A_x$  &  0.1  &  [0.04, 0.18]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Arabic*  &\\ [10.25ex] \hline
-Armenian-Adap*  &\\ [10.25ex] \hline
-Basque  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Basque-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Basque-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.09  &  [0.03, 0.15]  \\ 
-5396  &    &    &  $B_x-A_x$  &  0.82  &  [0.76, 0.88]  \\ 
-  &    &    &  $E_x$  &  0.99  &  [0.97, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Breton-Adap  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Breton-Adap-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Breton-Adap-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.11  &  [0.03, 0.22]  \\ 
-788  &    &    &  $B_x-A_x$  &  0.32  &  [0.2, 0.42]  \\ 
-  &    &    &  $E_x$  &  0.99  &  [0.95, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Bulgarian  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Bulgarian-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Bulgarian-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.07  &  [0.0, 0.22]  \\ 
-8907  &    &    &  $B_x-A_x$  &  0.56  &  [0.44, 0.7]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Buryat-Adap  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Buryat-Adap-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Buryat-Adap-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.09  &  [0.02, 0.19]  \\ 
-808  &    &    &  $B_x-A_x$  &  0.28  &  [0.19, 0.42]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [0.99, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Cantonese-Adap  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Cantonese-Adap-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Cantonese-Adap-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.17  &  [0.08, 0.31]  \\ 
-550  &    &    &  $B_x-A_x$  &  0.25  &  [0.17, 0.36]  \\ 
-  &    &    &  $E_x$  &  0.92  &  [0.85, 0.98]  \\ 
-  &    &    &  $W_x$  &  0.94  &  [0.86, 1.0]  \\ [10.25ex] \hline
-Catalan  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Catalan-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Catalan-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.13  &  [0.03, 0.25]  \\ 
-13123  &    &    &  $B_x-A_x$  &  0.44  &  [0.33, 0.57]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Chinese  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Chinese-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Chinese-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.12  &  [0.04, 0.23]  \\ 
-3997  &    &    &  $B_x-A_x$  &  0.1  &  [0.05, 0.19]  \\ 
-  &    &    &  $E_x$  &  0.99  &  [0.95, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Croatian  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Croatian-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Croatian-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.1  &  [0.03, 0.23]  \\ 
-7689  &    &    &  $B_x-A_x$  &  0.13  &  [0.05, 0.23]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Czech  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Czech-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Czech-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.14  &  [0.05, 0.27]  \\ 
-102993  &    &    &  $B_x-A_x$  &  0.66  &  [0.56, 0.77]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  0.94  &  [0.86, 0.99]  \\ [10.25ex] \hline
-Danish  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Danish-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Danish-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.11  &  [0.02, 0.26]  \\ 
-4383  &    &    &  $B_x-A_x$  &  0.15  &  [0.06, 0.25]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Dutch  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Dutch-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Dutch-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.07  &  [0.01, 0.15]  \\ 
-18310  &    &    &  $B_x-A_x$  &  0.04  &  [0.01, 0.08]  \\ 
-  &    &    &  $E_x$  &  0.88  &  [0.73, 1.0]  \\ 
-  &    &    &  $W_x$  &  0.98  &  [0.96, 1.0]  \\ [10.25ex] \hline
-Estonian  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Estonian-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Estonian-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.39  &  [0.3, 0.48]  \\ 
-6959  &    &    &  $B_x-A_x$  &  0.26  &  [0.18, 0.36]  \\ 
-  &    &    &  $E_x$  &  0.76  &  [0.67, 0.84]  \\ 
-  &    &    &  $W_x$  &  0.72  &  [0.65, 0.79]  \\ [10.25ex] \hline
-Faroese-Adap  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Faroese-Adap-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Faroese-Adap-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.13  &  [0.05, 0.26]  \\ 
-1108  &    &    &  $B_x-A_x$  &  0.34  &  [0.24, 0.45]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [0.99, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Finnish  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Finnish-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Finnish-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.05  &  [0.01, 0.12]  \\ 
-27198  &    &    &  $B_x-A_x$  &  0.95  &  [0.91, 0.99]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-French*  &\\ [10.25ex] \hline
-German  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/German-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/German-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.44  &  [0.37, 0.51]  \\ 
-13814  &    &    &  $B_x-A_x$  &  0.19  &  [0.12, 0.29]  \\ 
-  &    &    &  $E_x$  &  0.66  &  [0.6, 0.74]  \\ 
-  &    &    &  $W_x$  &  0.63  &  [0.57, 0.69]  \\ [10.25ex] \hline
-Greek  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Greek-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Greek-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.07  &  [0.0, 0.2]  \\ 
-1662  &    &    &  $B_x-A_x$  &  0.59  &  [0.48, 0.73]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Hebrew  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Hebrew-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Hebrew-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.12  &  [0.03, 0.24]  \\ 
-5241  &    &    &  $B_x-A_x$  &  0.19  &  [0.08, 0.3]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Hindi  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Hindi-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Hindi-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.07  &  [0.0, 0.24]  \\ 
-13304  &    &    &  $B_x-A_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Hungarian  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Hungarian-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Hungarian-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.55  &  [0.44, 0.65]  \\ 
-910  &    &    &  $B_x-A_x$  &  0.07  &  [0.0, 0.15]  \\ 
-  &    &    &  $E_x$  &  0.62  &  [0.51, 0.74]  \\ 
-  &    &    &  $W_x$  &  0.83  &  [0.76, 0.89]  \\ [10.25ex] \hline
-Indonesian  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Indonesian-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Indonesian-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.36  &  [0.28, 0.43]  \\ 
-4477  &    &    &  $B_x-A_x$  &  0.27  &  [0.22, 0.33]  \\ 
-  &    &    &  $E_x$  &  0.82  &  [0.77, 0.87]  \\ 
-  &    &    &  $W_x$  &  0.62  &  [0.57, 0.66]  \\ [10.25ex] \hline
-Japanese  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Japanese-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Japanese-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.05  &  [0.0, 0.18]  \\ 
-7164  &    &    &  $B_x-A_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Kazakh-Adap  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Kazakh-Adap-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Kazakh-Adap-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.08  &  [0.0, 0.24]  \\ 
-947  &    &    &  $B_x-A_x$  &  0.29  &  [0.2, 0.38]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Kurmanji-Adap  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Kurmanji-Adap-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Kurmanji-Adap-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.21  &  [0.09, 0.36]  \\ 
-634  &    &    &  $B_x-A_x$  &  0.1  &  [0.05, 0.16]  \\ 
-  &    &    &  $E_x$  &  0.86  &  [0.72, 0.95]  \\ 
-  &    &    &  $W_x$  &  0.96  &  [0.92, 1.0]  \\ [10.25ex] \hline
-Latvian  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Latvian-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Latvian-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.51  &  [0.41, 0.62]  \\ 
-4124  &    &    &  $B_x-A_x$  &  -0.05  &  [-0.11, 0.01]  \\ 
-  &    &    &  $E_x$  &  0.37  &  [0.24, 0.53]  \\ 
-  &    &    &  $W_x$  &  0.66  &  [0.58, 0.74]  \\ [10.25ex] \hline
-Naija-Adap  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Naija-Adap-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Naija-Adap-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.1  &  [0.02, 0.25]  \\ 
-848  &    &    &  $B_x-A_x$  &  0.33  &  [0.21, 0.47]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [0.99, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-North Sami  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/North_Sami-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/North_Sami-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.36  &  [0.28, 0.45]  \\ 
-2257  &    &    &  $B_x-A_x$  &  0.15  &  [0.08, 0.23]  \\ 
-  &    &    &  $E_x$  &  0.73  &  [0.62, 0.81]  \\ 
-  &    &    &  $W_x$  &  0.36  &  [0.28, 0.43]  \\ [10.25ex] \hline
-Norwegian  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Norwegian-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Norwegian-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.14  &  [0.04, 0.3]  \\ 
-29870  &    &    &  $B_x-A_x$  &  0.63  &  [0.48, 0.78]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Persian  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Persian-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Persian-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.17  &  [0.07, 0.32]  \\ 
-4798  &    &    &  $B_x-A_x$  &  0.12  &  [0.06, 0.2]  \\ 
-  &    &    &  $E_x$  &  0.93  &  [0.77, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [0.99, 1.0]  \\ [10.25ex] \hline
-Polish  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Polish-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Polish-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.39  &  [0.3, 0.5]  \\ 
-6100  &    &    &  $B_x-A_x$  &  0.08  &  [-0.0, 0.15]  \\ 
-  &    &    &  $E_x$  &  0.6  &  [0.5, 0.69]  \\ 
-  &    &    &  $W_x$  &  0.31  &  [0.23, 0.39]  \\ [10.25ex] \hline
-Romanian  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Romanian-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Romanian-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.12  &  [0.03, 0.24]  \\ 
-8664  &    &    &  $B_x-A_x$  &  0.15  &  [0.07, 0.24]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Serbian  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Serbian-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Serbian-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.06  &  [0.01, 0.15]  \\ 
-2935  &    &    &  $B_x-A_x$  &  0.19  &  [0.13, 0.26]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Slovak  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Slovak-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Slovak-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.21  &  [0.13, 0.3]  \\ 
-8483  &    &    &  $B_x-A_x$  &  0.48  &  [0.39, 0.56]  \\ 
-  &    &    &  $E_x$  &  0.94  &  [0.9, 0.97]  \\ 
-  &    &    &  $W_x$  &  0.89  &  [0.83, 0.94]  \\ [10.25ex] \hline
-Slovenian  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Slovenian-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Slovenian-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.31  &  [0.22, 0.39]  \\ 
-7532  &    &    &  $B_x-A_x$  &  0.44  &  [0.35, 0.56]  \\ 
-  &    &    &  $E_x$  &  0.85  &  [0.79, 0.92]  \\ 
-  &    &    &  $W_x$  &  0.79  &  [0.72, 0.85]  \\ [10.25ex] \hline
-Spanish* &\\ [10.25ex] \hline
-Swedish  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Swedish-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Swedish-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.11  &  [0.02, 0.29]  \\ 
-7041  &    &    &  $B_x-A_x$  &  0.06  &  [0.01, 0.12]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Tamil  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Tamil-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Tamil-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.15  &  [0.04, 0.29]  \\ 
-400  &    &    &  $B_x-A_x$  &  0.17  &  [0.1, 0.28]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Thai-Adap  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Thai-Adap-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Thai-Adap-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.15  &  [0.06, 0.28]  \\ 
-900  &    &    &  $B_x-A_x$  &  0.19  &  [0.12, 0.27]  \\ 
-  &    &    &  $E_x$  &  0.99  &  [0.97, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Turkish  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Turkish-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Turkish-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.18  &  [0.05, 0.35]  \\ 
-3685  &    &    &  $B_x-A_x$  &  0.03  &  [0.01, 0.06]  \\ 
-  &    &    &  $E_x$  &  1.0  &  [1.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  1.0  &  [1.0, 1.0]  \\ [10.25ex] \hline
-Ukrainian  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Ukrainian-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Ukrainian-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.12  &  [0.03, 0.22]  \\ 
-4506  &    &    &  $B_x-A_x$  &  0.18  &  [0.1, 0.24]  \\ 
-  &    &    &  $E_x$  &  0.94  &  [0.87, 1.0]  \\ 
-  &    &    &  $W_x$  &  0.99  &  [0.97, 1.0]  \\ [10.25ex] \hline
-Uyghur-Adap  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Uyghur-Adap-entropy-memory.pdf}}  &  \multirow{4}{*}{\includegraphics[width=0.25\textwidth]{figures/Uyghur-Adap-listener-surprisal-memory.pdf}}  &  $D_x$  &  0.17  &  [0.06, 0.3]  \\ 
-1656  &    &    &  $B_x-A_x$  &  0.0  &  [-0.0, 0.01]  \\ 
-  &    &    &  $E_x$  &  0.9  &  [0.0, 1.0]  \\ 
-  &    &    &  $W_x$  &  0.0  &  [0.0, 0.0]  \\ [10.25ex] \hline
-Vietnamese* &\\ [10.25ex] \hline
-\end{longtable}
 
 
 
