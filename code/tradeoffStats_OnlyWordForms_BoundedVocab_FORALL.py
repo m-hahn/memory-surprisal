@@ -9,7 +9,8 @@ from ud_languages import languages
 real_type = sys.argv[1] 
 
 import subprocess
-print("\t".join(["Language", real_type, "RANDOM_BY_TYPE"]))
-for language in languages:
-    print(subprocess.check_output(["/u/nlp/anaconda/ubuntu_16/envs/py27-mhahn/bin/python2.7", "tradeoffStats_OnlyWordForms_BoundedVocab.py", language, real_type]).strip())
+with open("../results/tradeoff/stats-onlyWordForms-boundedVocab_"+("REAL" if real_type == "REAL_REAL" else "GROUND")+".tsv", "w") as outFile:
+   print >> outFile, ("\t".join(["Language", real_type, "RANDOM_BY_TYPE"]))
+   for language in languages:
+       print >> outFile, (subprocess.check_output(["/u/nlp/anaconda/ubuntu_16/envs/py27-mhahn/bin/python2.7", "tradeoffStats_OnlyWordForms_BoundedVocab.py", language, real_type]).strip())
 

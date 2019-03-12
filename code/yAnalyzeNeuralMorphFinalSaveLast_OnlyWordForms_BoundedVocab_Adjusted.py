@@ -79,10 +79,11 @@ finalShib = { "Russian" : " Russian 0.4 150 256 3 0.05 ", "Erzya-Adap" : "Erzya-
        "Latvian" : " Latvian 0.45 300 64 1 0.1 ",
        "Indonesian" : " Indonesian 0.25 300 128 1 0.1 ",
        "Urdu" : " Urdu 0.2 50 512 1 0.1 ",
-       "Portuguese" : " Portuguese 0.2 300 1024 3 0.1 ",
+       "Portuguese" : " Portuguese 0.3 200 1024 3 0.1 ", # corrected (there previously was a bug here)
        "German" : " German 0.3 100 512 1 0.05 ",
        "Italian" : " Italian 0.4 300 256 1 0.05 " ,
-       "English" : " English 0.15 150 1024 2 0.1 "}
+       "English" : " English 0.15 150 1024 2 0.1 ",
+       "Korean" : " Korean 0.1 300 1024 1 0.05 "}
 
 
 types = [" REAL ", " REAL_REAL ", "RANDOM_MODEL ", "RANDOM_BY_TYPE ", "RANDOM_MODEL_ST ", "RANDOM_BY_TYPE_ST ", "RANDOM_MODEL_CONS ", "RANDOM_BY_TYPE_CONS ", "RANDOM_MODEL_NONP ", "RANDOM_BY_TYPE_NONP ", " TOTALLY_RANDOM ", " GROUND "]
@@ -101,8 +102,8 @@ for fileName in files:
 #     print(result)
      if len(result) < 4:
        continue
-     if language == "Korean" and len(result) < 4 or len(result[3]) == 0 or result[3][0] == "False":
-         continue
+#     if language == "Korean" and len(result) < 4 or len(result[3]) == 0 or result[3][0] == "False":
+ #        continue
 #     print(result)
      if "PARAMETER_SEARCH" in result:
        continue
@@ -110,9 +111,14 @@ for fileName in files:
          continue
      if " "+language+" " not in result[0]:
         continue
-     if onlyOptimized:
-       if not all([x in result[0] for x in  finalShib[language]]): # not in result[0] or finalShib[language][1] not in result[0]):
-         continue
+     if onlyOptimized: # changed this line (March 8, 2019)
+       if type(finalShib[language]) == type((1,2)):
+         if not all([x in result[0] for x in  finalShib[language]]): # not in result[0] or finalShib[language][1] not in result[0]):
+           continue
+       else:
+         if not finalShib[language] in result[0]: # all([x in result[0] for x in  ]): # not in result[0] or finalShib[language][1] not in result[0]):
+           continue
+
      typeOfResult = filter(lambda x:x in result[0], types)[0][:-1]
      if len(result) < 3:
          continue
@@ -152,27 +158,29 @@ for fileName in files:
 #     else:
 #        assert False, typeOfResult
 
+outpath1 = "../results/raw/word-level/"+language+"_after_tuning_onlyWordForms_boundedVocab.tsv"
+outpath2 = "../results/raw/word-level/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv"
 
 if averageUnigramCE[1] == 0:
     print("no results")
-    print("../results/raw"+language+"_after_tuning_onlyWordForms_boundedVocab.tsv")
-    print("../results/raw"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv")
+    print(outpath1)
+    print(outpath2)
     quit()
 
 averageUnigramCE = averageUnigramCE[0] / averageUnigramCE[1]
 
 
-outpath1 = "../results/raw"+language+"_after_tuning_onlyWordForms_boundedVocab.tsv"
 
 header = ["Model", "Language", "Code", "Drop1", "Emb", "Dim", "Layers", "lr", "Type", "Drop2", "Batch", "Length", "Balanced", "Memory", "Residual", "Duration", "NonUniformity", "ModelID", "MI"]
 headerDecay = ["Model", "Language", "Code", "Type", "Distance", "ConditionalMI", "TotalMI", "ModelID", "UnigramCE"]
 with open(outpath1, "w") as outFile:
- with open("../results/raw"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", "w") as outFileDecay:
+ with open(outpath2, "w") as outFileDecay:
 
   print >> outFile, "\t".join(header)
   print >> outFileDecay, "\t".join(headerDecay)
   
   for typeOfResult in types:
+     resultsPerType[typeOfResult[:-1]] = sorted(resultsPerType.get(typeOfResult[:-1], []), key=lambda x:x[6])
      if len(resultsPerType.get(typeOfResult[:-1], [])) == 0:
         continue
      print
@@ -206,4 +214,4 @@ with open(outpath1, "w") as outFile:
  
   #yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast.py	Basque	eu	0.1	100	512	1	0.002	RANDOM_MODEL	0.23	16	20	43.3432767303	1.55933869897	4.17839380314
 print outpath1
-print "../results/raw/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv"
+print outpath2

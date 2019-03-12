@@ -16,11 +16,14 @@ languages += ["Indonesian", "Urdu" , "Portuguese", "English", "Italian", "Russia
 languages = set(languages)
 
 import subprocess
-print "\t".join(["language", "result1Mean", "result2Mean", "result1Low", "result1High", "result2Low", "result2High", "result3Mean", "result3Low", "result3High"])
-for language in languages:
-    try:
-       result = subprocess.check_output(["/u/nlp/anaconda/ubuntu_16/envs/py27-mhahn/bin/python2.7", "yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_Adjusted_Difference.py", language, "RANDOM_BY_TYPE", realType]).strip().split("\n")
-       print result[0]    
-    except subprocess.CalledProcessError:
-       _ = 0
-
+outPath = "../results/tradeoff/listener-curve-onlyWordForms-boundedVocab_"+("REAL" if realType == "REAL_REAL" else "GROUND")+".tsv"
+print(outPath)
+with open(outPath, "w") as outFile:
+   print >> outFile, "\t".join(["language", "result1Mean", "result2Mean", "result1Low", "result1High", "result2Low", "result2High", "result3Mean", "result3Low", "result3High"])
+   for language in languages:
+       try:
+          result = subprocess.check_output(["/u/nlp/anaconda/ubuntu_16/envs/py27-mhahn/bin/python2.7", "yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_Adjusted_Difference.py", language, "RANDOM_BY_TYPE", realType]).strip().split("\n")
+          print >> outFile, result[0]    
+       except subprocess.CalledProcessError:
+          _ = 0
+   

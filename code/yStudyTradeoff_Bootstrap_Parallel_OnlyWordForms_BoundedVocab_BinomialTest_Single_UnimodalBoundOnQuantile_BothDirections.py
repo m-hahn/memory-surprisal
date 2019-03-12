@@ -116,78 +116,50 @@ import statsmodels.stats.proportion
 
 #binom = 
 
+
+# Assuming unimodality of RANDOM distribution and that REAL median has been estimated very precisely, get confidence bound on the quantile of REAL in the RANDOM distribution
+
+medians = {}
+
 for real in ["REAL_REAL", "GROUND"]:
-    interpolated = interpolatedByTypes[real]
-   # print(interpolated.size())
-    
+  medians[real] = interpolatedByTypes[real].median(dim=0)[0]
+#  print(medians[real])
+ # print(medians[real].size())
+  
+  for i in range(39):
+     hereRandom = torch.sort(interpolatedByTypes["RANDOM_BY_TYPE"][:,i])[0]
 
-#    print(comparisonMean)
-    for i in range(39):
-       
-       hereReal = torch.sort(interpolated[:,i])[0]      
-#       print("Real", hereReal.size(), "Random", interpolatedByTypes["RANDOM_BY_TYPE"][:,i].size())
+     worseRandomCount = float((hereRandom < medians[real][i]).sum())
+     sameRandomCount = float((hereRandom == medians[real][i]).sum())
+     betterRandomCount = float((hereRandom > medians[real][i]).sum())
+#     print(worseRandomCount, sameRandomCount, betterRandomCount)
 
-       hereRandom = interpolatedByTypes["RANDOM_BY_TYPE"][:,i]
-       comparison = hereRandom.unsqueeze(0) < hereReal.unsqueeze(1)
-#       comparisonReverse = hereRandom.unsqueeze(0) > hereReal.unsqueeze(1)
+     # The goal here is to provide a confidence lower bound on worseRandomCount
+     if worseRandomCount == 0:
+         bound = 0
+     else:
+   #     print(hereRandom.size())
+        largestPossibleValue = xPoints[i]
+        #print(i, largestPossibleValue, medians[real][i], hereRandom)
+        # if the median is at most the best sample
+        targetLevel = 0.05
+        #unaccountedForTarget = 1-math.pow(targetLevel, 1/(float(hereRandom.size()[0])))
+        randomBestWorse = float(hereRandom[int(worseRandomCount)-1])
+        assert randomBestWorse < float(medians[real][i])
+#        print((largestPossibleValue, medians[real][i] , randomBestWorse,   (largestPossibleValue - medians[real][i] + 0.0001) / (largestPossibleValue - randomBestWorse + 0.0001)))
 
-       # for each REAL model, find how many baselines it beats
-       realCount = hereReal.size()[0]
-       randomCount = hereRandom.size()[0]
-
-       comparisonMeanPerREAL = comparison.sum(dim=1)
-#       print(comparisonMeanPerREAL.size())
-       # prob(median is in the cell BELOW (worse than) this value)
-       totalPValue = 0
-       totalMean = 0
-       #totalLower = 0
-       #totalUpper = 0
-       cis = [None for _ in range(realCount)]
-       probMedians = [None for _ in range(realCount)]
-       for j in range(realCount):
-          comparisonMeanForThisREAL = float(comparisonMeanPerREAL[j])
-          p = (scipy.stats.binom_test(x=comparisonMeanForThisREAL, n=randomCount, alternative="greater")) 
-          # prob that (j-1) are worse than median, realCount-j+1 are >= than the median
-          probMedian = scipy.stats.binom.pmf(j, realCount, 0.5)
-          probMedians[j] = probMedian
-          totalPValue += probMedian * p
-          totalMean += probMedian * comparisonMeanForThisREAL/randomCount
-          cis[j] = (statsmodels.stats.proportion.proportion_confint(count=comparisonMeanForThisREAL,nobs=randomCount, alpha=0.001, method="jeffreys"))
-
-       bestCI = (0, 1, 1.0)
-       for j in range(realCount):
-        for k in range(j+1, realCount):
-           coverage = sum(probMedians[j:k+1]) # TODO check the precise definition
-           lower = min([x[0] for x in cis[j:k+1]])
-           upper = max([x[1] for x in cis[j:k+1]])
-           if coverage > 1-0.05 and (upper-lower) < bestCI[1] - bestCI[0]:
-              bestCI = (lower, upper, coverage*(1-0.001))
-
-       # TODO don't trust the CI
-       print "\t".join(map(str,[language, real, i, totalMean, totalPValue, bestCI[0], bestCI[1], bestCI[2]]))
+        for unaccountedFor in [float(x)/200 for x in range(1,200)]:
+#          print scipy.stats.binom_test(x=1, n=10, p=0.5, alternative="greater")
+          assert unaccountedFor > 0
+          assert unaccountedFor < 1
+          
+          percentile = unaccountedFor * (largestPossibleValue - medians[real][i] + 0.0001) / (largestPossibleValue - randomBestWorse + 0.0001)
+          if sameRandomCount+betterRandomCount == 0:
+             p1 = math.pow(1-unaccountedFor, worseRandomCount)
+          else:
+             p1 = 1-(scipy.stats.binom_test(x=sameRandomCount+betterRandomCount, n=worseRandomCount+sameRandomCount+betterRandomCount, p=unaccountedFor, alternative="greater"))
+          if p1 < 0.05:
+             print "\t".join(map(str,[language, real, 1-float(percentile), p1]))
+             break
 
 
-
-
-
-       #quit()
-
-#       comparison = interpolatedByTypes["RANDOM_BY_TYPE"] < minReal.unsqueeze(0)
-#       comparisonReverse = interpolatedByTypes["RANDOM_BY_TYPE"] > minReal.unsqueeze(0)
-#    
-#     #  print(comparison.size())
-#       comparisonMean = comparison.float().sum(dim=0)
-#       comparisonReverseMean = comparisonReverse.float().sum(dim=0)
-#    
-#
-#
-#       p1 = (scipy.stats.binom_test(x=comparisonMean[i], n=comparison.size()[0])) + math.pow(2, -interpolated.size()[0])
-#       p2 = (scipy.stats.binom_test(x=comparisonReverseMean[i], n=comparison.size()[0])) + math.pow(2, -interpolated.size()[0])
-#
-
-
-
-#  mis = list(interpolated[:,-5].numpy())
-#  for i in range(len(mis)):
-#     print("\t".join(map(str,[language, typ, float(xPoints[-5]), mis[i]])))
-#

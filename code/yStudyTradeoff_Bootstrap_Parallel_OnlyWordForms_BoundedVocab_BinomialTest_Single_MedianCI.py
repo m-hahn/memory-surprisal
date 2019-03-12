@@ -116,55 +116,28 @@ import statsmodels.stats.proportion
 
 #binom = 
 
-for real in ["REAL_REAL", "GROUND"]:
-    interpolated = interpolatedByTypes[real]
-   # print(interpolated.size())
-    
+for typ, interpolated in interpolatedByTypes.iteritems():  
 
-#    print(comparisonMean)
     for i in range(39):
        
        hereReal = torch.sort(interpolated[:,i])[0]      
-#       print("Real", hereReal.size(), "Random", interpolatedByTypes["RANDOM_BY_TYPE"][:,i].size())
-
-       hereRandom = interpolatedByTypes["RANDOM_BY_TYPE"][:,i]
-       comparison = hereRandom.unsqueeze(0) < hereReal.unsqueeze(1)
-#       comparisonReverse = hereRandom.unsqueeze(0) > hereReal.unsqueeze(1)
-
-       # for each REAL model, find how many baselines it beats
        realCount = hereReal.size()[0]
-       randomCount = hereRandom.size()[0]
 
-       comparisonMeanPerREAL = comparison.sum(dim=1)
-#       print(comparisonMeanPerREAL.size())
-       # prob(median is in the cell BELOW (worse than) this value)
-       totalPValue = 0
-       totalMean = 0
-       #totalLower = 0
-       #totalUpper = 0
-       cis = [None for _ in range(realCount)]
-       probMedians = [None for _ in range(realCount)]
-       for j in range(realCount):
-          comparisonMeanForThisREAL = float(comparisonMeanPerREAL[j])
-          p = (scipy.stats.binom_test(x=comparisonMeanForThisREAL, n=randomCount, alternative="greater")) 
-          # prob that (j-1) are worse than median, realCount-j+1 are >= than the median
-          probMedian = scipy.stats.binom.pmf(j, realCount, 0.5)
-          probMedians[j] = probMedian
-          totalPValue += probMedian * p
-          totalMean += probMedian * comparisonMeanForThisREAL/randomCount
-          cis[j] = (statsmodels.stats.proportion.proportion_confint(count=comparisonMeanForThisREAL,nobs=randomCount, alpha=0.001, method="jeffreys"))
-
+       probsBinomial = [scipy.stats.binom.pmf(j+1, realCount, 0.5) for j in range(realCount)]
+       
        bestCI = (0, 1, 1.0)
-       for j in range(realCount):
-        for k in range(j+1, realCount):
-           coverage = sum(probMedians[j:k+1]) # TODO check the precise definition
-           lower = min([x[0] for x in cis[j:k+1]])
-           upper = max([x[1] for x in cis[j:k+1]])
-           if coverage > 1-0.05 and (upper-lower) < bestCI[1] - bestCI[0]:
-              bestCI = (lower, upper, coverage*(1-0.001))
+       for k in range(int(realCount/2)-1):
+          lower = float(hereReal[k])
+          upper = float(hereReal[realCount-k-1])
+          assert lower <= upper
+          coverage = sum(probsBinomial[k:realCount-k]) # TODO verify these calculations, indices may be off by a bit
+          if coverage > 1-0.05 and (upper-lower) < bestCI[1]-bestCI[0]:
+             bestCI = (lower, upper, coverage)
+#       print(typ, i, bestCI)
+          # median is in [lower, upper]
 
        # TODO don't trust the CI
-       print "\t".join(map(str,[language, real, i, totalMean, totalPValue, bestCI[0], bestCI[1], bestCI[2]]))
+       print "\t".join(map(str,[language, typ, i, float(interpolated[:,i].median()), bestCI[0], bestCI[1], bestCI[2]]))
 
 
 

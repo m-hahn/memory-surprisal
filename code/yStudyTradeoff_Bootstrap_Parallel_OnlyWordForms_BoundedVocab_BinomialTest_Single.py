@@ -1,5 +1,3 @@
-# Better than yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_MaxControl.py by modeling the median of REAL
-
 import sys
 
 language = sys.argv[1]
@@ -111,79 +109,28 @@ for typ, mis in misByType.iteritems():
   interpolatedByTypes[typ] = interpolated
 
 import scipy.stats
-import math
-import statsmodels.stats.proportion
-
-#binom = 
 
 for real in ["REAL_REAL", "GROUND"]:
     interpolated = interpolatedByTypes[real]
    # print(interpolated.size())
+    median = interpolated.median(dim=0)[0]
+  #  print(median.size())
     
+    comparison = interpolatedByTypes["RANDOM_BY_TYPE"] < median.unsqueeze(0)
+    comparisonReverse = interpolatedByTypes["RANDOM_BY_TYPE"] > median.unsqueeze(0)
+
+ #   print(comparison.size())
+    comparisonMean = comparison.float().sum(dim=0)
+    comparisonReverseMean = comparisonReverse.float().sum(dim=0)
 
 #    print(comparisonMean)
     for i in range(39):
-       
-       hereReal = torch.sort(interpolated[:,i])[0]      
-#       print("Real", hereReal.size(), "Random", interpolatedByTypes["RANDOM_BY_TYPE"][:,i].size())
+       p1 = (scipy.stats.binom_test(x=comparisonMean[i], n=comparison.size()[0], alternative="greater"))
+#       p2 = (scipy.stats.binom_test(x=comparisonReverseMean[i], n=comparison.size()[0]))
 
-       hereRandom = interpolatedByTypes["RANDOM_BY_TYPE"][:,i]
-       comparison = hereRandom.unsqueeze(0) < hereReal.unsqueeze(1)
-#       comparisonReverse = hereRandom.unsqueeze(0) > hereReal.unsqueeze(1)
+#       print "\t".join(map(str,[language, real, i, float(xPoints[i]), float(comparisonMean[i]/comparison.size()[0]), float(comparisonReverseMean[i]/comparison.size()[0]), p1, p2]))
+       print "\t".join(map(str,[language, real, i, float(xPoints[i]), float(comparisonMean[i]/comparison.size()[0]), p1]))
 
-       # for each REAL model, find how many baselines it beats
-       realCount = hereReal.size()[0]
-       randomCount = hereRandom.size()[0]
-
-       comparisonMeanPerREAL = comparison.sum(dim=1)
-#       print(comparisonMeanPerREAL.size())
-       # prob(median is in the cell BELOW (worse than) this value)
-       totalPValue = 0
-       totalMean = 0
-       #totalLower = 0
-       #totalUpper = 0
-       cis = [None for _ in range(realCount)]
-       probMedians = [None for _ in range(realCount)]
-       for j in range(realCount):
-          comparisonMeanForThisREAL = float(comparisonMeanPerREAL[j])
-          p = (scipy.stats.binom_test(x=comparisonMeanForThisREAL, n=randomCount, alternative="greater")) 
-          # prob that (j-1) are worse than median, realCount-j+1 are >= than the median
-          probMedian = scipy.stats.binom.pmf(j, realCount, 0.5)
-          probMedians[j] = probMedian
-          totalPValue += probMedian * p
-          totalMean += probMedian * comparisonMeanForThisREAL/randomCount
-          cis[j] = (statsmodels.stats.proportion.proportion_confint(count=comparisonMeanForThisREAL,nobs=randomCount, alpha=0.001, method="jeffreys"))
-
-       bestCI = (0, 1, 1.0)
-       for j in range(realCount):
-        for k in range(j+1, realCount):
-           coverage = sum(probMedians[j:k+1]) # TODO check the precise definition
-           lower = min([x[0] for x in cis[j:k+1]])
-           upper = max([x[1] for x in cis[j:k+1]])
-           if coverage > 1-0.05 and (upper-lower) < bestCI[1] - bestCI[0]:
-              bestCI = (lower, upper, coverage*(1-0.001))
-
-       # TODO don't trust the CI
-       print "\t".join(map(str,[language, real, i, totalMean, totalPValue, bestCI[0], bestCI[1], bestCI[2]]))
-
-
-
-
-
-       #quit()
-
-#       comparison = interpolatedByTypes["RANDOM_BY_TYPE"] < minReal.unsqueeze(0)
-#       comparisonReverse = interpolatedByTypes["RANDOM_BY_TYPE"] > minReal.unsqueeze(0)
-#    
-#     #  print(comparison.size())
-#       comparisonMean = comparison.float().sum(dim=0)
-#       comparisonReverseMean = comparisonReverse.float().sum(dim=0)
-#    
-#
-#
-#       p1 = (scipy.stats.binom_test(x=comparisonMean[i], n=comparison.size()[0])) + math.pow(2, -interpolated.size()[0])
-#       p2 = (scipy.stats.binom_test(x=comparisonReverseMean[i], n=comparison.size()[0])) + math.pow(2, -interpolated.size()[0])
-#
 
 
 
