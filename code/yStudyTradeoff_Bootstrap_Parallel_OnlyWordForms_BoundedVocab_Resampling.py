@@ -79,7 +79,7 @@ for typ, mis in misByType.iteritems():
   #print(cumMIs[typ][0])
 
 
-xPoints = torch.FloatTensor([maximalMemory*x/20.0 for x in range(1,20)])
+xPoints = torch.FloatTensor([maximalMemory*x/40.0 for x in range(1,40)])
 
 
 for typ, mis in misByType.iteritems():  
@@ -133,25 +133,79 @@ typ2 = random
 import random
 
 
+
+
+if True:
+   interpolated1 = cumInterpolated[typ1][0]
+   interpolated2 = cumInterpolated[typ2][0]
+   
+
+   foundValues1 = cumInterpolated[typ1][1]
+   foundValues2 = cumInterpolated[typ2][1]
+ 
+
+   strictlyBiggerCounts = []
+   strictlySmallerCounts = []
+   biggerAverages = []
+   smallerAverages = []
+
+   comparisonFavor1 = (interpolated1.unsqueeze(1) >= interpolated2.unsqueeze(0)).float()
+   comparisonFavor2 = (interpolated2.unsqueeze(0) >= interpolated1.unsqueeze(1)).float()
+ #  print(comparison.mean())
+   bothAreMeaningful = foundValues1.unsqueeze(1) * foundValues2.unsqueeze(0)
+#   print("BOTH MEANINGFUL", bothAreMeaningful.mean())
+   comparableRange = (bothAreMeaningful.sum(2).unsqueeze(2)).sum(2) # length of the comparable range in each case
+   comparableRange[comparableRange==0] = 1
+  # print(comparableRange.size())
+   bigger = (comparisonFavor1 * bothAreMeaningful)
+   smaller = (comparisonFavor2 * bothAreMeaningful)
+   bigger = bigger.sum(2) / comparableRange
+   smaller = smaller.sum(2) / comparableRange
+   strictlyBiggerCounts = (  torch.sum(bigger == 1.0, dim=1))
+   strictlySmallerCounts = ( torch.sum(smaller == 1.0, dim=1))
+   biggerAverages = ( torch.sum(bigger, dim=1))
+   smallerAverages = ( torch.sum(smaller, dim=1))
+ #  print(bigger.size())
+#   quit()
+#   print(strictlyBiggerCounts.size())
+   bigger = (torch.sum(strictlyBiggerCounts).numpy() / len(strictlyBiggerCounts))
+   smaller = (torch.sum(strictlySmallerCounts).numpy() / len(strictlySmallerCounts))
+   biggerAvg = (torch.sum(biggerAverages).numpy() / len(biggerAverages)) / len(interpolated2)
+#   print("\t".join([str(x) for x in [language, bigger/(bigger+smaller+0.00000001), biggerAvg]]))
+   result1_real = (bigger/(bigger+smaller+0.00000001))
+   result2_real = (biggerAvg)
+
+
+
+
+
+
+
+
 result1 = []
 result2 = []
 
-samplesNumber = 1000
+samplesNumber = 10000
+
+#print(cumInterpolated[typ1][0].size())
+totalInterpolated = torch.cat([cumInterpolated[typ1][0], cumInterpolated[typ2][0]], dim=0)
 
 for u in range(samplesNumber):
-#   print(u)
-   indices1 = [random.randint(0, len(cumInterpolated[typ1][0])-1) for _ in range(len(cumInterpolated[typ1][0]))]
-   indices2 = [random.randint(0, len(cumInterpolated[typ2][0])-1) for _ in range(len(cumInterpolated[typ2][0]))]
+   perm = torch.randperm(totalInterpolated.size()[0])
+   
+   interpolated = totalInterpolated[perm]
+#   print(interpolated.size())
+   
+   interpolated1 = interpolated[:cumInterpolated[typ1][0].size()[0]]
+   interpolated2 = interpolated[cumInterpolated[typ1][0].size()[0]:]
+ #  print(interpolated1.size())
+  # print(interpolated2.size())
+   
 
+   foundValues1 = cumInterpolated[typ1][1]
+   foundValues2 = cumInterpolated[typ2][1]
+ 
 
-   interpolated1 = cumInterpolated[typ1][0][indices1]
-   interpolated2 = cumInterpolated[typ2][0][indices2]
-   
-   
-   foundValues1 = cumInterpolated[typ1][1][indices1]
-   foundValues2 = cumInterpolated[typ2][1][indices2]
-   
-   
    strictlyBiggerCounts = []
    strictlySmallerCounts = []
    biggerAverages = []
@@ -182,31 +236,7 @@ for u in range(samplesNumber):
 #   print("\t".join([str(x) for x in [language, bigger/(bigger+smaller+0.00000001), biggerAvg]]))
    result1.append(bigger/(bigger+smaller+0.00000001))
    result2.append(biggerAvg)
-
-result1 = sorted(result1)
-result2 = sorted(result2)
-
-result1Mean = sum(result1)/samplesNumber
-result2Mean = sum(result2)/samplesNumber
-
-result1Low = result1[int(0.01 * samplesNumber)]
-result1High = result1[int(0.99 * samplesNumber)]
-result2Low = result2[int(0.01 * samplesNumber)]
-result2High = result2[int(0.99 * samplesNumber)]
-
-assert result2Mean <= result2High
-
-print("\t".join([str(x) for x in [language, result1Mean, result2Mean, result1Low, result1High, result2Low, result2High]]))
-print(result1High-result1Low)
-# 
-#library(tidyr)
-#library(dplyr)
-#library(ggplot2)
-#data = data %>% rename(Entropy_Rate=Residual)
-#plot = ggplot(data, aes(x=Memory, y=Entropy_Rate, group=Type, fill=Type, color=Type)) +
-#    geom_point()
-#ggsave(plot, file="North_Sami-entropy-memory.pdf")
-#
-#
+#print(sorted(result1))
+print("\t".join([str(x) for x in [language, result1_real, result2_real, len([x for x in result1 if x >= result1_real])/float(samplesNumber),  len([x for x in result2 if x >= result2_real])/float(samplesNumber)  ]]))
 
 

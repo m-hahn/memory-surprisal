@@ -159,7 +159,7 @@ for real in ["REAL_REAL", "GROUND"]:
           else:
              p1 = 1-(scipy.stats.binom_test(x=sameRandomCount+betterRandomCount, n=worseRandomCount+sameRandomCount+betterRandomCount, p=unaccountedFor, alternative="greater"))
           if p1 < 0.05:
-             print "\t".join(map(str,[language, real, 1-float(percentile), p1]))
+             print "\t".join(map(str,[language, real, 1-float(percentile), p1, float(xPoints[i])]))
              break
 
 
