@@ -170,18 +170,25 @@ The listener maintains a memory state $L_t$; there are no assumptions about the 
 %We assume that the listener has no access to the speaker's state beyond what the speaker has already uttered.
 We only make two basic assumptions about the flow of information:
 
-First, we assume that the listener's internal state cannot depend on the future beyond its dependency on the past.
-Formally: 
-\begin{equation}\label{eq:listener-markov-1}
-L_t \bot X_{>t} | X_{\leq t}
-\end{equation}
-This means that the listener has no access to the speaker's state beyond what the speaker has already uttered.
 
-Second, we assume that $L_t$ contains no information about the past beyond what is contained in $X_{t-1}$ and $L_{t-1}$:
-\begin{equation}\label{eq:listener-markov-2}
-L_t \bot X_{<t} | X_{t-1}, L_{t-1}
-\end{equation}
-This means that any information about the past in $L_t$ has to be contained in $L_{t-1}$ -- formalizing the idea that a listener can only remember aspects of the past by keeping them in memory, and that memories of the past cannot `spontaneously' form later in the future.
+We assume that $L_t$ contains no information about the process beyond what is contained in $X_{t-1}$ and $L_{t-1}$:
+	\begin{equation}\label{eq:listener-markov}
+p((X_{t})_t| L_0, L_1, X_1)   = p((X_{t})_t| L_0, X_1)
+	\end{equation}
+
+%
+%First, we assume that the listener's internal state cannot depend on the future beyond its dependency on the past.
+%Formally: 
+%\begin{equation}\label{eq:listener-markov-1}
+%L_t \bot X_{>t} | X_{\leq t}
+%\end{equation}
+%This means that the listener has no access to the speaker's state beyond what the speaker has already uttered.
+%
+%Second, we assume that $L_t$ contains no information about the past beyond what is contained in $X_{t-1}$ and $L_{t-1}$:
+%\begin{equation}\label{eq:listener-markov-2}
+%L_t \bot X_{<t} | X_{t-1}, L_{t-1}
+%\end{equation}
+%This means that any information about the past in $L_t$ has to be contained in $L_{t-1}$ -- formalizing the idea that a listener can only remember aspects of the past by keeping them in memory, and that memories of the past cannot `spontaneously' form later in the future.
 
 The listener can trade off memory and future surprisal:
 A listener who chooses to store less memory will exerience higher surprisal in the future.
@@ -985,12 +992,44 @@ By stationarity, we can rewrite this expression as
 	H[X_t | L_t] - H[X_t | X_{<t}] &=  \frac{1}{T} \sum_{t=1}^{T} \left(H[X_t | L_t] - H[X_t | X_{<t}]\right) 
 \end{align*}
 For any $t$,
-	$$H[X_t | L_t] \geq H[X_t| X_{t-1}, L_{t-1}] \geq ... \geq H[X_t|X_{1 \dots T}, L_0]$$
+	\begin{equation}
+H[X_t | L_t] \geq H[X_t| X_{t-1}, L_{t-1}] \geq ... \geq H[X_t|X_{1 \dots t-1}, L_0]
+		\end{equation}
 	This can be derived from the two conditions \ref{eq:listener-markov-1} and \ref{eq:listener-markov-2} (TODO explain how).
+
+	\begin{equation}
+H[X_t| X_{2 \dots t-1}, L_{1}] \geq H[X_t|X_{1 \dots t-1}, L_0]
+	\end{equation}
+is true because the following is a Markov chain:
+\begin{equation}
+(X_t) \rightarrow (L_0, X_1, X_{2 \dots t-1})   \rightarrow   (L_1, X_{2 \dots t-1})
+\end{equation}
+because
+\begin{align*}
+p(X_t|L_0, X_1, X_{2 \dots t-1}; L_1, X_{2 \dots t-1}) & = p(X_t|L_0, L_1, X_1, X_{2 \dots t-1}) \\
+& = \sum_{X_{<1}} p(X_t|X_{<1}, L_0, L_1, X_1, X_{2 \dots t-1}) p(X_{<1}| L_0, L_1, X_1, X_{2 \dots t-1}) \\
+&= \sum_{X_{<1}} p(X_t|X_{<1}, L_0,  X_1, X_{2 \dots t-1}) p(X_{<1}| L_0, X_1, X_{2 \dots t-1}) \\
+&= p(X_t|L_0,  X_1, X_{2 \dots t-1}) 
+\end{align*}
+because
+	\begin{align*}
+p(X_t|X_{<1}, L_0, L_1, X_1, X_{2 \dots t-1}) = p(X_t|X_{<1}, L_0,  X_1, X_{2 \dots t-1}) \\
+p(X_{<1}| L_0, L_1, X_1, X_{2 \dots t-1})   = p(X_{<1}| L_0, X_1, X_{2 \dots t-1})
+	\end{align*}
+because of Equation~\ref{eq:listener-markov}.
+	\begin{equation}
+p((X_{t})_t| L_0, L_1, X_1)   = p((X_{t})_t| L_0, X_1)
+	\end{equation}
+
+	
+	% = \int dX_{<1} p(X_t|X_{<1}, X_1, X_{2 \dots t-1})  = \int dX_{<1} p(X_t|L_0, X_{<1}, X_1, X_{2 \dots t-1}) = p(X_t|L_0, X_1, X_{2 \dots t-1}) $
+
+%	$p(X_t|L_0, X_1, X_{2 \dots t-1}; L_1, X_{2 \dots t-1}) = p(X_t|L_0, L_1, X_1, X_{2 \dots t-1}) = \int dX_{<1} p(X_t|X_{<1}, L_0, L_1, X_1, X_{2 \dots t-1}) = \int dX_{<1} p(X_t|X_{<1}, X_1, X_{2 \dots t-1})  = \int dX_{<1} p(X_t|L_0, X_{<1}, X_1, X_{2 \dots t-1}) = p(X_t|L_0, X_1, X_{2 \dots t-1}) $
 
 Therefore
 \begin{align*}
-	H[X_t | L_t] - H[X_t | X_{<t}]& \geq   \frac{1}{T} \left(H[X_{1\dots T} | L_0] - H[X_{1\dots T} | X_{\leq 0}]\right)  \\
+	H[X_t | L_t] - H[X_t | X_{<t}]& \geq \frac{1}{T} \sum_{t=1}^T ( H[X_t|X_{1\dots t-1}, L_0] - H[X_t | X_{1\dots t-1}, X_{\leq 0}]  )    \\
+	& = \frac{1}{T} \left(H[X_{1\dots T} | L_0] - H[X_{1\dots T} | X_{\leq 0}]\right)  \\
 	& = \frac{1}{T} \left(I[X_{1\dots T}|X_{\leq 0}] - I[X_{1\dots T}|L_0]\right) 
 \end{align*}
 	The first term $I[X_{1\dots T}|X_{\leq 0}]$ can be rewritten in terms of $I_t$:

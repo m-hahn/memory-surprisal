@@ -136,19 +136,22 @@ for real in ["REAL_REAL", "GROUND"]:
 
      # The goal here is to provide a confidence lower bound on worseRandomCount
      if worseRandomCount == 0:
+         print "\t".join(map(str,[language, real, i, 0.0, 0.0, float(xPoints[i])]))
          bound = 0
      else:
    #     print(hereRandom.size())
         largestPossibleValue = xPoints[i]
         #print(i, largestPossibleValue, medians[real][i], hereRandom)
         # if the median is at most the best sample
-        targetLevel = 0.05
         #unaccountedForTarget = 1-math.pow(targetLevel, 1/(float(hereRandom.size()[0])))
         randomBestWorse = float(hereRandom[int(worseRandomCount)-1])
         assert randomBestWorse < float(medians[real][i])
 #        print((largestPossibleValue, medians[real][i] , randomBestWorse,   (largestPossibleValue - medians[real][i] + 0.0001) / (largestPossibleValue - randomBestWorse + 0.0001)))
 
-        for unaccountedFor in [float(x)/200 for x in range(1,200)]:
+        hasFound = False # TODO in reality this should be binary search, as the map is monotonic, would be much faster
+        for limit in [200,800,2000,10000]:
+#         print(limit)
+         for unaccountedFor in [float(x)/limit for x in range(1,limit)]:
 #          print scipy.stats.binom_test(x=1, n=10, p=0.5, alternative="greater")
           assert unaccountedFor > 0
           assert unaccountedFor < 1
@@ -158,8 +161,14 @@ for real in ["REAL_REAL", "GROUND"]:
              p1 = math.pow(1-unaccountedFor, worseRandomCount)
           else:
              p1 = 1-(scipy.stats.binom_test(x=sameRandomCount+betterRandomCount, n=worseRandomCount+sameRandomCount+betterRandomCount, p=unaccountedFor, alternative="greater"))
-          if p1 < 0.05:
-             print "\t".join(map(str,[language, real, 1-float(percentile), p1, float(xPoints[i])]))
+        #  print(unaccountedFor, p1)
+          if p1 < 0.001:
+             print "\t".join(map(str,[language, real, i, 1-float(percentile), p1, float(xPoints[i])]))
+             hasFound =True 
              break
-
+         if hasFound:
+             break
+        assert hasFound, (worseRandomCount, sameRandomCount, betterRandomCount)
+        if not hasFound:
+             print "\t".join(map(str,[language, real, i, 0.0, 0.0, float(xPoints[i])]))
 

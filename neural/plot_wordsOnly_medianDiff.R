@@ -1,46 +1,17 @@
 
+# Plots median difference with confidence intervals
+
+fullData = read.csv("../results/tradeoff/listener-curve-ci-median_diff.tsv", sep="\t")
 
 memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
-#    data = read.csv(paste("../results/raw/word-level/",language,"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", sep=""), sep="\t")
-    data = read.csv(paste("~/CS_SCR/",language,"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", sep=""), sep="\t")
-
     library(tidyr)
     library(dplyr)
     library(ggplot2)
-    data = data %>% filter(Type %in% c("RANDOM_BY_TYPE", "REAL_REAL", "GROUND"))
-
-
-    data2 = data %>% filter(Distance==1) %>% mutate(ConditionalMI=0, Distance=0)
-    data = rbind(data2, data)
-
-#data$UnigramCE = mean(data$UnigramCE, na.rm=TRUE)
-
-    data = data %>% group_by(ModelID) %>% mutate(CumulativeMemory = cumsum(Distance*ConditionalMI), CumulativeMI = cumsum(ConditionalMI), Surprisal=UnigramCE-CumulativeMI)
-
-
-    
-
-#    plot = ggplot(data, aes(x=Surprisal, y=CumulativeMemory, group=Type, fill=Type, color=Type, alpha=0.5)) + geom_smooth()+ theme_classic() + theme(legend.position="none")
-#    ggsave(plot, file=paste("figures/",language,"-listener-reverse-surprisal-memory_onlyWordForms_boundedVocab.pdf", sep=""))
-#    plot = ggplot(data, aes(x=Surprisal, y=CumulativeMemory, group=ModelID, fill=Type, color=Type, alpha=0.5)) + geom_line()+ theme_classic() + theme(legend.position="none")
-#    ggsave(plot, file=paste("figures/",language,"-listener-reverse-surprisal-memory-by-run_onlyWordForms_boundedVocab.pdf", sep=""))
-
-
-
-#    data3 = data %>% group_by(ModelID, Type) %>% summarise(Surprisal=min(Surprisal), CumulativeMI = max(CumulativeMI))
-#    data3$CumulativeMemory = max(data$CumulativeMemory)
-#    data = rbind(data %>% select(ModelID, Type, Surprisal, CumulativeMemory), data3)
-#
-
-    plot = ggplot(data, aes(x=CumulativeMemory, y=Surprisal, group=Type, fill=Type, color=Type, alpha=0.5)) + geom_smooth()+ theme_classic() + theme(legend.position="none")
-    ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory_onlyWordForms_boundedVocab.pdf", sep=""))
-
-    plot = ggplot(data, aes(x=CumulativeMemory, y=Surprisal, group=ModelID, fill=Type, color=Type)) + geom_line(alpha=0.5)+ theme_classic() + theme(legend.position="none")
-    ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory-by-run_onlyWordForms_boundedVocab.pdf", sep=""))
-
-
-
-
+#    dataL = read.csv(paste("../results/raw/word-level/",language,"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", sep=""), sep="\t")
+ #   UnigramCE = mean(dataL$UnigramCE)
+    data = fullData %>% filter(Language == language)
+    plot = ggplot(data, aes(x=Memory, y=-EmpiricalMedianDiff, fill=Type, color=Type)) + geom_line(size=2)+ theme_classic() + theme(legend.position="none") + geom_line(aes(x=Memory, y=-MedianDiff_Lower), linetype="dashed") + geom_line(aes(x=Memory, y=-MedianDiff_Upper), linetype="dashed")
+    ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory-MEDIAN_DIFFS_onlyWordForms_boundedVocab.pdf", sep=""))
     return(plot)
 }
 
@@ -99,7 +70,6 @@ plot = memListenerSurpPlot_onlyWordForms_boundedVocab("Portuguese")
 plot = memListenerSurpPlot_onlyWordForms_boundedVocab("English")
 plot = memListenerSurpPlot_onlyWordForms_boundedVocab("Italian")
 plot = memListenerSurpPlot_onlyWordForms_boundedVocab("Russian")
-plot = memListenerSurpPlot_onlyWordForms_boundedVocab("Korean")
 
 
 

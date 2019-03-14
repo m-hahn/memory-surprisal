@@ -1,46 +1,34 @@
 
+# Plots CIs for the quantile
+
+fullData_ConfidenceLowerBound = read.csv("../results/tradeoff/listener-curve-binomial-confidence-bound-quantile.tsv", sep="\t")
+fullData_ConfidenceLowerBound_05 = read.csv("../results/tradeoff/listener-curve-binomial-confidence-bound-quantile-05.tsv", sep="\t")
+
+fullData_BinomialTest = read.csv("../results/tradeoff/listener-curve-binomial-test.tsv", sep="\t")
 
 memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
-#    data = read.csv(paste("../results/raw/word-level/",language,"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", sep=""), sep="\t")
-    data = read.csv(paste("~/CS_SCR/",language,"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", sep=""), sep="\t")
-
     library(tidyr)
     library(dplyr)
     library(ggplot2)
-    data = data %>% filter(Type %in% c("RANDOM_BY_TYPE", "REAL_REAL", "GROUND"))
-
-
-    data2 = data %>% filter(Distance==1) %>% mutate(ConditionalMI=0, Distance=0)
-    data = rbind(data2, data)
-
-#data$UnigramCE = mean(data$UnigramCE, na.rm=TRUE)
-
-    data = data %>% group_by(ModelID) %>% mutate(CumulativeMemory = cumsum(Distance*ConditionalMI), CumulativeMI = cumsum(ConditionalMI), Surprisal=UnigramCE-CumulativeMI)
-
-
-    
-
-#    plot = ggplot(data, aes(x=Surprisal, y=CumulativeMemory, group=Type, fill=Type, color=Type, alpha=0.5)) + geom_smooth()+ theme_classic() + theme(legend.position="none")
-#    ggsave(plot, file=paste("figures/",language,"-listener-reverse-surprisal-memory_onlyWordForms_boundedVocab.pdf", sep=""))
-#    plot = ggplot(data, aes(x=Surprisal, y=CumulativeMemory, group=ModelID, fill=Type, color=Type, alpha=0.5)) + geom_line()+ theme_classic() + theme(legend.position="none")
-#    ggsave(plot, file=paste("figures/",language,"-listener-reverse-surprisal-memory-by-run_onlyWordForms_boundedVocab.pdf", sep=""))
-
-
-
-#    data3 = data %>% group_by(ModelID, Type) %>% summarise(Surprisal=min(Surprisal), CumulativeMI = max(CumulativeMI))
-#    data3$CumulativeMemory = max(data$CumulativeMemory)
-#    data = rbind(data %>% select(ModelID, Type, Surprisal, CumulativeMemory), data3)
-#
-
-    plot = ggplot(data, aes(x=CumulativeMemory, y=Surprisal, group=Type, fill=Type, color=Type, alpha=0.5)) + geom_smooth()+ theme_classic() + theme(legend.position="none")
-    ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory_onlyWordForms_boundedVocab.pdf", sep=""))
-
-    plot = ggplot(data, aes(x=CumulativeMemory, y=Surprisal, group=ModelID, fill=Type, color=Type)) + geom_line(alpha=0.5)+ theme_classic() + theme(legend.position="none")
-    ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory-by-run_onlyWordForms_boundedVocab.pdf", sep=""))
-
-
-
-
+    data = fullData_ConfidenceLowerBound %>% filter(Language == language)
+    data2 = fullData_BinomialTest %>% filter(Language == language)
+    data3 = fullData_ConfidenceLowerBound_05 %>% filter(Language == language)
+    #data = merge(data, data2, by=c("Language", "Position", "Type"))
+    #data$Memory = data$Memory.x
+    plot = ggplot(data, aes(x=Memory, y=LowerConfidenceBound, fill=Type, color=Type))
+    plot = plot + geom_line(size=1, linetype="dotted") 
+    plot = plot + geom_line(data=data3, size=2, linetype="dashed") 
+    plot = plot + geom_line(data=data2, aes(x=Memory, y=BetterEmpirical), size=2)
+    data2 = data2 %>% mutate(pValue_print = ifelse(round(pValue,5) == 0, "p<0.00001", paste("p=", round(pValue,5), sep="")))
+    plot = plot + geom_text(data=data2 %>% filter(Position %% 9 == 0, Type == "REAL_REAL"), aes(x=Memory, y=BetterEmpirical+0.1, label=pValue_print), size=3)
+    plot = plot + geom_text(data=data2 %>% filter(Position %% 9 == 0, Type == "GROUND"), aes(x=Memory, y=BetterEmpirical+0.05, label=pValue_print), size=3)
+    plot = plot + theme_classic() 
+    plot = plot + theme(legend.position="none") 
+    plot = plot + ylim(0,1.1)
+    plot = plot + ylab("Quantile")
+    plot = plot + xlab("Memory")
+    # + geom_line(aes(x=Memory, y=-MedianDiff_Upper))
+    ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory-QUANTILES_onlyWordForms_boundedVocab.pdf", sep=""), height=3.5, width=4.5)
     return(plot)
 }
 
@@ -99,7 +87,6 @@ plot = memListenerSurpPlot_onlyWordForms_boundedVocab("Portuguese")
 plot = memListenerSurpPlot_onlyWordForms_boundedVocab("English")
 plot = memListenerSurpPlot_onlyWordForms_boundedVocab("Italian")
 plot = memListenerSurpPlot_onlyWordForms_boundedVocab("Russian")
-plot = memListenerSurpPlot_onlyWordForms_boundedVocab("Korean")
 
 
 

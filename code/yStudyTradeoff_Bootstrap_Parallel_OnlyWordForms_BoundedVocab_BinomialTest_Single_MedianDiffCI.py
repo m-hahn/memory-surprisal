@@ -118,14 +118,18 @@ import statsmodels.stats.proportion
 
 
 CIs = {}
+medians = {}
 
 for typ, interpolated in interpolatedByTypes.iteritems():  
     CIs[typ] = []
+    medians[typ] = []
 
     for i in range(39):
        
        hereReal = torch.sort(interpolated[:,i])[0]      
        realCount = hereReal.size()[0]
+
+       medians[typ].append(float(torch.median(hereReal)))
 
        probsBinomial = [scipy.stats.binom.pmf(j+1, realCount, 0.5) for j in range(realCount)]
        
@@ -146,7 +150,7 @@ for typ, interpolated in interpolatedByTypes.iteritems():
 
 for real in ["REAL_REAL", "GROUND"]:
     for i in range(39):
-       print "\t".join(map(str, [language, real, CIs[real][i][0] - CIs["RANDOM_BY_TYPE"][i][1], CIs[real][i][1] - CIs["RANDOM_BY_TYPE"][i][0], CIs[real][i][2] * CIs["RANDOM_BY_TYPE"][i][2]]))
+       print "\t".join(map(str, [language, real, float(xPoints[i]), medians[real][i] - medians["RANDOM_BY_TYPE"][i], CIs[real][i][0] - CIs["RANDOM_BY_TYPE"][i][1], CIs[real][i][1] - CIs["RANDOM_BY_TYPE"][i][0], CIs[real][i][2] * CIs["RANDOM_BY_TYPE"][i][2]]))
 
 
 
