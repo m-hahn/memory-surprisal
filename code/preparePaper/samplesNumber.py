@@ -60,24 +60,10 @@ for language in languages:
 
    satisfied = h(stats, line_stats, "RANDOM_BY_TYPE") >= 10 and h(stats, line_stats, "REAL_REAL") >= 5 and (h(listener_curve, line_listener, "result1High") - h(listener_curve, line_listener, "result1Low") <= 0.15)
 
-   components = [language.replace("_"," ")+("*" if not satisfied else "")]
-   #components.append( "\\multirow{4}{*}{\includegraphics[width=0.25\\textwidth]{neural/figures/"+language+"-entropy-memory.pdf}}")
-   components.append( "\\multirow{4}{*}{\includegraphics[width=0.1\\textwidth]{neural/figures/"+language+"-listener-surprisal-memory-by-run_onlyWordForms_boundedVocab.pdf}}" )
-   components.append( "\\multirow{4}{*}{\includegraphics[width=0.1\\textwidth]{neural/figures/"+language+"-listener-surprisal-memory-HIST_byMem_onlyWordForms_boundedVocab.pdf}}" )
-   components.append( "\\multirow{4}{*}{\includegraphics[width=0.1\\textwidth]{neural/figures/"+language+"-listener-surprisal-memory-MEDIANS_onlyWordForms_boundedVocab.pdf}}" )
-   components.append( "\\multirow{4}{*}{\includegraphics[width=0.1\\textwidth]{neural/figures/"+language+"-listener-surprisal-memory-MEDIAN_DIFFS_onlyWordForms_boundedVocab.pdf}}" )
-   components.append( "\\multirow{4}{*}{\includegraphics[width=0.1\\textwidth]{neural/figures/"+language+"-listener-surprisal-memory-QUANTILES_onlyWordForms_boundedVocab.pdf}}" )
-   components.append("")
-   print("  &  ".join([str(x) for x in components]) + "  \\\\ " )
+   components = [language.replace("_"," ").replace("-Adap", "")]
+   components.append( h(stats, line_stats, "RANDOM_BY_TYPE") )
+   components.append( h(stats, line_stats, "REAL_REAL") )
 
-   components = [h(corpusSizes,languageKey_corpusSizes[language], "TrainingSents")] #h(stats, line_stats, "REAL_REAL")]
-   components.append("")
-   components.append("")
-   components.append("")
-   components.append("")
-   components.append("")
-   components.append(round(h(listener_curve, line_listener, "result1Mean"),2))
-   components.append( "".join(map(str,["[", round(h(listener_curve, line_listener, "result1Low"),2),", ", round(h(listener_curve, line_listener, "result1High"),2) , "]"])))
    print("  &  ".join([str(x) for x in components]) + "  \\\\ [10.25ex] \\hline" )
 
 
