@@ -807,10 +807,79 @@ The stopping criterion will be described below.
 
 
 \paragraph{Listener Memory: Surprisal-Memory Tradeoff}
+
+
+
+\paragraph{Stopping Criterion}
+
+For each language, we collected at least 5 data points for real orderings and at least 10 data points for baseline orderings.
+We continued obtaining new data points until the CI for $G$ had width $\leq 0.15$, or there were 100 samples from $P_1$ and 300 samples from $P_2$.
+Up to the end, we chose the next sample to be from $P_0$ with probability 2/3, and $P_1$ otherwise.
+%We chose these thresholds based on preliminary simulations which had suggested that these widths were achievable at acceptable computational cost.
+
+%- at least 30 samples from both baseline and real
+%
+%- for the language-level tradeoff curve, either the fraction is zero or the bootstrapped CI has width $\leq 0.2$.
+
+
+
+%
+%(1) is bigram MI always greater in real languages?
+%
+%(2) is the tradeoff curve always lower than for deterministic simple grammar? for deterministic complex grammars? for stochastic simple/complex grammars?
+
+
+\subsection{Statistics}
+
+We do these at each fixed memory value.
+
 We want to test whether languages' surprisal-memory tradeoffs better than those of most baseline languages.
 For each model for each language, we interpolate the surprisal-memory tradeoff curves given by Proposition~\ref{prop:suboptimal} linearly.
 We estimate the unigram entropy $H[X_0]$ by averaging over all models.
 We view surprisal as a function of memory load, so that the curve is defined on all of $\mathbb{R}_+$.
+
+
+
+\paragraph{Confidence Interval for Medians}
+We create (nonparametric and nonasymptotic) confidence interval for the median surprisal at each memory value, using the binomial test.
+
+% yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_MedianCI.py
+
+
+\paragraph{CI for Median Difference}
+We create (nonparametric and nonasymptotic) confidence interval for the difference median surprisal at each memory value.
+
+% yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_MedianDiffCI.py
+
+
+\paragraph{Significance Test}
+For each memory value $\mu$, we do a significance test (nonparametric and nonasymptotic) with the null hypothesis
+
+Let $W_-$ be the proportion of baseline languages that are less optimal than the real language throughout the entire range, and let $W_+$ be the proportion of baseline languages that are more optimal.
+
+We consider the null hypothesis that
+\begin{equation}
+	W_+ \geq W_-
+\end{equation}
+In reality, we do not observe the curve of the real language exactly, but as noisy samples from our computational estimator.
+
+
+
+
+For each memory value $\mu$, we do a significance test (nonparametric and nonasymptotic) with the null hypothesis
+\begin{equation}
+	W_+(\mu) \geq W_-(\mu)
+\end{equation}
+using the empirical median for the real language.
+
+% yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single.py
+
+We take the REAL values to be estimated exactly by their medians.
+
+
+
+
+
 For each sample $x$ from real orderings, we look at the proportions $W_+(x)$ of samples from the baseline languages that are more optimal than $x$ throughout the entire range where both curves are defined, and the proportion $W_-(x)$ of baseline samples that are consistently less optimal.
 
 We consider the null hypothesis that, on average, not more baseline languages are consistently less optimal than are consistently more optimal than the real orderings:
@@ -831,23 +900,48 @@ We use a bootstrapped confidence interval for $\E[G]$ for testing and for quanti
 %
 
 
-\paragraph{Stopping Criterion}
-
-For each language, we collected at least 5 data points for real orderings and at least 10 data points for baseline orderings.
-We continued obtaining new data points until the CI for $G$ had width $\leq 0.15$, or there were 100 samples from $P_1$ and 300 samples from $P_2$.
-Up to the end, we chose the next sample to be from $P_0$ with probability 2/3, and $P_1$ otherwise.
-%We chose these thresholds based on preliminary simulations which had suggested that these widths were achievable at acceptable computational cost.
-
-%- at least 30 samples from both baseline and real
-%
-%- for the language-level tradeoff curve, either the fraction is zero or the bootstrapped CI has width $\leq 0.2$.
 
 
+\paragraph{Confidence Interval for Quantile}
+CI for quantile: % yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_UnimodalBoundOnQuantile_BothDirections.py
 
-%
-%(1) is bigram MI always greater in real languages?
-%
-%(2) is the tradeoff curve always lower than for deterministic simple grammar? for deterministic complex grammars? for stochastic simple/complex grammars?
+We derive a CI for the quantile, under the assumption that the baseline distribution is unimodal. We take the REAL values to be estimated exactly by their medians.
+
+We want to create a CI at each Memory value for the quantile.
+
+Let $n_+$ be the better baseline samples, $n_-$ the worse ones.
+
+Let $\theta$ the best baseline sample that is worse than the real median.
+
+We want to get a confidence bound $q$ on $P(X < x_{real})$.
+
+Let $p := P(N_+ \leq n_+ | N_+ + N_-; q)$.
+Then output $(0, q)$ as a level $p$ CI for the parameter $P(X < x_{real})$.
+
+We minimize $q$ subject to $p < 0.05$.
+
+Once we have $q$, we can make it a bit better under the assumption that the baseline distribution is unimodal.
+
+This CI is exact in the sense that it does not involve asymptotic approximations or parametric assumptions, but it is extremely conservative.
+
+Also the following does not assume unimodality, and ends up getting about the same intervals
+% yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_UnimodalBoundOnQuantile_BothDirections_NoAssumption.py
+
+
+
+\paragraph{Confidence interval for quantile, for the entire range}
+
+we also apply bootstrapping
+
+We obtained a global measure as follows.
+
+
+
+
+
+
+
+
 
 
 
@@ -992,7 +1086,7 @@ By stationarity, we can rewrite this expression as
 	H[X_t | L_t] - H[X_t | X_{<t}] &=  \frac{1}{T} \sum_{t=1}^{T} \left(H[X_t | L_t] - H[X_t | X_{<t}]\right) 
 \end{align*}
 For any $t$,
-	$$H[X_t | L_t] \geq H[X_t| X_{t-1}, L_{t-1}] \geq ... \geq H[X_t|X_{1 \dots T}, L_0]$$
+	$$H[X_t | L_t] \geq H[X_t| X_{t-1}, L_{t-1}] \geq ... \geq H[X_t|X_{1 \dots t-1}, L_0]$$
 	This can be derived from the two conditions \ref{eq:listener-markov-1} and \ref{eq:listener-markov-2} (TODO explain how).
 
 Therefore
