@@ -39,16 +39,39 @@ with open("../../results/tradeoff/stats-onlyWordForms-boundedVocab_REAL.tsv", "r
 languageKey_stats = dict([(h(stats, line, "Language"), line) for line in stats[1]])
 
 
-
+entries = []
 
 for language in languages:
 #   line = languageKey[language]
-
-
    components = [language.replace("_"," ").replace("-Adap", "")]
    #components.append( "\\multirow{4}{*}{\includegraphics[width=0.25\\textwidth]{neural/figures/"+language+"-entropy-memory.pdf}}")
-   components.append( "\\multirow{4}{*}{\includegraphics[width=0.1\\textwidth]{neural/figures/"+language+"-listener-surprisal-memory-MEDIANS_onlyWordForms_boundedVocab.pdf}}" )
-   print("  &  ".join([str(x) for x in components]) + "  \\\\ " )
+   components.append( "\includegraphics[width=0.25\\textwidth]{neural/figures/"+language+"-listener-surprisal-memory-MEDIANS_onlyWordForms_boundedVocab.pdf}" )
+   entries.append(components)
+
+ROWS_PER_PART = 4
+COLUMNS = 4
+entries += [["",""] for x in range((COLUMNS-(len(entries)%COLUMNS))%COLUMNS)]
+
+outputRows = []
+if True:
+    languages = [x[0] for x in entries]
+    images = [x[1] for x in entries]
+
+    for i in range(len(entries)/COLUMNS):
+       outputRows.append( " & ".join(languages[i*COLUMNS:(i+1)*COLUMNS]))
+       outputRows.append( " \\\\ ")
+       outputRows.append( " & ".join(images[i*COLUMNS:(i+1)*COLUMNS]))
+       outputRows.append( " \\\\ ")
+
+for part in range(len(entries)/(COLUMNS*ROWS_PER_PART)+1):
+  with open("../../medians_"+str(part)+".tex", "w") as outFile:
+      for row in range(part*ROWS_PER_PART, (part+1)*ROWS_PER_PART):
+          if 4*row >= len(outputRows):
+              break
+          print >> outFile, outputRows[4*row]
+          print >> outFile, outputRows[4*row+1]
+          print >> outFile, outputRows[4*row+2]
+          print >> outFile, outputRows[4*row+3]
 
 
 

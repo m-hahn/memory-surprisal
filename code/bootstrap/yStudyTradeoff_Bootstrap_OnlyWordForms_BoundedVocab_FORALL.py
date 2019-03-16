@@ -5,18 +5,13 @@
 import sys
 realType = sys.argv[1]
 
-languages = []
-languages += ["Arabic", "Catalan", "Czech", "Dutch", "Finnish", "French", "German", "Hindi", "Norwegian", "Spanish"]
-languages += ["Basque", "Bulgarian", "Croatian", "Estonian", "Hebrew", "Japanese", "Polish", "Romanian", "Slovak", "Slovenian", "Swedish"]
-languages += ["Afrikaans", "Chinese", "Danish", "Greek", "Hungarian",  "North_Sami", "Persian", "Serbian", "Turkish", "Ukrainian", "Vietnamese"]
-languages += ["Amharic-Adap", "Armenian-Adap",  "Breton-Adap",  "Buryat-Adap", "Cantonese-Adap","Faroese-Adap", "Kazakh-Adap", "Kurmanji-Adap", "Naija-Adap","Thai-Adap", "Uyghur-Adap"]
-languages += ["Bambara-Adap", "Erzya-Adap", "Maltese", "Latvian"]
+with open("../../ud_languages.txt", "r") as inFile:
+   languages = inFile.read().strip().split("\n")
 
-languages += ["Indonesian", "Urdu" , "Portuguese", "English", "Italian", "Russian"]
 languages = set(languages)
 
 import subprocess
-outPath = "../results/tradeoff/listener-curve-onlyWordForms-boundedVocab_"+("REAL" if realType == "REAL_REAL" else "GROUND")+".tsv"
+outPath = "../../results/tradeoff/listener-curve-onlyWordForms-boundedVocab_"+("REAL" if realType == "REAL_REAL" else "GROUND")+".tsv"
 print(outPath)
 with open(outPath, "w") as outFile:
    print >> outFile, "\t".join(["language", "result1Mean", "result2Mean", "result1Low", "result1High", "result2Low", "result2High", "result3Mean", "result3Low", "result3High"])

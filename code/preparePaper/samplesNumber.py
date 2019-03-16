@@ -46,24 +46,32 @@ languageKey_corpusSizes = dict([(h(corpusSizes, line, "Language"), line) for lin
 
 
 
-
 with open("../../results/tradeoff/listener-curve-onlyWordForms-boundedVocab_REAL.tsv", "r") as inFile:
    listener_curve = readTSV(inFile)
 
 languageKey_listener_curve = dict([(h(listener_curve, line, "language"), line) for line in listener_curve[1]])
 
+output = []
+
 for language in languages:
-#   line = languageKey[language]
-   line_listener = languageKey_listener_curve[language]
-   line_stats = languageKey_stats[language]
+  #   line = languageKey[language]
+     line_listener = languageKey_listener_curve[language]
+     line_stats = languageKey_stats[language]
+  
+  
+     satisfied = h(stats, line_stats, "RANDOM_BY_TYPE") >= 10 and h(stats, line_stats, "REAL_REAL") >= 5 and (h(listener_curve, line_listener, "result1High") - h(listener_curve, line_listener, "result1Low") <= 0.15)
+  
+     components = [language.replace("_"," ").replace("-Adap", "")]
+     components.append( h(stats, line_stats, "RANDOM_BY_TYPE") )
+     components.append( h(stats, line_stats, "REAL_REAL") )
+  
+     output.append(components) # ("  &  ".join([str(x) for x in components]) + "  \\\\ " )
 
+if len(output)/2 * 2 < len(output):
+    output.append(["","",""])
 
-   satisfied = h(stats, line_stats, "RANDOM_BY_TYPE") >= 10 and h(stats, line_stats, "REAL_REAL") >= 5 and (h(listener_curve, line_listener, "result1High") - h(listener_curve, line_listener, "result1Low") <= 0.15)
-
-   components = [language.replace("_"," ").replace("-Adap", "")]
-   components.append( h(stats, line_stats, "RANDOM_BY_TYPE") )
-   components.append( h(stats, line_stats, "REAL_REAL") )
-
-   print("  &  ".join([str(x) for x in components]) + "  \\\\ [10.25ex] \\hline" )
-
+with open("../../samplesNumber.tex", "w") as outFile:
+ for i in range(len(output)/2):
+    here = output[i] + output[len(output)/2+i]
+    print >> outFile, ("  &  ".join([str(x) for x in here]) + "  \\\\") # [10.25ex] \\hline" )
 

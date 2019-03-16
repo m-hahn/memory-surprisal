@@ -45,9 +45,13 @@ with open("../corpusSizes.tsv", "r") as inFile:
 languageKey_corpusSizes = dict([(h(corpusSizes, line, "Language"), line) for line in corpusSizes[1]])
 
 
+output = []
 
-
-
+def pretty(x):
+    x = str(x)
+    if len(x) > 3:
+        x = x[:-3] + "," + x[-3:]
+    return x
 
 for language in languages:
 #   line = languageKey[language]
@@ -55,8 +59,16 @@ for language in languages:
 
 
    components = [language.replace("_"," ").replace("-Adap", "")]
-   components.append(h(corpusSizes,languageKey_corpusSizes[language], "TrainingSents"))
-   components.append(h(corpusSizes,languageKey_corpusSizes[language], "HeldoutSents"))
-   print("  &  ".join([str(x) for x in components]) + "  \\\\") # [10.25ex] \\hline" )
+   components.append(pretty(h(corpusSizes,languageKey_corpusSizes[language], "TrainingSents")))
+   components.append(pretty(h(corpusSizes,languageKey_corpusSizes[language], "HeldoutSents")))
+   output.append(components)
+
+if len(output)/2 * 2 < len(output):
+    output.append(["","",""])
+
+with open("../../corpusSizes.tex", "w") as outFile:
+ for i in range(len(output)/2):
+    here = output[i] + output[len(output)/2+i]
+    print >> outFile, ("  &  ".join([str(x) for x in here]) + "  \\\\") # [10.25ex] \\hline" )
 
 
