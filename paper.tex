@@ -957,30 +957,29 @@ Also the following does not assume unimodality, and ends up getting about the sa
 
 
 
-For each sample $x$ from real orderings, we look at the proportions $W_+(x)$ of samples from the baseline languages that are more optimal than $x$ throughout the entire range where both curves are defined, and the proportion $W_-(x)$ of baseline samples that are consistently less optimal.
+For each sample $x$ from real orderings, we look at the proportions $N_+(x)$ of samples from the baseline languages that are more optimal than $x$ throughout the entire range where both curves are defined, and the proportion $N_-(x)$ of baseline samples that are consistently less optimal.
 
-We consider the null hypothesis that, on average, not more baseline languages are consistently less optimal than are consistently more optimal than the real orderings:
-\begin{equation}
-	\E_{x \sim P_1}[W_+(x)] \geq \E_{x \sim P_1}[W_-(x)]
-\end{equation}
-where $P_1$ is the distribution over values obtained for real orderings.
+%We consider the null hypothesis that, on average, not more baseline languages are consistently less optimal than are consistently more optimal than the real orderings:
+%\begin{equation}
+%	\E_{x \sim P_1}[W_+(x)] \geq \E_{x \sim P_1}[W_-(x)]
+%\end{equation}
 
 We estimate the quotient
 \begin{equation}
 	G :=	\frac{\E_{x \sim P_1}[W_+(x)]}{\E_{x \sim P_1}[W_+(x) + W_-(x)]}
 \end{equation}
-We use a bootstrapped confidence interval for $\E[G]$ for testing and for quantifying the degree of optimization.
+where $P_1$ is the distribution over values obtained for real orderings.
+We use a bootstrapped confidence interval for $\E[G]$ for quantifying the degree of optimization.
+For bootstrapping, we separately resample samples from the real language and from the baseline grammars.
+
+Unlike the other statistics, this one provides a global measure of the degree of optimization of the real language.
+Due to the use of bootstrapping, the confidence intervals are not exact.
+
 
 %- bootstrapping
 %- subsampling
 %- permutation test / rank test ??
 %
-
-
-we also apply bootstrapping
-
-We obtained a global measure as follows.
-
 
 
 
@@ -1009,9 +1008,13 @@ Consequently, more samples were collected than necessary to reach the stopping c
 
 The numbers of samples taken per language are provided in Table~\ref{tab:samples}.
 
-In Figrue~\ref{tab:plain-results} (TODO), we show the estimated memory-surprisal tradeoff curves.
+In Figure~\ref{tab:plain-results} (TODO), we show the estimated memory-surprisal tradeoff curves.
+
 
 In Figure~\ref{tab:medians}, we show the medians.
+
+
+
 
 Descriptively, the real language provides better tradeoffs than the median of the baselines across languages, with four exceptions (Latvian, North Sami, Polish, Slovak).
 
@@ -1019,6 +1022,17 @@ Descriptively, the real language provides better tradeoffs than the median of th
 - show the slice histograms
 
 - show the total histogram
+
+
+
+\begin{figure}
+\includegraphics[width=0.95\textwidth]{neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
+\caption{Histogram}\label{fig:hist-real}
+\end{figure}
+
+
+
+
 
 \paragraph{Inferential Statistics}
 
@@ -1145,10 +1159,7 @@ $\E[G]$ was not estimated to be significantly above $>5$ for four languages: Lat
 
 
 
-\begin{figure}
-\includegraphics[width=0.95\textwidth]{neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
-\caption{Histogram}\label{fig:hist-real}
-\end{figure}
+
 
 \subsection{Discussion}
 
@@ -1179,10 +1190,10 @@ We found that branching direction entropy was strongly correlated with the surpr
 
 
 
-\section{Fixed Word Orders}
+\subsection{Experiment 2b: Fixed Word Orders}
 
 We test this hypothesis by comparing baseline languages to \emph{fixed-order} versions of the real languages.
-This enables us to tease apart the impact of the languages' word order rules from the impact of more specific ordering choices.
+This enables us to tease apart the impact of the languages' word order rules from the impact of word order freedom.
 
 
 \begin{figure}
@@ -1193,14 +1204,31 @@ This enables us to tease apart the impact of the languages' word order rules fro
 
 
 \paragraph{Fitting Ordering Grammars to Actual Orders}
-We additionally create ordering grammars that are fit to the actual orderings of each language.
+We create ordering grammars that are fit to the actual orderings of each language.
 These grammars faithfully represent the ordering rules if the actual language, to the extent that is possible in the formalism of ordering grammars.
 
-We construct these grammars by interpreting ordering grammars probabilistically, and setting the parameters 
+We construct these grammars by constructing \emph{probabilistic ordering grammars}, and setting the parameters to maximize the \emph{likelihood} of the actually observed orderings.
+We parameterized probabilistic ordering grammars as follows.
+For each relation type $\tau$, we introduce a \emph{direction parameter} $a_\tau \in [0,1]$ and a \emph{distance parameter} $b_\tau \in \mathbb{R}$.
+Each dependent is ordered on the left of its head with probability $a_\tau$ and to the right with probability $1-a_\tau$. 
+Then for each set of co-dependents $\{s_1, \dots , s_n\}$ placed on one side of a head, their order outward from the head is determined by iteratively sampling from the distribution $\operatorname{softmax}(b_{\tau_1}, \dots, b_{\tau_n})$ (\cite{goodfellow2016deep}, p. 184) without replacement. 
+
+Given a dependency tree, a probabilistic ordering grammar assigns a probability distribution over the possible projective linearizations of that tree.
+We use gradient descent to find parameters $a_\tau, b_\tau$ so as to maximize the overall likelihood of the orders in the actual corpus.
 
 
-We found that, across treebanks, random grammars that have more fine-grained rules or are evaluated nondeterministically do worse in both memory-surprisal tradeoffs.
-Thus, random grammars with by-relation weights constitute a stronger baseline.
+We convert probabilistic ordering grammars into ordinary ordering grammars by the following method.
+Let $A_-$ be those relations $\tau$ where $a_\tau > 0.5$, similarly for $A_+$ those here $a_\tau \geq 0.5$.
+Then we order all relations in $A_-$ by $b_\tau$ in \emph{decreasing} order, and those in $A_+$ by $b_\tau$ in \emph{increasing} order.
+
+Then ordering a tree following the converted version is equivalent to greedily choosing the highest-probability linearization for the dependents of each head in a tree.
+
+
+We choose this method since maximum-likelihood grammars can be constructed with simple gradient descent.
+Another option would be to use some kind of discrete optimization method to approximate the original orders without a probabilistic method.
+However, discrete optimization is computationally challenging.
+
+\paragraph{Results}
 
 
 \section{Discussion}
