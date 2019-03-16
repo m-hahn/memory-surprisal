@@ -69,6 +69,7 @@ plot = memListenerSurpPlot_onlyWordForms_boundedVocab("Portuguese")
 plot = memListenerSurpPlot_onlyWordForms_boundedVocab("English")
 plot = memListenerSurpPlot_onlyWordForms_boundedVocab("Italian")
 plot = memListenerSurpPlot_onlyWordForms_boundedVocab("Russian")
+plot = memListenerSurpPlot_onlyWordForms_boundedVocab("Korean")
 
 
 

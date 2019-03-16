@@ -1,7 +1,9 @@
 
 
 memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
-    data = read.csv(paste("../results/raw/word-level/",language,"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", sep=""), sep="\t")
+#    data = read.csv(paste("../results/raw/word-level/",language,"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", sep=""), sep="\t")
+    data = read.csv(paste("~/CS_SCR/",language,"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", sep=""), sep="\t")
+
     library(tidyr)
     library(dplyr)
     library(ggplot2)
@@ -33,7 +35,7 @@ memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
     plot = ggplot(data, aes(x=CumulativeMemory, y=Surprisal, group=Type, fill=Type, color=Type, alpha=0.5)) + geom_smooth()+ theme_classic() + theme(legend.position="none")
     ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory_onlyWordForms_boundedVocab.pdf", sep=""))
 
-    plot = ggplot(data, aes(x=CumulativeMemory, y=Surprisal, group=ModelID, fill=Type, color=Type)) + geom_line(alpha=0.2)+ theme_classic() + theme(legend.position="none")
+    plot = ggplot(data, aes(x=CumulativeMemory, y=Surprisal, group=ModelID, fill=Type, color=Type)) + geom_line(alpha=0.5)+ theme_classic() + theme(legend.position="none")
     ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory-by-run_onlyWordForms_boundedVocab.pdf", sep=""))
 
 
@@ -97,6 +99,7 @@ plot = memListenerSurpPlot_onlyWordForms_boundedVocab("Portuguese")
 plot = memListenerSurpPlot_onlyWordForms_boundedVocab("English")
 plot = memListenerSurpPlot_onlyWordForms_boundedVocab("Italian")
 plot = memListenerSurpPlot_onlyWordForms_boundedVocab("Russian")
+plot = memListenerSurpPlot_onlyWordForms_boundedVocab("Korean")
 
 
 
