@@ -150,10 +150,11 @@ TODO say at some point that we're studying sentence-internal memory
 
 We now introduce our main theoretical result on memory-surprisal tradeoffs.
 
+\paragraph{Setting}
 We formalize a language as a probabilistic sequence of words $\dots x_{-2} x_{-1} x_0 x_{1} x_{2} \dots$, extending indefinitely both into the past and into the future.
-The symbols $x_i$ belong to a common set, representing the vocabulary of the language.\footnote{Could also be phonemes, sentences, ..., any other kind of unit.}
+The symbols $x_i$ belong to a common set, representing the words of the language.\footnote{Could also be phonemes, sentences, ..., any other kind of unit.}
 
-Our main tool is the conditional probability distribution $p(x_t|x_{<t})$.
+We model the sequence as a probabilistic sequence; that is, given a context $x_{<t}$, the next word is distributed according to a distribution $p(x_t|x_{<t})$.
 
 % $(X_t)_{t \in \mathbb{Z}}$
 %We think of the language as a stochastic process, that is, a probability distribution over sequences of words $\dots x_{-2} x_{-1} x_0 x_{1} x_{2} \dots$.
@@ -177,14 +178,30 @@ Our main tool is the conditional probability distribution $p(x_t|x_{<t})$.
 We now analyze memory from the perspective of the listener, who needs to maintain information about the past to predict the future.
 As the speaker's utterance unfolds, the listener maintains a memory state $L_t$.
 
+
+
+\begin{figure}
+\includegraphics[width=0.45\textwidth]{figures/markov-condition.png}
+	\caption{Illustration of (\ref{eq:listener-markov}). As the utterance unfolds, the listener maintains a memory state. After receiving word $X_t$, the listener computes their new memory state $L_t$ based on the previous memory state $L_{t-1}$ and the new word $X_t$.}\label{fig:listener-markov}
+\end{figure}
+
+
+
+
+
 There are no assumptions about the memory architecture and the nature of its computations.
-We only make a basic assumption about the flow of information:
-At a given point in time, the listener's memory state $L_t$ contains no information about the process beyond what is contained in the last word observed $X_{t-1}$ and in the memory state before that word was observed $L_{t-1}$.
-This is formalized as a statement about conditional independence:
+We only make a basic assumption about the flow of information (Figure~\ref{fig:listener-markov}):
+At a given point in time, the listener's memory state $L_t$ is determined by the last word $X_t$, and the prior memory state $L_{t-1}$.
+As a consequence, $L_t$ contains no information about the process beyond what is contained in the last word observed $X_{t-1}$ and in the memory state before that word was observed $L_{t-1}$.
+This is formalized as a statement about conditional probabilities:
 	\begin{equation}\label{eq:listener-markov}
-p((X_{t})_t| L_0, L_1, X_1)   = p((X_{t})_t| L_0, X_1)
+p(L_1| (X_{t})_t, L_0)   = p((X_{t})_t| L_0, X_1)
+%p((X_{t})_t| L_0, L_1, X_1)   = p((X_{t})_t| L_0, X_1)
 	\end{equation}
 This says that $L_1$ contains no information about the utterances beyond what is contained in $L_0$ and $X_1$.	
+As a consequence, the listener has no knowledge of the speaker's state beyond the information provided in their prior communication.
+This is a simplification, as the listener could obtain information about the speaker from other sources, such as their common environment (weather, ...).
+For the study of memory in sentence processing, this seems fair. Discuss this more.
 
 %
 %First, we assume that the listener's internal state cannot depend on the future beyond its dependency on the past.
@@ -200,35 +217,44 @@ This says that $L_1$ contains no information about the utterances beyond what is
 %\end{equation}
 %This means that any information about the past in $L_t$ has to be contained in $L_{t-1}$ -- formalizing the idea that a listener can only remember aspects of the past by keeping them in memory, and that memories of the past cannot `spontaneously' form later in the future.
 
-The listener can trade off memory and future surprisal:
-A listener who chooses to store less memory will exerience higher surprisal in the future.
-A listener can achieve minimal surprisal -- that is, the lowest average surprisal that any model could achieve by predicting the future from the past -- if and only if $L_t$ contains all predictive information about the future that is contained in the past.
+%The listener can trade off memory and future surprisal:
+%A listener who chooses to store less memory will exerience higher surprisal in the future.
+%A listener can achieve minimal surprisal -- that is, the lowest average surprisal that any model could achieve by predicting the future from the past -- if and only if $L_t$ contains all predictive information about the future that is contained in the past.
 
-We will describe this tradeoff, and show that listener memory is linked to locality in a way similar to speaker memory.
-Consider a listener who uses $J$ bits of memory on average.
-What can we say about the listener's surprisal?
-
-
+%We now describe the memory-surprisal tradeoff. will describe this tradeoff, and show that listener memory is linked to locality in a way similar to speaker memory.
+%Consider a listener who uses $J$ bits of memory on average.
+%What can we say about the listener's surprisal?
 
 
 
 
-We will use the concept of \emph{conditional mutual information}.
-For two random variables $X, Y$, the mutual information $I[X,Y]$ is the reduction in entropy about $X$ by knowing $Y$:
+\paragraph{Conditional Mutual Information}
+
+We will use the concept of \emph{conditional mutual information} (Figure~\ref{fig:it-surprisal-intuition}).
+%For two random variables $X, Y$, the mutual information $I[X,Y]$ is the reduction in entropy about $X$ by knowing $Y$:
+%\begin{equation}
+%	I[X,Y] := H[X] - H[X|Y]
+%\end{equation}
+%For three random variables $X, Y, Z$, the mutual information between $X$ and $Y$, conditional on $Z$, is this entropy reduction when $Z$ is already known:
+%\begin{equation}
+%I[X,Y|Z] := H[X|Z] - H[X|Z,Y]
+%\end{equation}
+%We will use the specific form where $X$ and $Y$ are observations $X_0$, $X_t$ of the process $(X_t)_{t \in \mathbb{Z}}$, and $Z$ is a block of intervening observations $X_1, \dots, X_{t-1}$:
 \begin{equation}
-	I[X,Y] := H[X] - H[X|Y]
-\end{equation}
-For three random variables $X, Y, Z$, the mutual information between $X$ and $Y$, conditional on $Z$, is this entropy reduction when $Z$ is already known:
-\begin{equation}
-I[X,Y|Z] := H[X|Z] - H[X|Z,Y]
-\end{equation}
-We will use the specific form where $X$ and $Y$ are observations $X_0$, $X_t$ of the process $(X_t)_{t \in \mathbb{Z}}$, and $Z$ is a block of intervening observations $X_1, \dots, X_{t-1}$:
-\begin{equation}
-	I[X_t, X_0 | X_1, \dots, X_{t-1}] := H[X_t| X_1, \dots, X_{t-1}] - H[X_t| X_0, X_1, \dots, X_{t-1}]
+%	I[X_t, X_0 | X_1, \dots, X_{t-1}] := H[X_t| X_1, \dots, X_{t-1}] - H[X_t| X_0, X_1, \dots, X_{t-1}]
+	I_t := H[X_t| X_1, \dots, X_{t-1}] - H[X_t| X_0, X_1, \dots, X_{t-1}]
 \end{equation}
 This is equal to the reduction in uncertainty about the $t$-th observation when knowing the $0$-th observation, in addition to the block of intervening observations.
 That is, we measure the amount of statistical dependency of observations that are $t$ steps apart, controlling for any information that is redundant with intervening observations.
 This quantifies how much information needs to be carried across $t$ timesteps without any possibility for `guessing' it from intervening observations.
+
+
+
+\begin{figure*}
+\includegraphics[width=0.9\textwidth]{figures/listener-it.png}
+	\caption{(TODO adapt to format) Intuitive explanation of $I_t$}\label{fig:it-surprisal-intuition}
+\end{figure*}
+
 
 
 
@@ -243,14 +269,30 @@ Then
 
 
 \begin{proposition}\label{prop:suboptimal}
-	Let $T$ be a positive integer, and consider a listener using at most
-$$\sum_{t=1}^T t I_t$$
+	Let $T$ be any positive integer ($1, 2, 3, ...$), and consider a listener using at most
+	\begin{equation}\label{eq:memory}
+		\sum_{t=1}^T t I_t
+	\end{equation}
 bits of memory on average.
 Then this listener will incur surprisal at least
 	$$H[X_t|X_{<t}] + \sum_{t > T} I_t$$
 	on average.
 \end{proposition}
 The proof is given in the appendix (REF).
+
+%An intuitive (non-rigorous) argument goes as follows:
+%For each bit of information that is held in memory, we count the number of timesteps from when it is first entered into memory to when it is forgotten.
+
+
+\begin{figure*}
+\includegraphics[width=0.45\textwidth]{toy/decay.pdf}
+\includegraphics[width=0.45\textwidth]{toy/memory.pdf}
+%
+	\caption{Left: $I_t$ as a function of $t$, for two different processes. $I_t$ decays faster for the red process: Predictive information about the present observation is concentrated more strongly in the recent past. Left: $t \cdot I_t$ as a function of $t$ for the same processes. }\label{fig:basic}
+\end{figure*}
+
+
+
 
 The proposition gives us a lower bound on the listener's memory-surprisal curve: Taking all pairs of memory $\sum_{t=1}^T t I_t$ and surprisal $H[X_t|X_{<t}] + \sum_{t > T} I_t$, we obtain a curve in memry-surprisal plane, which is a lower bound on the memory demands of any listener at a given surprisal level.
 We visualize this for the two processes from Figure~\ref{fig:basic} in Figure~\ref{fig:listener-tradeoff}.
@@ -280,17 +322,19 @@ We visualize this for the two processes from Figure~\ref{fig:basic} in Figure~\r
 
 
 
-\begin{figure*}
-\includegraphics[width=0.9\textwidth]{figures/listener-it.png}
-	\caption{(TODO adapt to format) Intuitive explanation of $I_t$}
-\end{figure*}
-
-
 
 
 
 %that the model does not have an `absolute clock' built into it.
 
+
+Our result is entirely information-theoretic and applies to \emph{any} physical encoding of the past, entirely independent of the implementation of the model. % and the mechanisms by which it computes predictions.
+In particular, while the relation to psycholinguistic and psychological models of how memory works will be interesting to explore, our result applies to any such model.
+Memory representations do not have to be rational or optimal for this bound to hold:
+It provides a \emph{lower bound} on the amount of information that needs to be stored -- other memory representations will always need to store at least as much information.
+
+
+\paragraph{Information Locality}
 
 
 Due to the factor $t$ inside each term of the sum, carrying the same amount of information over longer distances requires more memory -- that is, modeling long statistical dependencies is more costly in terms of memory than modeling shorter ones.
@@ -299,18 +343,17 @@ In Section~\ref{sec:listener}, we will extend this analysis to listeners perform
 %incremental prediction.
 
 
-The result in (\ref{eq:memory-bound}) is entirely information-theoretic and applies to \emph{any} physical encoding of the past, entirely independent of the implementation of the model. % and the mechanisms by which it computes predictions.
-In particular, while the relation to psycholinguistic and psychological models of how memory works will be interesting to explore, our result applies to any such model.
-Memory representations do not have to be rational or optimal for this bound to hold:
-It provides a \emph{lower bound} on the amount of information that needs to be stored -- other memory representations will always need to store at least as much information.
 
-We will write $I_t$ as an abbreviation for $\operatorname{I}[X_t, X_0 | X_1, ..., X_{t-1}]$.
+
+%We will write $I_t$ as an abbreviation for $\operatorname{I}[X_t, X_0 | X_1, ..., X_{t-1}]$.
 The proposition implies that memory is decreased if $I_t$ decreases quickly as $t \rightarrow \infty$ -- that is, if the contributions of long-term dependencies in the process are small.
 In particular, memory load can only be finite if $I_t$ decreases fast enough for the infinite sum to converge to a finite value.
 %This confirms the intuition that finiteness of memory entails that the contribution of long-term 
 
-We have treated the process $(X_t)_t$ as a discrete-time process whose time steps correspond to words, but this is immaterial to the analysis.
-The analysis is not even restricted to discrete timesteps: We can replace the sum in~(\ref{eq:memory-bound}) with an integral to get a continuous-time version.
+
+%\paragraph{Discussion}
+%We have treated the process $(X_t)_t$ as a discrete-time process whose time steps correspond to words, but this is immaterial to the analysis.
+%The analysis is not even restricted to discrete timesteps: We can replace thes sum in Proposition~\ref{prop:suboptimal} with an integral to get a continuous-time version.
 
 
 
@@ -325,15 +368,7 @@ Note that the area under the curve is equal to (\ref{eq:memory-bound}).
 This area is smaller for the red process, as $I_t$ decays more quickly there.  
 
 
-\begin{figure*}
-\includegraphics[width=0.45\textwidth]{toy/decay.pdf}
-\includegraphics[width=0.45\textwidth]{toy/memory.pdf}
-%
-	\caption{Left: $I_t$ as a function of $t$, for two different processes. $I_t$ decays faster for the red process: Predictive information about the present observation is concentrated more strongly in the recent past. Left: $t \cdot I_t$ as a function of $t$ for the same processes. The area under the curves is given by (\ref{eq:memory-bound}). This area is smaller for the red process, as $I_t$ decays more quickly there.   }\label{fig:basic}
-\end{figure*}
-
-
-\subsection{Memory and Dependency Length}
+\section{Experiment 1: Memory and Dependency Length}
 
 
 
@@ -411,18 +446,20 @@ We interpreted each of the two languages as a stationary processes, extending in
 			However, we will see that the memory demands are different:
 			Figure~\ref{fig:toy-mis} (right) shows $t\cdot I_t$ as a function of $t$.
 			As $I_t$ decays faster in A orders, the total area under the curve now differs between A and B, and is larger in B.
-			This area corresponds to the lower bound in (\ref{eq:memory-bound}), and is 2.21 nats in A orders, and 2.43 nats in B orders.
-			While (\ref{eq:memory-bound}) is a general lower bound, it can be proven that this bound is actually tight in the case of this specific example.\footnote{This can be shown by computing the causal states and then showing that the crypticity is zero, both of which is tractable in the case of this small-scale artificial language.}
-That is, a speaker who optimally allocates memory resources will spend 2.21 nats in A orders, and 2.43 nats in B orders.
-It is important to stress that, even though we computed this value by considering the number of words impacting predictions at a given point in time, this bound holds independently of the actual implementation and architecture of memory and predictions.
+			%This area corresponds to the lower bound in (\ref{eq:memory-bound}), and is 2.21 nats in A orders, and 2.43 nats in B orders.
 
+%While (\ref{eq:memory-bound}) is a general lower bound, it can be proven that this bound is actually tight in the case of this specific example.\footnote{This can be shown by computing the causal states and then showing that the crypticity is zero, both of which is tractable in the case of this small-scale artificial language.}
+%That is, a speaker who optimally allocates memory resources will spend 2.21 nats in A orders, and 2.43 nats in B orders.
 
 
 In Figure~\ref{fig:toy-listener-tradeoff}, we show the resulting curve for the two versions of the artificial language from \cite{fedzechkina-human-2017}.
-In this language, speaker memory coincides with the memory demand of a listener who performs optimally in incremental prediction.
+%In this language, speaker memory coincides with the memory demand of a listener who performs optimally in incremental prediction.
 The curve shows that, at any desired level of surprisal, Order A requires at most as much memory as Order B.
 For reaching optimal surprisal, Order A requires strictly less memory.
 Thus, in this case, the listener's surprisal-memory tradeoff is optimized by the orders predicted by Dependency Length Minimization.
+
+It is important to stress that, even though we computed this value by considering the number of words impacting predictions at a given point in time, this bound holds independently of the actual implementation and architecture of memory and predictions.
+
 
 
 
@@ -503,146 +540,49 @@ Thus, in this case, the listener's surprisal-memory tradeoff is optimized by the
 
 % RF: what matters for the speaker is not I[X_t, X_0 | X_1, …, X_{t-1}], but I[X_t, X_0 | X_1, …, X_{t-1}, G] where G is some representation of the speaker’s goal (like in the van Dijk paper). This changes the interpretation of the mutual information. For the listener, it’s just redundancy. For the speaker, it’s redundancy *conditional on the goal*—which you could interpret as something like conceptual relatedness of linguistic elements. Then the speaker’s pressure is to keep conceptually related things close. 
 
-\section{Relation to Theories of Sentence Processing}
-
-
-\paragraph{Lossy-Context Surprisal}
-\citet{futrell-noisy-context-2017} describe a processing model where listeners make predictions (and incur surprisal) based on lossy memory representations.
-In particular, they consider loss models that delete, erase, or replace words in the past.
-Under the assumption that loss affects words more strongly that are further in the past, they derive a principle of information locality:
-A listener will incur surprisal
-$$ -\log P(w_t) - \sum_{j=1}^{t-1} f(i-j) pmi(w_i; w_j) + R$$
-where the `survival probability' $f(d)$ decreases as the distance $d$ between two words increases, and $R$ is a remainder term that can be argued to be small.
-Given that $f$ is assumed to be decreasing, this prediction loss will be smaller when words with high mutual information are closer together in the input.
-Our Proposition~\ref{prop:suboptimal} can be seen as an analogous result for general models of memory.
-
-
-
-
-
-
-\paragraph{Relation to Dependency Locality}
-The quantity described in Proposition~\ref{prop:lower-bound} is formally similar to Storage Cost in the Dependency Locality Theory (DLT) \citep{gibson-linguistic-1998}: Storage cost at a given timestep is defined as the number of predictions that are held in memory.
-Storage cost only considers predictions that are certain, and each prediction takes an equal amount of memory.
-In contrast, the result in Proposition~\ref{prop:lower-bound} can be seen as weighting predictions by their certainty and the amount of predictive information.
-In this sense, DLT storage cost can be seen as an approximation to Proposition~\ref{prop:lower-bound}.
-
-also surprisal -- integration cost
-
-
-\paragraph{Center Embeddings, ...}
-Yngve 1960, had a complexity measure, but doesn't work well for left-branching structures
-
-Miller and Chomsky 1963
-
-Frzier 1985 local nonterminal count
-
-Rambow and Joshi 1994 using TAG
-
-Marcus 1980 deterministic parsing
-
-(Sabrina Gerth, Memory Limitations in Sentence Processing)
-
-
-\subsection{Relation to other work}
-
-\paragraph{Statistical Complexity}
-There are deep connections between our formalization of listener memory and studies of dynamic systems in the Physics literature.
-Our formalization of listener memory, under the assumption of optimal prediction, is equivalent to the notion of \emph{Statistical Complexity} \citep{crutchfield-inferring-1989}.
-Speaker memory corresponds to \emph{Generative Complexity} \cite{loehr-non-sufficient-2008, loehr-predictive-2010}.
-The tradeoff between listener memory and surprisal is formally equivalent to the \emph{Recursive Information Bottleneck} considered by \cite{still-information-2014}.
-The quantity in (\ref{eq:memory-bound}) is equal to the \emph{excess entropy}, and it has long been known to bound statistical and generative complexity \citep{crutchfield-inferring-1989}.
-However, the link between memory and locality provided by our series expansion in (\ref{eq:memory-bound}) appears to be a novel contribution.
-
-
-\cite{sharan-prediction-2016} shows a link between excess entropy and approximability by $n$-th order Markov models, noting that processes with low excess entropy can be approximated well with Markov models of low order.
-
-
-
-\paragraph{Decay of Mutual Information}
-In Propositions~\ref{prop:lower-bound} and \ref{prop:suboptimal}, we showed a close link between memory and the decay of \emph{conditional} mutual information $I_t := I[X_t, X_0 | X_{1\dots t-1}]$.
-Prior work has studied the decay of \emph{unconditional} mutual information $I[X_t, X_0]$ in natural language \citep{ebeling-entropy-1994,lin-critical-2017}, and linked it to locality and memory \citep{futrell-noisy-context-2017}.
-
-The decay of unconditional mutual information is less closely linked to memory requirements than conditional mutual information:
-While the decay of conditional mutual informations provides a lower bound on memory need, unconditional mutual information does not:
-Consider the constant process where with probability 1/2 all $X_t = 0$, and with probability 1/2 all $X_t = 1$. %%$X_t = c$, where $c$ is random but independent of $t$ for each specific draw from the process.
-The unconditional mutual information is 1 at all distances, so does not decay at all, but the process only requires 1 bit of memory.
-Conversely, one can construct processes where the unconditional mutual informations are 0 for all $t$, but where $P > 0$ and this predictive information is actually spread out over arbitrarily large distances (that is, the ratio of memory $M$ and predictability $P$ can be made arbitrarrily large).\footnote{First, consider the process (called X by REF) consisting of 2 random bits and their XOR. This one has bounded nonzero $J$, but zero unconditional MI. To get unbounded $J$, consider the following process for any $N \in \mathbb{N}_{>2}$: Every $X_t$ is equal to the XOR of $X_{t-1}$ and $X_{t-N}$, such that each $X_t$ has $Bernoulli(1/2)$ as its marginal. The unconditional mutual information between any two timesteps is zero, but modeling the process requires $N$ bits of memory.}
-
-
-
-\paragraph{Long-range dependencies in text}    % excess entropy
-\cite{debowski-excess-2011} has studied the excess entropy of language across long ranges of text, in particular studying whether it is finite. % compute excess entropy in text
-Our work contrasts with this work in that we are interested in dependencies within sentences.
-
-
-\subsection{Discussion}
-
-\paragraph{Speakers vs Listeners}
-Our results apply both to speakers and listeners.
-
-\paragraph{Decay vs Interference}
-Work has suggested that interference and memory overload is more appropriate than decay \cite[p. 408]{lewis-activation-based-2005} for modeling locality and memory in sentence processing.
-The bounds in Propositions~\ref{prop:lower-bound} and \ref{prop:suboptimal} hold for any type of memory model, and are thus compatible with decay- or interference-based models.
-The formula in (\ref{eq:memory-bound}) might suggest that boundedness of memory entails that memory has to decay.
-This is not the case:
-A long dependency can be maintained perfectly with low average memory:
-Informally, if every sentence is $N$ words long and has one long-distance dependency spanning the entire sentence, this dependency can be modeled perfectly with a memory cost that is independent of $N$.
-In contrast, if every symbol strongly and non-redundantly depends on the character $T$ steps in the past, with $T$ large, this will create a memory cost proportional to $T$.
-
-
-
-
-\paragraph{Memory and Hierarchical Structure; Finiteness of Memory}
-Processing nontrivial hierarchical structures typically requires unbounded amounts of memory.
-However, crucially, the \emph{average} memory demand for prediction can be finite, if the probability mass assigned to long dependencies is small.
-In fact, languages defined by Probabilistic Context Free Grammars (PCFG) always have finite average memory (and thus in particular finite excess entropy):
-
-
-\begin{proposition}
-Any language generated by a PCFG, with rational weights, and finitely many terminals and nonterminals, has finite average memory demand in production and incremental prediction.
-\end{proposition}
-
-\begin{proof}[Proof Sketch]
-	TODO Actually, Proposition 2 in \cite{chi-statistical-1999} is enough, no need to talk about how to do parsing.
-
-	We provide an algorithm that performs generation or optimal prediction and has finite average memory use. We consider incremental Earley parsing \citep{earley-efficient-1970}. Disregarding probabilities, parsing a word of length $n$ takes $O(n^2)$ bits of memory (where the constants depend on the grammar but not $n$). For storing probabilities, the storage will be similarly bounded as long as the weights of the grammar are rational.
-	The result then follows from Proposition 2 in \cite{chi-statistical-1999}, which says that any function that is polynomial in the length of words drawn from a PCFG has finite expectation.\footnote{Using Proposition 2 of \cite{chi-statistical-1999}, one can also directly show that excess entropy is finite for any PCFG (without assumption about the weights), if we interpret it as giving rise to a stationary process consisting of a sequence of words independently drawn from the language.}
-\end{proof}
-
-
-
 
 \section{Large-Scale Evidence that natural language optimize Memory-Surprisal Tradeoff}
 
 We now investigate whether word orders as found in natural language optimize the two memory-surprisal tradeoffs.
 We will define a class of baseline languages that serve as a comparison class of word orders that natural language can be compared to.
-
 We compare the memory-surprisal tradeoffs of 52 actual languages to those of counterfactual reorderings.
-
 
 We want to compare to counterfactual reorderings.
 We cannot just compare to random orderings of individual syntactic trees, as such languages would not have word order regularities.
+Therefore, we compare to counterfactual word order gramars.
 
 \paragraph{Data}
 We draw on dependency corpora.
+The Universal Dependencies project has compiled dependency corpora for several dozen languages~\citep{nivre-universal-2017}.
 
-TODO talk about dependency grammar
+In dependency corpora, sentences are annotated with \emph{dependency trees}. TODO a figure.
+These are directed trees describing the grammatical relations among words. For example, the arcs labeled ``obj'' represent that the noun in question is the \emph{direct object} if the verb, rather than e.g. the subject or an indirect object.
+A dependency arc is drawn from a \emph{head} (e.g. TODO in Figure TODO) to a \emph{dependent} (e.g. TODO).
+Dependency trees can be defined in terms of many different syntactic theories \cite{corbett1993heads}.
+Although there are some differences in how different formalisms would draw trees for certain sentences, there is broad enough agreement about dependency trees that it has been possible to develop large-scale dependency-annotated corpora of text from dozens of languages \cite{nivre2017universal}.
 
-Universal Dependencies has compiled dependency corpora for several dozen languages
-
-
-We considered all languages for which there are Universal Dependencies 2.2 treebanks with a total of at least 400 sentences of training data.
+We considered all languages for which there are Universal Dependencies 2.2 treebanks with a total of at least 500 sentences of training data.
 We excluded data from historical languages.\footnote{Ancient Greek, Coptic, Gothic, Latin, Old Church Slavonic, Old French.}
 This resulted in 52 languages.
 
 
+For each of these languages, we pooled all available corpora in one dataset.
+Universal Dependencies corpora have a predefined split into \emph{training}, \emph{held-out} (also known as \emph{development}), and \emph{test} partitions.
+While larger corpora have all three partitions, smaller corpora often have only some of these partitions.
+For most language, we used the predefined data split, separately pooling data from the different partitions. %We did not use the test partitions.
+For some languages with little data, there is no predefined training partition, or the training partition is smaller than the other partitions.
+In these cases, we redefined the split to obtain more training data:
+For these languages, we pooled all the available partitions, used 100 randomly selected sentences as held-out data, and used the remainder as training data.\footnote{This affects Amharic, Armenian, Breton, Buryat, Cantonese, Faroese, Kazakh, Kurmanji, Naija, Thai, and Uyghur.}
+For each language, we used the training and held-out sets for estimating the memory-surprisal tradeoff (see Section~\ref{sec:method}).
+We provide the sizes of the resulting datasets in Table~\ref{tab:corpora}.
+
+
 
 \paragraph{Counterfactual Ordering Grammars}
-We define ordering grammars, small interpretable models of dependency tree linearization.
+We define ordering grammars, small models of the rules by which languages order syntactic structures into sentences.
 Our formalism of ordering grammars adapts the method of \cite{gildea-optimizing-2007, gildea-grammars-2010, gildea-human-2015} to the setting of dependency corpora.
 
-Universal dependencies defines 37 universal syntactic relations that are used to label dependency arcs across all corpora.
+Universal Dependencies defines 37 universal syntactic relations that are used to label dependency arcs across all corpora.
 These relations encode cross-linguistically meaningful relations such as subjects, objects, and adjectival modifiers.
 We define ordering grammars by assigning a parameter $a_\tau \in [-1,1]$ to every one of these 37 universal syntactic relations.
 Relations sometimes have language-specific subtypes; we do not distinguish these subtypes.
@@ -662,29 +602,20 @@ Such baseline grammars define languages that have consistent word order, but do 
 
 
 
-\subsection{Method}
-To estimate mutual informations, we use LSTM recurrent neural networks, the basis of the state of the art in modeling sequences such as natural language.
+\subsection{Estimating Memory-Surprisal Tradeoff}\label{sec:method}
+To estimate mutual informations, we use LSTM recurrent neural networks, the basis of the state of the art in modeling natural language (CITE) and predicting the surprisal effect on reading times~\citep{frank-insensitivity-2011, goodkind-predictive-2018}.
 We model language on the level of individual word forms.
 We provide data from alternative estimation methods in the SI.
 
 
-\paragraph{Data}
-
-
-UD models predefined with train, dev, and test splits.
-Small datasets sometimes not.
-
-For most language, we used the predefined data split.
-For some languages, where there was no training partition, or where the training partition was smaller than the test partition, we redefined the split to obtain more training data:
-For these languages, we randomly pooled all the available partitions, used 100 sentences as held-out data, and used the remainder as training data.\footnote{This affects Amharic, Armenian, Breton, Buryat, Cantonese, Faroese, Kazakh, Kurmanji, Naija, Thai, and Uyghur.}
-We provide the sizes of the resulting datasets in Table~\ref{tab:corpora}.
-
+%\paragraph{Data}
 
 
 \paragraph{Model}
-We use a recurrent neural network with Long-Short-Term Memory cells.
+We use a recurrent neural network with Long-Short-Term Memory cells~\citep{hochreiter-long-1997}.
 %Given a sequence of input words $w_1, ..., w_n \in V$, the model 
 %
+\textbf{TODO I'm describing this in a lot of detail. Alternatively, we can say this is a standard NLP method and refer to the NLP literature for the definition.}
 The first component of such a model is an \emph{embedding matrix} $W_{emb} \in \mathbb{R}^{|V| \times d_{emb}}$, where the \emph{vocabulary} $\mathcal{V}$ is a set, containing the words that occur in the corpus, and $d_{emb} \in \mathbb{N}$ is a fixed parameter.
 This matrix assigns a $d_{emb}$-dimensional vector to each word occurring in the corpus.
 The second component is an LSTM cell $f_{LSTM}$, a nonlinear transformation mapping an \emph{input} vector $x_{i} \in \mathbb{R}^{d_{emb}}$ a \emph{hidden state} $h_i \in \mathbb{R}^{d_{LSTM}}$ and a \emph{cell state} $c_i \in \mathbb{R}^{d_{LSTM}}$ to a new pair of hidden state and cell states $h_{i+1}, c_{i+1} \in \mathbb{R}^{d_{LSTM}}$.
@@ -783,21 +714,18 @@ and take the average over these.
 We cut $T$ off at 30.
 
 
-
-\subsection{Discussion: Alternative Models}
-Recent research has proven strong theoretical learnability guarantees for neural network models (CITE), supporting their success in practice.
-They also provide strong predictors of the surprisal effect on human reading times \citep{frank-insensitivity-2011, goodkind-predictive-2018}.
-
-In view of the NLP literature, the following are the main other options that exist for estimating mutual information and probabilities in sequences:
-
-A traditional model uses n-gram models. A challenge of n-gram models is that they do not express any morphosyntactic generalizations. Furthermore, standard n-gram models do not express any generalizations about pairs of words that are not adjacent -- e.g., encoding a generalization about morphological agreement between two words is hard for such a model to capture if the two words are not always adjacent. Both the small scale of available corpora in many languages and free word order in many languages with rich morphology thus seem to make such models unattractive.
-We evaluate our hypothesis using n-gram models in SI Section X, confirming the conclusions obtained from neural models.
-
-A second option is to construct a statistical grammar, such as PCFG.
-The challenge is to encode statistical morphosyntactic generalizations, and to decide which independence assumptions to put into the model.
-One can either decide on a language-specific basis which generalizations to put in (laborious and might introduce bias), or choose a general model family that is rich enough to learn generalizations.
-The second option will make this a machine learning model that, for our purposes, does not seem to be superior to a recurrent neural network.
-
+%
+%\subsection{Discussion: Alternative Models}
+%In view of the NLP literature, the following are the main other options that exist for estimating mutual information and probabilities in sequences:
+%
+%A traditional model uses n-gram models. A challenge of n-gram models is that they do not express any morphosyntactic generalizations. Furthermore, standard n-gram models do not express any generalizations about pairs of words that are not adjacent -- e.g., encoding a generalization about morphological agreement between two words is hard for such a model to capture if the two words are not always adjacent. Both the small scale of available corpora in many languages and free word order in many languages with rich morphology thus seem to make such models unattractive.
+%We evaluate our hypothesis using n-gram models in SI Section X, confirming the conclusions obtained from neural models.
+%
+%A second option is to construct a statistical grammar, such as PCFG.
+%The challenge is to encode statistical morphosyntactic generalizations, and to decide which independence assumptions to put into the model.
+%One can either decide on a language-specific basis which generalizations to put in (laborious and might introduce bias), or choose a general model family that is rich enough to learn generalizations.
+%The second option will make this a machine learning model that, for our purposes, does not seem to be superior to a recurrent neural network.
+%
 
 
 
@@ -811,7 +739,7 @@ The second option will make this a machine learning model that, for our purposes
 
 For each language, we collected data from the actual orderings and from random grammars.
 We collect multiple samples for the actual orderings to control for variation due to the random initialization of the neural network.
-We collected data from the actual and random orderings in proportion one to three.
+We collected data from the actual and random orderings in proportion one to two.
 The stopping criterion will be described below.
 
 
@@ -822,9 +750,6 @@ The stopping criterion will be described below.
 
 \paragraph{Stopping Criterion}
 
-For each language, we collected at least 5 data points for real orderings and at least 10 data points for baseline orderings.
-We continued obtaining new data points until the CI for $G$ had width $\leq 0.15$, or there were 100 samples from $P_1$ and 300 samples from $P_2$.
-Up to the end, we chose the next sample to be from $P_0$ with probability 2/3, and $P_1$ otherwise.
 %We chose these thresholds based on preliminary simulations which had suggested that these widths were achievable at acceptable computational cost.
 
 %- at least 30 samples from both baseline and real
@@ -983,7 +908,7 @@ Due to the use of bootstrapping, the confidence intervals are not exact.
 
 
 
-\paragraph{Number of Samples}
+\subsection{Number of Samples}
 Training neural language models is computationally costly.
 Therefore, we used a precision-based stopping criterion to adaptively choose a sample size for each language.
 Precision-based stopping criteria offer a way to adaptively choose sample size without biasing results (CITE).
@@ -1000,6 +925,9 @@ Consequently, more samples were collected than necessary to reach the stopping c
 
 %We chose these thresholds based on preliminary simulations which had suggested that these widths were achievable at acceptable computational cost.
 
+%For each language, we collected at least 5 data points for real orderings and at least 10 data points for baseline orderings.
+%We continued obtaining new data points until the CI for $G$ had width $\leq 0.15$, or there were 100 samples from $P_1$ and 300 samples from $P_2$.
+%Up to the end, we chose the next sample to be from $P_0$ with probability 2/3, and $P_1$ otherwise.
 
 
 
@@ -1235,7 +1163,118 @@ However, discrete optimization is computationally challenging.
 
 \subsection{Speaker Memory}
 
-The quantity $M$ is equal to the mutual information between past and future observations, $I[(X_i)_{i>0}, (X_i)_{i \leq 0}]$, which is often referred to as the \emph{excess entropy} of the process (CITE).
+%The quantity $M$ is equal to the mutual information between past and future observations, $I[(X_i)_{i>0}, (X_i)_{i \leq 0}]$, which is often referred to as the \emph{excess entropy} of the process (CITE).
+TODO
+
+\subsection{Relation to Theories of Sentence Processing}
+
+
+\paragraph{Lossy-Context Surprisal}
+\citet{futrell-noisy-context-2017} describe a processing model where listeners make predictions (and incur surprisal) based on lossy memory representations.
+In particular, they consider loss models that delete, erase, or replace words in the past.
+Under the assumption that loss affects words more strongly that are further in the past, they derive a principle of information locality:
+A listener will incur surprisal
+$$ -\log P(w_t) - \sum_{j=1}^{t-1} f(i-j) pmi(w_i; w_j) + R$$
+where the `survival probability' $f(d)$ decreases as the distance $d$ between two words increases, and $R$ is a remainder term that can be argued to be small.
+Given that $f$ is assumed to be decreasing, this prediction loss will be smaller when words with high mutual information are closer together in the input.
+Our Proposition~\ref{prop:suboptimal} can be seen as an analogous result for general models of memory.
+
+
+
+
+
+
+\paragraph{Relation to Dependency Locality}
+The quantity described in Proposition~\ref{prop:lower-bound} is formally similar to Storage Cost in the Dependency Locality Theory (DLT) \citep{gibson-linguistic-1998}: Storage cost at a given timestep is defined as the number of predictions that are held in memory.
+Storage cost only considers predictions that are certain, and each prediction takes an equal amount of memory.
+In contrast, the result in Proposition~\ref{prop:lower-bound} can be seen as weighting predictions by their certainty and the amount of predictive information.
+In this sense, DLT storage cost can be seen as an approximation to Proposition~\ref{prop:lower-bound}.
+
+also surprisal -- integration cost
+
+
+\paragraph{Center Embeddings, ...}
+Yngve 1960, had a complexity measure, but doesn't work well for left-branching structures
+
+Miller and Chomsky 1963
+
+Frzier 1985 local nonterminal count
+
+Rambow and Joshi 1994 using TAG
+
+Marcus 1980 deterministic parsing
+
+(Sabrina Gerth, Memory Limitations in Sentence Processing)
+
+
+\subsection{Relation to other work}
+
+\paragraph{Statistical Complexity}
+There are deep connections between our formalization of listener memory and studies of dynamic systems in the Physics literature.
+%Speaker memory corresponds to \emph{Generative Complexity} \cite{loehr-non-sufficient-2008, loehr-predictive-2010}.
+The tradeoff between listener memory and surprisal is formally equivalent to the \emph{Recursive Information Bottleneck} considered by \cite{still-information-2014}.
+In the limit of optimal prediction and minimal surprisal, our formalization of listener memory is equivalent to the notion of \emph{Statistical Complexity} \citep{crutchfield-inferring-1989}.
+In the limit $T \rightarrow \infty$, the quantity in (\ref{eq:memory}) is equal to the \emph{excess entropy}, which is known to bound statistical complexity \citep{crutchfield-inferring-1989}.
+However, the link between memory and information locality provided by our Proposition~\ref{prop:suboptimal} appears to be a novel contribution.
+Relatedly, \cite{sharan-prediction-2016} shows a link between excess entropy and approximability by $n$-th order Markov models, noting that processes with low excess entropy can be approximated well with Markov models of low order.
+
+also information-theoretic studies of memory capacity
+
+\paragraph{Decay of Mutual Information}
+In Propositions~\ref{prop:lower-bound} and \ref{prop:suboptimal}, we showed a close link between memory and the decay of \emph{conditional} mutual information $I_t := I[X_t, X_0 | X_{1\dots t-1}]$.
+Prior work has studied the decay of \emph{unconditional} mutual information $I[X_t, X_0]$ in natural language \citep{ebeling-entropy-1994,lin-critical-2017}, and linked it to locality and memory \citep{futrell-noisy-context-2017}.
+
+The decay of unconditional mutual information is less closely linked to memory requirements than conditional mutual information:
+While the decay of conditional mutual informations provides a lower bound on memory need, unconditional mutual information does not:
+Consider the constant process where with probability 1/2 all $X_t = 0$, and with probability 1/2 all $X_t = 1$. %%$X_t = c$, where $c$ is random but independent of $t$ for each specific draw from the process.
+The unconditional mutual information is 1 at all distances, so does not decay at all, but the process only requires 1 bit of memory.
+Conversely, one can construct processes where the unconditional mutual informations are 0 for all $t$, but where $P > 0$ and this predictive information is actually spread out over arbitrarily large distances (that is, the ratio of memory $M$ and predictability $P$ can be made arbitrarrily large).\footnote{First, consider the process (called X by REF) consisting of 2 random bits and their XOR. This one has bounded nonzero $J$, but zero unconditional MI. To get unbounded $J$, consider the following process for any $N \in \mathbb{N}_{>2}$: Every $X_t$ is equal to the XOR of $X_{t-1}$ and $X_{t-N}$, such that each $X_t$ has $Bernoulli(1/2)$ as its marginal. The unconditional mutual information between any two timesteps is zero, but modeling the process requires $N$ bits of memory.}
+
+
+
+\paragraph{Long-range dependencies in text}    % excess entropy
+\cite{debowski-excess-2011} has studied the excess entropy of language across long ranges of text, in particular studying whether it is finite. % compute excess entropy in text
+Our work contrasts with this work in that we are interested in dependencies within sentences.
+
+
+\subsection{Discussion}
+
+\paragraph{Speakers vs Listeners}
+Our results apply both to speakers and listeners.
+
+\paragraph{Decay vs Interference}
+Work has suggested that interference and memory overload is more appropriate than decay \cite[p. 408]{lewis-activation-based-2005} for modeling locality and memory in sentence processing.
+The bounds in Propositions~\ref{prop:lower-bound} and \ref{prop:suboptimal} hold for any type of memory model, and are thus compatible with decay- or interference-based models.
+The formula in (\ref{eq:memory-bound}) might suggest that boundedness of memory entails that memory has to decay.
+This is not the case:
+A long dependency can be maintained perfectly with low average memory:
+Informally, if every sentence is $N$ words long and has one long-distance dependency spanning the entire sentence, this dependency can be modeled perfectly with a memory cost that is independent of $N$.
+In contrast, if every symbol strongly and non-redundantly depends on the character $T$ steps in the past, with $T$ large, this will create a memory cost proportional to $T$.
+
+
+
+
+\paragraph{Memory and Hierarchical Structure; Finiteness of Memory}
+Processing nontrivial hierarchical structures typically requires unbounded amounts of memory.
+However, crucially, the \emph{average} memory demand for prediction can be finite, if the probability mass assigned to long dependencies is small.
+For instance, languages defined by Probabilistic Context Free Grammars (PCFG) always have finite average memory.
+The reason is that PCFGs assign low probabilities to long sequences.\footnote{Proposition 2 in \cite{chi-statistical-1999} implies that words drawn from a PCFG have finite expected length. This implies that average memory demands are finite.}
+
+
+%\begin{proposition}
+%Any language generated by a PCFG, with rational weights, and finitely many terminals and nonterminals, has finite average memory demand in production and incremental prediction.
+%\end{proposition}
+%
+%\begin{proof}[Proof Sketch]
+%	TODO Actually, Proposition 2 in \cite{chi-statistical-1999} is enough, no need to talk about how to do parsing.
+%
+%	We provide an algorithm that performs generation or optimal prediction and has finite average memory use. We consider incremental Earley parsing \citep{earley-efficient-1970}. Disregarding probabilities, parsing a word of length $n$ takes $O(n^2)$ bits of memory (where the constants depend on the grammar but not $n$). For storing probabilities, the storage will be similarly bounded as long as the weights of the grammar are rational.
+%	The result then follows from Proposition 2 in \cite{chi-statistical-1999}, which says that any function that is polynomial in the length of words drawn from a PCFG has finite expectation.\footnote{Using Proposition 2 of \cite{chi-statistical-1999}, one can also directly show that excess entropy is finite for any PCFG (without assumption about the weights), if we interpret it as giving rise to a stationary process consisting of a sequence of words independently drawn from the language.}
+%\end{proof}
+%
+%
+%
+
 
 
 
