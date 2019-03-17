@@ -890,7 +890,7 @@ For each sample $x$ from real orderings, we look at the proportions $N_+(x)$ of 
 %\end{equation}
 
 We estimate the quotient
-\begin{equation}
+\begin{equation}\label{eq:g}
 	G :=	\frac{\E_{x \sim P_1}[W_+(x)]}{\E_{x \sim P_1}[W_+(x) + W_-(x)]}
 \end{equation}
 where $P_1$ is the distribution over values obtained for real orderings.
@@ -936,20 +936,24 @@ Consequently, more samples were collected than necessary to reach the stopping c
 
 The numbers of samples taken per language are provided in Table~\ref{tab:samples}.
 
-In Figure~\ref{tab:plain-results} (TODO), we show the estimated memory-surprisal tradeoff curves.
+In Figure~\ref{tab:plain-results} (TODO), we show the estimated memory-surprisal tradeoff curves for all samples.
 
-
-In Figure~\ref{tab:medians}, we show the medians.
-
-
-
+In Figure~\ref{tab:medians}, we show the medians for real and baseline languages.
 
 Descriptively, the real language provides better tradeoffs than the median of the baselines across languages, with four exceptions (Latvian, North Sami, Polish, Slovak).
 
+In Figure~\ref{tab:slices}, we show the distribution of surprisals achieved at the maximal memory value for real and random languages.
 
-- show the slice histograms
+In Figure~\ref{tab:hist-real}, we show surprisals at maximum memory, after z-transforming for each individual language and then aggregating.
 
-- show the total histogram
+In Table \ref{tab:median_diffs}, we show the differences in median surprisal, as a function of memory.
+
+
+In Table~\ref{tab:boot-g}, we report the bootstrap estimates and confidence intervals for G~(\ref{eq:g}).
+$\E[G]$ was not estimated to be significantly above $>5$ for four languages: Latvian, North Sami, Polish, and Slovak.
+
+
+In Table~\ref{tab:quantiles}, we show the quantiles.
 
 
 
@@ -957,20 +961,6 @@ Descriptively, the real language provides better tradeoffs than the median of th
 \includegraphics[width=0.95\textwidth]{neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
 \caption{Histogram}\label{fig:hist-real}
 \end{figure}
-
-
-
-
-
-\paragraph{Inferential Statistics}
-
-inferential
-
-- report the bootstrapped thing G
-
-Median Differences \ref{tab:median_diffs}
-
-Quantiles \ref{tab:quantiles}
 
 
 \begin{table}
@@ -1073,16 +1063,6 @@ Quantiles \ref{tab:quantiles}
 	\caption{Quantiles (part 3)}
 \end{table}
 
-
-
-
-In all but X languages $\E[G] > 0.5$ significantly.
-
-$\E[G]$ was not estimated to be significantly above $>5$ for four languages: Latvian, North Sami, Polish, and Slovak.
-
-%\begin{longtable}{llllllllllllllllll}
-	%\input{results-table-word-level.tex}
-%\end{longtable}
 
 
 
