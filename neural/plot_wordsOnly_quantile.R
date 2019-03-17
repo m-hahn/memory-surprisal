@@ -27,7 +27,8 @@ memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
     plot = plot + ylim(0,1.1)
     plot = plot + ylab("Quantile")
     plot = plot + xlab("Memory")
-    # + geom_line(aes(x=Memory, y=-MedianDiff_Upper))
+    plot = plot + theme(text = element_text(size=20))
+   # + geom_line(aes(x=Memory, y=-MedianDiff_Upper))
     ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory-QUANTILES_onlyWordForms_boundedVocab.pdf", sep=""), height=3.5, width=4.5)
     return(plot)
 }
