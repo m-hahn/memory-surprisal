@@ -983,7 +983,7 @@ In Table~\ref{tab:quantiles}, we show the quantiles.
 \begin{longtable}{ccccccccccccccclll}
 \input{medians_0.tex}
 \end{longtable}
-	\caption{Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 \% confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
+	\caption{Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
 \end{table}
 
 \begin{table}
@@ -1014,7 +1014,7 @@ In Table~\ref{tab:quantiles}, we show the quantiles.
 \begin{longtable}{ccccccccccccccccll}
 \input{medianDiff_0.tex}
 \end{longtable}
-	\caption{Median Differences between Real and Baseline: For each memory budget, we provide the difference in median surprisal between real languages and random baselines; for real orders (blue) and maximum likelihood grammars (red). Lower values indicate lower surprisal compared to baselines. Solid lines indicate sample means. Dashed lines indicate 95 \% confidence intervals.}\label{tab:median_diffs}
+	\caption{Median Differences between Real and Baseline: For each memory budget, we provide the difference in median surprisal between real languages and random baselines; for real orders (blue) and maximum likelihood grammars (red). Lower values indicate lower surprisal compared to baselines. Solid lines indicate sample means. Dashed lines indicate 95 $\%$ confidence intervals.}\label{tab:median_diffs}
 \end{table}
 
 \begin{table}
@@ -1270,6 +1270,39 @@ The reason is that PCFGs assign low probabilities to long sequences.\footnote{Pr
 
 
 \section{N-Gram Models}
+
+
+
+\begin{table}
+\begin{longtable}{ccccccccccccccclll}
+\input{medians_ngrams_0.tex}
+\end{longtable}
+	\caption{Medians (estimated using n-gram models): For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians for ngrams, dashed lines indicate 95 \% confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians_ngrams}
+\end{table}
+
+\begin{table}
+\begin{longtable}{ccccccccccccccclll}
+\input{medians_ngrams_1.tex}
+\end{longtable}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}
+\begin{longtable}{ccccccccccccccclll}
+\input{medians_ngrams_2.tex}
+\end{longtable}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}
+\begin{longtable}{ccccccccccccccclll}
+\input{medians_ngrams_3.tex}
+\end{longtable}
+	\caption{Medians (cont.)}
+\end{table}
+
+
+
 
 
 %-- English, Korean, Russian

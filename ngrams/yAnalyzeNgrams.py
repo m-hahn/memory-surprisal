@@ -8,6 +8,7 @@ import sys
 sortBy = int(sys.argv[1])
 #horizon = int(sys.argv[2])
 language = sys.argv[2]
+assert len(sys.argv) == 3
 #restrictToFinished = (sys.argv[4] == "True")
 #onlyOptimized = (not (len(sys.argv) > 5 and sys.argv[5] == "False"))
 def f(a):
@@ -97,6 +98,9 @@ finalShib = {"Estonian" : "Estonian 0.16 200 256 1 0.0055",
 
 
 filenames = [x for x in os.listdir("/u/scr/mhahn/deps/memory-need-ngrams/") if x.startswith("search-"+language+"_yWithMo") and len(open("/u/scr/mhahn/deps/memory-need-ngrams/"+x, "r").read().split("\n"))>=30]
+#print(filenames)
+#print([x for x in os.listdir("/u/scr/mhahn/deps/memory-need-ngrams/") if x.startswith("search-"+language+"_yWithMo")])
+#print("/u/scr/mhahn/deps/memory-need-ngrams/search-"+language+"yWithMo")
 if len(filenames) == 0:
    quit()
 with open("/u/scr/mhahn/deps/memory-need-ngrams/"+filenames[0], "r") as inFile:
@@ -117,6 +121,7 @@ correctParameters = " ".join(params2)
 types = [" REAL_REAL ", "RANDOM_MODEL ", "RANDOM_BY_TYPE "]
 
 for fileName in files:
+  #print(fileName)
   if language not in fileName:
        continue
   if not fileName.startswith("estimates"):
@@ -124,13 +129,16 @@ for fileName in files:
 
   with open(path+fileName, "r") as inFile:
      result = inFile.read().split("\n")
-     if (correctParameters not in result[0]):
+     if (correctParameters+" " not in result[0]+" "):
          continue
      typeOfResult = filter(lambda x:x in result[0], types)[0][:-1]
      if len(result) < 3:
          continue
      if typeOfResult not in resultsPerType:
         resultsPerType[typeOfResult] = []
+     if "idForProcess" in result[0]:
+        continue
+#     print(result)
      result[1] = list(map(lambda x:x if x=="" else float(x), result[1].replace("[","").replace("]","").split(" ")))
      balanced, memory, residual, mi, decay, unigramCE  = f(result[2])
      duration = len(result[1])
@@ -148,8 +156,8 @@ for fileName in files:
 
 header = ["Type", "Memory", "Residual", "ModelID", "TotalMI"]
 headerDecay = ["Type", "Distance", "ConditionalMI", "TotalMI", "ModelID", "UnigramCE"]
-with open("/u/scr/mhahn/"+language+"_ngrams_after_tuning.tsv", "w") as outFile:
- with open("/u/scr/mhahn/"+language+"_ngrams_decay_after_tuning.tsv", "w") as outFileDecay:
+with open("../results/raw/ngrams/"+language+"_ngrams_after_tuning.tsv", "w") as outFile:
+ with open("../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv", "w") as outFileDecay:
 
   print >> outFile, "\t".join(header)
   print >> outFileDecay, "\t".join(headerDecay)
@@ -175,5 +183,5 @@ with open("/u/scr/mhahn/"+language+"_ngrams_after_tuning.tsv", "w") as outFile:
            print >> outFileDecay, "\t".join([str(rand[x]) for x in headerDecay]) #map(str,[parameters[0], parameters[1], parameters[2], parameters[8], i, max(0, rand[9][i]), rand[7], rand[6], rand[10]]))
  
   #yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast.py	Basque	eu	0.1	100	512	1	0.002	RANDOM_MODEL	0.23	16	20	43.3432767303	1.55933869897	4.17839380314
-print "/afs/cs.stanford.edu/u/mhahn/scr/"+language+"_ngrams_after_tuning.tsv" 
-print "/afs/cs.stanford.edu/u/mhahn/scr/"+language+"_ngrams_decay_after_tuning.tsv"
+print "../results/raw/ngrams/"+language+"_ngrams_after_tuning.tsv" 
+print "../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv"

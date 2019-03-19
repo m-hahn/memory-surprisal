@@ -1,65 +1,10 @@
 import os
 
-
-finalShib = {"Estonian" : "Estonian 0.16 200 256 1 0.0055",
-             "Vietnamese" : "vi 0.33 50 128 1 0.02",
-             "Slovenian" : "Slovenian 0.16 100 256 1 0.01",
-             "Finnish" : "Finnish 0.16 100 512 1 0.01",
-             "Polish" : "Polish 0.33 150 512 3 0.05",
-             "Czech" : "Czech 0.2 250 512 2 0.05",
-             "Swedish" : "Swedish 0.33 150 256 1 0.01",
-             "Hindi" : "Hindi 0.25 300 256 3 0.01",
-             "Basque" : "",
-             "German" : "German 0.2 150 512 2 0.01",
-             "Arabic" : "Arabic 0.2 300 1024 3 0.05",
-             "Turkish" : "Turkish 0.3 250 512 1 0.05",
-             "Spanish" : "Spanish 0.25 200 1024 3 0.01",
-             "Latvian" : "Latvian 0.35 100 128 2 0.005",
-             "Indonesian" : "Indonesian 0.45 50 256 2 0.005",
-             "Hungarian" : "Hungarian 0.35 100 128 1 0.005",
-             "Persian" : "Persian 0.4 300 256 2 0.005",
-             "Croatian" : "Croatian 0.2 50 128 3 0.005",
-             "French" : "French 0.4 100 1024 2 0.005",
-             "Chinese" : "Chinese 0.3 300 128 3 0.005",
-             "Serbian" : "Serbian 0.45 200 256 1 0.01",
-             "Slovak" :  "Slovak 0.2 150 128 1 0.005",
-             "North_Sami" : " North_Sami 0.25 50 64 1 0.01 ",
-             "Irish" : " Irish 0.1 200 64 2 0.001 ",
-             "Lithuanian" : "Lithuanian 0.15 200 64 1 0.001 ",
-             "Armenian" : "Armenian 0.3 150 64 1 0.05 ",
-             "Ukrainian" : "Ukrainian 0.25 100 128 1 0.005 ",
-             "Armenian-Adap" : "Armenian-Adap 0.45 200 64 2 0.005 ",
-             "Greek" : " Greek 0.35 300 512 3 0.01 ",
-             "Uyghur-Adap" : "Uyghur-Adap 0.4 50 128 1 0.01 ",
-             "Breton-Adap" : " Breton-Adap 0.4 300 64 3 0.005 ",
-             "Thai-Adap" : " Thai-Adap 0.35 100 128 3 0.001 ",
-             "Tamil" : " Tamil 0.4 150 128 2 0.001 ",
-             "Faroese-Adap" : "Faroese-Adap 0.4 100 64 2 0.005 ",
-             "Buryat-Adap" : " Buryat-Adap 0.15 150 128 3 0.001 ",
-             "Naija-Adap" : "Naija-Adap 0.45 50 64 2 0.005",
-             "Cantonese-Adap" : "Cantonese-Adap 0.45 150 64 3 0.001",
-             "Japanese" : " Japanese 0.45 300 512 1 0.01 ",
-             "Hebrew" : " Hebrew 0.2 50 256 2 0.01 ",
-             "Marathi" : " Marathi 0.25 150 64 1 0.001 ",
-             "Dutch" : " Dutch 0.1 50 128 1 0.01 ",
-             "Kazakh-Adap" : " Kazakh-Adap 0.4 300 128 1 0.005 ",
-             "Amharic-Adap" : " Amharic-Adap 0.35 100 64 1 0.005 ",
-             "Afrikaans" : " Afrikaans 0.45 50 512 1 0.005 ",
-             "Bulgarian" : "Bulgarian 0.0 300 256 1 0.001",
-             "Danish" : "Danish 0.05 150 128 3 0.001",
-             "Catalan" : "Catalan 0.3 150 256 2 0.005",
-             "Belarusian" : "Belarusian 0.45 100 64 1 0.01",
-             "Norwegian" : "Norwegian 0.45 300 256 2 0.005",
-             "Romanian" : "Romanian 0.3 200 256 1 0.005",
-             "Kurmanji-Adap" : "Kurmanji-Adap 0.35 200 256 2 0.005",
-             "Bambara-Adap" : "Bambara-Adap 0.2 100 64 1 0.005 ",
-             "Erzya-Adap" : "Erzya-Adap 0.2 50 64 2 0.005 ",
-             "Maltese" : " Maltese 0.45 50 512 1 0.005 "
-          }
-
+with open("../ud_languages.txt", "r") as inFile:
+   languages = inFile.read().strip().split("\n")
 
 import subprocess
 
-for language in finalShib:
+for language in languages:
    subprocess.call(["./python27", "yAnalyzeNgrams.py", "1", language])
 

@@ -1,7 +1,7 @@
 
 
 memSurpNgramsPlot = function(language) {
-    data = read.csv(paste(language,"_ngrams_after_tuning.tsv", sep=""), sep="\t")
+    data = read.csv(paste("../../../",language,"_ngrams_after_tuning.tsv", sep=""), sep="\t")
     library(tidyr)
     library(dplyr)
     library(ggplot2)
@@ -75,7 +75,7 @@ plot = memSurpNgramsPlot("Maltese")
 
 
 memListenerSurpNgramsPlot = function(language) {
-    data = read.csv(paste(language,"_ngrams_decay_after_tuning.tsv", sep=""), sep="\t")
+    data = read.csv(paste("../../../",language,"_ngrams_decay_after_tuning.tsv", sep=""), sep="\t")
     library(tidyr)
     library(dplyr)
     library(ggplot2)
