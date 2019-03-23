@@ -42,6 +42,7 @@
 \newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{question}[theorem]{Question}
 \newtheorem{example}[theorem]{Example}
+\newtheorem{lemma}[theorem]{Lemma}
 
 
 \frenchspacing
@@ -120,10 +121,9 @@ This leaves open the question whether such assumptions are necessary, or whether
 
 
 We approach this question by first providing general information-theoretic lower bounds on memory load that will hold independently of the architecture of memory representations.
-We will consider a general setting of a speaker producing sentences from a language, and a listener performing incremental prediction.
+We will consider a general setting of a listener performing incremental prediction.
 Our result immediatly entails a link between boundedness of memory and locality, which had been stipulated or derived from assumptions about memory architecture in previous models \citep{gibson-linguistic-1998, lewis-activation-based-2005, futrell-noisy-context-2017}.
-Unlike many previous theories, our results apply to both speakers and listeners.
-We will then use corpus data from over 50 languages to provide evidence that their word orders help lower memory cost.
+We will then use corpus data from over 52 languages to provide evidence that their word orders help lower memory cost.
 
 
 \section{Memory-Surprisal Tradeoff}
@@ -268,8 +268,8 @@ As before, we write $$I_t := I[X_t, X_0 | X_{1\dots t-1}]$$
 Then
 
 
-\begin{proposition}\label{prop:suboptimal}
-	Let $T$ be any positive integer ($1, 2, 3, ...$), and consider a listener using at most
+\begin{thm}\label{prop:suboptimal}
+	Let $T$ be any positive integer ($T \in \{1, 2, 3, ...\}$), and consider a listener using at most
 	\begin{equation}\label{eq:memory}
 		\sum_{t=1}^T t I_t
 	\end{equation}
@@ -277,7 +277,7 @@ bits of memory on average.
 Then this listener will incur surprisal at least
 	$$H[X_t|X_{<t}] + \sum_{t > T} I_t$$
 	on average.
-\end{proposition}
+\end{thm}
 The proof is given in the appendix (REF).
 
 %An intuitive (non-rigorous) argument goes as follows:
@@ -979,6 +979,88 @@ In Table~\ref{tab:quantiles}, we show the quantiles.
 	\caption{Samples drawn per language according to the precision-dependent stopping criterion.}\label{tab:samples}
 \end{table}
 
+
+
+
+
+
+\begin{table}
+\begin{longtable}{ccccccccccccccclll}
+\input{medians_REAL_0.tex}
+\end{longtable}
+	\caption{Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
+\end{table}
+
+\begin{table}
+\begin{longtable}{ccccccccccccccclll}
+\input{medians_REAL_1.tex}
+\end{longtable}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}
+\begin{longtable}{ccccccccccccccclll}
+\input{medians_REAL_2.tex}
+\end{longtable}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}
+\begin{longtable}{ccccccccccccccclll}
+\input{medians_REAL_3.tex}
+\end{longtable}
+	\caption{Medians (cont.)}
+\end{table}
+
+
+
+
+
+
+\begin{table}
+\begin{longtable}{cccccccccccccccccc}
+\input{quantiles_REAL_0.tex}
+\end{longtable}
+	\caption{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
+\end{table}
+
+\begin{table}
+\begin{longtable}{cccccccccccccccccc}
+\input{quantiles_REAL_1.tex}
+\end{longtable}
+	\caption{Quantiles (part 2)}
+\end{table}
+
+\begin{table}
+\begin{longtable}{cccccccccccccccccc}
+\input{quantiles_REAL_2.tex}
+\end{longtable}
+	\caption{Quantiles (part 3)}
+\end{table}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \begin{table}
 \begin{longtable}{ccccccccccccccclll}
 \input{medians_0.tex}
@@ -1346,73 +1428,87 @@ Due to the sizes of these treebanks, can also do experiment with full word forms
 -- Chinese treebank \citep{xue-chinese-2013}
 
 
-\section{Proofs}
+\section{Proof of the Theorem}
 
 
 
-\begin{proof}
-We denote the listener's memory state after hearing $X_{<t}$ by $L_t$.
-The average number of bits required to encode this state is $H[L_t]$, which by assumption is at most $\sum_{t=1}^T t I_t$.
-As the listener's predictions are made on the basis of her memory state, her average surprisal is at least $H[X_t | L_t]$.
-The difference between the listener's surprisal and optimal surprisal is thus at least $H[X_t | L_t] - H[X_t | X_{<t}]$.
-By stationarity, we can rewrite this expression as
+%\begin{proof}
+	We denote the listener's memory state at time $t$, after hearing $X_{<t} = ... X_{t-2} X_{t-1}$ by $L_t$.
+	The average number of bits required to encode this state is $\operatorname{H}[L_t]$, which by assumption is at most $\sum_{t=1}^T t I_t$.
+	As the listener's predictions are made on the basis of her memory state, her average surprisal is at least $\operatorname{H}[X_t | L_t]$.
+	The difference between the listener's surprisal and optimal surprisal is thus at least $\operatorname{H}[X_t | L_t] - \operatorname{H}[X_t | X_{<t}]$.
+By the assumption of stationarity, we can rewrite this expression as
 \begin{align*}
-	H[X_t | L_t] - H[X_t | X_{<t}] &=  \frac{1}{T} \sum_{t=1}^{T} \left(H[X_t | L_t] - H[X_t | X_{<t}]\right) 
+	\operatorname{H}[X_t | L_t] - \operatorname{H}[X_t | X_{<t}] &=  \frac{1}{T} \sum_{t=1}^{T} \left(\operatorname{H}[X_t | L_t] - \operatorname{H}[X_t | X_{<t}]\right) 
 \end{align*}
-For any $t$,
-	$$H[X_t | L_t] \geq H[X_t| X_{t-1}, L_{t-1}] \geq ... \geq H[X_t|X_{1 \dots t-1}, L_0]$$
+	\begin{lemma}
+For any $t$, the following inequality holds:
+%	$$H[X_t | L_t] \geq H[X_t| X_{t-1}, L_{t-1}] \geq ... \geq H[X_t|X_{1 \dots t-1}, L_0]$$
 	\begin{equation}
-H[X_t | L_t] \geq H[X_t| X_{t-1}, L_{t-1}] \geq ... \geq H[X_t|X_{1 \dots t-1}, L_0]
+%H[X_t | L_t] \geq H[X_t| X_{t-1}, L_{t-1}] \geq ... \geq H[X_t|X_{1 \dots t-1}, L_0]
+H[X_t | L_t] \geq H[X_t|X_{1 \dots t-1}, L_0]
 		\end{equation}
-	This can be derived from the two conditions \ref{eq:listener-markov-1} and \ref{eq:listener-markov-2} (TODO explain how).
+	\end{lemma}
+	\begin{proof}[Proof of the Lemma]
 
+By Equation~\ref{eq:listener-markov}:
 	\begin{equation}
-H[X_t| X_{2 \dots t-1}, L_{1}] \geq H[X_t|X_{1 \dots t-1}, L_0]
+p((X_{t})_t| L_0, L_1, X_1)   = p((X_{t})_t| L_0, X_1)
 	\end{equation}
-is true because the following is a Markov chain:
-\begin{equation}
-(X_t) \rightarrow (L_0, X_1, X_{2 \dots t-1})   \rightarrow   (L_1, X_{2 \dots t-1})
-\end{equation}
-because
+we have
+	\begin{align*}
+p(X_t|X_{<1}, L_0, L_1, X_1, X_{2 \dots t-1}) = p(X_t|X_{<1}, L_0,  X_1, X_{2 \dots t-1}) \\
+p(X_{<1}| L_0, L_1, X_1, X_{2 \dots t-1})   = p(X_{<1}| L_0, X_1, X_{2 \dots t-1})
+	\end{align*}
+Therefore
 \begin{align*}
 p(X_t|L_0, X_1, X_{2 \dots t-1}; L_1, X_{2 \dots t-1}) & = p(X_t|L_0, L_1, X_1, X_{2 \dots t-1}) \\
 & = \sum_{X_{<1}} p(X_t|X_{<1}, L_0, L_1, X_1, X_{2 \dots t-1}) p(X_{<1}| L_0, L_1, X_1, X_{2 \dots t-1}) \\
 &= \sum_{X_{<1}} p(X_t|X_{<1}, L_0,  X_1, X_{2 \dots t-1}) p(X_{<1}| L_0, X_1, X_{2 \dots t-1}) \\
 &= p(X_t|L_0,  X_1, X_{2 \dots t-1}) 
 \end{align*}
-because
-	\begin{align*}
-p(X_t|X_{<1}, L_0, L_1, X_1, X_{2 \dots t-1}) = p(X_t|X_{<1}, L_0,  X_1, X_{2 \dots t-1}) \\
-p(X_{<1}| L_0, L_1, X_1, X_{2 \dots t-1})   = p(X_{<1}| L_0, X_1, X_{2 \dots t-1})
-	\end{align*}
-because of Equation~\ref{eq:listener-markov}.
+Thus
+\begin{equation}
+(X_t) \rightarrow (L_0, X_1, X_{2 \dots t-1})   \rightarrow   (L_1, X_{2 \dots t-1})
+\end{equation}
+Thus
 	\begin{equation}
-p((X_{t})_t| L_0, L_1, X_1)   = p((X_{t})_t| L_0, X_1)
+H[X_t| X_{2 \dots t-1}, L_{1}] \geq H[X_t|X_{1 \dots t-1}, L_0]
 	\end{equation}
 
+Finally, iteratively applying this inequality, we get:
+		\begin{align*}
+		H[X_t | L_t] \geq H[X_t| X_{t-1}, L_{t-1}] \geq H[X_t| X_{t-2, t-1}, L_{t-2}] \geq ... \geq H[X_t|X_{1 \dots t-1}, L_0]
+		\end{align*}
+
+	\end{proof}
 	
 	% = \int dX_{<1} p(X_t|X_{<1}, X_1, X_{2 \dots t-1})  = \int dX_{<1} p(X_t|L_0, X_{<1}, X_1, X_{2 \dots t-1}) = p(X_t|L_0, X_1, X_{2 \dots t-1}) $
 
 %	$p(X_t|L_0, X_1, X_{2 \dots t-1}; L_1, X_{2 \dots t-1}) = p(X_t|L_0, L_1, X_1, X_{2 \dots t-1}) = \int dX_{<1} p(X_t|X_{<1}, L_0, L_1, X_1, X_{2 \dots t-1}) = \int dX_{<1} p(X_t|X_{<1}, X_1, X_{2 \dots t-1})  = \int dX_{<1} p(X_t|L_0, X_{<1}, X_1, X_{2 \dots t-1}) = p(X_t|L_0, X_1, X_{2 \dots t-1}) $
 
-Therefore
+	Plugging this inequality into the equality above:
 \begin{align*}
-	H[X_t | L_t] - H[X_t | X_{<t}]& \geq \frac{1}{T} \sum_{t=1}^T ( H[X_t|X_{1\dots t-1}, L_0] - H[X_t | X_{1\dots t-1}, X_{\leq 0}]  )    \\
-	& = \frac{1}{T} \left(H[X_{1\dots T} | L_0] - H[X_{1\dots T} | X_{\leq 0}]\right)  \\
+	\operatorname{H}[X_t | L_t] - \operatorname{H}[X_t | X_{<t}]& \geq \frac{1}{T} \sum_{t=1}^T ( \operatorname{H}[X_t|X_{1\dots t-1}, L_0] - \operatorname{H}[X_t | X_{1\dots t-1}, X_{\leq 0}]  )    \\
+	& = \frac{1}{T} \left(\operatorname{H}[X_{1\dots T} | L_0] - \operatorname{H}[X_{1\dots T} | X_{\leq 0}]\right)  \\
 	& = \frac{1}{T} \left(I[X_{1\dots T}|X_{\leq 0}] - I[X_{1\dots T}|L_0]\right) 
 \end{align*}
 	The first term $I[X_{1\dots T}|X_{\leq 0}]$ can be rewritten in terms of $I_t$:
+	\begin{align*}
+		I[X_{1\dots T}|X_{\leq 0}] &= \sum_{i=1}^T \sum_{j=-1}^{-\infty} I[X_i, X_j | X_{j+1}...X_{i-1}] = \sum_{t=1}^T t I_t + T \sum_{t > T} I_t
+	\end{align*}
+	Therefore
 \begin{align*}
-	H[X_t | L_t] - H[X_t | X_{<t}]& \geq \frac{1}{T} \left(\sum_{t=1}^T t I_t + T \sum_{t > T} I_t - I[X_{1\dots T}|L_0]\right) 
+	\operatorname{H}[X_t | L_t] - \operatorname{H}[X_t | X_{<t}]& \geq \frac{1}{T} \left(\sum_{t=1}^T t I_t + T \sum_{t > T} I_t - I[X_{1\dots T}|L_0]\right) 
 	%	&= \frac{1}{T} \left(\sum_{t=1}^\infty t I_t - \sum_{t > T}  (T-t) I_t- I[X_{1\dots T}|L_0]\right) \\
 \end{align*}
-	$I[X_{1\dots T}|L_0]$ is at most $H[L_0]$, which is at most $\sum_{t=1}^T t I_t$ by assumption. Thus, the expression above is bounded by
+	$I[X_{1\dots T}|L_0]$ is at most $\operatorname{H}[L_0]$, which is at most $\sum_{t=1}^T t I_t$ by assumption. Thus, the expression above is bounded by
 	\begin{align*}
-	H[X_t | L_t] - H[X_t | X_{<t}]& \geq \frac{1}{T} \left(\sum_{t=1}^T t I_t + T \sum_{t > T} I_t - \sum_{t=1}^T t I_t\right) \\
+	\operatorname{H}[X_t | L_t] - \operatorname{H}[X_t | X_{<t}]& \geq \frac{1}{T} \left(\sum_{t=1}^T t I_t + T \sum_{t > T} I_t - \sum_{t=1}^T t I_t\right) \\
 		&= \sum_{t > T} I_t
 \end{align*}
-	Rearranging shows that the listener's surprisal is at least $H[X_t|L_t] \geq H[X_t | X_{<t}] + \sum_{t > T} I_t$, as claimed.
-\end{proof}
+	Rearranging shows that the listener's surprisal is at least $\operatorname{H}[X_t|L_t] \geq \operatorname{H}[X_t | X_{<t}] + \sum_{t > T} I_t$, as claimed.
+%\end{proof}
 
 
 
