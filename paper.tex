@@ -453,6 +453,7 @@ We excluded data from historical languages.\footnote{Ancient Greek, Coptic, Goth
 This resulted in 52 languages.
 
 For each of these languages, we pooled all available corpora in one dataset.
+We excluded corpora that primarily contain text created by non-native speakers.
 Universal Dependencies corpora have a predefined split into \emph{training}, \emph{held-out} (also known as \emph{development}), and \emph{test} partitions.
 While larger corpora have all three partitions, smaller corpora often have only some of these partitions.
 For most language, we used the predefined data split, separately pooling data from the different partitions. %We did not use the test partitions.
@@ -589,13 +590,13 @@ This biases the hyperparameters towards modeling counterfactual grammars better,
 
 For computational efficiency, neural language models can only process a bounded number of distinct words in a single language.
 For each corpus, we limited the number of distinct processed words to the $N=10,000$ most common words in the training corpus, a common choice for neural language models (CITE).
-Following (CITE), we represented other words by their part-of-speech tags.
-This affected languages with larger corpora (TODO).
+Following (CITE), we represented other words by their part-of-speech tags as annotated in the corpora.
+This applied to 37 languages, affecting an average of 11~\% of words in this languages.
 We believe that this modeling limitation does not affect our results for the following reasons.
 First, this affects the same words in real and counterfactually ordered sentences.
-Second, excluded words are extremely infrequent, occurring less than 10 times (except for Czech and Russian, the languages for which we have by far the largest datasets).
-Many of the excluded words occur only once in the dataset.
-This means that any model would only be able to extract very limited information on these words from the available data, likely \emph{less} than what is provided by the part-of-speech tag.
+Second, all excluded words are extremely infrequent in the available data, occurring less than 10 times (except for Czech and Russian, the languages for which we have by far the largest datasets).
+Many of the excluded words occur only once in the dataset (78 \% on average across the affected languages).
+This means that any model would only be able to extract very limited information about these words from the available training data, likely \emph{less} than what is provided by the part-of-speech tag.
 Third, traditional N-gram models, which do not have this limitation, provide results in qualitative agreement with the neural network-based estimates (see SI).
 
 %Given a corpus, we estimate a language model by training the LSTM on a training partition to maximize the data likelihood, and stopping training once the data likelihood on a held-out partition drops.
@@ -849,15 +850,15 @@ Consequently, more samples were collected than necessary to reach the stopping c
 
 The numbers of samples taken per language are provided in Table~\ref{tab:samples}.
 
-In Figure~\ref{tab:plain-results} (TODO), we show the estimated memory-surprisal tradeoff curves for all samples.
+%In Figure~\ref{tab:plain-results} (TODO), we show the estimated memory-surprisal tradeoff curves for all samples.
 
 In Figure~\ref{tab:medians}, we show the medians for real and baseline languages.
 
 Descriptively, the real language provides better tradeoffs than the median of the baselines across languages, with four exceptions (Latvian, North Sami, Polish, Slovak).
 
-In Figure~\ref{tab:slices}, we show the distribution of surprisals achieved at the maximal memory value for real and random languages.
+In Figure~\ref{tab:slice-hists-real}, we show the distribution of surprisals achieved at the maximal memory value for real and random languages.
 
-In Figure~\ref{tab:hist-real}, we show surprisals at maximum memory, after z-transforming for each individual language and then aggregating.
+In Figure~\ref{fig:hist-real}, we show surprisals at maximum memory, after z-transforming for each individual language and then aggregating.
 
 In Table \ref{tab:median_diffs}, we show the differences in median surprisal, as a function of memory.
 
@@ -894,6 +895,13 @@ In Table~\ref{tab:quantiles}, we show the quantiles.
 
 
 
+\begin{table}
+\begin{longtable}{l|lll||l|lllllllllllllll}
+	Language & Mean & Lower & Upper & Language & Mean & Lower & Upper \\ \hline
+\input{boot_g_REAL.tex}
+\end{longtable}
+	\caption{Bootstrapped estimates for $G$.}\label{tab:boot-g}
+\end{table}
 
 
 
@@ -928,6 +936,36 @@ In Table~\ref{tab:quantiles}, we show the quantiles.
 
 
 
+
+
+
+\begin{table}
+\begin{longtable}{ccccccccccccccclll}
+\input{slice-hists_REAL_0.tex}
+\end{longtable}
+	\caption{Histograms: Surprisal, at maximum memory.}\label{tab:slice-hists-real}
+\end{table}
+
+\begin{table}
+\begin{longtable}{ccccccccccccccclll}
+\input{slice-hists_REAL_1.tex}
+\end{longtable}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}
+\begin{longtable}{ccccccccccccccclll}
+\input{slice-hists_REAL_2.tex}
+\end{longtable}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}
+\begin{longtable}{ccccccccccccccclll}
+\input{slice-hists_REAL_3.tex}
+\end{longtable}
+	\caption{Medians (cont.)}
+\end{table}
 
 
 \begin{table}
@@ -971,6 +1009,15 @@ In Table~\ref{tab:quantiles}, we show the quantiles.
 
 
 
+\begin{table}
+\begin{longtable}{l|ll||l|llllllllllllll}
+	Language & Base. & MLE & Language & Base. & MLE \\ \hline
+\input{samplesNumber_ground.tex}
+\end{longtable}
+	\caption{Experiment 3: Samples drawn per language according to the precision-dependent stopping criterion.}\label{tab:samples}
+\end{table}
+
+
 
 
 
@@ -978,7 +1025,7 @@ In Table~\ref{tab:quantiles}, we show the quantiles.
 \begin{longtable}{ccccccccccccccclll}
 \input{medians_0.tex}
 \end{longtable}
-	\caption{Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
+	\caption{Experiment 3. Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
 \end{table}
 
 \begin{table}
@@ -1093,7 +1140,7 @@ We found that branching direction entropy was strongly correlated with the surpr
 
 
 
-\subsection{Experiment 2b: Fixed Word Orders}
+\section{Experiment 3: Fixed Word Orders}
 
 We test this hypothesis by comparing baseline languages to \emph{fixed-order} versions of the real languages.
 This enables us to tease apart the impact of the languages' word order rules from the impact of word order freedom.
