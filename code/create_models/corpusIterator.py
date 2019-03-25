@@ -12,7 +12,7 @@ def readUDCorpus(language, partition):
       files = []
       while len(files) == 0:
         if len(basePaths) == 0:
-           print "No files found"
+           print >> sys.stderr, "No files found"
            raise IOError
         basePath = basePaths[0]
         del basePaths[0]
@@ -21,11 +21,11 @@ def readUDCorpus(language, partition):
       data = []
       for name in files:
         if "Sign" in name:
-           print "Skipping "+name
+           print >> sys.stderr, "Skipping "+name
            continue
         assert ("Sign" not in name)
         if "Chinese-CFL" in name:
-           print "Skipping "+name
+           print >> sys.stderr, "Skipping "+name
            continue
         suffix = name[len("UD_"+language):]
         if name == "UD_French-FTB":
@@ -35,7 +35,7 @@ def readUDCorpus(language, partition):
         subDirFiles = os.listdir(subDirectory)
         partitionHere = partition
         if (name in ["UD_North_Sami", "UD_Irish", "UD_Buryat-BDT", "UD_Armenian-ArmTDP"]) and partition == "dev" and (not language.endswith("-Adap")):
-            print "Substituted test for dev partition"
+            print >> sys.stderr, "Substituted test for dev partition"
             partitionHere = "test"
         elif language.endswith("-Adap"):
           if (name in ["UD_Kazakh-KTB", "UD_Cantonese-HK", "UD_Naija-NSC", "UD_Buryat-BDT", "UD_Thai-PUD", "UD_Breton-KEB", "UD_Faroese-OFT", "UD_Amharic-ATT", "UD_Kurmanji-MG", "UD_Upper_Sorbian-UFAL", "UD_Bambara-CRB", "UD_Erzya-JR"]):
@@ -45,7 +45,7 @@ def readUDCorpus(language, partition):
             
         candidates = filter(lambda x:"-ud-"+partitionHere+"." in x and x.endswith(".conllu"), subDirFiles)
         if len(candidates) == 0:
-           print "Did not find "+partitionHere+" file in "+subDirectory
+           print >> sys.stderr, "Did not find "+partitionHere+" file in "+subDirectory
            continue
         if len(candidates) == 2:
            candidates = filter(lambda x:"merged" in x, candidates)
@@ -66,7 +66,7 @@ def readUDCorpus(language, partition):
                        assert False
               data = data + newData
         except IOError:
-           print "Did not find "+dataPath
+           print >> sys.stderr, "Did not find "+dataPath
 
       assert len(data) > 0, (language, partition, files)
 
