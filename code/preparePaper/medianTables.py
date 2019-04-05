@@ -45,7 +45,7 @@ for language in languages:
 #   line = languageKey[language]
    components = [language.replace("_"," ").replace("-Adap", "")]
    #components.append( "\\multirow{4}{*}{\includegraphics[width=0.25\\textwidth]{neural/figures/"+language+"-entropy-memory.pdf}}")
-   components.append( "\includegraphics[width=0.25\\textwidth]{neural/figures/"+language+"-listener-surprisal-memory-MEDIANS_onlyWordForms_boundedVocab.pdf}" )
+   components.append( "\includegraphics[width=0.25\\textwidth]{neural/figures/"+language+"-listener-surprisal-memory-MEDIANS_QUANTILES_onlyWordForms_boundedVocab.pdf}" )
    entries.append(components)
 
 ROWS_PER_PART = 4
