@@ -7,7 +7,7 @@ fullData = read.csv("../results/tradeoff/listener-curve-histogram_byMem.tsv", se
     data = data %>% mutate(MI_z = (MI-mean)/sd)
     barWidth = 0.05 #(max(data$MI) - min(data$MI))/30
 
-branching = read.csv("../code/branching_entropy.tsv", sep="\t")
+branching = read.csv("../code/branching_entropy/branching_entropy.tsv", sep="\t")
 data = merge(data, branching, by=c("Language"))
 
 dataReal = data %>% filter(Type %in% c("REAL_REAL")) %>% group_by(Language, Type) %>% summarise(MI_z=mean(MI_z), MIDiff = mean(MI-mean), BranchingEntropy=mean(BranchingEntropy)) %>% mutate(y=1)

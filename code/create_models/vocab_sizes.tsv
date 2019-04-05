@@ -19,17 +19,12 @@ Polish	15.8033615986	21499	1	1.0
 Romanian	12.0048555794	31557	2	0.689751128004
 Slovak	13.8536795141	22886	1	1.0
 Slovenian	15.2655033851	31279	2	0.908430493684
-Skipping UD_Swedish_Sign_Language
-Skipping UD_Swedish_Sign_Language
 Swedish	7.67901776547	20845	1	1.0
 Afrikaans	0.0	5149	0	1.0
-Skipping UD_Chinese-CFL
-Skipping UD_Chinese-CFL
 Chinese	8.07757636761	18988	1	1.0
 Danish	7.3288501819	16648	1	1.0
 Greek	1.32843146544	10701	1	1.0
 Hungarian	2.02634245187	10640	1	1.0
-Substituted test for dev partition
 North_Sami	0.0	7702	0	1.0
 Persian	3.125	14278	1	1.0
 Serbian	6.74505358343	15117	1	1.0
