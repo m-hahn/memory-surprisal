@@ -1,0 +1,132 @@
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage{showlabels}
+%\usepackage{fullpage}
+\usepackage{pslatex}
+%\usepackage{latexsym}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{url}
+%\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{rotating}
+\usepackage{natbib}
+\usepackage{amssymb}
+
+\usepackage{tikz-dependency}
+\usepackage{longtable}
+
+
+\newcommand{\R}[0]{\mathbb{R}}
+\newcommand{\E}[0]{\mathbb{E}}
+\newcommand{\Ff}[0]{\mathcal{F}}
+
+\usepackage{multirow}
+
+\newcommand{\soft}[1]{}
+\newcommand{\nopreview}[1]{}
+\newcommand\comment[1]{{\color{red}#1}}
+\newcommand\mhahn[1]{{\color{red}(#1)}}
+
+\usepackage{amsthm}
+
+\newcommand{\thetad}[0]{{\theta_d}}
+\newcommand{\thetal}[0]{{\theta_{LM}}}
+
+\newcounter{theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{thm}[theorem]{Theorem}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{question}[theorem]{Question}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{lemma}[theorem]{Lemma}
+
+
+\frenchspacing
+%\def\baselinestretch{0.975}
+
+%\emnlpfinalcopy
+%\def\emnlppaperid{496}
+
+\title{TODO title}
+\author{Michael Hahn, Judith Degen, Richard Futrell}
+\date{2019}
+
+\begin{document}
+
+\maketitle
+
+All human languages express hierarchical thoughts into sentences, i.e., linear strings of words (CITE).
+Languages have different word orders: English orders the object after the verb, Japanese places it before the verb.
+Explaining the variation in the ways languages  order underlying hierarchical structures into linear strings of words has been the focus of a large body of linguistic research (CITE).
+We test the hypothesis that these grammars represent different solutions to the problem of efficient computation.
+Many linguists have suggested something like this on a theoretical level~\citep{chomsky2005three,hauser2002faculty, berwick1984grammatical,hawkins1994performance}.
+However, testing this hypothesis has been difficult for two resons:
+First, because this requires a large amount of data representing the distribution of underlying hierarchical structures that people communicate,
+and
+second, because this presupposes a computatioal model of processing efficiency.
+Such large-scale data has recently become available in the form of corpora annotated with underlying heirarchical structures across dozens of languages~\citep{nivre-universal-2017}.
+
+We use information theory to quantify efficiency of human language processing.
+Psycholinguistic research has uncovered two basic contributors to human processing effort: Surprisal and Memory.
+
+
+
+Memory has been harder to quantify
+
+Here, for the first time, we prove a tradeoff between memory and surprisal.
+We quantify memory as the number of bits about prior input that a listener represents.
+
+related to work in physics on the ability of physical systems to represent memory, representing more bits costs more memory \citep{PhysRevLett.115.098701}
+
+A listener who invests more memory resources to create representations of the past will incur lower average surprisal.
+
+We predict that languages order information in such a way as to create an optimal tradeoff.
+
+%We study language as a 
+Let $I_t$ be the Conditional Mutual Information of two words $X_0, X_t$ conditioned on the intervening words:
+\begin{equation}
+	I_t := I[X_t, X_0 | X_1, ..., X_{t-1}] = H[X_t|X_1, ..., X_{t-1}] - H[X_t|X_0, ..., X_{t-1}] 
+\end{equation}
+We prove that, for any integer $T > 0$, a listener encoding $\sum_{t=1}^T t I_t$ bits of memory will incur average surprisal at least $H[X_t| X_{<t}] + \sum_{t=T+1}^\infty I_t$.
+
+(visualization)
+
+We estimated the memory-surprisal tradeoff for 54 human languages, using standard neural-network models~\citep{hochreiter-long-1997}.
+We compared against chance by the following method.
+TODO
+
+TODO results
+
+results
+
+some discussion
+
+relation between our formalization of memory and models typically proposed in psycholinguistics and psychology
+
+- not all models of memory assume that listeners utilize the statistics to compress memory, though that would be more efficient.
+
+- this subsumes previous ideas about locality in language
+
+
+
+
+%Data for (1) has become available with UD, and there is Richard's 2015 paper and other DLM work, but the relation between what they investigate (DLM) and processing is only heuristic.
+%futrell2015largescale
+
+%We use information-theory to for the first time really test (2).
+%We use information-theoretical lower bounds on the difficulty in language processing.
+
+
+\bibliographystyle{apalike}
+
+\bibliography{literature}
+
+
+\end{document}
+
+
