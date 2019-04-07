@@ -52,7 +52,7 @@
 %\emnlpfinalcopy
 %\def\emnlppaperid{496}
 
-\title{TODO title}
+\title{???? The Structure of Human Language Reflects Limitations of Working Memory}
 \author{Michael Hahn, Judith Degen, Richard Futrell}
 \date{2019}
 
@@ -60,57 +60,142 @@
 
 \maketitle
 
-All human languages express hierarchical thoughts into sentences, i.e., linear strings of words (CITE).
-Languages have different word orders: English orders the object after the verb, Japanese places it before the verb.
-Explaining the variation in the ways languages  order underlying hierarchical structures into linear strings of words has been the focus of a large body of linguistic research (CITE).
-We test the hypothesis that these grammars represent different solutions to the problem of efficient computation.
-Many linguists have suggested something like this on a theoretical level~\citep{chomsky2005three,hauser2002faculty, berwick1984grammatical,hawkins1994performance}.
-However, testing this hypothesis has been difficult for two resons:
-First, because this requires a large amount of data representing the distribution of underlying hierarchical structures that people communicate,
-and
-second, because this presupposes a computatioal model of processing efficiency.
-Such large-scale data has recently become available in the form of corpora annotated with underlying heirarchical structures across dozens of languages~\citep{nivre-universal-2017}.
-
-We use information theory to quantify efficiency of human language processing.
-Psycholinguistic research has uncovered two basic contributors to human processing effort: Surprisal and Memory.
 
 
 
-Memory has been harder to quantify
+Human languages express hierarchical thoughts into sentences, i.e., linear strings of words.
+We show that the ways languages do this reflect an underlying optimization principle:
+Human languages have evolved towards robustness against limitations in human working memory.
 
-Here, for the first time, we prove a tradeoff between memory and surprisal.
-We quantify memory as the number of bits about prior input that a listener represents.
+Languages differ considerably in the rules they apply to order information: English orders the object after the verb, Japanese places it before the verb.
+Explaining the variation in the ways languages  order underlying hierarchical structures into linear strings of words has been one of the foci of linguistic research (CITE).
+We test the hypothesis that human languages represent different solutions to the problem of efficient computation with constrained working memory.
 
-related to work in physics on the ability of physical systems to represent memory, representing more bits costs more memory \citep{PhysRevLett.115.098701}
+Theoretical linguists have long suggested that the structure of human language reflects a need for efficient processing under resource limitations~\citep{berwick1984grammatical,hawkins1994performance} (also general efficiency mentioned outside functional work, e.g. \citep{chomsky2005three,hauser2002faculty}).
 
-A listener who invests more memory resources to create representations of the past will incur lower average surprisal.
 
-We predict that languages order information in such a way as to create an optimal tradeoff.
+We directly test this hypothesis using large-scale data from 54 languages, with expert annotations of underlying hierarchical structures~\citep{nivre-universal-2017}.
+
+
+
+We consider language understanding from the perspective of a listener processing a stream of words uttered by an interlocutor.
+During comprehension, this listener will represent some amount of information about past words in their short-term memory.
+We consider the question of how many bits of information this listener has to carry from one instant to the next.
+We expect that a listener's ease of comprehension will be modulated by the amount of memory held about previous context:
+A listener who remembers more of the past context should have less difficulty understanding, at the cost of increased working memory load.
+
+
+
+
+
+%We use information theory to quantify the tradeoff between memory load and ease of understanding.
+Experimental research has established that human processing effort on a given word is strongly predicted by its surprisal, the degree to which it cannot be predicted:
+%Experimental research has firmly established Surprisal as an accurate metric of human processing effort in language comprehesion.
+%The surprisal of a word in context is the degree to which it cannot be predicted:
+\begin{equation}\label{eq:surp}
+	-\log p(x_i|x_{1...i-1})
+\end{equation}
+where $x_i$ is the $i$-th word in a given utterance (or discourse).
+%This quantity is known to be a strong linear predictor of human processing effort.
+
+
+A listener with limited memory of prior context will not be able to compute the full conditional distribution~(\ref{eq:surp}).
+We denote a listener's memory representation at time $t$ by $l_t$, which is some -- generally imperfect -- summary of the context $X_{<t}$.
+The amount of information stored by the listener is the number of bits in $L_t$, i.e., its entropy $M := H[L_t]$.
+This listener will experience processing effort
+\begin{equation}
+	S :=	-\log p(x_t|l_t)
+\end{equation}
+upon hearing the next word $x_t$.
+%We quantify memory as the number of bits about prior input that a listener represents.
+
+We prove a theorem relating memory to the experienced comprehension difficulty $S$.
+Informally, the theorem says that languages support more efficient tradeoffs between short-term memory and comprehension difficulty when words are strongly predictive of their neighboring words.
+
+
+Based on our theoretical result, we estimated the memory-surprisal tradeoff for 54 human languages, using standard estimation methods for language modeling based on neural networks~\citep{hochreiter-long-1997}.
+We compared against chance by the following method.
+For each language, we constructed counterfactual versions that differ from real languages in their word order, holding all other properties constant.
+These counterfactual versions use randomly created grammar for linearizing hierarchical structures into sentences.
+These random grammars apply consistent grammatical rules similar to human language.
+
+Results are show in Figure~\ref{fig:results}.
+Human languages lead to a more efficient tradeoff than expected by chance ($p < 0.001$).
+
+At extremely low memory capacities, real and baseline languages are equally efficient.
+However, the curves soon diverge, and real language provides a more efficient tradeoff.
+The point of divergence is given by that memory capacity that fully exhausts information provided by the immediately preceding word, that is, when the capacity of a Markov model in approximating language is exhausted.
+
+
+\begin{figure}
+\includegraphics[width=\textwidth]{figures/full-results.png}
+	\caption{}\label{fig:results}
+\end{figure}
+
+
+Beyond human language, our theorem applies to other stochastic processes.
+To the extent that they may be affected by bounded memory in computation, we predict they should also enable efficient tradeoffs between memory and surprisal.
+
+
+
+
+
+
+% from the introduction to paper.tex:
+%Since the 1950s, it has been a persistent suggestion that human language processing is shaped by a resource bottleneck in short-term memory.
+%Language is produced and comprehended incrementally in a way that crucially requires both speaker and listener to use an active memory store to keep track of what was previously said.
+%Since short-term memory of this kind is known to be highly limited in capacity \citep{miller1956magical}, it makes sense for these capacity limits to comprise a major constraint on production and comprehension.
+%Indeed, a great deal of work in sentence processing has focused on characterizing the effects of memory constraints on language processing \citep{gibson-linguistic-1998,lewis-activation-based-2005,levy2013memory}.
+%
+%At the same time, the field of functional linguistics has argued that these resource constraints not only affect online language processing, they also shape the form of human language itself.
+%For example, the Performace--Grammar Correspondence Hypothesis (PGCH) of \citet{hawkins1994performance} holds that forms which are practically easier to produce and comprehend end up becoming part of the grammars of languages, and that this process can explain several of the universal properties of human languages originally documented by \citet{greenberg-universals-1963}.
+%
+%Here we take up the question of how to characterize short-term memory capacity limitations in language processing for both speakers and listeners, and the question of whether natural language grammars are shaped by these limitations.
+%Whereas previous theories were based on specific mechanistic models of memory, our theory is purely information-theoretic, meaning that our predictions will hold independently across a wide variety of implementations and architectures.
+%
+%Our main new concept is the idea of a \emph{memory--surprisal tradeoff}: it is possible for a listener to achieve greater ease of word-by-word comprehension at the cost of investing more computational resources into remembering previous words, and the particular shape of the resulting tradeoff of depends on the word order properties of a language. Analogous results also hold for language production by resource-constrained speakers. We show evidence that the preferred word orders of natural languages are those that enable efficient memory--surprisal tradeoffs.
+%
+%
+
+
+
+%However, testing this hypothesis has been difficult for two reasons:
+%First, this requires a large amount of data representing the distribution of underlying hierarchical structures that people communicate,
+%and
+%second, because this presupposes a computatioal model of processing efficiency.
+%Large-scale data has recently become available in the form of corpora annotated with underlying hierarchical structures across dozens of languages~\citep{nivre-universal-2017}.
+
+%We test the idea that language is optimized for processing with limited resources, in particular with limited memory resources.
+
+
+%Let $I_t$ be the Conditional Mutual Information of two words $X_0, X_t$ conditioned on the intervening words:
+%\begin{equation}
+%I_t := I[X_t, X_0 | X_1, ..., X_{t-1}] = H[X_t|X_1, ..., X_{t-1}] - H[X_t|X_0, ..., X_{t-1}] 
+%\end{equation}
+%We prove that, for any integer $T > 0$, a listener encoding $\sum_{t=1}^T t I_t$ bits of memory will incur average surprisal at least $H[X_t| X_{<t}] + \sum_{t=T+1}^\infty I_t$.
+
+
+
+%
+%Memory refers to information about previous parts of a sentence maintained in short-term memory.
+%While memory limitations have been shown experimentally to affect human language processing, there is no consensus on the architecture used to represent memories.
+%
+%Here, for the first time, we provide an information-theoretic integration of these two aspects of processing, leading to a general theory of the computational efficiency of language.
+%
+%We denote a listener's memory representation at time $t$ by $L_t$, which is some -- generally imperfect -- summary of the context $X_{<t}$.
+%This listener will experience surprisal
+%\begin{equation}
+%	S :=	-\log P(X_t|L_t)
+%\end{equation}
+%upon hearing the next word.
+%%We quantify memory as the number of bits about prior input that a listener represents.
+%The minimal amount of information stored is the number of bits in $L_t$, i.e., its entropy $M := H[L_t]$.
+%%related to work in physics on the ability of physical systems to represent memory, representing more bits costs more memory \citep{PhysRevLett.115.098701}
+%We note that there is a tradeoff between average memory, $\E[S]$ and memory $H[L_t]$: A listener who invests more memory resources to create representations of the past will incur lower average surprisal.
+%
+%We predict that languages order information in such a way as to create an optimal tradeoff.
 
 %We study language as a 
-Let $I_t$ be the Conditional Mutual Information of two words $X_0, X_t$ conditioned on the intervening words:
-\begin{equation}
-	I_t := I[X_t, X_0 | X_1, ..., X_{t-1}] = H[X_t|X_1, ..., X_{t-1}] - H[X_t|X_0, ..., X_{t-1}] 
-\end{equation}
-We prove that, for any integer $T > 0$, a listener encoding $\sum_{t=1}^T t I_t$ bits of memory will incur average surprisal at least $H[X_t| X_{<t}] + \sum_{t=T+1}^\infty I_t$.
-
-(visualization)
-
-We estimated the memory-surprisal tradeoff for 54 human languages, using standard neural-network models~\citep{hochreiter-long-1997}.
-We compared against chance by the following method.
-TODO
-
-TODO results
-
-results
-
-some discussion
-
-relation between our formalization of memory and models typically proposed in psycholinguistics and psychology
-
-- not all models of memory assume that listeners utilize the statistics to compress memory, though that would be more efficient.
-
-- this subsumes previous ideas about locality in language
 
 
 
@@ -126,6 +211,20 @@ relation between our formalization of memory and models typically proposed in ps
 
 \bibliography{literature}
 
+
+
+\begin{figure}
+\includegraphics[width=0.45\textwidth]{toy/add-surp.pdf}
+\includegraphics[width=0.45\textwidth]{toy/lower-mem.pdf}
+	\caption{Illustration for Proposition~\ref{prop:suboptimal}. Listeners can trade off memory and surprisal: A listener only investing memory of the amount given by the black area on the right will incur at least the black area on the left in additional surprisal. In the given example, $T=4$. By varying $T$, the two areas describe the listener's memory-surprisal tradeoff curve.}\label{fig:listener-tradeoff-decay}
+\end{figure}
+
+
+%(up to ~2500 words including references, notes and captions
+% abstract
+% introductory paragraph
+%up to four figures or tables
+%about 30 references
 
 \end{document}
 
