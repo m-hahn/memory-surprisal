@@ -113,11 +113,39 @@ We prove a theorem describing how the shape of this tradeoff relates to language
 Informally, the theorem says that languages support more efficient tradeoffs between short-term memory and comprehension difficulty when words are strongly predictive of their neighboring words.
 
 
+%TODO
+%Let $I_t$ be the Conditional Mutual Information of two words $X_0, X_t$ conditioned on the intervening words:
+\begin{equation}
+	\operatorname{I}_t := \operatorname{I}[X_t, X_0 | X_1, \dots, X_{t-1}] = \operatorname{H}[X_t|X_1, \dots, X_{t-1}] - \operatorname{H}[X_t|X_0, \dots, X_{t-1}] 
+\end{equation}
+%We prove that, for any integer $T > 0$, a listener encoding $\sum_{t=1}^T t I_t$ bits of memory will incur average surprisal at least $H[X_t| X_{<t}] + \sum_{t=T+1}^\infty I_t$.
+
+
+
+%
+%\begin{figure}
+%\includegraphics[width=\textwidth]{figures/theorem.png}
+%	\caption{Left: }\label{fig:theorem}
+%\end{figure}
+%
+
+%\caption{A speaker (left) utters a sentence. A comprehender (right) maintains a noisy representation of prior words, and incurs surprisal upon hearing the next word.}
+
+
+
 Based on our theoretical result, we estimated the memory-surprisal tradeoff for 54 human languages, using standard estimation methods for language modeling based on neural networks~\citep{hochreiter-long-1997}.
 We compared against chance by the following method.
 For each language, we constructed counterfactual versions that differ from real languages in their word order, holding all other properties constant.
-These counterfactual versions use randomly created grammar for linearizing hierarchical structures into sentences.
+These counterfactual versions use randomly created grammar for linearizing hierarchical structures into sentences (see Figure~\ref{fig:grammars}).
 These random grammars apply consistent grammatical rules as human language does, but have no bias towards any kind of processing efficiency or robustness.
+
+
+\begin{figure}
+\includegraphics[width=\textwidth]{figures/grammars.png}
+	\caption{Grammars specify the rules by which languages linearize underlying hierarchical structures into strings of words. In this example, the first grammar corresponds to English; the others are counterfactual. (\textbf{TODO} this draft is currently just copied from the Greenberg Universals paper, probably have to make it look a bit different. Also, adapt it so it looks more like `hierarchical structure' than `dependency graphs'. And add subjects.) }\label{fig:grammars}
+\end{figure}
+
+
 
 Results are show in Figure~\ref{fig:results}.
 Human languages lead to a more efficient tradeoff than expected by chance ($p < 0.0001$).
@@ -144,6 +172,7 @@ Things to perhaps mention:
 
 - Beyond human language, our theoretical result applies to other stochastic processes. To the extent that they may be affected by bounded memory in computation, we predict they should also enable efficient tradeoffs between memory and surprisal.
 
+- Our results provide a new perspective on several previous results: (1) DLM, (2) DLT, (3) decay of MI over distance.
 
 
 % from the introduction to paper.tex:
@@ -216,14 +245,14 @@ Things to perhaps mention:
 
 \bibliography{literature}
 
-
-
-\begin{figure}
-\includegraphics[width=0.45\textwidth]{toy/add-surp.pdf}
-\includegraphics[width=0.45\textwidth]{toy/lower-mem.pdf}
-	\caption{Illustration for Proposition~\ref{prop:suboptimal}. Listeners can trade off memory and surprisal: A listener only investing memory of the amount given by the black area on the right will incur at least the black area on the left in additional surprisal. In the given example, $T=4$. By varying $T$, the two areas describe the listener's memory-surprisal tradeoff curve.}\label{fig:listener-tradeoff-decay}
-\end{figure}
-
+%
+%
+%\begin{figure}
+%\includegraphics[width=0.45\textwidth]{toy/add-surp.pdf}
+%\includegraphics[width=0.45\textwidth]{toy/lower-mem.pdf}
+%	\caption{Illustration for Proposition~\ref{prop:suboptimal}. Listeners can trade off memory and surprisal: A listener only investing memory of the amount given by the black area on the right will incur at least the black area on the left in additional surprisal. In the given example, $T=4$. By varying $T$, the two areas describe the listener's memory-surprisal tradeoff curve.}\label{fig:listener-tradeoff-decay}
+%\end{figure}
+%
 
 %(up to ~2500 words including references, notes and captions
 % abstract
