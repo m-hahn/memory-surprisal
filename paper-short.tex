@@ -56,19 +56,42 @@
 \author{Michael Hahn, Judith Degen, Richard Futrell}
 \date{2019}
 
+
 \begin{document}
 
 \maketitle
+
+\begin{abstract}
+  %  the Nature template:
+  % 1-2 sentences basic introduction, for anyone
+  Each of the \~6000 natural languages currently spoken in the world embodies a different system for encoding hierarchically-structured thoughts into linear strings of words.
+  By characterizing the commonalities and differences among these systems, we can gain insight into the cognitive machinery that underpins this fundamental aspect of human intelligence. 
+  % 2-3 sentences detailed background, for scientists in related disciplines (linguistics, cogsci, computer science, info theory)
+  In linguistics and cognitive science, there have been two 
+
+  % 1 sentence general problem
+  % 1 sentence here we show
+  Here we show that the order of words across human languages is structured to enable efficient transfer of information under the constraint that language must be comprehended and produced by agents with limited short-term memory capacities.
+  % 2-3 sentences how main result adds to knowledge
+  Using concepts from information theory, we prove a theorem showing that any efficient communication system operating under memory constraints will exhibit a property called information locality: symbols which predict each other should be produced close to each other in time.
+  We show that information locality subsumes several principles of word order previously proposed in the linguistics and cognitive science literature, and explains a number of the previously-documented universal patterns in word order across languages.    
+  Next, we directly show that languages are optimized to minimize memory usage by calculating lower bounds on the amount of memory resources required for language comprehension in TODO real languages and in random baseline languages, finding that the real languages require less memory.
+  % 1-2 sentences general context
+  
+  % 2-3 sentences broader perspective
+  Our results suggest a view of natural language as a maximally efficient code for communication, subject to the particular information-processing constraints of the human mind. 
+\end{abstract}
+
 
 
 %Since short-term memory of this kind is known to be highly limited in capacity \citep{miller1956magical}, it makes sense for these capacity limits to comprise a major constraint on production and comprehension.
 
 
 
-Human languages express hierarchical thoughts into sentences, i.e., linear strings of words.
+Human languages express hierarchical thoughts into sentences, i.e. linear strings of words.
 Languages differ considerably in the rules they apply to order information: English orders the object after the verb, Japanese places it before the verb.
 Explaining the variation in the ways languages use to order underlying hierarchical structures into linear strings of words has been one of the foci of linguistic research (CITE).
-We show that the ways in which languages order information reflect an underlying optimization principle: Human languages have evolved towards robustness against limitations in human working memory.
+We show that the ways in which languages order information reflect an underlying optimization principle: human languages are adapted to limitations in human working memory.
 
 %We test the hypothesis that human languages represent different solutions to the problem of efficient computation with constrained working memory.
 The suggestion that the structure of human language partly reflects a need for efficient processing under resource limitations has been present in the theoretical and functional linguistics literature for decades~\citep{berwick1984grammatical,hawkins1994performance};
