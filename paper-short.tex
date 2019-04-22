@@ -30,7 +30,6 @@
 \newcommand{\soft}[1]{}
 \newcommand{\nopreview}[1]{}
 \newcommand\comment[1]{{\color{red}#1}}
-\newcommand\mhahn[1]{{\color{red}(#1)}}
 
 \usepackage{amsthm}
 
@@ -45,6 +44,11 @@
 \newtheorem{example}[theorem]{Example}
 \newtheorem{lemma}[theorem]{Lemma}
 
+\definecolor{Red}{RGB}{255,0,0}
+\newcommand{\red}[1]{\textcolor{Red}{#1}}
+\newcommand{\jd}[1]{\textcolor{Red}{[jd: #1]}} 
+\newcommand{\mhahn}[1]{\textcolor{Red}{[mhahn: #1]}} 
+\newcommand{\rljf}[1]{\textcolor{Red}{[rljf: #1]}} 
 
 \frenchspacing
 %\def\baselinestretch{0.975}
@@ -89,7 +93,7 @@
 
 
 
-Human languages express hierarchically-structured thoughts into sentences, i.e. linear strings of words.
+Human languages express hierarchically-structured thoughts into sentences, i.e. linear strings of words. \jd{too complicated for the general audience}
 Languages differ considerably in the rules they apply to order information: English orders the object after the verb, Japanese places it before the verb.
 Explaining the variation in the ways languages use to order underlying hierarchical structures into linear strings of words has been one of the foci of linguistic research (CITE).
 We show that the ways in which languages order information reflect an underlying optimization principle: human languages are adapted to limitations in human working memory.
@@ -105,15 +109,25 @@ We directly test this hypothesis by applying a novel information-theoretic analy
 In order to test this hypothesis, it is necessary to consider an individual listener's language comprehension process.
 %We consider language understanding from the perspective of a listener processing a stream of words uttered by an interlocutor.
 During comprehension, this listener is processing a stream of words uttered by an interlocutor.
-During comprehension, this listener will represent some amount of information about past words in their short-term memory.
-We consider the question of how many bits of information this listener has to carry from one instant to the next.
+This listener will represent information about past words in their short-term memory.
+We quantify the amount of memory resources that are used by the number of bits.
+We consider the question of how many bits of information this listener has to carry from one instant to the next.  %\jd{why?}
 Human language is well known to have a large amount of context-dependence in the meanings and forms of words.
 Thus, we expect that a listener's ease of comprehension will be modulated by how much memory they invest into representing information about past context:
 A listener who remembers more of the past context should have less difficulty understanding, at the cost of increased working memory load. (TODO need be clearer here. need to make really explicit and obvious why memory improves understanding.)
-We thus expect there to be a tradeoff between a listener's ease of language understanding and their working memory load.
+We thus expect there to be a tradeoff between a listener's ease of language understanding and their working memory load. \jd{why?}
 
+
+For example, 
+
+- example? something like `John threw the trash out'
+- something with a relative clause `The child that was playing on the street had a red ball' -- should not forget the `child'.
+- center embedding: `The physician who consulted the cardiologist checked the files in her office' -- (Fedorenko, Gibson, and Rohde (2006))
 
 Make clear that Understanding requires knowing the past. (introduce prediction earlier?) Example? Then formally introduce prediction.
+
+
+A maximally efficient listener will incur surprisal exactly at the entropy rate of the language, i.e., at the rate at which the language provides information.
 
 
 %We use information theory to quantify the tradeoff between memory load and ease of understanding.
@@ -126,6 +140,9 @@ Experimental research has established that human processing effort on a given wo
 where $x_i$ is the $i$-th word in a given utterance (or discourse).
 %This quantity is known to be a strong linear predictor of human processing effort.
 
+- can refer to general things such as Friston
+
+
 TODO Make sure letters are intutive.
 
 A listener with limited memory of prior context will not be able to compute the full conditional distribution~(\ref{eq:surp}).
@@ -136,10 +153,13 @@ This listener will experience processing effort
 	S :=	-\log p(x_t|L_t)
 \end{equation}
 upon hearing the next word $x_t$.
-One should expect that processing effort $S$ increases for a listener who invests less bits into representing information about prior context.
+One should expect that processing effort $S$ increases for a listener who invests less bits into representing information about prior context.\jd{why? this is important.}
+
 %We quantify memory as the number of bits about prior input that a listener represents.
 We prove a theorem describing how the shape of this tradeoff relates to language structure. %relating memory to the experienced comprehension difficulty $S$.
-Informally, the theorem says that languages support more efficient tradeoffs between short-term memory and comprehension difficulty when words are strongly predictive of their neighboring words.
+%Informally, the theorem says that languages support more efficient tradeoffs between short-term memory and comprehension difficulty when words are strongly predictive of their neighboring words.
+This theorem captures formally that languages support more efficient tradeoffs between short-term memory and comprehension difficulty when words are strongly predictive of their neighboring words.
+
 
 
 %TODO
@@ -157,6 +177,9 @@ Such a listener will experience average surprisal at least $H[X_t| X_{<t}] + \su
 
 By tracing out all values $T >0$, one can obtain a bound on the tradeoff curve for any possible listener.
 
+
+An immediate consequence of this theoretical result is a general relation between memory and locality:
+A language will enable more efficient tradeoffs if $I_t$ decays faster as $t$ grows, which corresponds to stronger concentration of predictive information in the recent past.
 
 %We prove that, for any integer $T > 0$, a listener encoding $\sum_{t=1}^T t I_t$ bits of memory will incur average surprisal at least $H[X_t| X_{<t}] + \sum_{t=T+1}^\infty I_t$.
 
