@@ -90,7 +90,7 @@
 %Since short-term memory of this kind is known to be highly limited in capacity \citep{miller1956magical}, it makes sense for these capacity limits to comprise a major constraint on production and comprehension.
 
 Human languages express thoughts into sentences, i.e. linear strings of words. \jd{too complicated for the general audience}
-For example, if your mountain climber friend Bob decided to turn back near the summit of Mt. Everest, you might say \emph{Bob gave the attempt to climb Mt. Everest up}.
+%For example, if your mountain climber friend Bob decided to turn back near the summit of Mt. Everest, you might say \emph{Bob gave the attempt to climb Mt. Everest up}.
 % Run with this example
 
 Each language embodies a different strategy for encoding thoughts into strings of words. 
@@ -113,25 +113,28 @@ During comprehension, this listener is processing a stream of words uttered by a
 This listener will represent information about past words in their short-term memory.
 We quantify the amount of memory resources that are used by the number of bits.
 We consider the question of how many bits of information this listener has to carry from one instant to the next.  %\jd{why?}
+
 Human language is well known to have a large amount of context-dependence in the meanings and forms of words.
-Thus, we expect that a listener's ease of comprehension will be modulated by how much memory they invest into representing information about past context:
-A listener who remembers more of the past context should have less difficulty understanding, at the cost of increased working memory load. (TODO need be clearer here. need to make really explicit and obvious why memory improves understanding.)
-We thus expect there to be a tradeoff between a listener's ease of language understanding and their working memory load. \jd{why?}
+Understanding what a word means often requires consideration of context. 
+Consider the sentence `The climber gave the attempt to reach the peak up.'
+Understanding the word \emph{up} requires establishing that it is related to the word \emph{gave} -- neither of them has the meaning of `give up' by itself.
+In order to understand this sentence correctly, a listener has to store some information about the occurrence of the word \emph{gave} until reaching \emph{up}.
+For language comprehension, this means that a listener's ease of comprehension will be modulated by how much memory they invest into representing information about past context:
+A listener who remembers more of the past context should have less difficulty understanding, at the cost of increased working memory load. 
+We thus expect there to be a tradeoff between a listener's ease of language understanding and their working memory load.
 
 
-For example, 
 
-- discontinuous idioms
-- example? something like `John threw the trash out'
-- particle verb, with completely idiomatic meaning. `give up' `the climber gave the attempt to reach the peak of Mount Everest up' could have figure `he gave the attempt to sculpture out of marble up'. understanding what the word means in contet requires understanding of the past.
-- 
-- something with a relative clause `The child that was playing on the street had a red ball' -- should not forget the `child'.
-- center embedding: `The physician who consulted the cardiologist checked the files in her office' -- (Fedorenko, Gibson, and Rohde (2006))
+%
+%For example, 
+%- discontinuous idioms
+%- example? something like `John threw the trash out'
+%- particle verb, with completely idiomatic meaning. `give up' `the climber gave the attempt to reach the peak of Mount Everest up' could have figure `he gave the attempt to sculpture out of marble up'. understanding what the word means in contet requires understanding of the past.
+%- something with a relative clause `The child that was playing on the street had a red ball' -- should not forget the `child'.
+%- center embedding: `The physician who consulted the cardiologist checked the files in her office' -- (Fedorenko, Gibson, and Rohde (2006))
+%Make clear that Understanding requires knowing the past. (introduce prediction earlier?) Example? Then formally introduce prediction.
 
-Make clear that Understanding requires knowing the past. (introduce prediction earlier?) Example? Then formally introduce prediction.
-
-
-A maximally efficient listener will incur surprisal exactly at the entropy rate of the language, i.e., at the rate at which the language provides information.
+%A maximally efficient listener will incur surprisal exactly at the entropy rate of the language, i.e., at the rate at which the language provides information.
 
 
 %We use information theory to quantify the tradeoff between memory load and ease of understanding.
@@ -144,10 +147,8 @@ Experimental research has established that human processing effort on a given wo
 where $x_i$ is the $i$-th word in a given utterance (or discourse).
 %This quantity is known to be a strong linear predictor of human processing effort.
 
-- can refer to general things such as Friston
-
-
-TODO Make sure letters are intutive.
+%- can refer to general things such as Friston
+%TODO Make sure letters are intutive.
 
 A listener with limited memory of prior context will not be able to compute the full conditional distribution~(\ref{eq:surp}).
 We denote a listener's memory representation at time $t$ by $L_t$, which is some -- generally imperfect -- summary of the preceding context $\dots x_{t-3}x_{t-2}x_{t-1}$.
@@ -157,7 +158,14 @@ This listener will experience processing effort
 	S :=	-\log p(x_t|L_t)
 \end{equation}
 upon hearing the next word $x_t$.
-One should expect that processing effort $S$ increases for a listener who invests less bits into representing information about prior context.\jd{why? this is important.}
+For a listener who invests less bits into representing information $L_t$ about prior context, $L_t$ will be a more coarse-grained representation of past observations.
+Thus, the predictions made by such a listener will be on average less accurate, and such a listener will incur greater processing effort $S$.
+%Since $L_t$ is some summary representation, 
+%Therefore, ne should expect that processing effort $S$ increases for a listener who invests less bits into representing information about prior context.\jd{why? this is important.}
+
+%For instance, in `The climber gave the attempt to reach the peak up', the word \emph{up} is less surprising to a listener who has maintained some information about the word \emph{gave} in their memory.
+Thus, there is a tradeoff between memory and surprisal:
+A listener can achieve lower levels of processing effort, at the expense of increased memory load.
 
 %We quantify memory as the number of bits about prior input that a listener represents.
 We prove a theorem describing how the shape of this tradeoff relates to language structure. %relating memory to the experienced comprehension difficulty $S$.
@@ -178,7 +186,6 @@ Our theoretical results describes how the tradeoff between memory and comprehens
 Consider a listener who invests $M$ bits of memory into representing past input.
 We then consider the smallest $T$ such the area under the curve of $t I_t$, to the left of $T$, has size $M$.
 Such a listener will experience average surprisal at least $H[X_t| X_{<t}] + \sum_{t=T+1}^\infty I_t$.
-
 By tracing out all values $T >0$, one can obtain a bound on the tradeoff curve for any possible listener.
 
 
