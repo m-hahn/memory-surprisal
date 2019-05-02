@@ -48,7 +48,7 @@
 \definecolor{Red}{RGB}{255,0,0}
 \newcommand{\red}[1]{\textcolor{Red}{#1}}
 \newcommand{\jd}[1]{\textcolor{Red}{[jd: #1]}} 
-\newcommand{\mhahn}[1]{\textcolor{Red}{[mhahn: #1]}} 
+\newcommand{\note}[1]{\textcolor{Red}{[note: #1]}} 
 \newcommand{\rljf}[1]{\textcolor{Red}{[rljf: #1]}} 
 
 \frenchspacing
@@ -129,36 +129,36 @@
 
 % introductory paragraph
 
-\mhahn{all three of the next are like first sentences}
+\note{all three of the next are like first sentences}
 Human languages express thoughts into sentences, i.e. linear strings of words. 
 %For example, if your mountain climber friend Bob decided to turn back near the summit of Mt. Everest, you might say \emph{Bob gave the attempt to climb Mt. Everest up}.
 % Run with this example
 \jd{is the commented out example sth that will make it in? it does seem like an example would be good here}
 
-Each language embodies a different strategy for encoding thoughts into strings of words. \jd{will this sentence and the next both survive?}\mhahn{make this sentence nonredundant}
-\mhahn{give an example}
+Each language embodies a different strategy for encoding thoughts into strings of words. \jd{will this sentence and the next both survive?}\note{make this sentence nonredundant}
+\note{give an example}
 
 These strategies can be seen as sets of rules that differ in the way ...
-Languages differ considerably in the rules they apply to order information: English orders the object after the verb, Japanese places it before the verb \mhahn{make more explicit here}.
+Languages differ considerably in the rules they apply to order information: English orders the object after the verb, Japanese places it before the verb \note{make more explicit here}.
 Explaining the variation in the strategies languages use to  order underlying hierarchical structures into linear strings of words has been one of the foci of linguistic research (\jd{CITE}).
 We show that these strategies reflect an underlying optimization principle: human languages are adapted to limitations in human working memory.
 
 %We test the hypothesis that human languages represent different solutions to the problem of efficient computation with constrained working memory.
 The suggestion that the structure of human language partly reflects a need for efficient processing under resource limitations has been present in the theoretical and functional linguistics literature for decades~\cite{berwick1984grammatical,hawkins1994performance};
 A lot of progress has been mdade on understanding. Evidence for the idea comes from various different frameworks.
-However, it's been hard to concluseively take this as evidence for efficient processing under resource limitations because tests have been tied to specific algorithmic models of language processing.\mhahn{TODO make this better}
-\mhahn{Maybe there is a citation that explicitly mentions this as a limitation of  thigngs like DLM}
+However, it's been hard to concluseively take this as evidence for efficient processing under resource limitations because tests have been tied to specific algorithmic models of language processing.\note{TODO make this better}
+\note{Maybe there is a citation that explicitly mentions this as a limitation of  thigngs like DLM}
 %however, it has been hard to test this idea without ad-hoc modeling assumptions.
 \jd{like what? why is the information-theoretic approach not subject to this ad-hoc-ness?}
-\mhahn{this is a strong critique. not clear what kinds of ad-hoc modeling this is about}
+\note{this is a strong critique. not clear what kinds of ad-hoc modeling this is about}
 e.g. previously based on some grammatical formalism and a linking to ideas about parsing algorithms.
 
 %Alternative?: there has been debate about what shapes human language. role played by UG/innate constraints? environment? cognition?
 For the first time, we test this hypothesis by applying...
 
 We directly test the efficient processing hypothesis by applying a novel information-theoretic analysis to large-scale data from 54 languages.
-\mhahn{Emphasize minimality of assumptions.}
-\mhahn{Say more about the steps that this will entail, so the reader won't get lost}
+\note{Emphasize minimality of assumptions.}
+\note{Say more about the steps that this will entail, so the reader won't get lost}
 
 
 
@@ -169,7 +169,7 @@ We directly test the efficient processing hypothesis by applying a novel informa
 \begin{figure}
 \centering
 \includegraphics[width=0.9\textwidth]{figures-gdrive/communication.png}
-	\caption{Memory and language comprehension. (1) A speaker produces a sequence of words. (2) A listener maintains a representation of the words received so far. The listener can represent these at higher (left) or lower (right) levels of precision. (3) Throughout communication, the listener generates probabilistic expectations about the next word. Higher precision of memory representations leads to more precise predictions. (4) When receiving the next word, the listener incurs surprisal depending on the predictions. Higher levels of fidelity in memory lead to lower surprisal on average. \jd{what do the numbers (1) (2) etc refer to? also: image is blurry, at least on my screen}\mhahn{make reference to $L_t$ inside the caption. you and the surprisals visually better aligned. maybe can color-code? }}
+	\caption{Memory and language comprehension. (1) A speaker produces a sequence of words. (2) A listener maintains a representation of the words received so far. The listener can represent these at higher (left) or lower (right) levels of precision. (3) Throughout communication, the listener generates probabilistic expectations about the next word. Higher precision of memory representations leads to more precise predictions. (4) When receiving the next word, the listener incurs surprisal depending on the predictions. Higher levels of fidelity in memory lead to lower surprisal on average. \jd{what do the numbers (1) (2) etc refer to? also: image is blurry, at least on my screen}\note{make reference to $L_t$ inside the caption. you and the surprisals visually better aligned. maybe can color-code? }}
 	\label{fig:communication}
 \end{figure}
 
@@ -200,11 +200,11 @@ upon hearing the next word $x_t$.
 %Thus, the predictions made by such a listener will be on average less accurate, and such a listener will incur greater processing effort $S$.
 
 
-Information theory, specifically the Data Processing Inequality \mhahn{add reference}, implies that the average surprisal $S$ will be higher for a listener who represents past input at lower levels of precision. \jd{include an additional sentence on the DPI?}
+Information theory, specifically the Data Processing Inequality \note{add reference}, implies that the average surprisal $S$ will be higher for a listener who represents past input at lower levels of precision. \jd{include an additional sentence on the DPI?}
 Consequently, there is a tradeoff between memory and surprisal:
 A listener can achieve lower levels of processing effort at the expense of increased memory load.
 
-\mhahn{reader will have lost the plot by now. strogn promise in the beginning. can solve this by foreshadowing}
+\note{reader will have lost the plot by now. strogn promise in the beginning. can solve this by foreshadowing}
 
 
 %Formally, we quantify memory as the number of bits about prior input that a listener represents.
@@ -225,8 +225,8 @@ This theorem captures formally that languages support more efficient tradeoffs b
 \includegraphics[width=0.2\textwidth]{figures-gdrive/tradeoff.png}
 	\caption{
 		(a) Conditional mutual information $I_t$ captures how much predictive information about the next word is provided, on average, by the word $t$ steps in the past.
-		(b) Here we illustrate our theoretical result. We plot $I_t$ (top) and $tI_t$ (bottom) as functions of $t$. A listener using $B$ bits memory (bottom) to represent prior observations will incur at least $A$ bits of extra surprisal beyond the entropy rate (top). \mhahn{there is t and T. COnfusing}
-		(c) \jd{FILL OUT} \mhahn{make the colors in (c) difefrenfr from this in (b). Do want to make clear what the mapping from (b) to (c) is. Maybe can even have a pair of the two (b) curves, and then show what they map on.}
+		(b) Here we illustrate our theoretical result. We plot $I_t$ (top) and $tI_t$ (bottom) as functions of $t$. A listener using $B$ bits memory (bottom) to represent prior observations will incur at least $A$ bits of extra surprisal beyond the entropy rate (top). \note{there is t and T. COnfusing}
+		(c) \jd{FILL OUT} \note{make the colors in (c) difefrenfr from this in (b). Do want to make clear what the mapping from (b) to (c) is. Maybe can even have a pair of the two (b) curves, and then show what they map on.}
 }\label{fig:theorem}
 \end{figure}
 
@@ -241,18 +241,18 @@ It is a statistical property of the language, and can be estimated from large-sc
 Our theoretical results describe how the tradeoff between memory and comprehension difficulty relates to $I_t$ (Figure~\ref{fig:theorem} (b)):
 Consider a listener who invests $B$ bits of memory into representing past input.
 We then consider the smallest $T$ such that the area under the curve of $t I_t$, to the left of $T$, has size $B$.
-Such a listener will experience average surprisal at least $H[X_t| X_{<t}] + \sum_{t=T+1}^\infty I_t$.\mhahn{maybe result first, and then say what $T$ is}
+Such a listener will experience average surprisal at least $H[X_t| X_{<t}] + \sum_{t=T+1}^\infty I_t$.\note{maybe result first, and then say what $T$ is}
 By tracing out all values $T >0$, one can obtain a bound on the tradeoff curve for any possible listener.
-\mhahn{hard to swallow for general audience. maybe can just use more straightforward less mathy language.}
+\note{hard to swallow for general audience. maybe can just use more straightforward less mathy language.}
 
 
-\mhahn{Alternative:}
+\note{Alternative:}
 A listener will experience average surprisal at least
 \begin{equation}
 	H[X_t| X_{<t}] + \sum_{t=T+1}^\infty I_t
 \end{equation}
 where $T$ is chosen to be the smallest $T$ for which $\sum_{t=1}^T t I_t \geq B$.
-\mhahn{End alternative.}
+\note{End alternative.}
 
 
 %We prove that, for any integer $T > 0$, a listener encoding $\sum_{t=1}^T t I_t$ bits of memory will incur average surprisal at least $H[X_t| X_{<t}] + \sum_{t=T+1}^\infty I_t$.
@@ -266,7 +266,7 @@ where $T$ is chosen to be the smallest $T$ for which $\sum_{t=1}^T t I_t \geq B$
 \begin{figure}
 \centering
 \includegraphics[width=\textwidth]{figures-gdrive/counterfactual-languages.png}
-	\caption{\mhahn{Can say more here to explain how it works} Estimating chance by constructing counterfactual grammars and languages.\jd{this figure is again blurry for me. also looks like there's sth in the background on the left?}}\label{fig:grammars}
+	\caption{\note{Can say more here to explain how it works} Estimating chance by constructing counterfactual grammars and languages.\jd{this figure is again blurry for me. also looks like there's sth in the background on the left?}}\label{fig:grammars}
 \end{figure}
 
 
@@ -280,7 +280,7 @@ We draw on the Universal Dependncies project, which has constructed expert annot
 For each language, we constructed counterfactual versions that differ from real languages in their word order, holding all other properties constant.
 These counterfactual versions use randomly created grammars for linearizing hierarchical structures into sentences (see Figure~\ref{fig:grammars}), akin to those found in human languages.
 See SI for details.
-\mhahn{maybe even more. hard concept to grasp. say more about the representation format, that it's as atheoretical as possible. encodes the ways heads are encoded to their dependents}
+\note{maybe even more. hard concept to grasp. say more about the representation format, that it's as atheoretical as possible. encodes the ways heads are encoded to their dependents}
 \jd{refer to SI here and make sure to include a lot more information in the SI about how the grammars were created}
 %These random grammars apply consistent grammatical rules as human language does, but have no bias towards any kind of processing efficiency or robustness.
 
@@ -299,7 +299,7 @@ We replicated this result with different methods of estimating chance (see SI).
 
 The only point where real and baseline languages are equally efficient is at extremely low memory capacities.
 The point of divergence is given by that memory capacity that fully exhausts information provided by the immediately preceding word, that is, when the capacity of a Markov model in approximating language is exhausted.
-\mhahn{can one rephrase this?}
+\note{can one rephrase this?}
 
 \begin{figure}
 \includegraphics[width=\textwidth]{figures/full-results.png}
@@ -313,7 +313,6 @@ The point of divergence is given by that memory capacity that fully exhausts inf
 
 An immediate consequence of this theoretical result is a general relation between memory and locality:
 A language will enable more efficient tradeoffs if $I_t$ decays very fast as $t$ grows, which corresponds to strong concentration of predictive information in the recent past.
-\mhahn{not taken up again. maybe this is together with locality discussion. after getting the tradeoff, would be good to go straight into the 54 languages}
 
 
 
