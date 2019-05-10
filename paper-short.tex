@@ -199,13 +199,16 @@ However, Equation~\ref{eq:surp} can only represent processing difficulty for a l
 which will on average be larger than Eq.~\ref{eq:surp} (see SI for proof). % Gibbs' inequality
 The limitations of memory have well-documented empirical effects on language processing, causing difficulty above and beyond the difficulty associated with surprisal \citep{gibson1998linguistic,gibson1999memory,gibson2000dependency,vasishth2005activationbased,levy2013memory}.
 
-Here we propose to model human language comprehension by treating the listener's memory $m_{i-1}$ as a lossily compressed representation of the context $x_{1...i-1}$, and the processing effort associated with each word using Eq.~\ref{eq:lossy-surp}. 
+Here we propose to model human language comprehension by treating the listener's memory $m_{i-1}$ as a lossily compressed representation of the context $x_{1...i-1}$, and the processing effort associated with each word using Eq.~\ref{eq:lossy-surp}. Suppose that the listener's memory has a fixed information-carrying capacity $k$,
+
+
+\rljf{I am feeling the urge to reframe everything in terms similar to my NYU talk, where we say the processing effort of a language is its entropy rate (an unavoidable cost) plus excess cost arising from memory distortion, which should be minimized. This feels like a very general theory, which can be explained graphically. Linguists and psycholinguists will not understand it at first, but maybe they will if we include the stuff at the end about how this relates to dependency locality in word order and processing. The entropy rate framing would allow us to define more useful terms for explaining our results. For example above we have $x_i$, $x_{1...i-1}$, and $m_{i-1}$ as values, but really they are best thought of as random variables, becuase all of our results are about entropy and mutual information, not pointwise surprisal or pointwise MI. Maybe we could even make some kind of call-out to the competence/performance distinction: entropy rate is the best achievable efficiency in language processing given a perfect listener (like competence), but the memory-distorted cross-entropy rate gives us the true difficulty (performance). Tagline: Human languages minimize the divergence between competence and performance given fixed processing resources.}
 
 
 
 
 
-Importantly, the listener can represent the prior context at higher or lower levels of precision (Figure~\ref{fig:communication}).
+importantly, the listener can represent the prior context at higher or lower levels of precision (Figure~\ref{fig:communication}).
 More detailed memory representations lead to a higher working memory load, but also enable more precise predictions.
 The psycholinguistic literature has established that humans differ in their capacity to store such representations \jd{CITE}, and that capacity limitations can create difficulties in language comprehension \jd{CITE}.
 
