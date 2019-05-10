@@ -109,7 +109,7 @@
   Here we give evidence for this view by showing that human languages structure information in time so as to enable efficient communication under the constraint that language must be comprehended and produced by agents with limited short-term memory resources.
   We directly show that languages minimize memory usage by calculating information-theoretic bounds on the amount of memory resources required for language comprehension in 54 real languages and in random baseline languages, finding that the real languages require less memory.
   % 2-3 sentences how main result adds to knowledge
-  To explain how languages achieve this result, we prove a theorem showing that any efficient communication system operating under memory constraints will exhibit a property called information locality: symbols which predict each other should be produced close to each other in time.
+  To explain how languages achieve this result, we prove a theorem showing that any efficient communication system operating under constraints on memory capacity will exhibit a property called information locality: symbols which predict each other should be produced close to each other in time.
   We show that information locality subsumes several principles of word order previously proposed in the linguistics and cognitive science literature, and explains a number of the previously-documented universal patterns in word order across languages.
 	% TODO i'm wondering whether we should first mention the big result, and then say, well it also subsumes previously proposed constraints.
   % 1-2 sentences general context
@@ -144,8 +144,15 @@ Explaining the variation in the strategies languages use to  order underlying hi
 We show that these strategies reflect an underlying optimization principle: human languages are adapted to limitations in human working memory.
 
 %We test the hypothesis that human languages represent different solutions to the problem of efficient computation with constrained working memory.
-The suggestion that the structure of human language partly reflects a need for efficient processing under resource limitations has been present in the theoretical and functional linguistics literature for decades~\cite{berwick1984grammatical,hawkins1994performance};
-A lot of progress has been mdade on understanding. Evidence for the idea comes from various different frameworks.
+The suggestion that the structure of human language partly reflects a need for efficient processing under resource limitations has been present in the theoretical and functional linguistics literature for decades~\cite{berwick1984grammatical,hawkins1994performance}, where theories have been developed in terms of specific mechanistic and heuristic models of human language processing.
+Here 
+
+
+\rljf{While it's important to point out that our results are much less theory-bound than other models, I don't think the ``previous results are all tied to previous theories'' framing is strong.}
+
+%Typically, such theories are developed in terms of specific mechanistic models of human language processing; for example, \citet{hawkins1994performance} shows that word order patterns can result from optimization for efficient parsing under a particular parsing algorithm.
+
+A lot of progress has been made on understanding. Evidence for the idea comes from various different frameworks.
 However, it's been hard to concluseively take this as evidence for efficient processing under resource limitations because tests have been tied to specific algorithmic models of language processing.\note{TODO make this better}
 \note{Maybe there is a citation that explicitly mentions this as a limitation of  thigngs like DLM}
 %however, it has been hard to test this idea without ad-hoc modeling assumptions.
@@ -173,21 +180,39 @@ We directly test the efficient processing hypothesis by applying a novel informa
 	\label{fig:communication}
 \end{figure}
 
-We begin this by considering the process of language comprehension in a person processing a stream of words uttered by an interlocutor (Figure~\ref{fig:communication}).
-Experimental research has established that such a listener (1) maintains information about the words received so far, and (2) forms probabilistic expectations about the upcoming words \jd{CITE}. %, and (3) words are easier to process when they are highly expected in context.
-Importantly, the listener can represent the prior context at higher or lower levels of precision (Figure~\ref{fig:communication}).
+We begin developing our model by considering the process of language comprehension in a person processing a stream of words uttered by an interlocutor (Figure~\ref{fig:communication}).
+Experimental research has established that such a listener (1) maintains information about the words received so far, (2) forms probabilistic expectations about the upcoming words, and (3) words are easier to process when they are highly expected in context \citep{hale2001probabilistic,levy2008expectation} \rljf{Good source for other cites here would be to dig around in Luke \& Christianson's review of predictability effects}.
+
+Experimental research has shown that human processing effort on a given word is strongly predicted by its \textbf{surprisal}, the degree to which it cannot be predicted from the preceding context \citep{hale2001probabilistic,levy2008expectation}.
+Surprisal is known to be a strong linear predictor of processing effort as measured by per-word reading times \citep{smith2013effect}.
+For an idealized listener with unbounded memory resources, surprisal will be given by the negative log-probability of a word given its preceding context:
+\begin{equation}\label{eq:surp}
+	S :=	-\log_2 p(x_i|x_{1...i-1})
+\end{equation}
+where $x_i$ is the $i$-th word in a given utterance (or discourse). In information-theoretic terms, surprisal is equivalent to the \textbf{information content} of a word, measured in bits, and the fact that the per-word reading time appears to be linear in the surprisal suggests that human language comprehension is best characterized in terms of a scalar rate of information processing in terms of bits per second. The idea that processing effort is determined by surprisal links language comprehension to theories of perception and brain function that are organized around the idea of prediction and \key{predictive coding} \citep{friston2009predictive,friston2010free,clark2013whatever}, which has had empirical success in other domains such as perception \citep{egner2010expectation}, auditory and music perception \citep{agres2018information}, and motor planning \citep{wolpert2001motor}.
+
+However, Equation~\ref{eq:surp} can only represent processing difficulty for a listener with unbounded memory resources, who can accurately remember the complete history of previous words $x_{1...i-1}$ leading up to the current word $x_i$. More realistically, human listeners have fixed-capacity memory resources that are being deployed during language comprehension, meaning that their predictions about upcoming words may be inaccurate compared to Eq.~\ref{eq:surp}. If $m_{i-1}$ is a listener's memory state before processing word $x_i$, then the true surprisal experienced by the listener will be given by \ref{eq:lossy-surp}:
+\begin{equation}
+  \label{eq:lossy-surp}
+  S_M := -\log_2 p(x_i|m_{i-1}),
+\end{equation}
+which will on average be larger than Eq.~\ref{eq:surp} (see SI for proof). % Gibbs' inequality
+The limitations of memory have well-documented empirical effects on language processing, causing difficulty above and beyond the difficulty associated with surprisal \citep{gibson1998linguistic,gibson1999memory,gibson2000dependency,vasishth2005activationbased,levy2013memory}.
+
+Here we propose to model human language comprehension by treating the listener's memory $m_{i-1}$ as a lossily compressed representation of the context $x_{1...i-1}$, and the processing effort associated with each word using Eq.~\ref{eq:lossy-surp}. Suppose that the listener's memory has a fixed information-carrying capacity $k$,
+
+
+\rljf{I am feeling the urge to reframe everything in terms similar to my NYU talk, where we say the processing effort of a language is its entropy rate (an unavoidable cost) plus excess cost arising from memory distortion, which should be minimized. This feels like a very general theory, which can be explained graphically. Linguists and psycholinguists will not understand it at first, but maybe they will if we include the stuff at the end about how this relates to dependency locality in word order and processing. The entropy rate framing would allow us to define more useful terms for explaining our results. For example above we have $x_i$, $x_{1...i-1}$, and $m_{i-1}$ as values, but really they are best thought of as random variables, becuase all of our results are about entropy and mutual information, not pointwise surprisal or pointwise MI. Maybe we could even make some kind of call-out to the competence/performance distinction: entropy rate is the best achievable efficiency in language processing given a perfect listener (like competence), but the memory-distorted cross-entropy rate gives us the true difficulty (performance). Tagline: Human languages minimize the divergence between competence and performance given fixed processing resources.}
+
+
+
+
+
+importantly, the listener can represent the prior context at higher or lower levels of precision (Figure~\ref{fig:communication}).
 More detailed memory representations lead to a higher working memory load, but also enable more precise predictions.
 The psycholinguistic literature has established that humans differ in their capacity to store such representations \jd{CITE}, and that capacity limitations can create difficulties in language comprehension \jd{CITE}.
 
 Experimental research has shown that human processing effort on a given word is strongly predicted by its surprisal, the degree to which it cannot be predicted from the preceding context \jd{CITE roger}.
-Surprisal is known to be a strong linear predictor of processing effort as measured by per-word log-transformed reading times.
-For an idealized listener with unbounded memory resources, surprisal will be given by the negative log-probability of a word given its preceding context:
-\begin{equation}\label{eq:surp}
-	S :=	-\log p(x_i|x_{1...i-1})
-\end{equation}
-where $x_i$ is the $i$-th word in a given utterance (or discourse).
-%
-%In reality, a listener will have bounded capacity to represent prior context.
 A listener with limited memory of prior context will not be able to compute the full conditional distribution~(\ref{eq:surp}).
 As in Figure~\ref{fig:communication}, we denote a listener's memory representation at time $t$ by $L_t$, which is some -- generally imperfect -- summary of the preceding context $\dots x_{t-3}x_{t-2}x_{t-1}$.
 This listener will experience surprisal
