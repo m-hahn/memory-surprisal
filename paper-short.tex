@@ -13,7 +13,7 @@
 \usepackage{graphicx}
 \usepackage{tikz}
 \usepackage{xcolor}
-\usepackage{natbib}
+%\usepackage{natbib}
 \usepackage{url}
 %\usepackage[colorinlistoftodos]{todonotes}
 \usepackage{rotating}
@@ -52,6 +52,7 @@
 \newcommand{\jd}[1]{\textcolor{Red}{[jd: #1]}} 
 \newcommand{\note}[1]{\textcolor{Red}{[note: #1]}} 
 \newcommand{\rljf}[1]{\textcolor{Red}{[rljf: #1]}} 
+\newcommand{\mhahn}[1]{\textcolor{Red}{[mhahn: #1]}} 
 
 \frenchspacing
 
@@ -93,7 +94,7 @@
 
 \begin{document}
 
-\baselineskip24pt
+%\baselineskip24pt
 
 
 \maketitle
@@ -136,7 +137,7 @@ A primary goal of the field of linguistics is to characterize and explain the co
 Here we argue that human languages can be modeled as solutions to the problem of maximally efficient communication among agents with particular information-processing constraints active during speaking and listening.
 We formalize these constraints using information theory, and show novel large-scale quantitative evidence from 54 languages that information is structured in time so as to minimize memory load during language comprehension.
 
-The idea that the universal properties of human languages are best explained with reference to communicative efficiency has a long history \citep{gabelentz1901sprachwissenschaft,zipf1949human,hockett1960origin,givon1991markedness,hawkins1994performance,hawkins2004efficiency,hawkins2014crosslinguistic,croft2001functional,haspelmath2008parametric,jaeger2011language,gibson2019efficiency}.
+The idea that the universal properties of human languages are best explained with reference to communicative efficiency has a long history \cite{gabelentz1901sprachwissenschaft,zipf1949human,hockett1960origin,givon1991markedness,hawkins1994performance,hawkins2004efficiency,hawkins2014crosslinguistic,croft2001functional,haspelmath2008parametric,jaeger2011language,gibson2019efficiency}.
 
 
 
@@ -154,15 +155,16 @@ Here
 
 %Typically, such theories are developed in terms of specific mechanistic models of human language processing; for example, \citet{hawkins1994performance} shows that word order patterns can result from optimization for efficient parsing under a particular parsing algorithm.
 
-A lot of progress has been made on understanding. Evidence for the idea comes from various different frameworks.
-However, it's been hard to concluseively take this as evidence for efficient processing under resource limitations because tests have been tied to specific algorithmic models of language processing.\note{TODO make this better}
-\note{Maybe there is a citation that explicitly mentions this as a limitation of  thigngs like DLM}
+%A lot of progress has been made on understanding. Evidence for the idea comes from various different frameworks.
+%However, it's been hard to concluseively take this as evidence for efficient processing under resource limitations because tests have been tied to specific algorithmic models of language processing.\note{TODO make this better}
+%\note{Maybe there is a citation that explicitly mentions this as a limitation of  thigngs like DLM}
 %however, it has been hard to test this idea without ad-hoc modeling assumptions.
-\jd{like what? why is the information-theoretic approach not subject to this ad-hoc-ness?}
-\note{this is a strong critique. not clear what kinds of ad-hoc modeling this is about}
-e.g. previously based on some grammatical formalism and a linking to ideas about parsing algorithms.
+%\jd{like what? why is the information-theoretic approach not subject to this ad-hoc-ness?}
+%\note{this is a strong critique. not clear what kinds of ad-hoc modeling this is about}
+%e.g. previously based on some grammatical formalism and a linking to ideas about parsing algorithms.
 
 %Alternative?: there has been debate about what shapes human language. role played by UG/innate constraints? environment? cognition?
+
 For the first time, we test this hypothesis by applying...
 
 We directly test the efficient processing hypothesis by applying a novel information-theoretic analysis to large-scale data from 54 languages.
@@ -184,17 +186,17 @@ We directly test the efficient processing hypothesis by applying a novel informa
 \begin{figure}
 \centering
 \includegraphics[width=0.9\textwidth]{figures-gdrive/communication.png}
-	\caption{Memory and language comprehension. (1) A speaker produces a sequence of words. (2) A listener maintains a representation of the words received so far. The listener can represent these at higher (left) or lower (right) levels of precision. (3) Throughout communication, the listener generates probabilistic expectations about the next word. Higher precision of memory representations leads to more precise predictions. (4) When receiving the next word, the listener incurs surprisal depending on the predictions. Higher levels of fidelity in memory lead to lower surprisal on average. \jd{what do the numbers (1) (2) etc refer to? also: image is blurry, at least on my screen}\note{make reference to $L_t$ inside the caption. you and the surprisals visually better aligned. maybe can color-code? }}
+	\caption{Memory and language comprehension. (1) A speaker produces a sequence of words. (2) A listener maintains a representation of the words received so far. The listener can represent these at higher (left) or lower (right) levels of precision. (3) Throughout communication, the listener generates probabilistic expectations about the next word. Higher precision of memory representations leads to more precise predictions. (4) When receiving the next word, the listener incurs surprisal depending on the predictions. Higher levels of fidelity in memory lead to lower surprisal on average. \jd{what do the numbers (1) (2) etc refer to? also: image is blurry, at least on my screen}\note{make reference to $L_t$ inside the caption. you and the surprisals visually better aligned. maybe can color-code? } \mhahn{problem suggests that memory has to be contiguous substrings}}
 	\label{fig:communication}
 \end{figure}
 
 We begin developing our model by considering the process of language comprehension illustrated in Figure~\ref{fig:communication}, where the listener Alice is processing a stream of words uttered by an interlocutor Bob (Figure~\ref{fig:communication}).
-Experimental research has established that (1) listeners maintain information about the words received so far, (2) listeners forms probabilistic expectations about the upcoming words, and (3) words are easy to process to the extent that they are predictable in context \rljf{Good source for other cites here would be to dig around in Luke \& Christianson's review of predictability effects}. Furthermore, the exact mathematical form of the relationship between predictability and processing difficulty (as measured e.g. in reading times) seems to be given by the \key{information content} of a word in context \citep{hale2001probabilistic,levy2008expectation,smith2013effect}.
+Experimental research has established that (1) listeners maintain information about the words received so far, (2) listeners forms probabilistic expectations about the upcoming words, and (3) words are easy to process to the extent that they are predictable in context \rljf{Good source for other cites here would be to dig around in Luke \& Christianson's review of predictability effects}. Furthermore, the exact mathematical form of the relationship between predictability and processing difficulty (as measured e.g. in reading times) seems to be given by the \key{information content} of a word in context \cite{hale2001probabilistic,levy2008expectation,smith2013effect}.
 For an idealized listener with unbounded memory resources, information content will be given by the negative log-probability of a word given its preceding context:
 \begin{equation}\label{eq:surp}
 	S :=	-\log_2 p(x_i|x_{1...i-1})
 \end{equation}
-where $x_i$ is the $i$-th word in a given utterance (or discourse). Information content is measured in bits and gives the amount of information communicated by the word. The idea that processing effort is determined by surprisal links language comprehension to theories of perception and brain function that are organized around the idea of prediction and \key{predictive coding} \citep{friston2009predictive,friston2010free,clark2013whatever}, which has had empirical success in other domains such as perception \citep{egner2010expectation}, auditory and music perception \citep{agres2018information}, and motor planning \citep{wolpert2001motor}. The average information-processing difficulty associated with a \emph{language} would then be the expected information content of each word in context, which is equivalent to an information-theoretic quantity called \key{entropy rate}: \rljf{the def. below is true only for a stationary process but maybe that's too much detail}
+where $x_i$ is the $i$-th word in a given utterance (or discourse). Information content is measured in bits and gives the amount of information communicated by the word. The idea that processing effort is determined by surprisal links language comprehension to theories of perception and brain function that are organized around the idea of prediction and \key{predictive coding} \cite{friston2009predictive,friston2010free,clark2013whatever}, which has had empirical success in other domains such as perception \cite{egner2010expectation}, auditory and music perception \cite{agres2018information}, and motor planning \cite{wolpert2001motor}. The average information-processing difficulty associated with a \emph{language} would then be the expected information content of each word in context, which is equivalent to an information-theoretic quantity called \key{entropy rate}: \rljf{the def. below is true only for a stationary process but maybe that's too much detail} \mhahn{yes, the whole theory assumes stationarity. not yet sure where to say this}
 \begin{equation}\label{eq:entropy-rate}
   h := \mathbb{E}[-\log_2 p(x_i|x_{1...i-1})].
 \end{equation}
@@ -205,10 +207,9 @@ However, Equation~\ref{eq:surp} can only represent processing difficulty for a l
   \label{eq:lossy-surp}
   S_M := -\log_2 p(x_i|m_{i-1}),
 \end{equation}
-which will on average be larger than Eq.~\ref{eq:surp} (see SI for proof). The limitations of memory have well-documented empirical effects on language processing, causing difficulty above and beyond the difficulty associated with raw information content \citep{gibson1998linguistic,gibson1999memory,gibson2000dependency,vasishth2005activationbased,levy2013memory}.
+which will on average be larger than Eq.~\ref{eq:surp} (see SI for proof). The limitations of memory have well-documented empirical effects on language processing, causing difficulty above and beyond the difficulty associated with raw information content \cite{gibson1998linguistic,gibson1999memory,gibson2000dependency,vasishth2005activationbased,levy2013memory}.
 The average processing difficulty associated with a language then comes out to a \key{cross entropy}:
 
-Here we propose to model human language comprehension by treating the listener's memory $m_{i-1}$ as a lossily compressed representation of the context $x_{1...i-1}$, and the processing effort associated with each word using Eq.~\ref{eq:lossy-surp}. Suppose that the listener's memory has a fixed information-carrying capacity $k$,
 
 
 \rljf{I am feeling the urge to reframe everything in terms similar to my NYU talk, where we say the processing effort of a language is its entropy rate (an unavoidable cost) plus excess cost arising from memory distortion, which should be minimized. This feels like a very general theory, which can be explained graphically. Linguists and psycholinguists will not understand it at first, but maybe they will if we include the stuff about how this relates to dependency locality in word order and processing. The entropy rate framing would allow us to define more useful terms for explaining our results. For example above we have $x_i$, $x_{1...i-1}$, and $m_{i-1}$ as values, but really they are best thought of as random variables, becuase all of our results are about entropy and mutual information, not pointwise surprisal or pointwise MI. Maybe we could even make some kind of call-out to the competence/performance distinction: entropy rate is the best achievable efficiency in language processing given a perfect listener (like competence), but the memory-distorted cross-entropy rate gives us the true difficulty (performance). Tagline: Human languages minimize the divergence between competence and performance given fixed processing resources.}
@@ -216,32 +217,38 @@ Here we propose to model human language comprehension by treating the listener's
 \rljf{Here we recast these theories in terms of information theory and the theory of statistical complexity...}
 
 
+Here we propose to model human language comprehension by treating the listener's memory $m_{i-1}$ as a lossily compressed representation of the context $x_{1...i-1}$, and the processing effort associated with each word using Eq.~\ref{eq:lossy-surp}.
+Suppose that the listener's memory has a fixed information-carrying capacity $k$, then this listener has to compress the context into a memory representation $m_{i-1}$ with at most $k$ bits: $H[m_{i-1}] \leq k$.
+
+
+Information theory implies that the processing cost $S_M$ trades off with the memory capacity $k$:
+Processing cost will be lower for a listener who represents past input at higher levels of precision.
 
 
 
 
-importantly, the listener can represent the prior context at higher or lower levels of precision (Figure~\ref{fig:communication}).
-More detailed memory representations lead to a higher working memory load, but also enable more precise predictions.
-The psycholinguistic literature has established that humans differ in their capacity to store such representations \jd{CITE}, and that capacity limitations can create difficulties in language comprehension \jd{CITE}.
-
-Experimental research has shown that human processing effort on a given word is strongly predicted by its surprisal, the degree to which it cannot be predicted from the preceding context \jd{CITE roger}.
-A listener with limited memory of prior context will not be able to compute the full conditional distribution~(\ref{eq:surp}).
-As in Figure~\ref{fig:communication}, we denote a listener's memory representation at time $t$ by $L_t$, which is some -- generally imperfect -- summary of the preceding context $\dots x_{t-3}x_{t-2}x_{t-1}$.
-This listener will experience surprisal
-\begin{equation}\label{eq:surp-listener}
-	S_L :=	-\log p(x_t|L_t)
-\end{equation}
-upon hearing the next word $x_t$.
+%importantly, the listener can represent the prior context at higher or lower levels of precision (Figure~\ref{fig:communication}).
+%More detailed memory representations lead to a higher working memory load, but also enable more precise predictions.
+%The psycholinguistic literature has established that humans differ in their capacity to store such representations \jd{CITE}, and that capacity limitations can create difficulties in language comprehension \jd{CITE}.
+%
+%Experimental research has shown that human processing effort on a given word is strongly predicted by its surprisal, the degree to which it cannot be predicted from the preceding context \jd{CITE roger}.
+%A listener with limited memory of prior context will not be able to compute the full conditional distribution~(\ref{eq:surp}).
+%As in Figure~\ref{fig:communication}, we denote a listener's memory representation at time $t$ by $L_t$, which is some -- generally imperfect -- summary of the preceding context $\dots x_{t-3}x_{t-2}x_{t-1}$.
+%This listener will experience surprisal
+%\begin{equation}\label{eq:surp-listener}
+%	S_L :=	-\log p(x_t|L_t)
+%\end{equation}
+%upon hearing the next word $x_t$.
 %The amount of information stored by the listener is the number of bits in $L_t$, i.e., its entropy $M := H[L_t]$.
 %For a listener who invests less bits into representing information $L_t$ about prior context, $L_t$ will be a more coarse-grained representation of past observations.
 %Thus, the predictions made by such a listener will be on average less accurate, and such a listener will incur greater processing effort $S$.
 
-
-Information theory, specifically the Data Processing Inequality \note{add reference}, implies that the average surprisal $S$ will be higher for a listener who represents past input at lower levels of precision. \jd{include an additional sentence on the DPI?}
-Consequently, there is a tradeoff between memory and surprisal:
-A listener can achieve lower levels of processing effort at the expense of increased memory load.
-
-\note{reader will have lost the plot by now. strogn promise in the beginning. can solve this by foreshadowing}
+%
+%Information theory, specifically the Data Processing Inequality \note{add reference}, implies that the average surprisal $S$ will be higher for a listener who represents past input at lower levels of precision. \jd{include an additional sentence on the DPI?}
+%Consequently, there is a tradeoff between memory and surprisal:
+%A listener can achieve lower levels of processing effort at the expense of increased memory load.
+%
+%	\note{reader will have lost the plot by now. strogn promise in the beginning. can solve this by foreshadowing}
 
 
 %Formally, we quantify memory as the number of bits about prior input that a listener represents.
@@ -278,18 +285,18 @@ It is a statistical property of the language, and can be estimated from large-sc
 Our theoretical results describe how the tradeoff between memory and comprehension difficulty relates to $I_t$ (Figure~\ref{fig:theorem} (b)):
 Consider a listener who invests $B$ bits of memory into representing past input.
 We then consider the smallest $T$ such that the area under the curve of $t I_t$, to the left of $T$, has size $B$.
-Such a listener will experience average surprisal at least $H[X_t| X_{<t}] + \sum_{t=T+1}^\infty I_t$.\note{maybe result first, and then say what $T$ is}
+Such a listener will experience average surprisal at least $H[X_t| X_{<t}] + \sum_{t=T+1}^\infty I_t$. %\note{maybe result first, and then say what $T$ is}
 By tracing out all values $T >0$, one can obtain a bound on the tradeoff curve for any possible listener.
-\note{hard to swallow for general audience. maybe can just use more straightforward less mathy language.}
-
-
-\note{Alternative:}
-A listener will experience average surprisal at least
-\begin{equation}
-	H[X_t| X_{<t}] + \sum_{t=T+1}^\infty I_t
-\end{equation}
-where $T$ is chosen to be the smallest $T$ for which $\sum_{t=1}^T t I_t \geq B$.
-\note{End alternative.}
+%\note{hard to swallow for general audience. maybe can just use more straightforward less mathy language.}
+%
+%
+%\note{Alternative:}
+%A listener will experience average surprisal at least
+%\begin{equation}
+%	H[X_t| X_{<t}] + \sum_{t=T+1}^\infty I_t
+%\end{equation}
+%where $T$ is chosen to be the smallest $T$ for which $\sum_{t=1}^T t I_t \geq B$.
+%\note{End alternative.}
 
 
 %We prove that, for any integer $T > 0$, a listener encoding $\sum_{t=1}^T t I_t$ bits of memory will incur average surprisal at least $H[X_t| X_{<t}] + \sum_{t=T+1}^\infty I_t$.
@@ -317,8 +324,8 @@ We draw on the Universal Dependncies project, which has constructed expert annot
 For each language, we constructed counterfactual versions that differ from real languages in their word order, holding all other properties constant.
 These counterfactual versions use randomly created grammars for linearizing hierarchical structures into sentences (see Figure~\ref{fig:grammars}), akin to those found in human languages.
 See SI for details.
-\note{maybe even more. hard concept to grasp. say more about the representation format, that it's as atheoretical as possible. encodes the ways heads are encoded to their dependents}
-\jd{refer to SI here and make sure to include a lot more information in the SI about how the grammars were created}
+%\note{maybe even more. hard concept to grasp. say more about the representation format, that it's as atheoretical as possible. encodes the ways heads are encoded to their dependents}
+%\jd{refer to SI here and make sure to include a lot more information in the SI about how the grammars were created}
 %These random grammars apply consistent grammatical rules as human language does, but have no bias towards any kind of processing efficiency or robustness.
 
 
@@ -336,11 +343,11 @@ We replicated this result with different methods of estimating chance (see SI).
 
 The only point where real and baseline languages are equally efficient is at extremely low memory capacities.
 The point of divergence is given by that memory capacity that fully exhausts information provided by the immediately preceding word, that is, when the capacity of a Markov model in approximating language is exhausted.
-\note{can one rephrase this?}
+%\note{can one rephrase this?}
 
 \begin{figure}
 \includegraphics[width=\textwidth]{figures/full-results.png}
-	\caption{\jd{FILL OUT; make less blurry}}\label{fig:results}
+	\caption{Tradeoffs between memory (x axis) and processing cost (y axis) in 54 languages, for real orderings (blue) and counterfactual baseline grammars (red). \jd{FILL OUT; make less blurry}}\label{fig:results}
 \end{figure}
 
 
