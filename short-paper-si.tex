@@ -859,6 +859,41 @@ Finally, iteratively applying this inequality, we get:
 Justify linear interpolation: The curve is convex, which is shown by `time-sharing': Use one code $\lambda$ fraction of times, and the other code $1-\lambda$ fraction of times.
 
 
+\section{Locality in a model with Memory Retrieval}
+
+Here we describe an information-theoretic formalization of a model that has both a limited WM and an unlimited STM.
+
+We can explicitly explain how this covers the McElree ideas and the Lewis and Vasishth ACT-R model.
+
+Bounding retrieval = bounding the precision and/or content of retrieved items. Explain more how this relates to McElree and ACT-R.
+
+\begin{thm}
+Average working memory $H[L_t] \leq \sum_{t=1}^T t I_t$, average retrieval $H[R_t] \leq \sum_{t=T+1}^S I_t$ (per word), leads to average surprisal increase at least $\geq \sum_{t>S} I_t$.
+\end{thm}
+
+\begin{proof}
+The negative surprisal gap is
+$\leq \frac{1}{T}(I[X_1\dots X_T|(M_0, R_1, ..., R_T)] - \sum_{t=1}^T t I_t - T \sum_{t>T} I_t) \leq  \frac{1}{T}(T\cdot H[R_t] - T \sum_{t>T} I_t) = H[R_t] - \sum_{t>T} I_t$
+
+\end{proof}
+
+
+
+We can also think of this as a multi-objective optimization:
+
+minimize $\lambda_1 WM + \lambda_2 Retrieval$ to achieve a given surprisal level.
+
+If $\frac{\lambda_2}{\lambda_1} \rightarrow \infty$ (retrievals get more expensive), recover previous model.
+
+If $\frac{\lambda_2}{\lambda_1} \rightarrow 0$ (retrievals get cheaper), locality effect gets weaker, and disappears in the limit\footnote{(Of course, even in this limit, there might be additional factors that may still favor locality in a specific implementation of memory -- e.g., in ACT-R, decay and interference are less problematic if there is locality.)}
+
+Objective
+$$\min_{T} \lambda_1 \sum_{t=1}^T t I_t + \lambda_2 \sum_{t=T+1}^S I_t$$
+has solution $T \approx \frac{\lambda_2}{\lambda_1}$.\footnote{Can do simple proof using the continuous-$T$-version.}
+
+
+Consequence: As long as retrievals are more expensive than keeping the same amount in WM, locality is predicted.
+
 \end{document}
 
 
