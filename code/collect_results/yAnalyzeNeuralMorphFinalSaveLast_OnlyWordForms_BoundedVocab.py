@@ -1,3 +1,5 @@
+assert False, "superseded???"
+
 import os
 
 path = "../results/per-run/memory-need-neural-wordforms/"
