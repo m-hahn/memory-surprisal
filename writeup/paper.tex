@@ -889,7 +889,7 @@ TODO
 \begin{table}
 \begin{longtable}{l|ll||l|llllllllllllll}
 	Language & Training & Held-Out & 	Language & Training & Held-Out\\ \hline
-\input{corpusSizes.tex}
+\input{tables/corpusSizes.tex}
 \end{longtable}
 	\caption{Languages, with the number of training and held-out sentences available.}\label{tab:corpora}
 \end{table}
@@ -897,7 +897,7 @@ TODO
 \begin{table}
 \begin{longtable}{l|ll||l|llllllllllllll}
 	Language & Base. & Real & Language & Base. & Real \\ \hline
-\input{samplesNumber.tex}
+\input{tables/samplesNumber.tex}
 \end{longtable}
 	\caption{Samples drawn per language according to the precision-dependent stopping criterion.}\label{tab:samples}
 \end{table}
@@ -907,7 +907,7 @@ TODO
 \begin{table}
 \begin{longtable}{l|lll||l|lllllllllllllll}
 	Language & Mean & Lower & Upper & Language & Mean & Lower & Upper \\ \hline
-\input{boot_g_REAL.tex}
+\input{tables/boot_g_REAL.tex}
 \end{longtable}
 	\caption{Bootstrapped estimates for $G$.}\label{tab:boot-g}
 \end{table}
@@ -916,28 +916,28 @@ TODO
 
 \begin{table}
 \begin{longtable}{ccccccccccccccclll}
-\input{medians_REAL_0.tex}
+\input{tables/medians_REAL_0.tex}
 \end{longtable}
 	\caption{Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
 \end{table}
 
 \begin{table}
 \begin{longtable}{ccccccccccccccclll}
-\input{medians_REAL_1.tex}
+\input{tables/medians_REAL_1.tex}
 \end{longtable}
 	\caption{Medians (cont.)}
 \end{table}
 
 \begin{table}
 \begin{longtable}{ccccccccccccccclll}
-\input{medians_REAL_2.tex}
+\input{tables/medians_REAL_2.tex}
 \end{longtable}
 	\caption{Medians (cont.)}
 \end{table}
 
 \begin{table}
 \begin{longtable}{ccccccccccccccclll}
-\input{medians_REAL_3.tex}
+\input{tables/medians_REAL_3.tex}
 \end{longtable}
 	\caption{Medians (cont.)}
 \end{table}
@@ -950,28 +950,28 @@ TODO
 
 \begin{table}
 \begin{tabular}{ccccccccccccccclll}
-\input{slice-hists_REAL_0.tex}
+\input{tables/slice-hists_REAL_0.tex}
 \end{tabular}
 	\caption{Histograms: Surprisal, at maximum memory.}\label{tab:slice-hists-real}
 \end{table}
 
 \begin{table}
 \begin{tabular}{ccccccccccccccclll}
-\input{slice-hists_REAL_1.tex}
+\input{tables/slice-hists_REAL_1.tex}
 \end{tabular}
 	\caption{Medians (cont.)}
 \end{table}
 
 \begin{table}
 \begin{tabular}{ccccccccccccccclll}
-\input{slice-hists_REAL_2.tex}
+\input{tables/slice-hists_REAL_2.tex}
 \end{tabular}
 	\caption{Medians (cont.)}
 \end{table}
 
 \begin{table}
 \begin{tabular}{ccccccccccccccclll}
-\input{slice-hists_REAL_3.tex}
+\input{tables/slice-hists_REAL_3.tex}
 \end{tabular}
 	\caption{Medians (cont.)}
 \end{table}
@@ -979,21 +979,21 @@ TODO
 
 \begin{table}
 \begin{tabular}{cccccccccccccccccc}
-\input{quantiles_REAL_0.tex}
+\input{tables/quantiles_REAL_0.tex}
 \end{tabular}
 	\caption{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
 \end{table}
 
 \begin{table}
 \begin{tabular}{cccccccccccccccccc}
-\input{quantiles_REAL_1.tex}
+\input{tables/quantiles_REAL_1.tex}
 \end{tabular}
 	\caption{Quantiles (part 2)}
 \end{table}
 
 \begin{table}
 \begin{tabular}{cccccccccccccccccc}
-\input{quantiles_REAL_2.tex}
+\input{tables/quantiles_REAL_2.tex}
 \end{tabular}
 	\caption{Quantiles (part 3)}
 \end{table}
@@ -1021,7 +1021,7 @@ TODO
 \begin{table}
 \begin{tabular}{l|ll||l|llllllllllllll}
 	Language & Base. & MLE & Language & Base. & MLE \\ \hline
-\input{samplesNumber_ground.tex}
+\input{tables/samplesNumber_ground.tex}
 \end{tabular}
 	\caption{Experiment 3: Samples drawn per language according to the precision-dependent stopping criterion.}\label{tab:samples}
 \end{table}
@@ -1032,28 +1032,28 @@ TODO
 
 \begin{table}
 \begin{tabular}{ccccccccccccccclll}
-\input{medians_0.tex}
+\input{tables/medians_0.tex}
 \end{tabular}
 	\caption{Experiment 3. Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
 \end{table}
 
 \begin{table}
 \begin{tabular}{ccccccccccccccclll}
-\input{medians_1.tex}
+\input{tables/medians_1.tex}
 \end{tabular}
 	\caption{Medians (cont.)}
 \end{table}
 
 \begin{table}
 \begin{tabular}{ccccccccccccccclll}
-\input{medians_2.tex}
+\input{tables/medians_2.tex}
 \end{tabular}
 	\caption{Medians (cont.)}
 \end{table}
 
 \begin{table}
 \begin{tabular}{ccccccccccccccclll}
-\input{medians_3.tex}
+\input{tables/medians_3.tex}
 \end{tabular}
 	\caption{Medians (cont.)}
 \end{table}
@@ -1063,28 +1063,28 @@ TODO
 
 \begin{table}
 \begin{tabular}{ccccccccccccccccll}
-\input{medianDiff_0.tex}
+\input{tables/medianDiff_0.tex}
 \end{tabular}
 	\caption{Median Differences between Real and Baseline: For each memory budget, we provide the difference in median surprisal between real languages and random baselines; for real orders (blue) and maximum likelihood grammars (red). Lower values indicate lower surprisal compared to baselines. Solid lines indicate sample means. Dashed lines indicate 95 $\%$ confidence intervals.}\label{tab:median_diffs}
 \end{table}
 
 \begin{table}
 \begin{tabular}{ccccccccccccccccll}
-\input{medianDiff_1.tex}
+\input{tables/medianDiff_1.tex}
 \end{tabular}
 	\caption{Median Differences (Part 2)}
 \end{table}
 
 \begin{table}
 \begin{tabular}{ccccccccccccccccll}
-\input{medianDiff_2.tex}
+\input{tables/medianDiff_2.tex}
 \end{tabular}
 	\caption{Median Differences (Part 3)}
 \end{table}
 
 \begin{table}
 \begin{tabular}{ccccccccccccccccll}
-\input{medianDiff_3.tex}
+\input{tables/medianDiff_3.tex}
 \end{tabular}
 	\caption{Median Differences (Part 4)}
 \end{table}
@@ -1095,21 +1095,21 @@ TODO
 
 \begin{table}
 \begin{tabular}{cccccccccccccccccc}
-\input{quantiles_0.tex}
+\input{tables/quantiles_0.tex}
 \end{tabular}
 	\caption{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
 \end{table}
 
 \begin{table}
 \begin{tabular}{cccccccccccccccccc}
-\input{quantiles_1.tex}
+\input{tables/quantiles_1.tex}
 \end{tabular}
 	\caption{Quantiles (part 2)}
 \end{table}
 
 \begin{table}
 \begin{tabular}{cccccccccccccccccc}
-\input{quantiles_2.tex}
+\input{tables/quantiles_2.tex}
 \end{tabular}
 	\caption{Quantiles (part 3)}
 \end{table}
@@ -1126,28 +1126,28 @@ TODO
 
 \begin{table}
 \begin{tabular}{ccccccccccccccclll}
-\input{medians_ngrams_0.tex}
+\input{tables/medians_ngrams_0.tex}
 \end{tabular}
 	\caption{Medians (estimated using n-gram models): For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians for ngrams, dashed lines indicate 95 \% confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians_ngrams}
 \end{table}
 
 \begin{table}
 \begin{tabular}{ccccccccccccccclll}
-\input{medians_ngrams_1.tex}
+\input{tables/medians_ngrams_1.tex}
 \end{tabular}
 	\caption{Medians (cont.)}
 \end{table}
 
 \begin{table}
 \begin{tabular}{ccccccccccccccclll}
-\input{medians_ngrams_2.tex}
+\input{tables/medians_ngrams_2.tex}
 \end{tabular}
 	\caption{Medians (cont.)}
 \end{table}
 
 \begin{table}
 \begin{tabular}{ccccccccccccccclll}
-\input{medians_ngrams_3.tex}
+\input{tables/medians_ngrams_3.tex}
 \end{tabular}
 	\caption{Medians (cont.)}
 \end{table}
