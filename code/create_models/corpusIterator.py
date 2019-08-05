@@ -1,11 +1,12 @@
 import os
 import random
-#import accessISWOCData
-#import accessTOROTData
 import sys
 
 header = ["index", "word", "lemma", "posUni", "posFine", "morph", "head", "dep", "_", "_"]
 
+SMALL_TREEBANKS = ["UD_Kazakh-KTB", "UD_Cantonese-HK", "UD_Naija-NSC", "UD_Buryat-BDT", "UD_Thai-PUD", "UD_Breton-KEB", "UD_Faroese-OFT", "UD_Amharic-ATT", "UD_Kurmanji-MG", "UD_Upper_Sorbian-UFAL", "UD_Bambara-CRB", "UD_Erzya-JR"]
+SUBSTITUTE_TEST_FOR_DEV = ["UD_North_Sami", "UD_Irish", "UD_Buryat-BDT", "UD_Armenian-ArmTDP"]
+SUBSTITUTE_DEV_FOR_TRAIN = ["UD_Armenian-ArmTDP"]
 
 def readUDCorpus(language, partition):
       basePaths = ["/u/scr/corpora/Universal_Dependencies_2.2/ud-treebanks-v2.2/", "/u/scr/corpora/Universal_Dependencies_2.1/ud-treebanks-v2.1/", "/u/scr/corpora/Universal_Dependencies_2.3/ud-treebanks-v2.3/"]
@@ -34,15 +35,18 @@ def readUDCorpus(language, partition):
             subDirectory =basePath+"/"+name
         subDirFiles = os.listdir(subDirectory)
         partitionHere = partition
-        if (name in ["UD_North_Sami", "UD_Irish", "UD_Buryat-BDT", "UD_Armenian-ArmTDP"]) and partition == "dev" and (not language.endswith("-Adap")):
+
+        # Special procedures for small corpora
+        if (name in SUBSTITUTE_TEST_FOR_DEV) and partition == "dev" and (not language.endswith("-Adap")):
             print >> sys.stderr, "Substituted test for dev partition"
             partitionHere = "test"
         elif language.endswith("-Adap"):
-          if (name in ["UD_Kazakh-KTB", "UD_Cantonese-HK", "UD_Naija-NSC", "UD_Buryat-BDT", "UD_Thai-PUD", "UD_Breton-KEB", "UD_Faroese-OFT", "UD_Amharic-ATT", "UD_Kurmanji-MG", "UD_Upper_Sorbian-UFAL", "UD_Bambara-CRB", "UD_Erzya-JR"]):
+          if (name in SMALL_TREEBANKS):
              partitionHere = "test"
-          elif name == "UD_Armenian-ArmTDP":
+          elif name in SUBSTITUTE_DEV_FOR_TRAIN:
              partitionHere  = ("train" if partition == "dev" else "test")
             
+        # Collect corpus files
         candidates = filter(lambda x:"-ud-"+partitionHere+"." in x and x.endswith(".conllu"), subDirFiles)
         if len(candidates) == 0:
            print >> sys.stderr, "Did not find "+partitionHere+" file in "+subDirectory
@@ -55,7 +59,7 @@ def readUDCorpus(language, partition):
            with open(dataPath, "r") as inFile:
               newData = inFile.read().strip().split("\n\n")
               assert len(newData) > 1
-              if language.endswith("-Adap")  and (name in ["UD_Kazakh-KTB", "UD_Cantonese-HK", "UD_Naija-NSC", "UD_Buryat-BDT",  "UD_Thai-PUD", "UD_Breton-KEB", "UD_Faroese-OFT", "UD_Amharic-ATT", "UD_Kurmanji-MG", "UD_Upper_Sorbian-UFAL", "UD_Bambara-CRB", "UD_Erzya-JR"]): # "UD_Armenian-ArmTDP",
+              if language.endswith("-Adap")  and (name in SMALL_TREEBANKS): # "UD_Armenian-ArmTDP",
                   random.Random(4).shuffle(newData)
                   devLength = 100
                   if partition == "dev":
@@ -83,11 +87,7 @@ class CorpusIterator():
       assert self.splitWords == (language == "BKTreebank_Vietnamese")
 
       self.storeMorph = storeMorph
-      if language.startswith("ISWOC_"):
-          data = accessISWOCData.readISWOCCorpus(language.replace("ISWOC_",""), partition)
-      elif language.startswith("TOROT_"):
-          data = accessTOROTData.readTOROTCorpus(language.replace("TOROT_",""), partition)
-      elif language == "BKTreebank_Vietnamese":
+      if language == "BKTreebank_Vietnamese":
           import accessBKTreebank
           data = accessBKTreebank.readBKTreebank(partition)
       elif language == "TuebaJS":
@@ -133,10 +133,6 @@ class CorpusIterator():
            if self.language == "Thai-Adap":
               assert sentence[i]["lemma"] == "_"
               sentence[i]["lemma"] = sentence[i]["word"]
-           if "ISWOC" in self.language or "TOROT" in self.language:
-              if sentence[i]["head"] == 0:
-                  sentence[i]["dep"] = "root"
-
            if self.splitLemmas:
               sentence[i]["lemmas"] = sentence[i]["lemma"].split("+")
 
