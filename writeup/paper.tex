@@ -31,6 +31,10 @@
 \newcommand{\nopreview}[1]{}
 \newcommand\comment[1]{{\color{red}#1}}
 \newcommand\mhahn[1]{{\color{red}(#1)}}
+\newcommand\note[1]{{\color{red}(#1)}}
+\newcommand\jd[1]{{\color{red}(#1)}}
+\newcommand\rljf[1]{{\color{red}(#1)}}
+\newcommand{\key}[1]{\textbf{#1}}
 
 \usepackage{amsthm}
 
@@ -78,18 +82,45 @@ Online memory limitations are well-established as a factor impacting sentence pr
 %
 %\begin{thm}\label{prop:suboptimal}
 %	For each positive integer $t$, define
-%$I_t := I[X_t, X_0 | X_{1\dots t-1}]$,
+%$I_t := I[w_t, w_0 | w_{1\dots t-1}]$,
 %i.e., the mutual information between words at distance $t$, controlling for redundancy with the intervening words.
 %	Let $T$ be a positive integer, and consider a comprehender using at most $\sum_{t=1}^T t I_t$
 %bits of memory on average.
 %Then this comprehender will incur average surprisal at least
-%	$H[X_t|X_{<t}] + \sum_{t > T} I_t$.
+%	$H[w_t|w_{<t}] + \sum_{t > T} I_t$.
 %\end{thm}
 %
 
  
 \section{Introduction}
 
+\input{introduction.tex}
+
+
+
+\mhahn{pasted from the other draft}
+Each human language is a system for encoding an infinite variety of thoughts into sentences, i.e. linear strings of words.
+A primary goal of the field of linguistics is to characterize and explain the commonalities and differences among these systems, and so to gain insight into the cognitive machinery that underpins this fundamental aspect of human intelligence.
+Here we argue that human languages can be modeled as solutions to the problem of maximally efficient communication among agents with particular information-processing constraints active during speaking and listening.
+We formalize these constraints using information theory, and show novel large-scale quantitative evidence from 54 languages that information is structured in time so as to minimize memory load during language comprehension.
+
+The idea that the universal properties of human languages are best explained with reference to communicative efficiency has a long history \cite{gabelentz1901sprachwissenschaft,zipf1949human,hockett1960origin,givon1991markedness,hawkins1994performance,hawkins2004efficiency,hawkins2014crosslinguistic,croft2001functional,haspelmath2008parametric,jaeger2011language,gibson2019efficiency}.
+
+
+
+These strategies can be seen as sets of rules that differ in the way ...
+Languages differ considerably in the rules they apply to order information: English orders the object after the verb, Japanese places it before the verb \note{make more explicit here}.
+Explaining the variation in the strategies languages use to  order underlying hierarchical structures into linear strings of words has been one of the foci of linguistic research (\jd{CITE}).
+We show that these strategies reflect an underlying optimization principle: human languages are adapted to limitations in human working memory.
+
+%We test the hypothesis that human languages represent different solutions to the problem of efficient computation with constrained working memory.
+The suggestion that the structure of human language partly reflects a need for efficient processing under resource limitations has been present in the theoretical and functional linguistics literature for decades~\cite{berwick1984grammatical,hawkins1994performance}, where theories have been developed in terms of specific mechanistic and heuristic models of human language processing.
+Here 
+
+
+
+
+\mhahn{original intro}
 Since the 1950s, it has been a persistent suggestion that human language processing is shaped by a resource bottleneck in short-term memory.
 Language is produced and comprehended incrementally in a way that crucially requires both speaker and listener to use an active memory store to keep track of what was previously said.
 Since short-term memory of this kind is known to be highly limited in capacity \citep{miller1956magical}, it makes sense for these capacity limits to comprise a major constraint on production and comprehension.
@@ -152,227 +183,12 @@ We will then use corpus data from over 52 languages to provide evidence that the
 \section{Memory-Surprisal Tradeoff}
 \label{sec:ms-tradeoff}
 
-With minimal assumptions, we will use information theory to derive a tradeoff between \emph{listener memory} and (listener) surprisal
+\input{tradeoff.tex}
 
-In the second part of the paper, we examine whether word orders in natural language optimise this tradeoff.
 
+\section{Information Locality}\label{sec:info-locality}
 
-
-We consider a \emph{listener} who, as the speaker's utterance unfolds, engages in incremental prediction.
-%Informally, we expect that both speaker and listener will be affected by memory demands:
-%rom the speaker's perspective, producing well-formed sentences will require information about what she has uttered so far.
-For the listener, predicting the next word well requires maintaining information about the past.
-For the listener, the quality of prediction is measured by the average \emph{surprisal} experienced.
-For a fixed language, we can ask how much information about the past (1) the speaker has to maintain to produce well-formed utterances, and (2) the listener has to maintain to incur a minimal amount of surprisal.
-Utilizing the tools of information theory, we quantify memory in \emph{bits}, obtaining bounds that hold across different models of memory architecture and ways of quantifying memory load.
-
-
-TODO say at some point that we're studying sentence-internal memory
-
-\subsection{Theoretical Results}
-
-
-We now introduce our main theoretical result on memory-surprisal tradeoffs.
-
-\paragraph{Setting}
-We formalize a language as a probabilistic sequence of words $\dots x_{-2} x_{-1} x_0 x_{1} x_{2} \dots$, extending indefinitely both into the past and into the future.
-The symbols $x_i$ belong to a common set, representing the words of the language.\footnote{Could also be phonemes, sentences, ..., any other kind of unit.}
-
-We model the sequence as a probabilistic sequence; that is, given a context $x_{<t}$, the next word is distributed according to a distribution $p(x_t|x_{<t})$.
-
-% $(X_t)_{t \in \mathbb{Z}}$
-%We think of the language as a stochastic process, that is, a probability distribution over sequences of words $\dots x_{-2} x_{-1} x_0 x_{1} x_{2} \dots$.
-%As the elements are indexed by the full set of integers, we think of the process as extending infinitely into both the past and the future; that is, we model a setting where the speaker has been speaking and will continue to speak for an infinite amount of time.
-%This assumption is for mathematical convenience and does not affect the substance of our results: As we restrict our attention to the processing of individual sentences, which have finite length, we will actually not make use of long-range and infinite contexts.
-%We make the assumption that this process is \emph{stationary}.
-%Formally, this means that the conditional distribution $P(X_t|X_{<t})$ does not depend on $t$, it only depends on the actual sequence $X_{<t}$.
-%Informally, this says that the process has no `internal clock', and that the statistical rules of the language do not change at the timescale we are interested in.
-%In reality, the statistical rules of language do change: They change as language changes over generations, and they also change between different situations -- e.g., depending on the interlocutor at a given point in time.
-%Given that we are interested in memory needs in the processing of \emph{individual sentences}, at a timescale of seconds or minutes, stationarity seems to be a reasonable assumption to make.
-
-
-%The speaker maintains a memory state $S_t$, which evolves over the timesteps $t$.
-%We will not make any assumptions about the content of $S_t$ and how the speaker computes it.
-%The only assumption is that the speaker's past and future utterances are independent when conditioning on the memory state:
-%\begin{equation}\label{eq:markov-speaker}
-%X_{>t} \bot X_{\leq t} | S_t
-%\end{equation}
-%This means that the memory state $S_t$ functions as a `bottleneck', encoding all information about the past that influence the speaker's choices in the future.
-
-We now analyze memory from the perspective of the listener, who needs to maintain information about the past to predict the future.
-As the speaker's utterance unfolds, the listener maintains a memory state $L_t$.
-
-
-
-\begin{figure}
-\includegraphics[width=0.45\textwidth]{figures/markov-condition.png}
-	\caption{Illustration of (\ref{eq:listener-markov}). As the utterance unfolds, the listener maintains a memory state. After receiving word $X_t$, the listener computes their new memory state $L_t$ based on the previous memory state $L_{t-1}$ and the new word $X_t$.}\label{fig:listener-markov}
-\end{figure}
-
-
-
-
-
-There are no assumptions about the memory architecture and the nature of its computations.
-We only make a basic assumption about the flow of information (Figure~\ref{fig:listener-markov}):
-At a given point in time, the listener's memory state $L_t$ is determined by the last word $X_t$, and the prior memory state $L_{t-1}$.
-As a consequence, $L_t$ contains no information about the process beyond what is contained in the last word observed $X_{t-1}$ and in the memory state before that word was observed $L_{t-1}$.
-This is formalized as a statement about conditional probabilities:
-	\begin{equation}\label{eq:listener-markov}
-p(L_1| (X_{t})_t, L_0)   = p((X_{t})_t| L_0, X_1)
-%p((X_{t})_t| L_0, L_1, X_1)   = p((X_{t})_t| L_0, X_1)
-	\end{equation}
-This says that $L_1$ contains no information about the utterances beyond what is contained in $L_0$ and $X_1$.	
-As a consequence, the listener has no knowledge of the speaker's state beyond the information provided in their prior communication.
-This is a simplification, as the listener could obtain information about the speaker from other sources, such as their common environment (weather, ...).
-For the study of memory in sentence processing, this seems fair. Discuss this more.
-
-%
-%First, we assume that the listener's internal state cannot depend on the future beyond its dependency on the past.
-%Formally: 
-%\begin{equation}\label{eq:listener-markov-1}
-%L_t \bot X_{>t} | X_{\leq t}
-%\end{equation}
-%This means that the listener has no access to the speaker's state beyond what the speaker has already uttered.
-%
-%Second, we assume that $L_t$ contains no information about the past beyond what is contained in $X_{t-1}$ and $L_{t-1}$:
-%\begin{equation}\label{eq:listener-markov-2}
-%L_t \bot X_{<t} | X_{t-1}, L_{t-1}
-%\end{equation}
-%This means that any information about the past in $L_t$ has to be contained in $L_{t-1}$ -- formalizing the idea that a listener can only remember aspects of the past by keeping them in memory, and that memories of the past cannot `spontaneously' form later in the future.
-
-%The listener can trade off memory and future surprisal:
-%A listener who chooses to store less memory will exerience higher surprisal in the future.
-%A listener can achieve minimal surprisal -- that is, the lowest average surprisal that any model could achieve by predicting the future from the past -- if and only if $L_t$ contains all predictive information about the future that is contained in the past.
-
-%We now describe the memory-surprisal tradeoff. will describe this tradeoff, and show that listener memory is linked to locality in a way similar to speaker memory.
-%Consider a listener who uses $J$ bits of memory on average.
-%What can we say about the listener's surprisal?
-
-
-
-
-\paragraph{Conditional Mutual Information}
-
-We will use the concept of \emph{conditional mutual information} (Figure~\ref{fig:it-surprisal-intuition}).
-%For two random variables $X, Y$, the mutual information $I[X,Y]$ is the reduction in entropy about $X$ by knowing $Y$:
-%\begin{equation}
-%	I[X,Y] := H[X] - H[X|Y]
-%\end{equation}
-%For three random variables $X, Y, Z$, the mutual information between $X$ and $Y$, conditional on $Z$, is this entropy reduction when $Z$ is already known:
-%\begin{equation}
-%I[X,Y|Z] := H[X|Z] - H[X|Z,Y]
-%\end{equation}
-%We will use the specific form where $X$ and $Y$ are observations $X_0$, $X_t$ of the process $(X_t)_{t \in \mathbb{Z}}$, and $Z$ is a block of intervening observations $X_1, \dots, X_{t-1}$:
-\begin{equation}
-%	I[X_t, X_0 | X_1, \dots, X_{t-1}] := H[X_t| X_1, \dots, X_{t-1}] - H[X_t| X_0, X_1, \dots, X_{t-1}]
-	I_t := H[X_t| X_1, \dots, X_{t-1}] - H[X_t| X_0, X_1, \dots, X_{t-1}]
-\end{equation}
-This is equal to the reduction in uncertainty about the $t$-th observation when knowing the $0$-th observation, in addition to the block of intervening observations.
-That is, we measure the amount of statistical dependency of observations that are $t$ steps apart, controlling for any information that is redundant with intervening observations.
-This quantifies how much information needs to be carried across $t$ timesteps without any possibility for `guessing' it from intervening observations.
-
-
-
-\begin{figure*}
-\includegraphics[width=0.9\textwidth]{figures/listener-it.png}
-	\caption{(TODO adapt to format) Intuitive explanation of $I_t$}\label{fig:it-surprisal-intuition}
-\end{figure*}
-
-
-
-
-
-We return to the information and memory curves in Figure~\ref{fig:basic}.
-In the graph of $t \cdot I_t$, we look for the first $T$ such that the area under the curve to the left of $T$ has size $\geq J$.
-This is illustrated in Figure~\ref{fig:listener-tradeoff-decay} (right).
-Then let $\epsilon$ be the area under the curve of $I_t$ to the right of $T$ (Figure~\ref{fig:listener-tradeoff-decay}, left).
-We can prove that such a listener must incur surprisal at least $\epsilon$ greater than a listener with perfect memory.
-As before, we write $$I_t := I[X_t, X_0 | X_{1\dots t-1}]$$
-Then
-
-
-\begin{thm}\label{prop:suboptimal}
-	Let $T$ be any positive integer ($T \in \{1, 2, 3, ...\}$), and consider a listener using at most
-	\begin{equation}\label{eq:memory}
-		\sum_{t=1}^T t I_t
-	\end{equation}
-bits of memory on average.
-Then this listener will incur surprisal at least
-	$$H[X_t|X_{<t}] + \sum_{t > T} I_t$$
-	on average.
-\end{thm}
-The proof is given in the appendix (REF).
-
-%An intuitive (non-rigorous) argument goes as follows:
-%For each bit of information that is held in memory, we count the number of timesteps from when it is first entered into memory to when it is forgotten.
-
-
-\begin{figure*}
-\includegraphics[width=0.45\textwidth]{toy/decay.pdf}
-\includegraphics[width=0.45\textwidth]{toy/memory.pdf}
-%
-	\caption{Left: $I_t$ as a function of $t$, for two different processes. $I_t$ decays faster for the red process: Predictive information about the present observation is concentrated more strongly in the recent past. Left: $t \cdot I_t$ as a function of $t$ for the same processes. }\label{fig:basic}
-\end{figure*}
-
-
-\begin{figure}
-	\begin{center}
-\includegraphics[width=0.45\textwidth]{figures/interpolate-curve.png}
-\end{center}
-	\caption{Estimating memory-surprisal tradeoff using the Theorem: We trace out the memory and surprisal values for all $T=1, 2, ...$, and linearly interpolate the curve.}\label{fig:interpolate}
-\end{figure}
-
-
-
-
-
-
-
-The proposition gives us a lower bound on the listener's memory-surprisal curve: Taking all pairs of memory $\sum_{t=1}^T t I_t$ and surprisal $H[X_t|X_{<t}] + \sum_{t > T} I_t$.
-Then interplate linearly (justify this in appendix).
-We obtain a curve in memry-surprisal plane, which is a lower bound on the memory demands of any listener at a given surprisal level.
-We visualize this for the two processes from Figure~\ref{fig:basic} in Figure~\ref{fig:listener-tradeoff}.
-
-\begin{figure}
-\includegraphics[width=0.45\textwidth]{toy/add-surp.pdf}
-\includegraphics[width=0.45\textwidth]{toy/lower-mem.pdf}
-	\caption{Illustration for Proposition~\ref{prop:suboptimal}. Listeners can trade off memory and surprisal: A listener only investing memory of the amount given by the black area on the right will incur at least the black area on the left in additional surprisal. In the given example, $T=4$. By varying $T$, the two areas describe the listener's memory-surprisal tradeoff curve.}\label{fig:listener-tradeoff-decay}
-\end{figure}
-
-
-
-
-\begin{figure}
-\includegraphics[width=0.45\textwidth]{toy/listener-tradeoff.pdf}
-	\caption{Listener's memory-surprisal tradeoff for the two processes in Figure~\ref{fig:basic}. Recall that the red process had a faster decay of conditional mutual information. Correspondingly, this figure shows that a listener can achieve lower surprisal at the same level of memory load.}\label{fig:listener-tradeoff}
-\end{figure}
-
-
-
-\begin{figure}
-\includegraphics[width=0.45\textwidth]{toy/toy-mem-surp.pdf}
-	\caption{Tradeoff between listener memory and surprisal, for the two versions of the artificial language from \cite{fedzechkina-human-2017}. Language A requires less memory at the same level of surprisal.}\label{fig:toy-listener-tradeoff}
-\end{figure}
-
-
-
-
-
-
-
-
-%that the model does not have an `absolute clock' built into it.
-
-
-Our result is entirely information-theoretic and applies to \emph{any} physical encoding of the past, entirely independent of the implementation of the model. % and the mechanisms by which it computes predictions.
-In particular, while the relation to psycholinguistic and psychological models of how memory works will be interesting to explore, our result applies to any such model.
-Memory representations do not have to be rational or optimal for this bound to hold:
-It provides a \emph{lower bound} on the amount of information that needs to be stored -- other memory representations will always need to store at least as much information.
-
-
-\paragraph{Information Locality}
-
+TODO derive information locality
 
 Due to the factor $t$ inside each term of the sum, carrying the same amount of information over longer distances requires more memory -- that is, modeling long statistical dependencies is more costly in terms of memory than modeling shorter ones.
 This formalizes a general, assumption-free, link between memory and locality in language production.
@@ -382,14 +198,14 @@ In Section~\ref{sec:listener}, we will extend this analysis to listeners perform
 
 
 
-%We will write $I_t$ as an abbreviation for $\operatorname{I}[X_t, X_0 | X_1, ..., X_{t-1}]$.
+%We will write $I_t$ as an abbreviation for $\operatorname{I}[w_t, w_0 | w_1, ..., w_{t-1}]$.
 The proposition implies that memory is decreased if $I_t$ decreases quickly as $t \rightarrow \infty$ -- that is, if the contributions of long-term dependencies in the process are small.
 In particular, memory load can only be finite if $I_t$ decreases fast enough for the infinite sum to converge to a finite value.
 %This confirms the intuition that finiteness of memory entails that the contribution of long-term 
 
 
 %\paragraph{Discussion}
-%We have treated the process $(X_t)_t$ as a discrete-time process whose time steps correspond to words, but this is immaterial to the analysis.
+%We have treated the process $(w_t)_t$ as a discrete-time process whose time steps correspond to words, but this is immaterial to the analysis.
 %The analysis is not even restricted to discrete timesteps: We can replace thes sum in Proposition~\ref{prop:suboptimal} with an integral to get a continuous-time version.
 
 
@@ -411,27 +227,13 @@ This area is smaller for the red process, as $I_t$ decays more quickly there.
 \input{toy-experiment.tex}
 
 
-\paragraph{Center Embeddings}
-
-\cite{miller-finitary-1963} attributed the unacceptability of multiple center-embedding to memory limitations.
-
-
+%\paragraph{Center Embeddings}
+%\cite{miller-finitary-1963} attributed the unacceptability of multiple center-embedding to memory limitations.
 %\cite{gibson-linguistic-1998}
-
-%first center-embeddings, POS level model
-
-%Later work found evidence that cross-serial dependencies are less taxing.
-
-
-%now cross-serial: POS level model things are the same. But lexical level, assume PMI and dependencies. Then listener's tradeoff is better for cross-serial dependencies
-
-\paragraph{Other Psycholinguistic Predictions}
-
+%\paragraph{Other Psycholinguistic Predictions}
 % RF: the fact that you would get locality effects given medium WM capacity, but not very high or very low WM capacity, as Bruno Nicenboim found. And maybe some speaker-listener asymmetries. 
-
-\paragraph{Speakers}
-
-% RF: what matters for the speaker is not I[X_t, X_0 | X_1, …, X_{t-1}], but I[X_t, X_0 | X_1, …, X_{t-1}, G] where G is some representation of the speaker’s goal (like in the van Dijk paper). This changes the interpretation of the mutual information. For the listener, it’s just redundancy. For the speaker, it’s redundancy *conditional on the goal*—which you could interpret as something like conceptual relatedness of linguistic elements. Then the speaker’s pressure is to keep conceptually related things close. 
+%\paragraph{Speakers}
+% RF: what matters for the speaker is not I[w_t, w_0 | w_1, …, w_{t-1}], but I[w_t, w_0 | w_1, …, w_{t-1}, G] where G is some representation of the speaker’s goal (like in the van Dijk paper). This changes the interpretation of the mutual information. For the listener, it’s just redundancy. For the speaker, it’s redundancy *conditional on the goal*—which you could interpret as something like conceptual relatedness of linguistic elements. Then the speaker’s pressure is to keep conceptually related things close. 
 
 
 \section{Large-Scale Evidence that natural language optimize Memory-Surprisal Tradeoff}
@@ -471,12 +273,12 @@ Dependency trees can be defined in terms of many different syntactic theories \c
 Although there are some differences in how different formalisms would draw trees for certain sentences, there is broad enough agreement about dependency trees that it has been possible to develop large-scale dependency-annotated corpora of text from dozens of languages \cite{nivre2017universal}.
 
 \paragraph{Corpora}
-We considered all languages for which there are Universal Dependencies 2.2 treebanks with a total of at least 500 sentences of training data.
-We excluded data from historical languages.\footnote{Ancient Greek, Coptic, Gothic, Latin, Old Church Slavonic, Old French.}
-This resulted in 52 languages.
+We considered all languages for which there are Universal Dependencies 2.3 treebanks with a total of at least 500 sentences of training data.
+We excluded data from historical languages.\footnote{Ancient Greek, Classical Chinese, Coptic, Gothic, Latin, Old Church Slavonic, Old French.}
+This resulted in 54 languages.
 
 For each of these languages, we pooled all available corpora in one dataset.
-We excluded corpora that primarily contain text created by non-native speakers.
+We excluded corpora that primarily contain code-switched text\footnote{Hindi English corpus}, or text created by non-native speakers.\footnote{ESL, CFL}
 Universal Dependencies corpora have a predefined split into \emph{training}, \emph{held-out} (also known as \emph{development}), and \emph{test} partitions.
 While larger corpora have all three partitions, smaller corpora often have only some of these partitions.
 For most language, we used the predefined data split, separately pooling data from the different partitions. %We did not use the test partitions.
@@ -495,9 +297,9 @@ Our formalism of ordering grammars adapts the method of \cite{gildea-optimizing-
 Universal Dependencies defines 37 universal syntactic relations that are used to label dependency arcs across all corpora.
 These relations encode cross-linguistically meaningful relations such as subjects, objects, and adjectival modifiers.
 We define ordering grammars by assigning a parameter $a_\tau \in [-1,1]$ to every one of these 37 universal syntactic relations.
-Relations sometimes have language-specific subtypes; we do not distinguish these subtypes.
+Relations sometimes have language-specific subtypes; we do not distinguish these subtypes.\mhahn{give an example to make clear what this refers to}
 
-In our model, this parameter defines how dependents are ordered relative to their head:
+Following Gildea and colleagues, this parameter defines how dependents are ordered relative to their head:
 Given a head and a set of dependents, we order each dependents by the parameter $a_\tau$ assigned to the syntactic relation linking it to the head.
 Dependents with negative weights are placed to the left of the head; dependents with positive weights are placed to the right.
 
@@ -518,7 +320,7 @@ In this sense, ordering grammars represent approximations to the kinds of orderi
 
 
 \subsection{Estimating Memory-Surprisal Tradeoff}\label{sec:method}
-To estimate mutual informations, we use LSTM recurrent neural networks, the basis of the state of the art in modeling natural language (CITE) and predicting the surprisal effect on reading times~\citep{frank-insensitivity-2011, goodkind-predictive-2018}.
+To estimate mutual informations, we use LSTM recurrent neural networks, the basis of the state of the art in modeling natural language (CITE)\footnote{While Transformers are now better at modeling when large training sets comprising millions of sentences per language are available, they have not reached the level of LSTMs on small/medium training data such as the UD corpora} and predicting the surprisal effect on reading times~\citep{frank-insensitivity-2011, goodkind-predictive-2018}.
 %We model language on the level of individual word forms.
 We provide data from alternative estimation methods in the SI.
 
@@ -632,13 +434,13 @@ Third, traditional N-gram models, which do not have this limitation, provide res
 
 
 
-The quantity $\operatorname{I}[X_t, X_0 | X_1, ..., X_{t-1}]$ in~(\ref{eq:memory-bound}) is equal to the difference 
+The quantity $\operatorname{I}[w_t, w_0 | w_1, ..., w_{t-1}]$ in~(\ref{eq:memory-bound}) is equal to the difference 
 \begin{equation}
-H[X_t|X_1, ..., X_{t-1}] - H[X_t|X_0, X_1, ..., X_{t-1}]
+H[w_t|w_1, ..., w_{t-1}] - H[w_t|w_0, w_1, ..., w_{t-1}]
 \end{equation}
 For each word in the held-out partition, we compute the difference
 \begin{equation}
-	-\log P_\theta[X_t | X_0, X_1, ..., X_{t-1}] - P_\theta[X_t | X_1, ..., X_{t-1}]
+	-\log P_\theta[w_t | w_0, w_1, ..., w_{t-1}] - P_\theta[w_t | w_1, ..., w_{t-1}]
 \end{equation}
 and take the average over these.
 We cut $T$ off at 20, as this is the length of the sequences processed by the model.
@@ -646,7 +448,7 @@ We cut $T$ off at 20, as this is the length of the sequences processed by the mo
 We then used linear interpolation to interpolate the surprisal value for memory values in between these values. (TODO make a figure).
 This is justified theoretically (TODO maybe discuss when introducing the theorem).
 
-We estimate the unigram entropy $H[X_0]$ by averaging over all models.
+We estimate the unigram entropy $H[w_0]$ by averaging over all models.
 
 %
 %\subsection{Discussion: Alternative Models}
@@ -859,9 +661,7 @@ In the case where the stopping criterion was reached for a language while severa
 Consequently, more samples were collected than necessary to reach the stopping criterion; however, in a way that does not bias our results towards or against our hypothesis.
 
 %Due to parallelization of this procedure, it often produced more samples than required, when the stopping criterion .
-
 %We chose these thresholds based on preliminary simulations which had suggested that these widths were achievable at acceptable computational cost.
-
 %For each language, we collected at least 5 data points for real orderings and at least 10 data points for baseline orderings.
 %We continued obtaining new data points until the CI for $G$ had width $\leq 0.15$, or there were 100 samples from $P_1$ and 300 samples from $P_2$.
 %Up to the end, we chose the next sample to be from $P_0$ with probability 2/3, and $P_1$ otherwise.
@@ -891,244 +691,6 @@ $\E[G]$ was not estimated to be significantly above $>5$ for four languages: Lat
 
 
 In Table~\ref{tab:quantiles}, we show the quantiles.
-
-
-
-\begin{figure}
-\includegraphics[width=0.95\textwidth]{neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
-\caption{Histogram}\label{fig:hist-real}
-\end{figure}
-
-
-\begin{table}
-\begin{longtable}{l|ll||l|llllllllllllll}
-	Language & Training & Held-Out & 	Language & Training & Held-Out\\ \hline
-\input{corpusSizes.tex}
-\end{longtable}
-	\caption{Languages, with the number of training and held-out sentences available.}\label{tab:corpora}
-\end{table}
-
-\begin{table}
-\begin{longtable}{l|ll||l|llllllllllllll}
-	Language & Base. & Real & Language & Base. & Real \\ \hline
-\input{samplesNumber.tex}
-\end{longtable}
-	\caption{Samples drawn per language according to the precision-dependent stopping criterion.}\label{tab:samples}
-\end{table}
-
-
-
-\begin{table}
-\begin{longtable}{l|lll||l|lllllllllllllll}
-	Language & Mean & Lower & Upper & Language & Mean & Lower & Upper \\ \hline
-\input{boot_g_REAL.tex}
-\end{longtable}
-	\caption{Bootstrapped estimates for $G$.}\label{tab:boot-g}
-\end{table}
-
-
-
-\begin{table}
-\begin{longtable}{ccccccccccccccclll}
-\input{medians_REAL_0.tex}
-\end{longtable}
-	\caption{Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
-\end{table}
-
-\begin{table}
-\begin{longtable}{ccccccccccccccclll}
-\input{medians_REAL_1.tex}
-\end{longtable}
-	\caption{Medians (cont.)}
-\end{table}
-
-\begin{table}
-\begin{longtable}{ccccccccccccccclll}
-\input{medians_REAL_2.tex}
-\end{longtable}
-	\caption{Medians (cont.)}
-\end{table}
-
-\begin{table}
-\begin{longtable}{ccccccccccccccclll}
-\input{medians_REAL_3.tex}
-\end{longtable}
-	\caption{Medians (cont.)}
-\end{table}
-
-
-
-
-
-
-
-\begin{table}
-\begin{longtable}{ccccccccccccccclll}
-\input{slice-hists_REAL_0.tex}
-\end{longtable}
-	\caption{Histograms: Surprisal, at maximum memory.}\label{tab:slice-hists-real}
-\end{table}
-
-\begin{table}
-\begin{longtable}{ccccccccccccccclll}
-\input{slice-hists_REAL_1.tex}
-\end{longtable}
-	\caption{Medians (cont.)}
-\end{table}
-
-\begin{table}
-\begin{longtable}{ccccccccccccccclll}
-\input{slice-hists_REAL_2.tex}
-\end{longtable}
-	\caption{Medians (cont.)}
-\end{table}
-
-\begin{table}
-\begin{longtable}{ccccccccccccccclll}
-\input{slice-hists_REAL_3.tex}
-\end{longtable}
-	\caption{Medians (cont.)}
-\end{table}
-
-
-\begin{table}
-\begin{longtable}{cccccccccccccccccc}
-\input{quantiles_REAL_0.tex}
-\end{longtable}
-	\caption{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
-\end{table}
-
-\begin{table}
-\begin{longtable}{cccccccccccccccccc}
-\input{quantiles_REAL_1.tex}
-\end{longtable}
-	\caption{Quantiles (part 2)}
-\end{table}
-
-\begin{table}
-\begin{longtable}{cccccccccccccccccc}
-\input{quantiles_REAL_2.tex}
-\end{longtable}
-	\caption{Quantiles (part 3)}
-\end{table}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\begin{table}
-\begin{longtable}{l|ll||l|llllllllllllll}
-	Language & Base. & MLE & Language & Base. & MLE \\ \hline
-\input{samplesNumber_ground.tex}
-\end{longtable}
-	\caption{Experiment 3: Samples drawn per language according to the precision-dependent stopping criterion.}\label{tab:samples}
-\end{table}
-
-
-
-
-
-\begin{table}
-\begin{longtable}{ccccccccccccccclll}
-\input{medians_0.tex}
-\end{longtable}
-	\caption{Experiment 3. Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
-\end{table}
-
-\begin{table}
-\begin{longtable}{ccccccccccccccclll}
-\input{medians_1.tex}
-\end{longtable}
-	\caption{Medians (cont.)}
-\end{table}
-
-\begin{table}
-\begin{longtable}{ccccccccccccccclll}
-\input{medians_2.tex}
-\end{longtable}
-	\caption{Medians (cont.)}
-\end{table}
-
-\begin{table}
-\begin{longtable}{ccccccccccccccclll}
-\input{medians_3.tex}
-\end{longtable}
-	\caption{Medians (cont.)}
-\end{table}
-
-
-
-
-\begin{table}
-\begin{longtable}{ccccccccccccccccll}
-\input{medianDiff_0.tex}
-\end{longtable}
-	\caption{Median Differences between Real and Baseline: For each memory budget, we provide the difference in median surprisal between real languages and random baselines; for real orders (blue) and maximum likelihood grammars (red). Lower values indicate lower surprisal compared to baselines. Solid lines indicate sample means. Dashed lines indicate 95 $\%$ confidence intervals.}\label{tab:median_diffs}
-\end{table}
-
-\begin{table}
-\begin{longtable}{ccccccccccccccccll}
-\input{medianDiff_1.tex}
-\end{longtable}
-	\caption{Median Differences (Part 2)}
-\end{table}
-
-\begin{table}
-\begin{longtable}{ccccccccccccccccll}
-\input{medianDiff_2.tex}
-\end{longtable}
-	\caption{Median Differences (Part 3)}
-\end{table}
-
-\begin{table}
-\begin{longtable}{ccccccccccccccccll}
-\input{medianDiff_3.tex}
-\end{longtable}
-	\caption{Median Differences (Part 4)}
-\end{table}
-
-
-
-
-
-\begin{table}
-\begin{longtable}{cccccccccccccccccc}
-\input{quantiles_0.tex}
-\end{longtable}
-	\caption{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
-\end{table}
-
-\begin{table}
-\begin{longtable}{cccccccccccccccccc}
-\input{quantiles_1.tex}
-\end{longtable}
-	\caption{Quantiles (part 2)}
-\end{table}
-
-\begin{table}
-\begin{longtable}{cccccccccccccccccc}
-\input{quantiles_2.tex}
-\end{longtable}
-	\caption{Quantiles (part 3)}
-\end{table}
-
-
 
 
 
@@ -1206,11 +768,6 @@ However, discrete optimization is computationally challenging.
 
 \section{Discussion}
 
-\subsection{Speaker Memory}
-
-%The quantity $M$ is equal to the mutual information between past and future observations, $I[(X_i)_{i>0}, (X_i)_{i \leq 0}]$, which is often referred to as the \emph{excess entropy} of the process (CITE).
-TODO
-
 \subsection{Relation to Theories of Sentence Processing}
 
 
@@ -1266,14 +823,14 @@ Relatedly, \cite{sharan-prediction-2016} shows a link between excess entropy and
 also information-theoretic studies of memory capacity
 
 \paragraph{Decay of Mutual Information}
-In Propositions~\ref{prop:lower-bound} and \ref{prop:suboptimal}, we showed a close link between memory and the decay of \emph{conditional} mutual information $I_t := I[X_t, X_0 | X_{1\dots t-1}]$.
-Prior work has studied the decay of \emph{unconditional} mutual information $I[X_t, X_0]$ in natural language \citep{ebeling-entropy-1994,lin-critical-2017}, and linked it to locality and memory \citep{futrell-noisy-context-2017}.
+In Propositions~\ref{prop:lower-bound} and \ref{prop:suboptimal}, we showed a close link between memory and the decay of \emph{conditional} mutual information $I_t := I[w_t, w_0 | w_{1\dots t-1}]$.
+Prior work has studied the decay of \emph{unconditional} mutual information $I[w_t, w_0]$ in natural language \citep{ebeling-entropy-1994,lin-critical-2017}, and linked it to locality and memory \citep{futrell-noisy-context-2017}.
 
 The decay of unconditional mutual information is less closely linked to memory requirements than conditional mutual information:
 While the decay of conditional mutual informations provides a lower bound on memory need, unconditional mutual information does not:
-Consider the constant process where with probability 1/2 all $X_t = 0$, and with probability 1/2 all $X_t = 1$. %%$X_t = c$, where $c$ is random but independent of $t$ for each specific draw from the process.
+Consider the constant process where with probability 1/2 all $w_t = 0$, and with probability 1/2 all $w_t = 1$. %%$w_t = c$, where $c$ is random but independent of $t$ for each specific draw from the process.
 The unconditional mutual information is 1 at all distances, so does not decay at all, but the process only requires 1 bit of memory.
-Conversely, one can construct processes where the unconditional mutual informations are 0 for all $t$, but where $P > 0$ and this predictive information is actually spread out over arbitrarily large distances (that is, the ratio of memory $M$ and predictability $P$ can be made arbitrarrily large).\footnote{First, consider the process (called X by REF) consisting of 2 random bits and their XOR. This one has bounded nonzero $J$, but zero unconditional MI. To get unbounded $J$, consider the following process for any $N \in \mathbb{N}_{>2}$: Every $X_t$ is equal to the XOR of $X_{t-1}$ and $X_{t-N}$, such that each $X_t$ has $Bernoulli(1/2)$ as its marginal. The unconditional mutual information between any two timesteps is zero, but modeling the process requires $N$ bits of memory.}
+Conversely, one can construct processes where the unconditional mutual informations are 0 for all $t$, but where $P > 0$ and this predictive information is actually spread out over arbitrarily large distances (that is, the ratio of memory $M$ and predictability $P$ can be made arbitrarrily large).\footnote{First, consider the process (called X by REF) consisting of 2 random bits and their XOR. This one has bounded nonzero $J$, but zero unconditional MI. To get unbounded $J$, consider the following process for any $N \in \mathbb{N}_{>2}$: Every $w_t$ is equal to the XOR of $w_{t-1}$ and $w_{t-N}$, such that each $w_t$ has $Bernoulli(1/2)$ as its marginal. The unconditional mutual information between any two timesteps is zero, but modeling the process requires $N$ bits of memory.}
 
 
 
@@ -1285,7 +842,7 @@ Our work contrasts with this work in that we are interested in dependencies with
 \subsection{Discussion}
 
 \paragraph{Speakers vs Listeners}
-Our results apply both to speakers and listeners.
+can we say something about this
 
 \paragraph{Decay vs Interference}
 Work has suggested that interference and memory overload is more appropriate than decay \cite[p. 408]{lewis-activation-based-2005} for modeling locality and memory in sentence processing.
@@ -1306,24 +863,11 @@ For instance, languages defined by Probabilistic Context Free Grammars (PCFG) al
 The reason is that PCFGs assign low probabilities to long sequences.\footnote{Proposition 2 in \cite{chi-statistical-1999} implies that words drawn from a PCFG have finite expected length. This implies that average memory demands are finite.}
 
 
-%\begin{proposition}
-%Any language generated by a PCFG, with rational weights, and finitely many terminals and nonterminals, has finite average memory demand in production and incremental prediction.
-%\end{proposition}
-%
-%\begin{proof}[Proof Sketch]
-%	TODO Actually, Proposition 2 in \cite{chi-statistical-1999} is enough, no need to talk about how to do parsing.
-%
-%	We provide an algorithm that performs generation or optimal prediction and has finite average memory use. We consider incremental Earley parsing \citep{earley-efficient-1970}. Disregarding probabilities, parsing a word of length $n$ takes $O(n^2)$ bits of memory (where the constants depend on the grammar but not $n$). For storing probabilities, the storage will be similarly bounded as long as the weights of the grammar are rational.
-%	The result then follows from Proposition 2 in \cite{chi-statistical-1999}, which says that any function that is polynomial in the length of words drawn from a PCFG has finite expectation.\footnote{Using Proposition 2 of \cite{chi-statistical-1999}, one can also directly show that excess entropy is finite for any PCFG (without assumption about the weights), if we interpret it as giving rise to a stationary process consisting of a sequence of words independently drawn from the language.}
-%\end{proof}
-%
-%
-%
-
-
 
 
 \section{Conclusion}
+
+TODO
 
 
 \bibliographystyle{apalike}
@@ -1334,35 +878,277 @@ The reason is that PCFGs assign low probabilities to long sequences.\footnote{Pr
 
 
 
+
+
+\begin{figure}
+\includegraphics[width=0.95\textwidth]{neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
+\caption{Histogram}\label{fig:hist-real}
+\end{figure}
+
+
+\begin{table}
+\begin{longtable}{l|ll||l|llllllllllllll}
+	Language & Training & Held-Out & 	Language & Training & Held-Out\\ \hline
+\input{tables/corpusSizes.tex}
+\end{longtable}
+	\caption{Languages, with the number of training and held-out sentences available.}\label{tab:corpora}
+\end{table}
+
+\begin{table}
+\begin{longtable}{l|ll||l|llllllllllllll}
+	Language & Base. & Real & Language & Base. & Real \\ \hline
+\input{tables/samplesNumber.tex}
+\end{longtable}
+	\caption{Samples drawn per language according to the precision-dependent stopping criterion.}\label{tab:samples}
+\end{table}
+
+
+
+\begin{table}
+\begin{longtable}{l|lll||l|lllllllllllllll}
+	Language & Mean & Lower & Upper & Language & Mean & Lower & Upper \\ \hline
+\input{tables/boot_g_REAL.tex}
+\end{longtable}
+	\caption{Bootstrapped estimates for $G$.}\label{tab:boot-g}
+\end{table}
+
+
+
+\begin{table}
+\begin{longtable}{ccccccccccccccclll}
+\input{tables/medians_REAL_0.tex}
+\end{longtable}
+	\caption{Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
+\end{table}
+
+\begin{table}
+\begin{longtable}{ccccccccccccccclll}
+\input{tables/medians_REAL_1.tex}
+\end{longtable}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}
+\begin{longtable}{ccccccccccccccclll}
+\input{tables/medians_REAL_2.tex}
+\end{longtable}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}
+\begin{longtable}{ccccccccccccccclll}
+\input{tables/medians_REAL_3.tex}
+\end{longtable}
+	\caption{Medians (cont.)}
+\end{table}
+
+
+
+
+
+
+
+\begin{table}
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/slice-hists_REAL_0.tex}
+\end{tabular}
+	\caption{Histograms: Surprisal, at maximum memory.}\label{tab:slice-hists-real}
+\end{table}
+
+\begin{table}
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/slice-hists_REAL_1.tex}
+\end{tabular}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/slice-hists_REAL_2.tex}
+\end{tabular}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/slice-hists_REAL_3.tex}
+\end{tabular}
+	\caption{Medians (cont.)}
+\end{table}
+
+
+\begin{table}
+\begin{tabular}{cccccccccccccccccc}
+\input{tables/quantiles_REAL_0.tex}
+\end{tabular}
+	\caption{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
+\end{table}
+
+\begin{table}
+\begin{tabular}{cccccccccccccccccc}
+\input{tables/quantiles_REAL_1.tex}
+\end{tabular}
+	\caption{Quantiles (part 2)}
+\end{table}
+
+\begin{table}
+\begin{tabular}{cccccccccccccccccc}
+\input{tables/quantiles_REAL_2.tex}
+\end{tabular}
+	\caption{Quantiles (part 3)}
+\end{table}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{table}
+\begin{tabular}{l|ll||l|llllllllllllll}
+	Language & Base. & MLE & Language & Base. & MLE \\ \hline
+\input{tables/samplesNumber_ground.tex}
+\end{tabular}
+	\caption{Experiment 3: Samples drawn per language according to the precision-dependent stopping criterion.}\label{tab:samples}
+\end{table}
+
+
+
+
+
+\begin{table}
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/medians_0.tex}
+\end{tabular}
+	\caption{Experiment 3. Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
+\end{table}
+
+\begin{table}
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/medians_1.tex}
+\end{tabular}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/medians_2.tex}
+\end{tabular}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/medians_3.tex}
+\end{tabular}
+	\caption{Medians (cont.)}
+\end{table}
+
+
+
+
+\begin{table}
+\begin{tabular}{ccccccccccccccccll}
+\input{tables/medianDiff_0.tex}
+\end{tabular}
+	\caption{Median Differences between Real and Baseline: For each memory budget, we provide the difference in median surprisal between real languages and random baselines; for real orders (blue) and maximum likelihood grammars (red). Lower values indicate lower surprisal compared to baselines. Solid lines indicate sample means. Dashed lines indicate 95 $\%$ confidence intervals.}\label{tab:median_diffs}
+\end{table}
+
+\begin{table}
+\begin{tabular}{ccccccccccccccccll}
+\input{tables/medianDiff_1.tex}
+\end{tabular}
+	\caption{Median Differences (Part 2)}
+\end{table}
+
+\begin{table}
+\begin{tabular}{ccccccccccccccccll}
+\input{tables/medianDiff_2.tex}
+\end{tabular}
+	\caption{Median Differences (Part 3)}
+\end{table}
+
+\begin{table}
+\begin{tabular}{ccccccccccccccccll}
+\input{tables/medianDiff_3.tex}
+\end{tabular}
+	\caption{Median Differences (Part 4)}
+\end{table}
+
+
+
+
+
+\begin{table}
+\begin{tabular}{cccccccccccccccccc}
+\input{tables/quantiles_0.tex}
+\end{tabular}
+	\caption{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
+\end{table}
+
+\begin{table}
+\begin{tabular}{cccccccccccccccccc}
+\input{tables/quantiles_1.tex}
+\end{tabular}
+	\caption{Quantiles (part 2)}
+\end{table}
+
+\begin{table}
+\begin{tabular}{cccccccccccccccccc}
+\input{tables/quantiles_2.tex}
+\end{tabular}
+	\caption{Quantiles (part 3)}
+\end{table}
+
+
+
+
+
+
+
 \section{N-Gram Models}
 
 
 
 \begin{table}
-\begin{longtable}{ccccccccccccccclll}
-\input{medians_ngrams_0.tex}
-\end{longtable}
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/medians_ngrams_0.tex}
+\end{tabular}
 	\caption{Medians (estimated using n-gram models): For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians for ngrams, dashed lines indicate 95 \% confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians_ngrams}
 \end{table}
 
 \begin{table}
-\begin{longtable}{ccccccccccccccclll}
-\input{medians_ngrams_1.tex}
-\end{longtable}
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/medians_ngrams_1.tex}
+\end{tabular}
 	\caption{Medians (cont.)}
 \end{table}
 
 \begin{table}
-\begin{longtable}{ccccccccccccccclll}
-\input{medians_ngrams_2.tex}
-\end{longtable}
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/medians_ngrams_2.tex}
+\end{tabular}
 	\caption{Medians (cont.)}
 \end{table}
 
 \begin{table}
-\begin{longtable}{ccccccccccccccclll}
-\input{medians_ngrams_3.tex}
-\end{longtable}
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/medians_ngrams_3.tex}
+\end{tabular}
 	\caption{Medians (cont.)}
 \end{table}
 
@@ -1411,90 +1197,9 @@ Due to the sizes of these treebanks, can also do experiment with full word forms
 -- Chinese treebank \citep{xue-chinese-2013}
 
 
-\section{Proof of the Theorem}
+\section{Formal Analysis and Proofs}
+\input{formal-analysis.tex}
 
-
-
-%\begin{proof}
-	We denote the listener's memory state at time $t$, after hearing $X_{<t} = ... X_{t-2} X_{t-1}$ by $L_t$.
-	The average number of bits required to encode this state is $\operatorname{H}[L_t]$, which by assumption is at most $\sum_{t=1}^T t I_t$.
-	As the listener's predictions are made on the basis of her memory state, her average surprisal is at least $\operatorname{H}[X_t | L_t]$.
-	The difference between the listener's surprisal and optimal surprisal is thus at least $\operatorname{H}[X_t | L_t] - \operatorname{H}[X_t | X_{<t}]$.
-By the assumption of stationarity, we can rewrite this expression as
-\begin{align*}
-	\operatorname{H}[X_t | L_t] - \operatorname{H}[X_t | X_{<t}] &=  \frac{1}{T} \sum_{t=1}^{T} \left(\operatorname{H}[X_t | L_t] - \operatorname{H}[X_t | X_{<t}]\right) 
-\end{align*}
-	\begin{lemma}
-For any $t$, the following inequality holds:
-%	$$H[X_t | L_t] \geq H[X_t| X_{t-1}, L_{t-1}] \geq ... \geq H[X_t|X_{1 \dots t-1}, L_0]$$
-	\begin{equation}
-%H[X_t | L_t] \geq H[X_t| X_{t-1}, L_{t-1}] \geq ... \geq H[X_t|X_{1 \dots t-1}, L_0]
-H[X_t | L_t] \geq H[X_t|X_{1 \dots t-1}, L_0]
-		\end{equation}
-	\end{lemma}
-	\begin{proof}[Proof of the Lemma]
-
-By Equation~\ref{eq:listener-markov}:
-	\begin{equation}
-p((X_{t})_t| L_0, L_1, X_1)   = p((X_{t})_t| L_0, X_1)
-	\end{equation}
-we have
-	\begin{align*}
-p(X_t|X_{<1}, L_0, L_1, X_1, X_{2 \dots t-1}) = p(X_t|X_{<1}, L_0,  X_1, X_{2 \dots t-1}) \\
-p(X_{<1}| L_0, L_1, X_1, X_{2 \dots t-1})   = p(X_{<1}| L_0, X_1, X_{2 \dots t-1})
-	\end{align*}
-Therefore
-\begin{align*}
-p(X_t|L_0, X_1, X_{2 \dots t-1}; L_1, X_{2 \dots t-1}) & = p(X_t|L_0, L_1, X_1, X_{2 \dots t-1}) \\
-& = \sum_{X_{<1}} p(X_t|X_{<1}, L_0, L_1, X_1, X_{2 \dots t-1}) p(X_{<1}| L_0, L_1, X_1, X_{2 \dots t-1}) \\
-&= \sum_{X_{<1}} p(X_t|X_{<1}, L_0,  X_1, X_{2 \dots t-1}) p(X_{<1}| L_0, X_1, X_{2 \dots t-1}) \\
-&= p(X_t|L_0,  X_1, X_{2 \dots t-1}) 
-\end{align*}
-Thus
-\begin{equation}
-(X_t) \rightarrow (L_0, X_1, X_{2 \dots t-1})   \rightarrow   (L_1, X_{2 \dots t-1})
-\end{equation}
-Thus
-	\begin{equation}
-H[X_t| X_{2 \dots t-1}, L_{1}] \geq H[X_t|X_{1 \dots t-1}, L_0]
-	\end{equation}
-
-Finally, iteratively applying this inequality, we get:
-		\begin{align*}
-		H[X_t | L_t] \geq H[X_t| X_{t-1}, L_{t-1}] \geq H[X_t| X_{t-2, t-1}, L_{t-2}] \geq ... \geq H[X_t|X_{1 \dots t-1}, L_0]
-		\end{align*}
-
-	\end{proof}
-	
-	% = \int dX_{<1} p(X_t|X_{<1}, X_1, X_{2 \dots t-1})  = \int dX_{<1} p(X_t|L_0, X_{<1}, X_1, X_{2 \dots t-1}) = p(X_t|L_0, X_1, X_{2 \dots t-1}) $
-
-%	$p(X_t|L_0, X_1, X_{2 \dots t-1}; L_1, X_{2 \dots t-1}) = p(X_t|L_0, L_1, X_1, X_{2 \dots t-1}) = \int dX_{<1} p(X_t|X_{<1}, L_0, L_1, X_1, X_{2 \dots t-1}) = \int dX_{<1} p(X_t|X_{<1}, X_1, X_{2 \dots t-1})  = \int dX_{<1} p(X_t|L_0, X_{<1}, X_1, X_{2 \dots t-1}) = p(X_t|L_0, X_1, X_{2 \dots t-1}) $
-
-	Plugging this inequality into the equality above:
-\begin{align*}
-	\operatorname{H}[X_t | L_t] - \operatorname{H}[X_t | X_{<t}]& \geq \frac{1}{T} \sum_{t=1}^T ( \operatorname{H}[X_t|X_{1\dots t-1}, L_0] - \operatorname{H}[X_t | X_{1\dots t-1}, X_{\leq 0}]  )    \\
-	& = \frac{1}{T} \left(\operatorname{H}[X_{1\dots T} | L_0] - \operatorname{H}[X_{1\dots T} | X_{\leq 0}]\right)  \\
-	& = \frac{1}{T} \left(I[X_{1\dots T}|X_{\leq 0}] - I[X_{1\dots T}|L_0]\right) 
-\end{align*}
-	The first term $I[X_{1\dots T}|X_{\leq 0}]$ can be rewritten in terms of $I_t$:
-	\begin{align*}
-		I[X_{1\dots T}|X_{\leq 0}] &= \sum_{i=1}^T \sum_{j=-1}^{-\infty} I[X_i, X_j | X_{j+1}...X_{i-1}] = \sum_{t=1}^T t I_t + T \sum_{t > T} I_t
-	\end{align*}
-	Therefore
-\begin{align*}
-	\operatorname{H}[X_t | L_t] - \operatorname{H}[X_t | X_{<t}]& \geq \frac{1}{T} \left(\sum_{t=1}^T t I_t + T \sum_{t > T} I_t - I[X_{1\dots T}|L_0]\right) 
-	%	&= \frac{1}{T} \left(\sum_{t=1}^\infty t I_t - \sum_{t > T}  (T-t) I_t- I[X_{1\dots T}|L_0]\right) \\
-\end{align*}
-	$I[X_{1\dots T}|L_0]$ is at most $\operatorname{H}[L_0]$, which is at most $\sum_{t=1}^T t I_t$ by assumption. Thus, the expression above is bounded by
-	\begin{align*}
-	\operatorname{H}[X_t | L_t] - \operatorname{H}[X_t | X_{<t}]& \geq \frac{1}{T} \left(\sum_{t=1}^T t I_t + T \sum_{t > T} I_t - \sum_{t=1}^T t I_t\right) \\
-		&= \sum_{t > T} I_t
-\end{align*}
-	Rearranging shows that the listener's surprisal is at least $\operatorname{H}[X_t|L_t] \geq \operatorname{H}[X_t | X_{<t}] + \sum_{t > T} I_t$, as claimed.
-%\end{proof}
-
-
-Justify linear interpolation: The curve is convex, which is shown by `time-sharing': Use one code $\lambda$ fraction of times, and the other code $1-\lambda$ fraction of times.
 
 
 \end{document}
