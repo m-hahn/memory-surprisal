@@ -168,7 +168,7 @@ TODO
 
 
 \begin{figure}
-\includegraphics[width=0.95\textwidth]{../code/analyze_neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
+\includegraphics[width=0.5\textwidth]{../code/analyze_neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
 \caption{Histogram}\label{fig:hist-real}
 \end{figure}
 
@@ -410,79 +410,32 @@ TODO
 
 \section{N-Gram Models}
 
-
-
-\begin{table}
-\begin{tabular}{ccccccccccccccclll}
-\input{tables/medians_ngrams_0.tex}
-\end{tabular}
-	\caption{Medians (estimated using n-gram models): For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians for ngrams, dashed lines indicate 95 \% confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians_ngrams}
-\end{table}
-
-\begin{table}
-\begin{tabular}{ccccccccccccccclll}
-\input{tables/medians_ngrams_1.tex}
-\end{tabular}
-	\caption{Medians (cont.)}
-\end{table}
-
-\begin{table}
-\begin{tabular}{ccccccccccccccclll}
-\input{tables/medians_ngrams_2.tex}
-\end{tabular}
-	\caption{Medians (cont.)}
-\end{table}
-
-\begin{table}
-\begin{tabular}{ccccccccccccccclll}
-\input{tables/medians_ngrams_3.tex}
-\end{tabular}
-	\caption{Medians (cont.)}
-\end{table}
-
+\input{control-ngrams.tex}
 
 
 
 
 %-- English, Korean, Russian
-%
 %-- UD$\_$Polish-LFG (released in 2.2, not included in original experiment) (13,744 sentences)
-%
 %-- character-level Russian
+%\section{Character-Level Modeling}
+%\section{Non-UD Dependency Treebanks}
+%- other treebanks
+%-- spoken Japanese (T{\"u}ba-J/S)
+%-- another Vietnamese dependency treebank \citep{nguyen-bktreebank:-2017} (5,639 sentences)
+%-- another Chinese dependency treebank LDC2012T05
+%Due to the sizes of these treebanks, can also do experiment with full word forms.
 %
-
-
-
-\section{Character-Level Modeling}
-
-\section{Non-UD Dependency Treebanks}
-
-
-
-- other treebanks
-
-
-
--- spoken Japanese (T{\"u}ba-J/S)
-
--- another Vietnamese dependency treebank \citep{nguyen-bktreebank:-2017} (5,639 sentences)
-
-
--- another Chinese dependency treebank LDC2012T05
-
-
-Due to the sizes of these treebanks, can also do experiment with full word forms.
-
-
-\section{Constituency Treebank}
-
--- Penn treebank \citep{marcus-building-1993}
-
--- spoken English (T{\"u}ba-E/S)
-
--- spoken German (T{\"u}ba-D/S)
-
--- Chinese treebank \citep{xue-chinese-2013}
+%
+%\section{Constituency Treebank}
+%
+%-- Penn treebank \citep{marcus-building-1993}
+%
+%-- spoken English (T{\"u}ba-E/S)
+%
+%-- spoken German (T{\"u}ba-D/S)
+%
+%-- Chinese treebank \citep{xue-chinese-2013}
 
 
 \section{Formal Analysis and Proofs}
