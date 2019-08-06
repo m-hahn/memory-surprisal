@@ -22,7 +22,6 @@ satisfiedLanguages = set()
 myID = random.randint(0,1000000000)
 
 
-#languages = ['Afrikaans', 'Amharic-Adap', 'Arabic', 'Armenian-Adap', 'Basque', 'Breton-Adap', 'Bulgarian', 'Buryat-Adap', 'Cantonese-Adap', 'Catalan', 'Chinese', 'Croatian', 'Czech', 'Danish', 'Dutch', 'Estonian', 'Faroese-Adap', 'Finnish', 'French', 'German', 'Greek', 'Hebrew', 'Hindi', 'Hungarian', 'Indonesian', 'Japanese', 'Kazakh-Adap', 'Kurmanji-Adap', 'Latvian', 'Naija-Adap', 'North_Sami', 'Norwegian', 'Persian', 'Polish', 'Romanian', 'Serbian', 'Slovak', 'Slovenian', 'Spanish', 'Swedish', 'Tamil', 'Thai-Adap', 'Turkish', 'Ukrainian', 'Uyghur-Adap', 'Vietnamese'] # 'Lithuanian', 'Marathi'
 
 
 #languages = {"GROUND" : languages[::], "RANDOM_BY_TYPE" : languages[::], "RWAL_REAL" : languages[::]}

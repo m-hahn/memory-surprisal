@@ -12,15 +12,18 @@ import time
 
 real_type = sys.argv[1] if len(sys.argv) > 1 else "REAL_REAL"
 
-languages = []
-languages += ["Arabic", "Catalan", "Czech", "Dutch", "Finnish", "French", "German", "Hindi", "Norwegian", "Spanish"]
-languages += ["Basque", "Bulgarian", "Croatian", "Estonian", "Hebrew", "Japanese", "Polish", "Romanian", "Slovak", "Slovenian", "Swedish"]
-languages += ["Afrikaans", "Chinese", "Danish", "Greek", "Hungarian",  "North_Sami", "Persian", "Serbian", "Tamil", "Turkish", "Ukrainian", "Vietnamese"]
-languages += ["Amharic-Adap", "Armenian-Adap",  "Breton-Adap",  "Buryat-Adap", "Cantonese-Adap","Faroese-Adap", "Kazakh-Adap", "Kurmanji-Adap", "Naija-Adap","Thai-Adap", "Uyghur-Adap"]
-languages += ["Bambara-Adap", "Erzya-Adap", "Maltese", "Latvian"]
+# small languages: "Tamil", 
 
-languages += ["Indonesian", "Urdu" , "Portuguese", "English", "Italian", "Russian", "Korean"]
-	
+#U = []
+#U += ["Arabic", "Catalan", "Czech", "Dutch", "Finnish", "French", "German", "Hindi", "Norwegian", "Spanish"]
+#U += ["Basque", "Bulgarian", "Croatian", "Estonian", "Hebrew", "Japanese", "Polish", "Romanian", "Slovak", "Slovenian", "Swedish"]
+#U += ["Afrikaans", "Chinese", "Danish", "Greek", "Hungarian",  "North_Sami", "Persian", "Serbian", "Turkish", "Ukrainian", "Vietnamese"]
+#U += ["Amharic-Adap", "Armenian-Adap",  "Breton-Adap",  "Buryat-Adap", "Cantonese-Adap","Faroese-Adap", "Kazakh-Adap", "Kurmanji-Adap", "Naija-Adap","Thai-Adap", "Uyghur-Adap"]
+#U += ["Bambara-Adap", "Erzya-Adap", "Maltese", "Latvian"]
+#
+#U += ["Indonesian", "Urdu" , "Portuguese", "English", "Italian", "Russian", "Korean"]
+
+from ud_languages import languages
 
 
 satisfiedLanguages = set()
