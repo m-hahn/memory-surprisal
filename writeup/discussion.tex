@@ -1,0 +1,107 @@
+
+\subsection{Relation to Theories of Sentence Processing}
+
+
+\paragraph{Lossy-Context Surprisal}
+\citet{futrell-noisy-context-2017} describe a processing model where listeners make predictions (and incur surprisal) based on lossy memory representations.
+In particular, they consider loss models that delete, erase, or replace words in the past.
+Under the assumption that loss affects words more strongly that are further in the past, they derive a principle of information locality:
+A listener will incur surprisal
+$$ -\log P(w_t) - \sum_{j=1}^{t-1} f(i-j) pmi(w_i; w_j) + R$$
+where the `survival probability' $f(d)$ decreases as the distance $d$ between two words increases, and $R$ is a remainder term that can be argued to be small.
+Given that $f$ is assumed to be decreasing, this prediction loss will be smaller when words with high mutual information are closer together in the input.
+Our Proposition~\ref{prop:suboptimal} can be seen as an analogous result for general models of memory.
+
+
+
+
+
+
+\paragraph{Relation to Dependency Locality}
+The quantity described in Proposition~\ref{prop:lower-bound} is formally similar to Storage Cost in the Dependency Locality Theory (DLT) \citep{gibson-linguistic-1998}: Storage cost at a given timestep is defined as the number of predictions that are held in memory.
+Storage cost only considers predictions that are certain, and each prediction takes an equal amount of memory.
+In contrast, the result in Proposition~\ref{prop:lower-bound} can be seen as weighting predictions by their certainty and the amount of predictive information.
+In this sense, DLT storage cost can be seen as an approximation to Proposition~\ref{prop:lower-bound}.
+
+also surprisal -- integration cost
+
+
+\paragraph{Center Embeddings, ...}
+Yngve 1960, had a complexity measure, but doesn't work well for left-branching structures
+
+Miller and Chomsky 1963
+
+Frzier 1985 local nonterminal count
+
+Rambow and Joshi 1994 using TAG
+
+Marcus 1980 deterministic parsing
+
+(Sabrina Gerth, Memory Limitations in Sentence Processing)
+
+
+\subsection{Relation to other work}
+
+\paragraph{Statistical Complexity}
+There are deep connections between our formalization of listener memory and studies of dynamic systems in the Physics literature.
+%Speaker memory corresponds to \emph{Generative Complexity} \cite{loehr-non-sufficient-2008, loehr-predictive-2010}.
+The tradeoff between listener memory and surprisal is formally equivalent to the \emph{Recursive Information Bottleneck} considered by \cite{still-information-2014}.
+In the limit of optimal prediction and minimal surprisal, our formalization of listener memory is equivalent to the notion of \emph{Statistical Complexity} \citep{crutchfield-inferring-1989}.
+In the limit $T \rightarrow \infty$, the quantity in (\ref{eq:memory}) is equal to the \emph{excess entropy}, which is known to bound statistical complexity \citep{crutchfield-inferring-1989}.
+However, the link between memory and information locality provided by our Proposition~\ref{prop:suboptimal} appears to be a novel contribution.
+Relatedly, \cite{sharan-prediction-2016} shows a link between excess entropy and approximability by $n$-th order Markov models, noting that processes with low excess entropy can be approximated well with Markov models of low order.
+
+also information-theoretic studies of memory capacity
+
+\paragraph{Decay of Mutual Information}
+In Propositions~\ref{prop:lower-bound} and \ref{prop:suboptimal}, we showed a close link between memory and the decay of \emph{conditional} mutual information $I_t := I[w_t, w_0 | w_{1\dots t-1}]$.
+Prior work has studied the decay of \emph{unconditional} mutual information $I[w_t, w_0]$ in natural language \citep{ebeling-entropy-1994,lin-critical-2017}, and linked it to locality and memory \citep{futrell-noisy-context-2017}.
+
+The decay of unconditional mutual information is less closely linked to memory requirements than conditional mutual information:
+While the decay of conditional mutual informations provides a lower bound on memory need, unconditional mutual information does not:
+Consider the constant process where with probability 1/2 all $w_t = 0$, and with probability 1/2 all $w_t = 1$. %%$w_t = c$, where $c$ is random but independent of $t$ for each specific draw from the process.
+The unconditional mutual information is 1 at all distances, so does not decay at all, but the process only requires 1 bit of memory.
+Conversely, one can construct processes where the unconditional mutual informations are 0 for all $t$, but where $P > 0$ and this predictive information is actually spread out over arbitrarily large distances (that is, the ratio of memory $M$ and predictability $P$ can be made arbitrarrily large).\footnote{First, consider the process (called X by REF) consisting of 2 random bits and their XOR. This one has bounded nonzero $J$, but zero unconditional MI. To get unbounded $J$, consider the following process for any $N \in \mathbb{N}_{>2}$: Every $w_t$ is equal to the XOR of $w_{t-1}$ and $w_{t-N}$, such that each $w_t$ has $Bernoulli(1/2)$ as its marginal. The unconditional mutual information between any two timesteps is zero, but modeling the process requires $N$ bits of memory.}
+
+
+
+\paragraph{Long-range dependencies in text}    % excess entropy
+\cite{debowski-excess-2011} has studied the excess entropy of language across long ranges of text, in particular studying whether it is finite. % compute excess entropy in text
+Our work contrasts with this work in that we are interested in dependencies within sentences.
+
+
+\subsection{Discussion}
+
+\paragraph{Speakers vs Listeners}
+can we say something about this
+
+\paragraph{Decay vs Interference}
+Work has suggested that interference and memory overload is more appropriate than decay \cite[p. 408]{lewis-activation-based-2005} for modeling locality and memory in sentence processing.
+The bounds in Propositions~\ref{prop:lower-bound} and \ref{prop:suboptimal} hold for any type of memory model, and are thus compatible with decay- or interference-based models.
+The formula in (\ref{eq:memory-bound}) might suggest that boundedness of memory entails that memory has to decay.
+This is not the case:
+A long dependency can be maintained perfectly with low average memory:
+Informally, if every sentence is $N$ words long and has one long-distance dependency spanning the entire sentence, this dependency can be modeled perfectly with a memory cost that is independent of $N$.
+In contrast, if every symbol strongly and non-redundantly depends on the character $T$ steps in the past, with $T$ large, this will create a memory cost proportional to $T$.
+
+
+
+
+\paragraph{Memory and Hierarchical Structure; Finiteness of Memory}
+Processing nontrivial hierarchical structures typically requires unbounded amounts of memory.
+However, crucially, the \emph{average} memory demand for prediction can be finite, if the probability mass assigned to long dependencies is small.
+For instance, languages defined by Probabilistic Context Free Grammars (PCFG) always have finite average memory.
+The reason is that PCFGs assign low probabilities to long sequences.\footnote{Proposition 2 in \cite{chi-statistical-1999} implies that words drawn from a PCFG have finite expected length. This implies that average memory demands are finite.}
+
+
+
+%\paragraph{Center Embeddings}
+%\cite{miller-finitary-1963} attributed the unacceptability of multiple center-embedding to memory limitations.
+%\cite{gibson-linguistic-1998}
+%\paragraph{Other Psycholinguistic Predictions}
+% RF: the fact that you would get locality effects given medium WM capacity, but not very high or very low WM capacity, as Bruno Nicenboim found. And maybe some speaker-listener asymmetries. 
+%\paragraph{Speakers}
+% RF: what matters for the speaker is not I[w_t, w_0 | w_1, …, w_{t-1}], but I[w_t, w_0 | w_1, …, w_{t-1}, G] where G is some representation of the speaker’s goal (like in the van Dijk paper). This changes the interpretation of the mutual information. For the listener, it’s just redundancy. For the speaker, it’s redundancy *conditional on the goal*—which you could interpret as something like conceptual relatedness of linguistic elements. Then the speaker’s pressure is to keep conceptually related things close. 
+
+
+

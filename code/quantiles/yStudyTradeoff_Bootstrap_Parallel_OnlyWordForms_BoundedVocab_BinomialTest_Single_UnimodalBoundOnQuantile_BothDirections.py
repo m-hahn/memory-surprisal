@@ -21,7 +21,7 @@ def readTSV(x):
       for i in range(len(data)):
           data[i][column] = vals[i]
     return (header, data)
-with open("../results/raw/word-level/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", "r") as inFile:
+with open("../../results/raw/word-level/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", "r") as inFile:
      data = readTSV(inFile)
 #print(len(data))
 
@@ -137,6 +137,8 @@ for real in ["REAL_REAL", "GROUND"]:
      # The goal here is to provide a confidence lower bound on worseRandomCount
      if worseRandomCount == 0:
          print "\t".join(map(str,[language, real, i, 0.0, 0.0, float(xPoints[i])]))
+#                              ["Language", "Type", "Position", "LowerConfidenceBound", "Level", "Memory"])
+
          bound = 0
      else:
    #     print(hereRandom.size())
@@ -161,9 +163,10 @@ for real in ["REAL_REAL", "GROUND"]:
              p1 = math.pow(1-unaccountedFor, worseRandomCount)
           else:
              p1 = 1-(scipy.stats.binom_test(x=sameRandomCount+betterRandomCount, n=worseRandomCount+sameRandomCount+betterRandomCount, p=unaccountedFor, alternative="greater"))
-        #  print(unaccountedFor, p1)
           if p1 < 0.001:
              print "\t".join(map(str,[language, real, i, 1-float(percentile), p1, float(xPoints[i])]))
+#                ["Language", "Type", "Position", "LowerConfidenceBound", "Level", "Memory"])
+             assert 1-float(percentile) <= (worseRandomCount) / (sameRandomCount + betterRandomCount), (unaccountedFor, 1-float(percentile), (worseRandomCount) / (sameRandomCount + betterRandomCount))
              hasFound =True 
              break
          if hasFound:
@@ -171,4 +174,8 @@ for real in ["REAL_REAL", "GROUND"]:
         assert hasFound, (worseRandomCount, sameRandomCount, betterRandomCount)
         if not hasFound:
              print "\t".join(map(str,[language, real, i, 0.0, 0.0, float(xPoints[i])]))
+#                                  ["Language", "Type", "Position", "LowerConfidenceBound", "Level", "Memory"])
+
+
+
 

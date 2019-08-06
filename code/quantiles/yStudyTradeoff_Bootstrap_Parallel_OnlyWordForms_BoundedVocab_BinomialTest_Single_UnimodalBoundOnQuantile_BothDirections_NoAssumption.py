@@ -21,7 +21,7 @@ def readTSV(x):
       for i in range(len(data)):
           data[i][column] = vals[i]
     return (header, data)
-with open("../results/raw/word-level/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", "r") as inFile:
+with open("../../results/raw/word-level/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", "r") as inFile:
      data = readTSV(inFile)
 #print(len(data))
 
@@ -136,13 +136,15 @@ for real in ["REAL_REAL", "GROUND"]:
 
      # The goal here is to provide a confidence lower bound on worseRandomCount
      if worseRandomCount == 0:
+         print "\t".join(map(str,[language, real, i, 0.0, 0.0, float(xPoints[i])]))
+#                              ["Language", "Type", "Position", "LowerConfidenceBound", "Level", "Memory"])
+
          bound = 0
      else:
    #     print(hereRandom.size())
         largestPossibleValue = xPoints[i]
         #print(i, largestPossibleValue, medians[real][i], hereRandom)
         # if the median is at most the best sample
-        targetLevel = 0.05
         #unaccountedForTarget = 1-math.pow(targetLevel, 1/(float(hereRandom.size()[0])))
         randomBestWorse = float(hereRandom[int(worseRandomCount)-1])
         assert randomBestWorse < float(medians[real][i])
@@ -153,13 +155,15 @@ for real in ["REAL_REAL", "GROUND"]:
           assert unaccountedFor > 0
           assert unaccountedFor < 1
           
-          percentile = unaccountedFor #* (largestPossibleValue - medians[real][i] + 0.0001) / (largestPossibleValue - randomBestWorse + 0.0001)
+          percentile = unaccountedFor 
           if sameRandomCount+betterRandomCount == 0:
              p1 = math.pow(1-unaccountedFor, worseRandomCount)
           else:
              p1 = 1-(scipy.stats.binom_test(x=sameRandomCount+betterRandomCount, n=worseRandomCount+sameRandomCount+betterRandomCount, p=unaccountedFor, alternative="greater"))
-          if p1 < 0.05:
-             print "\t".join(map(str,[language, real, 1-float(percentile), p1]))
+          if p1 < 0.001:
+             print "\t".join(map(str,[language, real, i, 1-float(percentile), p1, float(xPoints[i])]))
+#             print("PERCENTILE", worseRandomCount / (worseRandomCount + sameRandomCount + betterRandomCount))
+             assert 1-float(percentile) <= worseRandomCount / (worseRandomCount + sameRandomCount + betterRandomCount)
              break
 
 

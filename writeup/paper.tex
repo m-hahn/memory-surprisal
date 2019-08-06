@@ -97,91 +97,13 @@ Online memory limitations are well-established as a factor impacting sentence pr
 \input{introduction.tex}
 
 
-
-\mhahn{pasted from the other draft}
-Each human language is a system for encoding an infinite variety of thoughts into sentences, i.e. linear strings of words.
-A primary goal of the field of linguistics is to characterize and explain the commonalities and differences among these systems, and so to gain insight into the cognitive machinery that underpins this fundamental aspect of human intelligence.
-Here we argue that human languages can be modeled as solutions to the problem of maximally efficient communication among agents with particular information-processing constraints active during speaking and listening.
-We formalize these constraints using information theory, and show novel large-scale quantitative evidence from 54 languages that information is structured in time so as to minimize memory load during language comprehension.
-
-The idea that the universal properties of human languages are best explained with reference to communicative efficiency has a long history \cite{gabelentz1901sprachwissenschaft,zipf1949human,hockett1960origin,givon1991markedness,hawkins1994performance,hawkins2004efficiency,hawkins2014crosslinguistic,croft2001functional,haspelmath2008parametric,jaeger2011language,gibson2019efficiency}.
-
-
-
-These strategies can be seen as sets of rules that differ in the way ...
-Languages differ considerably in the rules they apply to order information: English orders the object after the verb, Japanese places it before the verb \note{make more explicit here}.
-Explaining the variation in the strategies languages use to  order underlying hierarchical structures into linear strings of words has been one of the foci of linguistic research (\jd{CITE}).
-We show that these strategies reflect an underlying optimization principle: human languages are adapted to limitations in human working memory.
-
-%We test the hypothesis that human languages represent different solutions to the problem of efficient computation with constrained working memory.
-The suggestion that the structure of human language partly reflects a need for efficient processing under resource limitations has been present in the theoretical and functional linguistics literature for decades~\cite{berwick1984grammatical,hawkins1994performance}, where theories have been developed in terms of specific mechanistic and heuristic models of human language processing.
-Here 
-
-
-
-
-\mhahn{original intro}
-Since the 1950s, it has been a persistent suggestion that human language processing is shaped by a resource bottleneck in short-term memory.
-Language is produced and comprehended incrementally in a way that crucially requires both speaker and listener to use an active memory store to keep track of what was previously said.
-Since short-term memory of this kind is known to be highly limited in capacity \citep{miller1956magical}, it makes sense for these capacity limits to comprise a major constraint on production and comprehension.
-Indeed, a great deal of work in sentence processing has focused on characterizing the effects of memory constraints on language processing \citep{gibson-linguistic-1998,lewis-activation-based-2005,levy2013memory}.
-
-At the same time, the field of functional linguistics has argued that these resource constraints not only affect online language processing, they also shape the form of human language itself.
-For example, the Performace--Grammar Correspondence Hypothesis (PGCH) of \citet{hawkins1994performance} holds that forms which are practically easier to produce and comprehend end up becoming part of the grammars of languages, and that this process can explain several of the universal properties of human languages originally documented by \citet{greenberg-universals-1963}.
-
-Here we take up the question of how to characterize short-term memory capacity limitations in language processing for both speakers and listeners, and the question of whether natural language grammars are shaped by these limitations.
-Whereas previous theories were based on specific mechanistic models of memory, our theory is purely information-theoretic, meaning that our predictions will hold independently across a wide variety of implementations and architectures.
-
-Our main new concept is the idea of a \emph{memory--surprisal tradeoff}: it is possible for a listener to achieve greater ease of word-by-word comprehension at the cost of investing more computational resources into remembering previous words, and the particular shape of the resulting tradeoff of depends on the word order properties of a language. Analogous results also hold for language production by resource-constrained speakers. We show evidence that the preferred word orders of natural languages are those that enable efficient memory--surprisal tradeoffs.
-
-The remainder of this paper is structured as follows. In Section~\ref{sec:background}, we give a brief review of previous work on the effects of short-term memory on languages and language processing. In Section~\ref{sec:ms-tradeoff}, we describe the memory--surprisal tradeoff and how it results from rate--distortion theory, the theory of optimal information processing under resource constraints \citep{cover2006elements}. In Section~\ref{sec:info-locality}, We prove that word orders enable efficient processing in terms of the memory--surprisal tradeoff when they exhibit \emph{information locality}: whenever utterance elements that predict each other are close to each other. We argue that information locality is a good model of the effects of memory constraints on language processing. In Section~\ref{sec:experiment1}, languages which have previously been shown to be preferred in artificial language experiments are exactly those that enable efficient memory--surprisal tradeoffs \citep{fedzechkina2017human}. In Section~\ref{sec:experiment2}, we show that word orders of natural languages as found in dependency corpora \citep{ud} enable more efficient memory--surprisal tradeoffs than baseline word orders. Section~\ref{sec:conclusion} concludes.
-
-
-
-\section{Background}
-\label{sec:background}
+\section{Background}\label{sec:background}
 % More detailed lit review
 
-A wide range of work has argued that natural language orders information in ways that reduce memory effort.
-An early example is \cite{miller-finitary-1963}, who attributed the unacceptability of multiple center embeddings in English to limitations of human working memory.
-\cite{hawkins-efficiency-2003} provides cross-linguistic evidence that word orders are optimized for processing based on local contexts.
-Further work has found computational, corpus-based evidence that memory limitations impact language structure and production.
-In particular, languages have been shown to shorten the length of syntactic dependency lengths \citep{futrell-large-scale-2015}.
-Dependency length can be linked to memory use in certain models of incremental syntactic parsing, and increases processing difficulty in theories of memory in sentence processing \citep{gibson-linguistic-1998}.
-\cite{gildea-human-2015} further provide evidence from five languages that word orders optimize predictability from local contexts.
-\cite{futrell-noisy-context-2017} provide evidence that language shows information locality, i.e., elements with higher mutual infomation are closer together, which is predicted by their model of Lossy-Context Surprisal.
-
-All these models of memory in sentence processing, and derived measures of efficiency for memory allocation, require specific assumptions about the architecture of memory.
-This leaves open the question whether such assumptions are necessary, or whether word orders across languages are optimized for memory independently of the implementation and architecture of human language processing.
+\input{background.tex}
 
 
-We approach this question by first providing general information-theoretic lower bounds on memory load that will hold independently of the architecture of memory representations.
-We will consider a general setting of a listener performing incremental prediction.
-Our result immediatly entails a link between boundedness of memory and locality, which had been stipulated or derived from assumptions about memory architecture in previous models \citep{gibson-linguistic-1998, lewis-activation-based-2005, futrell-noisy-context-2017}.
-We will then use corpus data from over 52 languages to provide evidence that their word orders help lower memory cost.
-
-%TODO mention prior work
-%
-%-  center embeddings dispreferred/impossible to process \cite{miller-finitary-1963}
-%
-%- explanation of greenberg universals
-%
-%- dependency length minimization
-%
-%- \cite{gibson-linguistic-1998}
-%
-
-%\paragraph{\cite{berwick-grammatical-1986}}
-%They considered incremental parsing, or, more precisely, incremental recognition of grammaticality.
-
-
-
-%also (CITE): operations in a specific incremental parsing model
-
-
-
-\section{Memory-Surprisal Tradeoff}
-\label{sec:ms-tradeoff}
+\section{Memory-Surprisal Tradeoff}\label{sec:ms-tradeoff}
 
 \input{tradeoff.tex}
 
@@ -195,20 +117,14 @@ This formalizes a general, assumption-free, link between memory and locality in 
 In Section~\ref{sec:listener}, we will extend this analysis to listeners performing incremental prediction.
 %incremental prediction.
 
-
-
-
 %We will write $I_t$ as an abbreviation for $\operatorname{I}[w_t, w_0 | w_1, ..., w_{t-1}]$.
 The proposition implies that memory is decreased if $I_t$ decreases quickly as $t \rightarrow \infty$ -- that is, if the contributions of long-term dependencies in the process are small.
 In particular, memory load can only be finite if $I_t$ decreases fast enough for the infinite sum to converge to a finite value.
 %This confirms the intuition that finiteness of memory entails that the contribution of long-term 
 
-
 %\paragraph{Discussion}
 %We have treated the process $(w_t)_t$ as a discrete-time process whose time steps correspond to words, but this is immaterial to the analysis.
 %The analysis is not even restricted to discrete timesteps: We can replace thes sum in Proposition~\ref{prop:suboptimal} with an integral to get a continuous-time version.
-
-
 
 We illustrate Proposition~\ref{prop:lower-bound} in Figure~\ref{fig:basic}.
 We consider two processes A and B, where $I_t := 5t^{-1.5}$ for $A$ and $I_t := 3.5 t^{-2.5}$ for $B$.
@@ -227,642 +143,13 @@ This area is smaller for the red process, as $I_t$ decays more quickly there.
 \input{toy-experiment.tex}
 
 
-%\paragraph{Center Embeddings}
-%\cite{miller-finitary-1963} attributed the unacceptability of multiple center-embedding to memory limitations.
-%\cite{gibson-linguistic-1998}
-%\paragraph{Other Psycholinguistic Predictions}
-% RF: the fact that you would get locality effects given medium WM capacity, but not very high or very low WM capacity, as Bruno Nicenboim found. And maybe some speaker-listener asymmetries. 
-%\paragraph{Speakers}
-% RF: what matters for the speaker is not I[w_t, w_0 | w_1, …, w_{t-1}], but I[w_t, w_0 | w_1, …, w_{t-1}, G] where G is some representation of the speaker’s goal (like in the van Dijk paper). This changes the interpretation of the mutual information. For the listener, it’s just redundancy. For the speaker, it’s redundancy *conditional on the goal*—which you could interpret as something like conceptual relatedness of linguistic elements. Then the speaker’s pressure is to keep conceptually related things close. 
-
-
 \section{Large-Scale Evidence that natural language optimize Memory-Surprisal Tradeoff}
 
-We now investigate whether word orders as found in natural language optimize the two memory-surprisal tradeoffs.
-We compare the memory-surprisal tradeoffs of 52 actual languages to those of counterfactual reorderings.
-We cannot just compare to random orderings of individual syntactic trees, as such languages would not have word order regularities.
-Therefore, we compare to counterfactual word order grammars.
-
-\begin{figure}
-\centering
-\begin{dependency}[theme = simple]
-   \begin{deptext}[column sep=1em]
-	   I \&	   wrote \& risāla \& li \& sadīq  \\
-   \end{deptext}
-	%   \deproot{3}{ROOT}
-   \depedge{1}{2}{obj}
-	%   \depedge[edge start x offset=-6pt]{2}{5}{ATT}
-   \depedge{1}{4}{obl}
-   \depedge{4}{3}{case}
-   %\depedge[arc angle=50]{7}{6}{ATT}
-\end{dependency}
-	\caption{TODO Dependencies example}\label{fig:dependency}
-\end{figure}
-
-
-
-\subsection{Data}
-We draw on corpora annotated with syntactic structures.
-The Universal Dependencies project has compiled dependency corpora for several dozen languages~\citep{nivre-universal-2017}.
-
-\paragraph{Dependency Grammar}
-In dependency corpora, sentences are annotated with \emph{dependency trees} (Figure~\ref{fig:dependency}).
-These are directed trees describing the grammatical relations among words. For example, the arcs labeled ``obj'' represent that the noun in question is the \emph{direct object} if the verb, rather than e.g. the subject or an indirect object.
-A dependency arc is drawn from a \emph{head} (e.g. TODO in Figure TODO) to a \emph{dependent} (e.g. TODO).
-Dependency trees can be defined in terms of many different syntactic theories \cite{corbett1993heads}.
-Although there are some differences in how different formalisms would draw trees for certain sentences, there is broad enough agreement about dependency trees that it has been possible to develop large-scale dependency-annotated corpora of text from dozens of languages \cite{nivre2017universal}.
-
-\paragraph{Corpora}
-We considered all languages for which there are Universal Dependencies 2.3 treebanks with a total of at least 500 sentences of training data.
-We excluded data from historical languages.\footnote{Ancient Greek, Classical Chinese, Coptic, Gothic, Latin, Old Church Slavonic, Old French.}
-This resulted in 54 languages.
-
-For each of these languages, we pooled all available corpora in one dataset.
-We excluded corpora that primarily contain code-switched text\footnote{Hindi English corpus}, or text created by non-native speakers.\footnote{ESL, CFL}
-Universal Dependencies corpora have a predefined split into \emph{training}, \emph{held-out} (also known as \emph{development}), and \emph{test} partitions.
-While larger corpora have all three partitions, smaller corpora often have only some of these partitions.
-For most language, we used the predefined data split, separately pooling data from the different partitions. %We did not use the test partitions.
-For some languages with little data, there is no predefined training partition, or the training partition is smaller than the other partitions.
-In these cases, we redefined the split to obtain more training data:
-For these languages, we pooled all the available partitions, used 100 randomly selected sentences as held-out data, and used the remainder as training data.\footnote{This affects Amharic, Armenian, Breton, Buryat, Cantonese, Faroese, Kazakh, Kurmanji, Naija, Thai, and Uyghur.}
-For each language, we used the training and held-out sets for estimating the memory-surprisal tradeoff (see Section~\ref{sec:method}).
-We provide the sizes of the resulting datasets in Table~\ref{tab:corpora}.
-
-
-
-\subsection{Counterfactual Ordering Grammars}
-We define ordering grammars, small models of the rules by which languages order syntactic structures into sentences.
-Our formalism of ordering grammars adapts the method of \cite{gildea-optimizing-2007, gildea-grammars-2010, gildea-human-2015} to the setting of dependency corpora.
-
-Universal Dependencies defines 37 universal syntactic relations that are used to label dependency arcs across all corpora.
-These relations encode cross-linguistically meaningful relations such as subjects, objects, and adjectival modifiers.
-We define ordering grammars by assigning a parameter $a_\tau \in [-1,1]$ to every one of these 37 universal syntactic relations.
-Relations sometimes have language-specific subtypes; we do not distinguish these subtypes.\mhahn{give an example to make clear what this refers to}
-
-Following Gildea and colleagues, this parameter defines how dependents are ordered relative to their head:
-Given a head and a set of dependents, we order each dependents by the parameter $a_\tau$ assigned to the syntactic relation linking it to the head.
-Dependents with negative weights are placed to the left of the head; dependents with positive weights are placed to the right.
-
-Ordering grammars describe languages that have consistent word order:
-For instance, the subject is consistently ordered before or after the verb, depending on whether the parameter for the verb-subject dependency is positive or negative.
-
-We define baseline grammars by randomly sampling the parameters $a_\tau$.
-Such baseline grammars define languages that have consistent word order, but do not exhibit any systematic correlations between the orderings of different dependents.
-
-
-
-\paragraph{Discussion}
-In actual languages, the ordering of words is largely determined by the syntactic relations (CITE).
-However, certain kinds of rules cannot be modeled by our word order grammars, such as rules sensitive to the category of the dependent (e.g., differences between nominal and pronominal objects).
-Word order freedom also is not modeled.
-In this sense, ordering grammars represent approximations to the kinds of ordering rules found in natural language \cite{gildea-optimizing-2007, gildea-grammars-2010, gildea-human-2015}.
-
-
-
-\subsection{Estimating Memory-Surprisal Tradeoff}\label{sec:method}
-To estimate mutual informations, we use LSTM recurrent neural networks, the basis of the state of the art in modeling natural language (CITE)\footnote{While Transformers are now better at modeling when large training sets comprising millions of sentences per language are available, they have not reached the level of LSTMs on small/medium training data such as the UD corpora} and predicting the surprisal effect on reading times~\citep{frank-insensitivity-2011, goodkind-predictive-2018}.
-%We model language on the level of individual word forms.
-We provide data from alternative estimation methods in the SI.
-
-
-%\paragraph{Data}
-
-
-
-%Given a sequence of input words $w_1, ..., w_n \in V$, the model 
-%%
-%\textbf{TODO I'm describing this in a lot of detail. Alternatively, we can say this is a standard NLP method and refer to the NLP literature for the definition.}
-%The first component of such a model is an \emph{embedding matrix} $W_{emb} \in \mathbb{R}^{|V| \times d_{emb}}$, where the \emph{vocabulary} $\mathcal{V}$ is a set, containing the words that occur in the corpus, and $d_{emb} \in \mathbb{N}$ is a fixed parameter.
-%This matrix assigns a $d_{emb}$-dimensional vector to each word occurring in the corpus.
-%The second component is an LSTM cell $f_{LSTM}$, a nonlinear transformation mapping an \emph{input} vector $x_{i} \in \mathbb{R}^{d_{emb}}$ a \emph{hidden state} $h_i \in \mathbb{R}^{d_{LSTM}}$ and a \emph{cell state} $c_i \in \mathbb{R}^{d_{LSTM}}$ to a new pair of hidden state and cell states $h_{i+1}, c_{i+1} \in \mathbb{R}^{d_{LSTM}}$.
-%The LSTM cell $f_{LSTM}$ is parameterized by a matrix of numerical parameters $W_{LSTM}$.
-%
-%%Such networks estimate the probability of a word in context as follows.
-%Given a sequence of input words $w_1, ..., w_n \in V$, the model first retrieves fixed-dimensionality vector representations $x_1, ..., x_n$, where $x_i$ is the row of $W_{emb}$ corresponding to the word $w_i$.
-%It then computes a sequence of hidden and cell states by the following recurrent computation:
-%\begin{align*}
-%	h_1, c_1 &:= 0 \\
-%	h_2, c_2 &:= f_{LSTM}(x_1, h_1, c_1) \\
-%	\dots \\
-%	h_{n+1}, c_{n+1} &:= f_{LSTM}(x_n, h_n, c_n) \\
-%\end{align*}
-%The vector $h_i$ encodes the result of reading the words $w_1, ..., w_{i-1}$.
-%We will write $LSTM(w_1, ..., w_{i-1})$ for $h_i$.
-%
-%The third component of the recurrent language model is the matrix $W_{output} \in \mathbb{R}^{|V| \times d_{LSTM}}$.
-%We obtain per-word predictions of the next word by computing
-%\begin{align*}
-%	s_i := W_{output} h_i \in \mathbb{R}^{|V|} \\
-%	p_i := \operatorname{softmax}(s_i)\in \mathbb{R}^{|V|} 
-%\end{align*}
-%where the softmax transformation normalizes vectors into probability distributions as follows
-%\begin{equation}
-%	\operatorname{softmax}(x)_i := \frac{\exp(x_i)}{\sum_{j=1}^{|V|} \exp(x_j)}
-%\end{equation}
-%Finally, the probability of the word $w_n$ in the context $w_1, ..., w_{n-1}$ is computed as
-%\begin{equation}
-%	p_\theta(w_n|w_1...w_{n-1}) := \frac{\exp((p_n)_{w_n})}{\sum_{w \in V} \exp(x_w)}
-%\end{equation}
-%and thus the surprisal is estimated as
-%\begin{equation}
-%- \log	p_\theta(w_n|w_1...w_{n-1}) := -\log \frac{\exp((p_n)_{w_n})}{\sum_{w \in V} \exp(x_w)}
-%\end{equation}
-%We discuss the choice of the numerical parameters in the next section.
-%
-
-\paragraph{Model and Parameter Estimation}
-We use a recurrent neural network with Long-Short-Term Memory cells~\citep{hochreiter-long-1997} (CITE for Neural LM).
-This architecture takes as input a sequence $x_1 ... x_N$ of words, and at each time step $t=1, ..., N$, calculates a probability distribution over the next word $w_{t}$ given preceding words $w_1 ... w_{t-1}$: $p(w_t|w_1...w_{t-1})$.
-
-The network is parameterized by a vector $\theta$ of weights determining how the activations of neurons propagate through the network~\citep{hochreiter-long-1997}.
-Given a corpus, the numeral parameters of the LSTM are chosen so as to minimize the average surprisal across the training corpus.
-%We can think of the LSTM parameters as forming one large vector $\theta$.
-At the beginning of training, the parameters $\theta$ are randomly initialized.
-
-The training corpus is chopped into word sequences $w_1 ... w_T$ of length $T$ ($T = 20$ in our experiments).
-If $\theta_n$ consists of the LSTM parameters after $n$ training steps, we randomly select a word sequence $w_1 ... w_T$ from the training corpus, and use the LSTM using the current parameter setting $\theta_n$ to compute the per-word surprisals.
-We then update the parameter vector:
-\begin{equation}\label{eq:train}
-	\theta_{n+1} := \theta_n + \alpha \partial_\theta \left(\sum_{i=1}^T \log p_\theta(w_i|w_1...w_{i-1})\right)
-\end{equation}
-where $\alpha \in \mathbb{R}_+$ is the \emph{learning rate}.
-When calculating the parameter update, we use three standard methods of regularization that have been shown to improve neural language modeling: dropout~\citep{srivastava-dropout:-2014}, word dropout, and word noising~\citep{xie2017data}.
-In this process, the word sequences are sampled without replacement.
-Once all sequences have been processed, we start another pass through the training data.
-Before each pass through the training data, the order of sentences of the training data is shuffled, and the corpus is again chopped into sequences of length $T$.
-
-After each pass through the training data, the average surprisal at the current parameter setting $\theta_n$ is evaluated on the held-out partition.
-We terminate training once this held-out  surprisal does not improve over the one computed after the previous pass any more.
-
-
-
-%\paragraph{Regularization}
-%Dropout, Word dropout, Word noising
-%Any statistical estimation problem faces the 
-%The quality of neural network models is further improved by regularization, improving generalization to the full data distribution.
-%In the case of neural networks, the most successful regularization methods typically take the form of random modifications to the input and internal activations when computing the gradients in the training updates~(\ref{eq:train}).
-%First, we apply \emph{dropout} both to the input vectors $x_i$ and to the output vectos $h_i$, randomly setting individual elements to zero with rate $p_{embedding} \in [0,1]$.
-%Second, we apply \emph{word dropout}, randomly zeroing out entire input vectors $x_i$ at rate $p_{word}$.
-
-\paragraph{Choice of Hyperparameters}
-
-The LSTM model has a set of numerical \emph{hyper-parameters} that need to be specified before parameter estimation, namely the dimensionalities of the embeddings $d_{emb}$, the dimensionality of the hidden states $d_{LSTM}$, and the number of LSTM layers $d_{layer}$, the learning rate $\alpha$, and the regularization parameters (dropout rate $p_{embedding}$, word dropout rate $p_{word}$, word noising rate $p_{noising}$).
-We choose these parameters so as to minimize the average surprisal on the held-out partition resulting at the end of parameter estimation.
-
-For each corpus, we used Bayesian optimization using the Expected Improvement acquisition function \citep{snoek-practical-2012} to find a good setting of the hyperparameters.
-We optimized the hyperparameters to minimize average surprisal on languages generated from random word order grammars.
-This biases the hyperparameters towards modeling counterfactual grammars better, biasing them \emph{against} our hypothesis.
-
-For computational efficiency, neural language models can only process a bounded number of distinct words in a single language.
-For each corpus, we limited the number of distinct processed words to the $N=10,000$ most common words in the training corpus, a common choice for neural language models (CITE).
-Following (CITE), we represented other words by their part-of-speech tags as annotated in the corpora.
-This applied to 37 languages, affecting an average of 11~\% of words in this languages.
-We believe that this modeling limitation does not affect our results for the following reasons.
-First, this affects the same words in real and counterfactually ordered sentences.
-Second, all excluded words are extremely infrequent in the available data, occurring less than 10 times (except for Czech and Russian, the languages for which we have by far the largest datasets).
-Many of the excluded words occur only once in the dataset (78 \% on average across the affected languages).
-This means that any model would only be able to extract very limited information about these words from the available training data, likely \emph{less} than what is provided by the part-of-speech tag.
-Third, traditional N-gram models, which do not have this limitation, provide results in qualitative agreement with the neural network-based estimates (see SI).
-
-%Given a corpus, we estimate a language model by training the LSTM on a training partition to maximize the data likelihood, and stopping training once the data likelihood on a held-out partition drops.
-%The hyperparameters (number of hidden units, learning rate, etc.) are chosen so as to maximize the likelihood of the held-out partition.
-%This procedure helps prevent overfitting the model to the training data, and ensure that it generalizes to unseen data. 
-
-
-
-\paragraph{Estimating the Memory-Surprisal Tradeoff Curve}
-
-
-
-The quantity $\operatorname{I}[w_t, w_0 | w_1, ..., w_{t-1}]$ in~(\ref{eq:memory-bound}) is equal to the difference 
-\begin{equation}
-H[w_t|w_1, ..., w_{t-1}] - H[w_t|w_0, w_1, ..., w_{t-1}]
-\end{equation}
-For each word in the held-out partition, we compute the difference
-\begin{equation}
-	-\log P_\theta[w_t | w_0, w_1, ..., w_{t-1}] - P_\theta[w_t | w_1, ..., w_{t-1}]
-\end{equation}
-and take the average over these.
-We cut $T$ off at 20, as this is the length of the sequences processed by the model.
-
-We then used linear interpolation to interpolate the surprisal value for memory values in between these values. (TODO make a figure).
-This is justified theoretically (TODO maybe discuss when introducing the theorem).
-
-We estimate the unigram entropy $H[w_0]$ by averaging over all models.
-
-%
-%\subsection{Discussion: Alternative Models}
-%In view of the NLP literature, the following are the main other options that exist for estimating mutual information and probabilities in sequences:
-%
-%A traditional model uses n-gram models. A challenge of n-gram models is that they do not express any morphosyntactic generalizations. Furthermore, standard n-gram models do not express any generalizations about pairs of words that are not adjacent -- e.g., encoding a generalization about morphological agreement between two words is hard for such a model to capture if the two words are not always adjacent. Both the small scale of available corpora in many languages and free word order in many languages with rich morphology thus seem to make such models unattractive.
-%We evaluate our hypothesis using n-gram models in SI Section X, confirming the conclusions obtained from neural models.
-%
-%A second option is to construct a statistical grammar, such as PCFG.
-%The challenge is to encode statistical morphosyntactic generalizations, and to decide which independence assumptions to put into the model.
-%One can either decide on a language-specific basis which generalizations to put in (laborious and might introduce bias), or choose a general model family that is rich enough to learn generalizations.
-%The second option will make this a machine learning model that, for our purposes, does not seem to be superior to a recurrent neural network.
-%
-
-
-
-%\subsection{Data}
-%\subsection{Setup}
-%The recurrent neural network architecture has a range of adjustable parameters such as the number of neurons.
-%For each language, we used Bayesian optimization using the Expected Improvement acquisition function (CITE) \citep{snoek-practical-2012} to find a good setting of the hyperparameters, taking average surprisal on random grammars as the objective.
-%This biases the hyperparameters towards favoring counterfactual grammars.
-
-%\subsection{Setup}
-
-For each language, we collected data from the actual orderings and from several random grammars.
-We collect multiple samples for the actual orderings to control for variation due to the random initialization of the neural network.
-For each of the random grammars, we collect one sample.
-Data is collected according to a precision-based stopping criterion described in Section (REF).
-%We collected data from the actual and random orderings in proportion one to two.
-%The stopping criterion will be described below.
-
-%Due to the randomness both in the sequence of training examples and the random initialization of the network weights, the results of the parameter estimation procedure will vary when run multiple times, especially on smaller datasets.
-%Informally, due to the finiteness of the dataset, multiple parameter settings are compatible with the available training data.
-%Consequently, memory-surprisal tradeoffs estimated on held-out sets will also show some variation.
-%Therefore, we collect multiple samples for the actual orderings to control for variation due to the random initialization of the neural network.
-
-
-%We chose these thresholds based on preliminary simulations which had suggested that these widths were achievable at acceptable computational cost.
-
-%- at least 30 samples from both baseline and real
-%
-%- for the language-level tradeoff curve, either the fraction is zero or the bootstrapped CI has width $\leq 0.2$.
-
-
-
-%
-%(1) is bigram MI always greater in real languages?
-%
-%(2) is the tradeoff curve always lower than for deterministic simple grammar? for deterministic complex grammars? for stochastic simple/complex grammars?
-
-
-\subsection{Statistics}
-
-We now describe how we compared memory-surprisal tradeoffs between real and baseline languages.
-
-%For each sample, we estim
-%For each language, we viewed surprisal as a function of memory.
-%We used linear interpolation to obtain surprisal values for all levels of memory.
-
-We want to test whether languages' surprisal-memory tradeoffs better than those of most baseline languages.
-%We view surprisal as a function of memory load, so that the curve is defined on all of $\mathbb{R}_+$.
-We compare real and baseline languages by evaluating which languages result in lower surprisal at the same level of memory.
-We now describe the statistics we use to quantifying the difference between real and baseline languages.
-We do everything in a frequentist framework (null hypothesis testing \& confidence intervals), as we can do exact tests and confidence intervals without parametric assumptions.
-Maybe we can explain how the tests \& CIs also have reasonable Bayesian interpretations (for the specific methods used here, rejection of the null should guarantee that the posterior of the null hypothesis is small under a wide range of priors.).
-
-\paragraph{Confidence Interval for Medians}
-We use a (nonparametric and nonasymptotic) confidence interval for the median surprisal at each memory value, using the binomial test.
-We consider the medians over all runs for the real language, and over all baselines grammars.
-
-% yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_MedianCI.py
-
-
-\paragraph{CI for Median Difference}
-We create (nonparametric and nonasymptotic) confidence interval for the difference between real and baseline median surprisals at each memory value.
-
-% yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_MedianDiffCI.py
-
-
-\paragraph{Pointwise Significance Test}
-For each memory value $\mu$, we do a nonparametric and nonasymptotic significance hypothesis test against the null hypothesis that at least half of the baseline grammars have lower surprisal than the actual language (Figure~\ref{fig:nhst-pointwise}).
-Formally, let $W_-(\mu)$ be the proportion of baseline languages that have strictly lower surprisal than the real language at memory level $\mu$.
-We take the real language to be represented by the \emph{sample median}.
-For each level $\mu$ of memory, we consider the null hypothesis that
-\begin{equation}
-	W_-(\mu) \leq 0.5
-\end{equation}
-%In reality, we do not observe the curve of the real language exactly, but as noisy samples from our computational estimator.
-We use the Binomial Test.
-
-%This statistic also should have a reasonable Bayesian interpretation:
-% E.g., if the random samples are unimodal, and we do inference over only the median (location family), 
-
-
-
-\begin{figure}
-	\begin{center}
-\includegraphics[width=0.45\textwidth]{figures/nhst.png}
-\end{center}
-	\caption{Illustration for the pointwise null-hypothesis significance test. At a given level of memory, we test against the null hypothesis that at least half of the baseline orders provide lower surprisal than the real language.}\label{fig:nhst-pointwise}
-\end{figure}
-
-
-
-
-
-
-%For each memory value $\mu$, we do a significance test (nonparametric and nonasymptotic).
-%\begin{equation}
-%	W_+(\mu) \geq W_-(\mu)
-%\end{equation}
-%We use the empirical median for the real language.
-
-% yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single.py
-
-%We take the REAL values to be estimated exactly by their medians.
-
-
-
-\paragraph{Pointwise Quantile Estimate}
-%CI for quantile: % yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_UnimodalBoundOnQuantile_BothDirections.py
-
-\begin{figure}
-	\begin{center}
-\includegraphics[width=0.45\textwidth]{figures/quantile.png}
-\end{center}
-	\caption{Illustration for the quantile estimate. At each level of memory, we provide an estimate of the percentage of baseline languages that have lower surprisal than the real language.}\label{fig:quantile-pointwise}
-\end{figure}
-
-
-For each level of memory, we estimate what percentage of baseline languages have lower surprisal than the real language.
-This is described in Figure~\ref{fig:quantile-pointwise}.
-
-We derive a confidence interval under the assumption that the distribution of baseline languages is unimodal.
-
-We derive a CI for the quantile, under the assumption that the baseline distribution is unimodal. We take the REAL values to be estimated exactly by their medians.
-
-We want to create a CI at each Memory value for the quantile.
-
-Let $n_+$ be the better baseline samples, $n_-$ the worse ones.
-
-Let $\theta$ the best baseline sample that is worse than the real median.
-
-We want to get a confidence bound $q$ on $P(X < x_{real})$.
-
-Let $p := P(N_+ \leq n_+ | N_+ + N_-; q)$.
-Then output $(0, q)$ as a level $p$ CI for the parameter $P(X < x_{real})$.
-
-We minimize $q$ subject to $p < 0.05$.
-
-Once we have $q$, we can make it a bit better under the assumption that the baseline distribution is unimodal.
-
-This CI is exact in the sense that it does not involve asymptotic approximations or parametric assumptions, but it is extremely conservative.
-
-Also the following does not assume unimodality, and ends up getting about the same intervals
-% yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_UnimodalBoundOnQuantile_BothDirections_NoAssumption.py
-
-
-
-
-\paragraph{Global Quantile Estimate}
-
-
-\begin{figure}
-	\begin{center}
-\includegraphics[width=0.45\textwidth]{figures/quantile-global.png}
-\end{center}
-	\caption{Illustration for the global quantile estimate. For each sample for the real language, we compare the memory-surprisal curve to all baselines.}\label{fig:quantile-global}
-\end{figure}
-
-
-
-For each sample $x$ from real orderings, we look at the proportions $N_+(x)$ of samples from the baseline languages that are more optimal than $x$ throughout the entire range where both curves are defined, and the proportion $N_-(x)$ of baseline samples that are consistently less optimal.
-
-%We consider the null hypothesis that, on average, not more baseline languages are consistently less optimal than are consistently more optimal than the real orderings:
-%\begin{equation}
-%	\E_{x \sim P_1}[W_+(x)] \geq \E_{x \sim P_1}[W_-(x)]
-%\end{equation}
-
-We estimate the quotient
-\begin{equation}\label{eq:g}
-	G :=	\frac{\E_{x \sim P_1}[W_+(x)]}{\E_{x \sim P_1}[W_+(x) + W_-(x)]}
-\end{equation}
-where $P_1$ is the distribution over values obtained for real orderings.
-We use a bootstrapped confidence interval for $\E[G]$ for quantifying the degree of optimization.
-For bootstrapping, we separately resample samples from the real language and from the baseline grammars.
-
-Unlike the other statistics, this one provides a global measure of the degree of optimization of the real language.
-Due to the use of bootstrapping, the confidence intervals are not exact.
-
-
-%- bootstrapping
-%- subsampling
-%- permutation test / rank test ??
-%
-
-
-
-\subsection{Number of Samples}
-Training neural language models is computationally costly.
-Therefore, we used a precision-based stopping criterion to adaptively choose a sample size for each language.
-Precision-based stopping criteria offer a way to adaptively choose sample size without biasing results (CITE).
-
-For each language, we first collected 10 data points for real orderings and 10 data points for baseline orderings.
-We continued obtaining new data points until the CI for $G$ had width $\leq 0.15$, or there were 100 samples from $P_1$ and 300 samples from $P_2$.
-Up to the end, we chose the next sample to be from $P_0$ with probability 2/3, and $P_1$ otherwise.\footnote{Due to a scripting error, a much higher number of samples was generated for Erzya.}
-
-This procedure was parallelized on several machines.
-In the case where the stopping criterion was reached for a language while several machines were still computing samples for this language, we did not discard those samples.
-Consequently, more samples were collected than necessary to reach the stopping criterion; however, in a way that does not bias our results towards or against our hypothesis.
-
-%Due to parallelization of this procedure, it often produced more samples than required, when the stopping criterion .
-%We chose these thresholds based on preliminary simulations which had suggested that these widths were achievable at acceptable computational cost.
-%For each language, we collected at least 5 data points for real orderings and at least 10 data points for baseline orderings.
-%We continued obtaining new data points until the CI for $G$ had width $\leq 0.15$, or there were 100 samples from $P_1$ and 300 samples from $P_2$.
-%Up to the end, we chose the next sample to be from $P_0$ with probability 2/3, and $P_1$ otherwise.
-
-
-
-
-\subsection{Results}
-
-The numbers of samples taken per language are provided in Table~\ref{tab:samples}.
-
-%In Figure~\ref{tab:plain-results} (TODO), we show the estimated memory-surprisal tradeoff curves for all samples.
-
-In Figure~\ref{tab:medians}, we show the medians for real and baseline languages.
-
-Descriptively, the real language provides better tradeoffs than the median of the baselines across languages, with four exceptions (Latvian, North Sami, Polish, Slovak).
-
-In Figure~\ref{tab:slice-hists-real}, we show the distribution of surprisals achieved at the maximal memory value for real and random languages.
-
-In Figure~\ref{fig:hist-real}, we show surprisals at maximum memory, after z-transforming for each individual language and then aggregating.
-
-In Table \ref{tab:median_diffs}, we show the differences in median surprisal, as a function of memory.
-
-
-In Table~\ref{tab:boot-g}, we report the bootstrap estimates and confidence intervals for G~(\ref{eq:g}).
-$\E[G]$ was not estimated to be significantly above $>5$ for four languages: Latvian, North Sami, Polish, and Slovak.
-
-
-In Table~\ref{tab:quantiles}, we show the quantiles.
-
-
-
-
-
-\subsection{Discussion}
-
-We have found that 48 out of 52 languages provide better memory-surprisal tradeoffs than random baselines with consistent but counterfactual word order rules.
-
-Four languages provide exceptions; these are Latvian (Baltic), North Sami (Uralic), Polish and Slovak (both Slavic).
-All four languages have strong word order freedom (CITE).
-Freedom of word order plausibly makes sentences less predictable, as the same syntactic structure can receive different surface realizations.
-We thus hypothesized that freedom of word order impacts the memory-surprisal tradeoff, and that languages with more strongly fixed word order should display more optimal memory-surprisal tradeoffs.
-%We hypothesized that freedom of word order freedom may be responsible for the difference between these languages and the other languages.
-
-To test this hypothesis, we examined the correlation between word order freedom and the surprisal difference between real and baseline orderings.
-To quantify word order freedom, we used a corpus-based estimate, the \emph{branching direction entropy}~\citep{futrell-quantifying-2015}.
-This is the entropy of the ordering (head-first or dependent-first) of dependencies conditioned on the dependency label and the part-of-speech label of head and dependent.
-%\cite{futrell-quantifying-2015} showed that this me
-These two quantities are plotted in Figure~\ref{fig:hist-real}.
-We found that branching direction entropy was strongly correlated with the surprisal difference between real and baseline orderings (Spearman correlations -0.58, $p = 7.414e-6$).
-
-
-
-\begin{figure}
-\includegraphics[width=0.95\textwidth]{neural/figures/surprisal-branching-entropy-REAL.pdf}
-	\caption{Surprisal Difference vs Branching Direction Entropy.}\label{fig:hist-real}
-\end{figure}
-
-
-
-
-
-
-\section{Experiment 3: Fixed Word Orders}
-
-We test this hypothesis by comparing baseline languages to \emph{fixed-order} versions of the real languages.
-This enables us to tease apart the impact of the languages' word order rules from the impact of word order freedom.
-
-
-\begin{figure}
-\includegraphics[width=0.95\textwidth]{neural/figures/full-GROUND-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
-	\caption{Histogram}\label{fig:hist-real}
-\end{figure}
-
-
-
-\paragraph{Fitting Ordering Grammars to Actual Orders}
-We create ordering grammars that are fit to the actual orderings of each language.
-These grammars faithfully represent the ordering rules if the actual language, to the extent that is possible in the formalism of ordering grammars.
-
-We construct these grammars by constructing \emph{probabilistic ordering grammars}, and setting the parameters to maximize the \emph{likelihood} of the actually observed orderings.
-We parameterized probabilistic ordering grammars as follows.
-For each relation type $\tau$, we introduce a \emph{direction parameter} $a_\tau \in [0,1]$ and a \emph{distance parameter} $b_\tau \in \mathbb{R}$.
-Each dependent is ordered on the left of its head with probability $a_\tau$ and to the right with probability $1-a_\tau$. 
-Then for each set of co-dependents $\{s_1, \dots , s_n\}$ placed on one side of a head, their order outward from the head is determined by iteratively sampling from the distribution $\operatorname{softmax}(b_{\tau_1}, \dots, b_{\tau_n})$ (\cite{goodfellow2016deep}, p. 184) without replacement. 
-
-Given a dependency tree, a probabilistic ordering grammar assigns a probability distribution over the possible projective linearizations of that tree.
-We use gradient descent to find parameters $a_\tau, b_\tau$ so as to maximize the overall likelihood of the orders in the actual corpus.
-
-
-We convert probabilistic ordering grammars into ordinary ordering grammars by the following method.
-Let $A_-$ be those relations $\tau$ where $a_\tau > 0.5$, similarly for $A_+$ those here $a_\tau \geq 0.5$.
-Then we order all relations in $A_-$ by $b_\tau$ in \emph{decreasing} order, and those in $A_+$ by $b_\tau$ in \emph{increasing} order.
-
-Then ordering a tree following the converted version is equivalent to greedily choosing the highest-probability linearization for the dependents of each head in a tree.
-
-
-We choose this method since maximum-likelihood grammars can be constructed with simple gradient descent.
-Another option would be to use some kind of discrete optimization method to approximate the original orders without a probabilistic method.
-However, discrete optimization is computationally challenging.
-
-\paragraph{Results}
-
+\input{main-experiment.tex}
 
 \section{Discussion}
 
-\subsection{Relation to Theories of Sentence Processing}
-
-
-\paragraph{Lossy-Context Surprisal}
-\citet{futrell-noisy-context-2017} describe a processing model where listeners make predictions (and incur surprisal) based on lossy memory representations.
-In particular, they consider loss models that delete, erase, or replace words in the past.
-Under the assumption that loss affects words more strongly that are further in the past, they derive a principle of information locality:
-A listener will incur surprisal
-$$ -\log P(w_t) - \sum_{j=1}^{t-1} f(i-j) pmi(w_i; w_j) + R$$
-where the `survival probability' $f(d)$ decreases as the distance $d$ between two words increases, and $R$ is a remainder term that can be argued to be small.
-Given that $f$ is assumed to be decreasing, this prediction loss will be smaller when words with high mutual information are closer together in the input.
-Our Proposition~\ref{prop:suboptimal} can be seen as an analogous result for general models of memory.
-
-
-
-
-
-
-\paragraph{Relation to Dependency Locality}
-The quantity described in Proposition~\ref{prop:lower-bound} is formally similar to Storage Cost in the Dependency Locality Theory (DLT) \citep{gibson-linguistic-1998}: Storage cost at a given timestep is defined as the number of predictions that are held in memory.
-Storage cost only considers predictions that are certain, and each prediction takes an equal amount of memory.
-In contrast, the result in Proposition~\ref{prop:lower-bound} can be seen as weighting predictions by their certainty and the amount of predictive information.
-In this sense, DLT storage cost can be seen as an approximation to Proposition~\ref{prop:lower-bound}.
-
-also surprisal -- integration cost
-
-
-\paragraph{Center Embeddings, ...}
-Yngve 1960, had a complexity measure, but doesn't work well for left-branching structures
-
-Miller and Chomsky 1963
-
-Frzier 1985 local nonterminal count
-
-Rambow and Joshi 1994 using TAG
-
-Marcus 1980 deterministic parsing
-
-(Sabrina Gerth, Memory Limitations in Sentence Processing)
-
-
-\subsection{Relation to other work}
-
-\paragraph{Statistical Complexity}
-There are deep connections between our formalization of listener memory and studies of dynamic systems in the Physics literature.
-%Speaker memory corresponds to \emph{Generative Complexity} \cite{loehr-non-sufficient-2008, loehr-predictive-2010}.
-The tradeoff between listener memory and surprisal is formally equivalent to the \emph{Recursive Information Bottleneck} considered by \cite{still-information-2014}.
-In the limit of optimal prediction and minimal surprisal, our formalization of listener memory is equivalent to the notion of \emph{Statistical Complexity} \citep{crutchfield-inferring-1989}.
-In the limit $T \rightarrow \infty$, the quantity in (\ref{eq:memory}) is equal to the \emph{excess entropy}, which is known to bound statistical complexity \citep{crutchfield-inferring-1989}.
-However, the link between memory and information locality provided by our Proposition~\ref{prop:suboptimal} appears to be a novel contribution.
-Relatedly, \cite{sharan-prediction-2016} shows a link between excess entropy and approximability by $n$-th order Markov models, noting that processes with low excess entropy can be approximated well with Markov models of low order.
-
-also information-theoretic studies of memory capacity
-
-\paragraph{Decay of Mutual Information}
-In Propositions~\ref{prop:lower-bound} and \ref{prop:suboptimal}, we showed a close link between memory and the decay of \emph{conditional} mutual information $I_t := I[w_t, w_0 | w_{1\dots t-1}]$.
-Prior work has studied the decay of \emph{unconditional} mutual information $I[w_t, w_0]$ in natural language \citep{ebeling-entropy-1994,lin-critical-2017}, and linked it to locality and memory \citep{futrell-noisy-context-2017}.
-
-The decay of unconditional mutual information is less closely linked to memory requirements than conditional mutual information:
-While the decay of conditional mutual informations provides a lower bound on memory need, unconditional mutual information does not:
-Consider the constant process where with probability 1/2 all $w_t = 0$, and with probability 1/2 all $w_t = 1$. %%$w_t = c$, where $c$ is random but independent of $t$ for each specific draw from the process.
-The unconditional mutual information is 1 at all distances, so does not decay at all, but the process only requires 1 bit of memory.
-Conversely, one can construct processes where the unconditional mutual informations are 0 for all $t$, but where $P > 0$ and this predictive information is actually spread out over arbitrarily large distances (that is, the ratio of memory $M$ and predictability $P$ can be made arbitrarrily large).\footnote{First, consider the process (called X by REF) consisting of 2 random bits and their XOR. This one has bounded nonzero $J$, but zero unconditional MI. To get unbounded $J$, consider the following process for any $N \in \mathbb{N}_{>2}$: Every $w_t$ is equal to the XOR of $w_{t-1}$ and $w_{t-N}$, such that each $w_t$ has $Bernoulli(1/2)$ as its marginal. The unconditional mutual information between any two timesteps is zero, but modeling the process requires $N$ bits of memory.}
-
-
-
-\paragraph{Long-range dependencies in text}    % excess entropy
-\cite{debowski-excess-2011} has studied the excess entropy of language across long ranges of text, in particular studying whether it is finite. % compute excess entropy in text
-Our work contrasts with this work in that we are interested in dependencies within sentences.
-
-
-\subsection{Discussion}
-
-\paragraph{Speakers vs Listeners}
-can we say something about this
-
-\paragraph{Decay vs Interference}
-Work has suggested that interference and memory overload is more appropriate than decay \cite[p. 408]{lewis-activation-based-2005} for modeling locality and memory in sentence processing.
-The bounds in Propositions~\ref{prop:lower-bound} and \ref{prop:suboptimal} hold for any type of memory model, and are thus compatible with decay- or interference-based models.
-The formula in (\ref{eq:memory-bound}) might suggest that boundedness of memory entails that memory has to decay.
-This is not the case:
-A long dependency can be maintained perfectly with low average memory:
-Informally, if every sentence is $N$ words long and has one long-distance dependency spanning the entire sentence, this dependency can be modeled perfectly with a memory cost that is independent of $N$.
-In contrast, if every symbol strongly and non-redundantly depends on the character $T$ steps in the past, with $T$ large, this will create a memory cost proportional to $T$.
-
-
-
-
-\paragraph{Memory and Hierarchical Structure; Finiteness of Memory}
-Processing nontrivial hierarchical structures typically requires unbounded amounts of memory.
-However, crucially, the \emph{average} memory demand for prediction can be finite, if the probability mass assigned to long dependencies is small.
-For instance, languages defined by Probabilistic Context Free Grammars (PCFG) always have finite average memory.
-The reason is that PCFGs assign low probabilities to long sequences.\footnote{Proposition 2 in \cite{chi-statistical-1999} implies that words drawn from a PCFG have finite expected length. This implies that average memory demands are finite.}
-
-
+\input{discussion.tex}
 
 
 \section{Conclusion}
@@ -881,7 +168,7 @@ TODO
 
 
 \begin{figure}
-\includegraphics[width=0.95\textwidth]{neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
+\includegraphics[width=0.95\textwidth]{../code/analyze_neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
 \caption{Histogram}\label{fig:hist-real}
 \end{figure}
 
@@ -918,7 +205,7 @@ TODO
 \begin{longtable}{ccccccccccccccclll}
 \input{tables/medians_REAL_0.tex}
 \end{longtable}
-	\caption{Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
+	\caption{Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median, dotted lines indicate empirical quantiles ($10\%, 20\%, \dots, 80\%, 90\%$). Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
 \end{table}
 
 \begin{table}
@@ -977,29 +264,29 @@ TODO
 \end{table}
 
 
-\begin{table}
-\begin{tabular}{cccccccccccccccccc}
-\input{tables/quantiles_REAL_0.tex}
-\end{tabular}
-	\caption{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
-\end{table}
-
-\begin{table}
-\begin{tabular}{cccccccccccccccccc}
-\input{tables/quantiles_REAL_1.tex}
-\end{tabular}
-	\caption{Quantiles (part 2)}
-\end{table}
-
-\begin{table}
-\begin{tabular}{cccccccccccccccccc}
-\input{tables/quantiles_REAL_2.tex}
-\end{tabular}
-	\caption{Quantiles (part 3)}
-\end{table}
-
-
-
+%\begin{table}
+%\begin{tabular}{cccccccccccccccccc}
+%\input{tables/quantiles_REAL_0.tex}
+%\end{tabular}
+%	\caption{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
+%\end{table}
+%
+%\begin{table}
+%\begin{tabular}{cccccccccccccccccc}
+%\input{tables/quantiles_REAL_1.tex}
+%\end{tabular}
+%	\caption{Quantiles (part 2)}
+%\end{table}
+%
+%\begin{table}
+%\begin{tabular}{cccccccccccccccccc}
+%\input{tables/quantiles_REAL_2.tex}
+%\end{tabular}
+%	\caption{Quantiles (part 3)}
+%\end{table}
+%
+%
+%
 
 
 
@@ -1093,23 +380,24 @@ TODO
 
 
 
+
 \begin{table}
 \begin{tabular}{cccccccccccccccccc}
-\input{tables/quantiles_0.tex}
+\input{tables/quantiles_noAssumption_0.tex}
 \end{tabular}
 	\caption{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
 \end{table}
 
 \begin{table}
 \begin{tabular}{cccccccccccccccccc}
-\input{tables/quantiles_1.tex}
+\input{tables/quantiles_noAssumption_1.tex}
 \end{tabular}
 	\caption{Quantiles (part 2)}
 \end{table}
 
 \begin{table}
 \begin{tabular}{cccccccccccccccccc}
-\input{tables/quantiles_2.tex}
+\input{tables/quantiles_noAssumption_2.tex}
 \end{tabular}
 	\caption{Quantiles (part 3)}
 \end{table}

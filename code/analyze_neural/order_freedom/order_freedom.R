@@ -1,4 +1,4 @@
-fullData = read.csv("../results/tradeoff/listener-curve-histogram_byMem.tsv", sep="\t")
+fullData = read.csv("../../../results/tradeoff/listener-curve-histogram_byMem.tsv", sep="\t")
     library(tidyr)
     library(dplyr)
     library(ggplot2)
@@ -7,7 +7,7 @@ fullData = read.csv("../results/tradeoff/listener-curve-histogram_byMem.tsv", se
     data = data %>% mutate(MI_z = (MI-mean)/sd)
     barWidth = 0.05 #(max(data$MI) - min(data$MI))/30
 
-branching = read.csv("../code/branching_entropy/branching_entropy.tsv", sep="\t")
+branching = read.csv("../../branching_entropy/branching_entropy.tsv", sep="\t")
 data = merge(data, branching, by=c("Language"))
 
 dataReal = data %>% filter(Type %in% c("REAL_REAL")) %>% group_by(Language, Type) %>% summarise(MI_z=mean(MI_z), MIDiff = mean(MI-mean), BranchingEntropy=mean(BranchingEntropy)) %>% mutate(y=1)
@@ -17,9 +17,11 @@ plot = ggplot(dataReal, aes(x=-MIDiff, y=BranchingEntropy)) + geom_point()
 plot = plot + theme_classic() 
 plot = plot + theme(legend.position="none")   
 plot = plot + geom_text(aes(label=Language), hjust=0.8, vjust=1.1)
-#plot = plot + xlim(-2.5, 0.5)
+plot = plot + xlab("Surprisal Difference")
+plot = plot + ylab("Branching Direction Entropy")
+plot = plot + theme(axis.title=element_text(size=30))
 
-ggsave(plot, file=paste("figures/surprisal-branching-entropy-REAL.pdf", sep=""))
+ggsave(plot, file=paste("../figures/surprisal-branching-entropy-REAL.pdf", sep=""), width=15, height=7)
 
 
 
@@ -32,7 +34,7 @@ plot = plot + theme(legend.position="none")
 plot = plot + geom_text(aes(label=Language), hjust=0.8, vjust=1.1)
 #plot = plot + xlim(-2.5, 0.5)
 
-ggsave(plot, file=paste("figures/surprisal-branching-entropy-GROUND.pdf", sep=""))
+ggsave(plot, file=paste("../figures/surprisal-branching-entropy-GROUND.pdf", sep=""))
 
 
 

@@ -1,3 +1,7 @@
+# This script is used to compute `Confidence Interval for Medians'
+
+# It is called by code/medians/yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_MedianCI_All.py
+
 # Better than yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_MaxControl.py by modeling the median of REAL
 
 import sys
@@ -21,7 +25,7 @@ def readTSV(x):
       for i in range(len(data)):
           data[i][column] = vals[i]
     return (header, data)
-with open("../results/raw/word-level/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", "r") as inFile:
+with open("../../results/raw/word-level/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", "r") as inFile:
      data = readTSV(inFile)
 #print(len(data))
 
@@ -135,32 +139,11 @@ for typ, interpolated in interpolatedByTypes.iteritems():
              bestCI = (lower, upper, coverage)
 #       print(typ, i, bestCI)
           # median is in [lower, upper]
-
+       empirical_median = float(interpolated[:,i].median())
+       assert bestCI[0] <= empirical_median
        # TODO don't trust the CI
-       print "\t".join(map(str,[language, typ, i, float(xPoints[i]), float(interpolated[:,i].median()), bestCI[0], bestCI[1], bestCI[2]]))
+       print "\t".join(map(str,[language, typ, i,                float(xPoints[i]), empirical_median,     bestCI[0], bestCI[1], bestCI[2]]))
+                             # "Language", "Type", "Position",  "Memory",           "MedianEmpirical",    "MedianLower", "MedianUpper", "Level"
 
 
 
-
-
-       #quit()
-
-#       comparison = interpolatedByTypes["RANDOM_BY_TYPE"] < minReal.unsqueeze(0)
-#       comparisonReverse = interpolatedByTypes["RANDOM_BY_TYPE"] > minReal.unsqueeze(0)
-#    
-#     #  print(comparison.size())
-#       comparisonMean = comparison.float().sum(dim=0)
-#       comparisonReverseMean = comparisonReverse.float().sum(dim=0)
-#    
-#
-#
-#       p1 = (scipy.stats.binom_test(x=comparisonMean[i], n=comparison.size()[0])) + math.pow(2, -interpolated.size()[0])
-#       p2 = (scipy.stats.binom_test(x=comparisonReverseMean[i], n=comparison.size()[0])) + math.pow(2, -interpolated.size()[0])
-#
-
-
-
-#  mis = list(interpolated[:,-5].numpy())
-#  for i in range(len(mis)):
-#     print("\t".join(map(str,[language, typ, float(xPoints[-5]), mis[i]])))
-#
