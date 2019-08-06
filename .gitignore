@@ -5,3 +5,5 @@
 *.pdf
 *.swo
 *.swp
+*.pyc
+results/per-run/
