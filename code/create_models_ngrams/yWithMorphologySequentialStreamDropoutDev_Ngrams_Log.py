@@ -273,7 +273,34 @@ elif args.model == "RANDOM_MODEL_CONS":
      dhWeights[key] = 1.0
      distanceWeights[key] = random()
   originalCounter = "NA"
-
+elif args.model == "GROUND":
+  groundPath = "/u/scr/mhahn/deps/manual_output_ground_coarse/"
+  import os
+  files = [x for x in os.listdir(groundPath) if x.startswith(args.language+"_infer")]
+  print(files)
+  assert len(files) > 0
+  with open(groundPath+files[0], "r") as inFile:
+     headerGrammar = next(inFile).strip().split("\t")
+     print(headerGrammar)
+     dhByDependency = {}
+     distByDependency = {}
+     for line in inFile:
+         line = line.strip().split("\t")
+         assert int(line[headerGrammar.index("Counter")]) >= 1000000
+#         if line[headerGrammar.index("Language")] == language:
+#           print(line)
+         dependency = line[headerGrammar.index("Dependency")]
+         dhHere = float(line[headerGrammar.index("DH_Mean_NoPunct")])
+         distHere = float(line[headerGrammar.index("Distance_Mean_NoPunct")])
+         print(dependency, dhHere, distHere)
+         dhByDependency[dependency] = dhHere
+         distByDependency[dependency] = distHere
+  for key in range(len(itos_deps)):
+     dhWeights[key] = dhByDependency[itos_deps[key][1].split(":")[0]]
+     distanceWeights[key] = distByDependency[itos_deps[key][1].split(":")[0]]
+  originalCounter = "NA"
+else:
+  assert False, args.model
 
 lemmas = list(vocab_lemmas.iteritems())
 lemmas = sorted(lemmas, key = lambda x:x[1], reverse=True)
