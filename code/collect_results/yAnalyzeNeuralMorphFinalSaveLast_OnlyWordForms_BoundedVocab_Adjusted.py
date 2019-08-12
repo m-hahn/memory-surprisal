@@ -86,12 +86,15 @@ finalShib = { "Russian" : " Russian 0.4 150 256 3 0.05 ", "Erzya-Adap" : "Erzya-
        "Korean" : " Korean 0.1 300 1024 1 0.05 "}
 
 
+from ud_languages import languages
+assert set(finalShib) == set(languages)
+
 types = [" REAL ", " REAL_REAL ", "RANDOM_MODEL ", "RANDOM_BY_TYPE ", "RANDOM_MODEL_ST ", "RANDOM_BY_TYPE_ST ", "RANDOM_MODEL_CONS ", "RANDOM_BY_TYPE_CONS ", "RANDOM_MODEL_NONP ", "RANDOM_BY_TYPE_NONP ", " TOTALLY_RANDOM ", " GROUND "]
 
 
 averageUnigramCE = [0.0,0]
 
-for fileName in files:
+for fileName in sorted(files):
   if language not in fileName:
        continue
   if not fileName.startswith("estimates"):
