@@ -19,6 +19,7 @@ for language in languages:
     filenames = [x for x in os.listdir("/u/scr/mhahn/deps/memory-need-ngrams/") if x.startswith("search-"+language+"_yWithMo") and len(open("/u/scr/mhahn/deps/memory-need-ngrams/"+x, "r").read().split("\n"))>=30]
     if len(filenames) == 0:
        continue
+    assert len(filenames) == 1
     with open("/u/scr/mhahn/deps/memory-need-ngrams/"+filenames[0], "r") as inFile:
         params = next(inFile).strip().split("\t")[2:]
         assert len(params) == 4
@@ -32,5 +33,6 @@ for language in languages:
        for _ in range({"REAL_REAL" : 5, "RANDOM_BY_TYPE" : 20}[MODEL_TYPE]):
           command = map(str,["/u/nlp/anaconda/ubuntu_16/envs/py27-mhahn/bin/python2.7", version, "--language", language, "--model", MODEL_TYPE] + params2)
           print(command)
+          quit()
           result = subprocess.call(command)
 

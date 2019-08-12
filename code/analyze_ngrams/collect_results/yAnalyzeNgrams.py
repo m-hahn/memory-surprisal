@@ -37,7 +37,7 @@ resultsPerType = {}
 
 
 filenames = [x for x in os.listdir("/u/scr/mhahn/deps/memory-need-ngrams/") if x.startswith("search-"+language+"_yWithMo") and len(open("/u/scr/mhahn/deps/memory-need-ngrams/"+x, "r").read().split("\n"))>=30]
-#print(filenames)
+assert len(filenames) == 1, filenames
 #print([x for x in os.listdir("/u/scr/mhahn/deps/memory-need-ngrams/") if x.startswith("search-"+language+"_yWithMo")])
 #print("/u/scr/mhahn/deps/memory-need-ngrams/search-"+language+"yWithMo")
 if len(filenames) == 0:
@@ -45,7 +45,8 @@ if len(filenames) == 0:
 with open("/u/scr/mhahn/deps/memory-need-ngrams/"+filenames[0], "r") as inFile:
     params = next(inFile).strip().split("\t")[2:]
     assert len(params) == 4
-  
+    params[-1] = "20"
+print("Parameters identified in the search: ", params)  
 version = "yWithMorphologySequentialStreamDropoutDev_Ngrams_Log.py"
 argumentNames = ["alpha", "gamma", "delta", "cutoff"]
 
@@ -60,7 +61,6 @@ correctParameters = " ".join(params2)
 types = [" REAL_REAL ", "RANDOM_MODEL ", "RANDOM_BY_TYPE "]
 
 for fileName in files:
-  #print(fileName)
   if language not in fileName:
        continue
   if not fileName.startswith("estimates"):
@@ -68,8 +68,10 @@ for fileName in files:
 
   with open(path+fileName, "r") as inFile:
      result = inFile.read().split("\n")
+#     print(correctParameters, result[0])
      if (correctParameters+" " not in result[0]+" "):
          continue
+     print(fileName)
      typeOfResult = filter(lambda x:x in result[0], types)[0][:-1]
      if len(result) < 3:
          continue
@@ -95,8 +97,8 @@ for fileName in files:
 
 header = ["Type", "Memory", "Residual", "ModelID", "TotalMI"]
 headerDecay = ["Type", "Distance", "ConditionalMI", "TotalMI", "ModelID", "UnigramCE"]
-with open("../results/raw/ngrams/"+language+"_ngrams_after_tuning.tsv", "w") as outFile:
- with open("../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv", "w") as outFileDecay:
+with open("../../../results/raw/ngrams/"+language+"_ngrams_after_tuning.tsv", "w") as outFile:
+ with open("../../../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv", "w") as outFileDecay:
 
   print >> outFile, "\t".join(header)
   print >> outFileDecay, "\t".join(headerDecay)
@@ -122,5 +124,5 @@ with open("../results/raw/ngrams/"+language+"_ngrams_after_tuning.tsv", "w") as 
            print >> outFileDecay, "\t".join([str(rand[x]) for x in headerDecay]) #map(str,[parameters[0], parameters[1], parameters[2], parameters[8], i, max(0, rand[9][i]), rand[7], rand[6], rand[10]]))
  
   #yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast.py	Basque	eu	0.1	100	512	1	0.002	RANDOM_MODEL	0.23	16	20	43.3432767303	1.55933869897	4.17839380314
-print "../results/raw/ngrams/"+language+"_ngrams_after_tuning.tsv" 
-print "../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv"
+print "../../../results/raw/ngrams/"+language+"_ngrams_after_tuning.tsv" 
+print "../../../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv"
