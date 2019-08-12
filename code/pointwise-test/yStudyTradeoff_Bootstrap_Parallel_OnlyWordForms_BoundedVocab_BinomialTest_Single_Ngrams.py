@@ -1,4 +1,4 @@
-# Better than yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_MaxControl.py by modeling the median of REAL
+# This one is mentioned in the paper source
 
 import sys
 
@@ -21,13 +21,8 @@ def readTSV(x):
       for i in range(len(data)):
           data[i][column] = vals[i]
     return (header, data)
-try:
-  with open("../../../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv", "r") as inFile:
+with open("../../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv", "r") as inFile:
      data = readTSV(inFile)
-except IOError:
-  print >> sys.stderr, ("ERROR nothing for this language? "+language)
-  quit()
-
 #print(len(data))
 
 
@@ -50,26 +45,21 @@ for i in range(len(data[1])):
     if typ not in matrixByType:
         matrixByType[typ] = []
     matrixByType[typ].append(matrix[i])
-MAX_DISTANCE = -1
 for typ in matrixByType:
-   tensorized = torch.FloatTensor(matrixByType[typ])
-   MAX_DISTANCE = int(tensorized[:,1].max())
-   matrixByType[typ] = tensorized.view(-1, MAX_DISTANCE, 4)
+   matrixByType[typ] = torch.FloatTensor(matrixByType[typ]).view(-1, 19, 4)
    #print(matrixByType[typ][0])
    misByType[typ] = matrixByType[typ][:,:,2]
 #print(misByType["RANDOM_BY_TYPE"])
-if MAX_DISTANCE == -1:
-  print >> sys.stderr, ("ERROR nothing for this language? "+language)
-  quit()
+
 #data = data %>% group_by(ModelID) %>% mutate(CumulativeMemory = cumsum(Distance*ConditionalMI), CumulativeMI = cumsum(ConditionalMI))
-distance = torch.FloatTensor(range(1,1+MAX_DISTANCE))
+distance = torch.FloatTensor(range(1,20))
 
 cumMIs = {}
 cumMems = {}
 cumInterpolated = {}
 maximalMemory = 0
 for typ, mis in misByType.iteritems():
-  mask = torch.FloatTensor([[1 if j <= i else 0 for j in range(MAX_DISTANCE)] for i in range(MAX_DISTANCE)])
+  mask = torch.FloatTensor([[1 if j <= i else 0 for j in range(19)] for i in range(19)])
   cumulativeMI = torch.matmul(mis, mask.t())
   #print("MIs", mis[0])
   #print("Cum MI", cumulativeMI[0])
@@ -119,11 +109,34 @@ for typ, mis in misByType.iteritems():
      interpolated[:,j] = torch.sum(condition  * interpolation, dim=1)
      foundValues[:,j] = torch.sum(condition, dim=1)
   interpolatedByTypes[typ] = interpolated
-  for i in range(0, interpolated.size()[0]):
-      for j in range(0, len(xPoints)):
-        print "\t".join(map(str, [language, typ, int(matrixByType[typ][i][0][0]), j, float(xPoints[j]), float(interpolated[i,j])]))
-#  print(interpolated.size())
- # print(matrixByType[typ].size())
-#       print "\t".join(map(str,[language, typ, i, float(xPoints[i]), float(interpolated[:,i].median()), bestCI[0], bestCI[1], bestCI[2]]))
+
+import scipy.stats
+
+for real in ["REAL_REAL"]: #, "GROUND"]:
+    interpolated = interpolatedByTypes[real]
+   # print(interpolated.size())
+    median = interpolated.median(dim=0)[0]
+  #  print(median.size())
+    
+    comparison = interpolatedByTypes["RANDOM_BY_TYPE"] < median.unsqueeze(0)
+    comparisonReverse = interpolatedByTypes["RANDOM_BY_TYPE"] > median.unsqueeze(0)
+
+ #   print(comparison.size())
+    comparisonMean = comparison.float().sum(dim=0)
+    comparisonReverseMean = comparisonReverse.float().sum(dim=0)
+
+#    print(comparisonMean)
+    for i in range(39):
+       p1 = (scipy.stats.binom_test(x=comparisonMean[i], n=comparison.size()[0], alternative="greater"))
+#       p2 = (scipy.stats.binom_test(x=comparisonReverseMean[i], n=comparison.size()[0]))
+
+#       print "\t".join(map(str,[language, real, i, float(xPoints[i]), float(comparisonMean[i]/comparison.size()[0]), float(comparisonReverseMean[i]/comparison.size()[0]), p1, p2]))
+       print "\t".join(map(str,[language, real, i, float(xPoints[i]), float(comparisonMean[i]/comparison.size()[0]), p1]))
 
 
+
+
+#  mis = list(interpolated[:,-5].numpy())
+#  for i in range(len(mis)):
+#     print("\t".join(map(str,[language, typ, float(xPoints[-5]), mis[i]])))
+#

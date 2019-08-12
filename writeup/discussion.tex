@@ -1,6 +1,30 @@
 
-\subsection{Relation to Theories of Sentence Processing}
+\subsection{Other Models of Sentence Processing}
 
+\paragraph{Early Models}
+
+Yngve 1960, had a complexity measure, but doesn't work well for left-branching structures
+
+Miller and Chomsky 1963
+
+Frzier 1985 local nonterminal count
+
+Rambow and Joshi 1994 using TAG
+
+Marcus 1980 deterministic parsing
+
+(Sabrina Gerth, Memory Limitations in Sentence Processing)
+
+
+\paragraph{Dependency Locality}
+The quantity described in Proposition~\ref{prop:lower-bound} is formally similar to Storage Cost in the Dependency Locality Theory (DLT) \citep{gibson-linguistic-1998}: Storage cost at a given timestep is defined as the number of predictions that are held in memory.
+Storage cost only considers predictions that are certain, and each prediction takes an equal amount of memory.
+In contrast, the result in Proposition~\ref{prop:lower-bound} can be seen as weighting predictions by their certainty and the amount of predictive information.
+In this sense, DLT storage cost can be seen as an approximation to Proposition~\ref{prop:lower-bound}.
+
+also surprisal -- integration cost
+
+\paragraph{Cue-Based Retrieval}
 
 \paragraph{Lossy-Context Surprisal}
 \citet{futrell-noisy-context-2017} describe a processing model where listeners make predictions (and incur surprisal) based on lossy memory representations.
@@ -15,32 +39,7 @@ Our Proposition~\ref{prop:suboptimal} can be seen as an analogous result for gen
 
 
 
-
-
-\paragraph{Relation to Dependency Locality}
-The quantity described in Proposition~\ref{prop:lower-bound} is formally similar to Storage Cost in the Dependency Locality Theory (DLT) \citep{gibson-linguistic-1998}: Storage cost at a given timestep is defined as the number of predictions that are held in memory.
-Storage cost only considers predictions that are certain, and each prediction takes an equal amount of memory.
-In contrast, the result in Proposition~\ref{prop:lower-bound} can be seen as weighting predictions by their certainty and the amount of predictive information.
-In this sense, DLT storage cost can be seen as an approximation to Proposition~\ref{prop:lower-bound}.
-
-also surprisal -- integration cost
-
-
-\paragraph{Center Embeddings, ...}
-Yngve 1960, had a complexity measure, but doesn't work well for left-branching structures
-
-Miller and Chomsky 1963
-
-Frzier 1985 local nonterminal count
-
-Rambow and Joshi 1994 using TAG
-
-Marcus 1980 deterministic parsing
-
-(Sabrina Gerth, Memory Limitations in Sentence Processing)
-
-
-\subsection{Relation to other work}
+\subsection{Statistical Studies of Language}
 
 \paragraph{Statistical Complexity}
 There are deep connections between our formalization of listener memory and studies of dynamic systems in the Physics literature.
@@ -71,6 +70,8 @@ Our work contrasts with this work in that we are interested in dependencies with
 
 
 \subsection{Discussion}
+
+\mhahn{Q what are some of the things that need to go here?}
 
 \paragraph{Speakers vs Listeners}
 can we say something about this

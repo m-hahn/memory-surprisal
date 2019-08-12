@@ -2,8 +2,8 @@
 
 We now investigate whether word orders as found in natural language optimize the two memory-surprisal tradeoffs.
 We compare the memory-surprisal tradeoffs of 52 actual languages to those of counterfactual reorderings.
-We cannot just compare to random orderings of individual syntactic trees, as such languages would not have word order regularities.
-Therefore, we compare to counterfactual word order grammars.
+We compare to counterfactual reorderings that differ from the actual languages in their word order rules, i.e., the rules that determine how syntactic structures are ordered into strings of words.\mhahn{where introduce the idea of word order}.
+To create such counterfactual reorderings, we parameterize these word order rules using a method introduced by Gildea and colleagues \citep{gildea-optimizing-2007, gildea-grammars-2010, gildea-human-2015}.
 
 \begin{figure}
 \centering
@@ -22,17 +22,20 @@ Therefore, we compare to counterfactual word order grammars.
 \end{figure}
 
 
+\mhahn{at some point the whole idea of syntactic structures have to be introduced}
 
 \subsection{Data}
 We draw on corpora annotated with syntactic structures.
-The Universal Dependencies project has compiled dependency corpora for several dozen languages~\citep{nivre-universal-2017}.
+The Universal Dependencies project has compiled such annotated corpora for several dozen languages~\citep{nivre-universal-2017}.
+These are annotated in the format of Dependency Grammar.
 
 \paragraph{Dependency Grammar}
 In dependency corpora, sentences are annotated with \emph{dependency trees} (Figure~\ref{fig:dependency}).
 These are directed trees describing the grammatical relations among words. For example, the arcs labeled ``obj'' represent that the noun in question is the \emph{direct object} if the verb, rather than e.g. the subject or an indirect object.
 A dependency arc is drawn from a \emph{head} (e.g. TODO in Figure TODO) to a \emph{dependent} (e.g. TODO).
-Dependency trees can be defined in terms of many different syntactic theories \cite{corbett1993heads}.
+Dependency trees can be defined in terms of many different syntactic theories \citep{corbett1993heads}.
 Although there are some differences in how different formalisms would draw trees for certain sentences, there is broad enough agreement about dependency trees that it has been possible to develop large-scale dependency-annotated corpora of text from dozens of languages \cite{nivre2017universal}.
+\mhahn{currently this is taken from the Greenberg paper}
 
 \paragraph{Corpora}
 We considered all languages for which there are Universal Dependencies 2.3 treebanks with a total of at least 500 sentences of training data.
@@ -40,7 +43,7 @@ We excluded data from historical languages.\footnote{Ancient Greek, Classical Ch
 This resulted in 54 languages.
 
 For each of these languages, we pooled all available corpora in one dataset.
-We excluded corpora that primarily contain code-switched text\footnote{Hindi English corpus}, or text created by non-native speakers.\footnote{ESL, CFL}
+We excluded corpora that primarily contain code-switched text\footnote{Hindi English corpus}, or text created by non-native speakers.\footnote{ESL for English, CFL for Chinese}
 Universal Dependencies corpora have a predefined split into \emph{training}, \emph{held-out} (also known as \emph{development}), and \emph{test} partitions.
 While larger corpora have all three partitions, smaller corpora often have only some of these partitions.
 For most language, we used the predefined data split, separately pooling data from the different partitions. %We did not use the test partitions.
@@ -82,103 +85,48 @@ In this sense, ordering grammars represent approximations to the kinds of orderi
 
 
 \subsection{Estimating Memory-Surprisal Tradeoff}\label{sec:method}
-To estimate mutual informations, we use LSTM recurrent neural networks, the basis of the state of the art in modeling natural language (CITE)\footnote{While Transformers are now better at modeling when large training sets comprising millions of sentences per language are available, they have not reached the level of LSTMs on small/medium training data such as the UD corpora} and predicting the surprisal effect on reading times~\citep{frank-insensitivity-2011, goodkind-predictive-2018}.
-%We model language on the level of individual word forms.
+To estimate mutual informations, we use LSTM recurrent neural networks, the basis of the state of the art in modeling natural language (CITE)\footnote{We note that the state-of-the-art is now achieved by other models when extremely large amounts of training data (on the order of several dozen GB of texts) are available. In comparison, LSTMs remain state of the art on small/medium training data such as the UD corpora.} and predicting the surprisal effect on reading times~\citep{frank-insensitivity-2011, goodkind-predictive-2018}.
 We provide data from alternative estimation methods in the SI.
 
 
-%\paragraph{Data}
-
-
-
-%Given a sequence of input words $w_1, ..., w_n \in V$, the model 
-%%
-%\textbf{TODO I'm describing this in a lot of detail. Alternatively, we can say this is a standard NLP method and refer to the NLP literature for the definition.}
-%The first component of such a model is an \emph{embedding matrix} $W_{emb} \in \mathbb{R}^{|V| \times d_{emb}}$, where the \emph{vocabulary} $\mathcal{V}$ is a set, containing the words that occur in the corpus, and $d_{emb} \in \mathbb{N}$ is a fixed parameter.
-%This matrix assigns a $d_{emb}$-dimensional vector to each word occurring in the corpus.
-%The second component is an LSTM cell $f_{LSTM}$, a nonlinear transformation mapping an \emph{input} vector $x_{i} \in \mathbb{R}^{d_{emb}}$ a \emph{hidden state} $h_i \in \mathbb{R}^{d_{LSTM}}$ and a \emph{cell state} $c_i \in \mathbb{R}^{d_{LSTM}}$ to a new pair of hidden state and cell states $h_{i+1}, c_{i+1} \in \mathbb{R}^{d_{LSTM}}$.
-%The LSTM cell $f_{LSTM}$ is parameterized by a matrix of numerical parameters $W_{LSTM}$.
-%
-%%Such networks estimate the probability of a word in context as follows.
-%Given a sequence of input words $w_1, ..., w_n \in V$, the model first retrieves fixed-dimensionality vector representations $x_1, ..., x_n$, where $x_i$ is the row of $W_{emb}$ corresponding to the word $w_i$.
-%It then computes a sequence of hidden and cell states by the following recurrent computation:
-%\begin{align*}
-%	h_1, c_1 &:= 0 \\
-%	h_2, c_2 &:= f_{LSTM}(x_1, h_1, c_1) \\
-%	\dots \\
-%	h_{n+1}, c_{n+1} &:= f_{LSTM}(x_n, h_n, c_n) \\
-%\end{align*}
-%The vector $h_i$ encodes the result of reading the words $w_1, ..., w_{i-1}$.
-%We will write $LSTM(w_1, ..., w_{i-1})$ for $h_i$.
-%
-%The third component of the recurrent language model is the matrix $W_{output} \in \mathbb{R}^{|V| \times d_{LSTM}}$.
-%We obtain per-word predictions of the next word by computing
-%\begin{align*}
-%	s_i := W_{output} h_i \in \mathbb{R}^{|V|} \\
-%	p_i := \operatorname{softmax}(s_i)\in \mathbb{R}^{|V|} 
-%\end{align*}
-%where the softmax transformation normalizes vectors into probability distributions as follows
-%\begin{equation}
-%	\operatorname{softmax}(x)_i := \frac{\exp(x_i)}{\sum_{j=1}^{|V|} \exp(x_j)}
-%\end{equation}
-%Finally, the probability of the word $w_n$ in the context $w_1, ..., w_{n-1}$ is computed as
-%\begin{equation}
-%	p_\theta(w_n|w_1...w_{n-1}) := \frac{\exp((p_n)_{w_n})}{\sum_{w \in V} \exp(x_w)}
-%\end{equation}
-%and thus the surprisal is estimated as
-%\begin{equation}
-%- \log	p_\theta(w_n|w_1...w_{n-1}) := -\log \frac{\exp((p_n)_{w_n})}{\sum_{w \in V} \exp(x_w)}
-%\end{equation}
-%We discuss the choice of the numerical parameters in the next section.
-%
 
 \paragraph{Model and Parameter Estimation}
 We use a recurrent neural network with Long-Short-Term Memory cells~\citep{hochreiter-long-1997} (CITE for Neural LM).
-This architecture takes as input a sequence $x_1 ... x_N$ of words, and at each time step $t=1, ..., N$, calculates a probability distribution over the next word $w_{t}$ given preceding words $w_1 ... w_{t-1}$: $p(w_t|w_1...w_{t-1})$.
+This architecture takes as input a sequence $x_1 ... x_N$ of words, and at each time step $t=1, ..., N$, calculates a probability distribution $p(w_t|w_1...w_{t-1})$ over the next word $w_{t}$ given preceding words $w_1 ... w_{t-1}$.
+Our model specification follows (CITE someone who used exactly the same model).
 
 The network is parameterized by a vector $\theta$ of weights determining how the activations of neurons propagate through the network~\citep{hochreiter-long-1997}.
 Given a corpus, the numeral parameters of the LSTM are chosen so as to minimize the average surprisal across the training corpus.
 %We can think of the LSTM parameters as forming one large vector $\theta$.
-At the beginning of training, the parameters $\theta$ are randomly initialized.
+At the beginning of training, the parameters $\theta$ are randomly initialized to some setting $\theta_0$.
 
-The training corpus is chopped into word sequences $w_1 ... w_T$ of length $T$ ($T = 20$ in our experiments).
-If $\theta_n$ consists of the LSTM parameters after $n$ training steps, we randomly select a word sequence $w_1 ... w_T$ from the training corpus, and use the LSTM using the current parameter setting $\theta_n$ to compute the per-word surprisals.
-We then update the parameter vector:
+The training corpus is chopped into word sequences $w_1 ... w_{T_{max}}$ of length ${T_{max}}$, where ${T_{max}}$ is the highest $T$ for which we estimate $I_T$. %  (${T_{max}} = 20$ in our experiments).
+We use Stochastic Gradient Descent to optimize the parameters $\theta$ so as to minimize the surprisal
 \begin{equation}\label{eq:train}
-	\theta_{n+1} := \theta_n + \alpha \partial_\theta \left(\sum_{i=1}^T \log p_\theta(w_i|w_1...w_{i-1})\right)
+	\frac{1}{T_{max}} \sum_{i=1}^{T_{max}} \log p_\theta(w_i|w_1...w_{i-1})
 \end{equation}
-where $\alpha \in \mathbb{R}_+$ is the \emph{learning rate}.
 When calculating the parameter update, we use three standard methods of regularization that have been shown to improve neural language modeling: dropout~\citep{srivastava-dropout:-2014}, word dropout, and word noising~\citep{xie2017data}.
-In this process, the word sequences are sampled without replacement.
+
 Once all sequences have been processed, we start another pass through the training data.
 Before each pass through the training data, the order of sentences of the training data is shuffled, and the corpus is again chopped into sequences of length $T$.
-
-After each pass through the training data, the average surprisal at the current parameter setting $\theta_n$ is evaluated on the held-out partition.
+After each pass through the training data, the average surprisal~(\ref{eq:train}) at the current parameter setting $\theta$ is evaluated on the held-out partition.
 We terminate training once this held-out  surprisal does not improve over the one computed after the previous pass any more.
 
+In our experiments, we chose $T_{max} = 20$. Prior work has found that the probabilities $p(w_t|w_1...w_{t-1})$ are dominated by a small number of preceding words \citep{daniluk2017frustratingly}, suggesting that $I_t$ will be close to zero for $t$ greater than 20.
 
 
-%\paragraph{Regularization}
-%Dropout, Word dropout, Word noising
-%Any statistical estimation problem faces the 
-%The quality of neural network models is further improved by regularization, improving generalization to the full data distribution.
-%In the case of neural networks, the most successful regularization methods typically take the form of random modifications to the input and internal activations when computing the gradients in the training updates~(\ref{eq:train}).
-%First, we apply \emph{dropout} both to the input vectors $x_i$ and to the output vectos $h_i$, randomly setting individual elements to zero with rate $p_{embedding} \in [0,1]$.
-%Second, we apply \emph{word dropout}, randomly zeroing out entire input vectors $x_i$ at rate $p_{word}$.
 
 \paragraph{Choice of Hyperparameters}
 
-The LSTM model has a set of numerical \emph{hyper-parameters} that need to be specified before parameter estimation, namely the dimensionalities of the embeddings $d_{emb}$, the dimensionality of the hidden states $d_{LSTM}$, and the number of LSTM layers $d_{layer}$, the learning rate $\alpha$, and the regularization parameters (dropout rate $p_{embedding}$, word dropout rate $p_{word}$, word noising rate $p_{noising}$).
-We choose these parameters so as to minimize the average surprisal on the held-out partition resulting at the end of parameter estimation.
-
+The LSTM model has a set of numerical \emph{hyperparameters} that need to be specified before parameter estimation, such as the number of recurrent neurons and the learning rate. %namely the dimensionalities of the embeddings $d_{emb}$, the dimensionality of the hidden states $d_{LSTM}$, and the number of LSTM layers $d_{layer}$, the learning rate $\alpha$, and the regularization parameters (dropout rate $p_{embedding}$, word dropout rate $p_{word}$, word noising rate $p_{noising}$).
 For each corpus, we used Bayesian optimization using the Expected Improvement acquisition function \citep{snoek-practical-2012} to find a good setting of the hyperparameters.
-We optimized the hyperparameters to minimize average surprisal on languages generated from random word order grammars.
-This biases the hyperparameters towards modeling counterfactual grammars better, biasing them \emph{against} our hypothesis.
+We optimized the hyperparameters to minimize average surprisal~(\ref{eq:train}) on the held-out partition resulting at the end of parameter estimation, on languages generated from random word order grammars.
+This biases the hyperparameters towards modeling counterfactual grammars better, biasing them \emph{against} our hypothesis that real orders result in better memory-surprisal tradeoffs than counterfactual orders.
 
-For computational efficiency, neural language models can only process a bounded number of distinct words in a single language.
+Due to reasons of computational efficiency, neural language models can only process a bounded number of distinct words in a single language (CITE).
 For each corpus, we limited the number of distinct processed words to the $N=10,000$ most common words in the training corpus, a common choice for neural language models (CITE).
 Following (CITE), we represented other words by their part-of-speech tags as annotated in the corpora.
-This applied to 37 languages, affecting an average of 11~\% of words in this languages.
+This applied to 37 languages, affecting an average of 11~\% of words in these languages.
 We believe that this modeling limitation does not affect our results for the following reasons.
 First, this affects the same words in real and counterfactually ordered sentences.
 Second, all excluded words are extremely infrequent in the available data, occurring less than 10 times (except for Czech and Russian, the languages for which we have by far the largest datasets).
@@ -186,9 +134,6 @@ Many of the excluded words occur only once in the dataset (78 \% on average acro
 This means that any model would only be able to extract very limited information about these words from the available training data, likely \emph{less} than what is provided by the part-of-speech tag.
 Third, traditional N-gram models, which do not have this limitation, provide results in qualitative agreement with the neural network-based estimates (see SI).
 
-%Given a corpus, we estimate a language model by training the LSTM on a training partition to maximize the data likelihood, and stopping training once the data likelihood on a held-out partition drops.
-%The hyperparameters (number of hidden units, learning rate, etc.) are chosen so as to maximize the likelihood of the held-out partition.
-%This procedure helps prevent overfitting the model to the training data, and ensure that it generalizes to unseen data. 
 
 
 
@@ -196,71 +141,27 @@ Third, traditional N-gram models, which do not have this limitation, provide res
 
 
 
-The quantity $\operatorname{I}[w_t, w_0 | w_1, ..., w_{t-1}]$ in~(\ref{eq:memory-bound}) is equal to the difference 
+The quantity $I_t$ in~(\ref{eq:memory-bound}) is equal to the difference 
 \begin{equation}
-H[w_t|w_1, ..., w_{t-1}] - H[w_t|w_0, w_1, ..., w_{t-1}]
+\operatorname{I}[w_t, w_0 | w_1, ..., w_{t-1}] = H[w_t|w_1, ..., w_{t-1}] - H[w_t|w_0, w_1, ..., w_{t-1}]
 \end{equation}
-For each word in the held-out partition, we compute the difference
+This quantity can be estimated as follows.
+After estimating the parameter vector $\theta$, we compute the following difference for each word $w_t$ ($t$ ranging from $T_{max}$ up to the length of the held-out partition) in the held-out partition:
 \begin{equation}
-	-\log P_\theta[w_t | w_0, w_1, ..., w_{t-1}] - P_\theta[w_t | w_1, ..., w_{t-1}]
+	\frac{1}{|HeldOut|-t} \sum_{i=t}^{|HeldOut|} \log P_\theta[w_i | w_{i-t}, w_{i-t+1}, ..., w_{i-1}] - P_\theta[w_i | w_{i-t+1}, ..., w_{i-1}]
 \end{equation}
 and take the average over these.
 We cut $T$ off at 20, as this is the length of the sequences processed by the model.
 
-We then used linear interpolation to interpolate the surprisal value for memory values in between these values. (TODO make a figure).
-This is justified theoretically (TODO maybe discuss when introducing the theorem).
+%We then used linear interpolation to interpolate the surprisal value for memory values in between these values. (TODO make a figure).\mhahn{mention linear interpolation already when explaining how to get tradeoff from theorem}
+%This is justified theoretically (TODO maybe discuss when introducing the theorem).
 
 We estimate the unigram entropy $H[w_0]$ by averaging over all models.
-
-%
-%\subsection{Discussion: Alternative Models}
-%In view of the NLP literature, the following are the main other options that exist for estimating mutual information and probabilities in sequences:
-%
-%A traditional model uses n-gram models. A challenge of n-gram models is that they do not express any morphosyntactic generalizations. Furthermore, standard n-gram models do not express any generalizations about pairs of words that are not adjacent -- e.g., encoding a generalization about morphological agreement between two words is hard for such a model to capture if the two words are not always adjacent. Both the small scale of available corpora in many languages and free word order in many languages with rich morphology thus seem to make such models unattractive.
-%We evaluate our hypothesis using n-gram models in SI Section X, confirming the conclusions obtained from neural models.
-%
-%A second option is to construct a statistical grammar, such as PCFG.
-%The challenge is to encode statistical morphosyntactic generalizations, and to decide which independence assumptions to put into the model.
-%One can either decide on a language-specific basis which generalizations to put in (laborious and might introduce bias), or choose a general model family that is rich enough to learn generalizations.
-%The second option will make this a machine learning model that, for our purposes, does not seem to be superior to a recurrent neural network.
-%
-
-
-
-%\subsection{Data}
-%\subsection{Setup}
-%The recurrent neural network architecture has a range of adjustable parameters such as the number of neurons.
-%For each language, we used Bayesian optimization using the Expected Improvement acquisition function (CITE) \citep{snoek-practical-2012} to find a good setting of the hyperparameters, taking average surprisal on random grammars as the objective.
-%This biases the hyperparameters towards favoring counterfactual grammars.
-
-%\subsection{Setup}
 
 For each language, we collected data from the actual orderings and from several random grammars.
 We collect multiple samples for the actual orderings to control for variation due to the random initialization of the neural network.
 For each of the random grammars, we collect one sample.
 Data is collected according to a precision-based stopping criterion described in Section (REF).
-%We collected data from the actual and random orderings in proportion one to two.
-%The stopping criterion will be described below.
-
-%Due to the randomness both in the sequence of training examples and the random initialization of the network weights, the results of the parameter estimation procedure will vary when run multiple times, especially on smaller datasets.
-%Informally, due to the finiteness of the dataset, multiple parameter settings are compatible with the available training data.
-%Consequently, memory-surprisal tradeoffs estimated on held-out sets will also show some variation.
-%Therefore, we collect multiple samples for the actual orderings to control for variation due to the random initialization of the neural network.
-
-
-%We chose these thresholds based on preliminary simulations which had suggested that these widths were achievable at acceptable computational cost.
-
-%- at least 30 samples from both baseline and real
-%
-%- for the language-level tradeoff curve, either the fraction is zero or the bootstrapped CI has width $\leq 0.2$.
-
-
-
-%
-%(1) is bigram MI always greater in real languages?
-%
-%(2) is the tradeoff curve always lower than for deterministic simple grammar? for deterministic complex grammars? for stochastic simple/complex grammars?
-
 
 \subsection{Statistics}
 
@@ -275,30 +176,32 @@ We want to test whether languages' surprisal-memory tradeoffs better than those 
 We compare real and baseline languages by evaluating which languages result in lower surprisal at the same level of memory.
 We now describe the statistics we use to quantifying the difference between real and baseline languages.
 We do everything in a frequentist framework (null hypothesis testing \& confidence intervals), as we can do exact tests and confidence intervals without parametric assumptions.
-Maybe we can explain how the tests \& CIs also have reasonable Bayesian interpretations (for the specific methods used here, rejection of the null should guarantee that the posterior of the null hypothesis is small under a wide range of priors.).
+\mhahn{Maybe we can explain how the tests \& CIs also have reasonable Bayesian interpretations (for the specific methods used here, rejection of the null should guarantee that the posterior of the null hypothesis is small under a wide range of priors.).}
 
-\paragraph{Confidence Interval for Medians}
-We use a (nonparametric and nonasymptotic) confidence interval for the median surprisal at 40 evenly spaced points of memory (selected individually for each language), using the binomial PDF. \mhahn{some standard stats reference}
-We consider the medians over all runs for the real language, and over all baselines grammars.
+\paragraph{Median Surprisal and Confidence Interval for Medians}
+We compute surprisal at 40 evenly spaced points of memory (selected individually for each language), over all runs for the real language, and over all baselines grammars.
+We then compute the median surprisal over all runs for the real language, and over all baselines grammars.
+We compute a confidence interval for this median surprisal, using the binomial PDF. \mhahn{some standard stats reference}
+This interval is exact, without parametric assumptions or asymptotic approximations.
 
 % yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_MedianCI.py
 
 
-\paragraph{CI for Median Difference}
-We create (nonparametric and nonasymptotic) confidence interval for the difference between real and baseline median surprisals at each memory value.
-\mhahn{the resulting plots are not very intuitive, might scrap this}
-
-% yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_MedianDiffCI.py
+%\paragraph{CI for Median Difference}
+%We create (nonparametric and nonasymptotic) confidence interval for the difference between real and baseline median surprisals at each memory value.
+%\mhahn{the resulting plots are not very intuitive, might scrap this}
+%
+%% yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_MedianDiffCI.py
 
 
 \paragraph{Pointwise Significance Test}
-For each memory value $\mu$, we do a nonparametric and nonasymptotic significance hypothesis test against the null hypothesis that at least half of the baseline grammars have lower surprisal than the actual language (Figure~\ref{fig:nhst-pointwise}).
+At five evenly spaced memory values $\mu$ (chosen per language), we do a nonparametric and nonasymptotic significance hypothesis test against the null hypothesis that at least half of the baseline grammars have lower surprisal than the actual language (Figure~\ref{fig:nhst-pointwise}).
 Formally, let $W_-(\mu)$ be the proportion of baseline languages that have strictly lower surprisal than the real language at memory level $\mu$.
-We take the real language to be represented by the \emph{sample median}.
 For each level $\mu$ of memory, we consider the null hypothesis that
 \begin{equation}
 	W_-(\mu) \leq 0.5
 \end{equation}
+In this test, we approximate the surprisal value of the real language by the \emph{sample median}.
 %In reality, we do not observe the curve of the real language exactly, but as noisy samples from our computational estimator.
 We use the Binomial Test.
 
@@ -333,7 +236,8 @@ We use the Binomial Test.
 
 \paragraph{Pointwise Quantile Estimate}
 %CI for quantile: % yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_UnimodalBoundOnQuantile_BothDirections.py
-\mhahn{might scrap the CI}
+%\mhahn{might scrap the CI}
+
 
 \begin{figure}
 	\begin{center}
@@ -342,34 +246,33 @@ We use the Binomial Test.
 	\caption{Illustration for the quantile estimate. At each level of memory, we provide an estimate of the percentage of baseline languages that have lower surprisal than the real language.}\label{fig:quantile-pointwise}
 \end{figure}
 
-
-For each level of memory, we estimate what percentage of baseline languages have lower surprisal than the real language.
+To provide estimates of the degree of optimization of real orders, we also compute what \emph{fraction} of baseline languages provides better tradeoffs than the real language.
+Specifically, for each level of memory $\mu$, we estimate what percentage of baseline languages have lower (or equal) surprisal than the real language.
 This is described in Figure~\ref{fig:quantile-pointwise}.
+We use the Binomial Test to derive a confidence lower bound for this quantile (CITE).
+Again, we take the REAL values to be estimated exactly by their medians.
 
-We derive a CI for the quantile, taking the REAL values to be estimated exactly by their medians.
-
-We want to create a CI at each Memory value for the quantile.
-
-At a fixed memory value $\mu$, let $n_+$ be the better baseline samples, $n_-$ the worse (or equal) ones.
-
-We want to get a confidence bound $q$ on $P_{X \sim Baseline}(X < x_{real})$.
-
-Let $p := P(N_+ \leq n_+ | N_+ + N_-; q)$.
-Then output $(0, q)$ as a level $p$ CI for the parameter $P(X < x_{real})$.
-
-We minimize $q$ subject to $p < 0.05$.
-
-
-This CI is exact in the sense that it does not involve asymptotic approximations or parametric assumptions, but it is extremely conservative.
-
-Also the following does not assume unimodality, and ends up getting about the same intervals
-% yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_UnimodalBoundOnQuantile_BothDirections_NoAssumption.py
+%We want to create a CI at each Memory value for the quantile.
+%
+%At a fixed memory value $\mu$, let $n_+$ be the better baseline samples, $n_-$ the worse (or equal) ones.
+%
+%We want to get a confidence bound $q$ on $P_{X \sim Baseline}(X < x_{real})$.
+%Let $p := P(N_+ \leq n_+ | N_+ + N_-; q)$.
+%Then output $(0, q)$ as a level $p$ CI for the parameter $P(X < x_{real})$.
+%We minimize $q$ subject to $p < 0.05$.
+%This CI is exact in the sense that it does not involve asymptotic approximations or parametric assumptions, but it is extremely conservative.
+%
+%Also the following does not assume unimodality, and ends up getting about the same intervals
+%% yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_UnimodalBoundOnQuantile_BothDirections_NoAssumption.py
 
 
 
 
 \paragraph{Global Quantile Estimate}
 
+To provide a stopping criterion, we additionally need a global measure of the degree of optimization of the real language.
+
+Due to the use of bootstrapping, the confidence intervals are not exact.
 
 \begin{figure}
 	\begin{center}
@@ -395,8 +298,6 @@ where $P_1$ is the distribution over values obtained for real orderings.
 We use a bootstrapped confidence interval for $\E[G]$ for quantifying the degree of optimization.
 For bootstrapping, we separately resample samples from the real language and from the baseline grammars.
 
-Unlike the other statistics, this one provides a global measure of the degree of optimization of the real language.
-Due to the use of bootstrapping, the confidence intervals are not exact.
 
 
 %- bootstrapping
@@ -429,6 +330,9 @@ Consequently, more samples were collected than necessary to reach the stopping c
 
 
 \subsection{Results}
+
+
+
 
 The numbers of samples taken per language are provided in Table~\ref{tab:samples}.
 
@@ -474,28 +378,37 @@ We found that branching direction entropy was strongly correlated with the surpr
 
 
 
+
 \begin{figure}
-\includegraphics[width=0.95\textwidth]{../code/analyze_neural/figures/surprisal-branching-entropy-REAL.pdf}
+\includegraphics[width=0.95\textwidth]{../code/visualize_neural/figures/surprisal-branching-entropy-REAL.pdf}
 	\caption{Surprisal Difference vs Branching Direction Entropy.}\label{fig:hist-real}
 \end{figure}
 
 
+\mhahn{One thing that has to be discussed: the absolute values differ between languages}
 
+\section{Experiment 2: Free Word Orders}
 
+Here we match the branching entropies of the baseline grammars with those of the real language.
 
 
 \section{Experiment 3: Fixed Word Orders}
 
-We test this hypothesis by comparing baseline languages to \emph{fixed-order} versions of the real languages.
-This enables us to tease apart the impact of the languages' word order rules from the impact of word order freedom.
+
+A possible concern is that the optimization observed in Experiment 1 might be an artifact of the grammar formalism.
+To address this possibility, we repeated the experiment comparing baseline grammars to grammars that represent the word order of the real languages as faithfully as is possible with the grammar formalism.
+%We test this hypothesis by comparing baseline languages to \emph{fixed-order} versions of the real languages.
+%This enables us to tease apart the impact of the languages' word order rules from the impact of word order freedom.
 
 
 \begin{figure}
-\includegraphics[width=0.5\textwidth]{../code/analyze_neural/figures/full-GROUND-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
+\includegraphics[width=0.5\textwidth]{../code/visualize_neural/figures/full-GROUND-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
 	\caption{Histogram}\label{fig:hist-real}
 \end{figure}
 
+\subsection{Setup}
 
+Everything is identical to Experiment 1, except that we replaced the real orderings with orderings generated from grammars fitted to the word orders found in the real language.
 
 \paragraph{Fitting Ordering Grammars to Actual Orders}
 We create ordering grammars that are fit to the actual orderings of each language.
@@ -523,5 +436,112 @@ Another option would be to use some kind of discrete optimization method to appr
 However, discrete optimization is computationally challenging.
 
 \paragraph{Results}
+\mhahn{to what extent do we have to present the large results figures separately for Experiment 1 and this experiment? or maybe we just provide some summary statistics separately, but provide the figures together. or all the big figures go into the SI? I don't mind, I just don't know what people in that audience would expect.}
 
+
+
+
+%
+%\subsection{Discussion: Alternative Models}
+%In view of the NLP literature, the following are the main other options that exist for estimating mutual information and probabilities in sequences:
+%
+%A traditional model uses n-gram models. A challenge of n-gram models is that they do not express any morphosyntactic generalizations. Furthermore, standard n-gram models do not express any generalizations about pairs of words that are not adjacent -- e.g., encoding a generalization about morphological agreement between two words is hard for such a model to capture if the two words are not always adjacent. Both the small scale of available corpora in many languages and free word order in many languages with rich morphology thus seem to make such models unattractive.
+%We evaluate our hypothesis using n-gram models in SI Section X, confirming the conclusions obtained from neural models.
+%
+%A second option is to construct a statistical grammar, such as PCFG.
+%The challenge is to encode statistical morphosyntactic generalizations, and to decide which independence assumptions to put into the model.
+%One can either decide on a language-specific basis which generalizations to put in (laborious and might introduce bias), or choose a general model family that is rich enough to learn generalizations.
+%The second option will make this a machine learning model that, for our purposes, does not seem to be superior to a recurrent neural network.
+%
+
+
+
+%\subsection{Data}
+%\subsection{Setup}
+%The recurrent neural network architecture has a range of adjustable parameters such as the number of neurons.
+%For each language, we used Bayesian optimization using the Expected Improvement acquisition function (CITE) \citep{snoek-practical-2012} to find a good setting of the hyperparameters, taking average surprisal on random grammars as the objective.
+%This biases the hyperparameters towards favoring counterfactual grammars.
+
+%\subsection{Setup}
+
+
+
+
+%\paragraph{Data}
+%Given a sequence of input words $w_1, ..., w_n \in V$, the model 
+%%
+%\textbf{TODO I'm describing this in a lot of detail. Alternatively, we can say this is a standard NLP method and refer to the NLP literature for the definition.}
+%The first component of such a model is an \emph{embedding matrix} $W_{emb} \in \mathbb{R}^{|V| \times d_{emb}}$, where the \emph{vocabulary} $\mathcal{V}$ is a set, containing the words that occur in the corpus, and $d_{emb} \in \mathbb{N}$ is a fixed parameter.
+%This matrix assigns a $d_{emb}$-dimensional vector to each word occurring in the corpus.
+%The second component is an LSTM cell $f_{LSTM}$, a nonlinear transformation mapping an \emph{input} vector $x_{i} \in \mathbb{R}^{d_{emb}}$ a \emph{hidden state} $h_i \in \mathbb{R}^{d_{LSTM}}$ and a \emph{cell state} $c_i \in \mathbb{R}^{d_{LSTM}}$ to a new pair of hidden state and cell states $h_{i+1}, c_{i+1} \in \mathbb{R}^{d_{LSTM}}$.
+%The LSTM cell $f_{LSTM}$ is parameterized by a matrix of numerical parameters $W_{LSTM}$.
+%
+%%Such networks estimate the probability of a word in context as follows.
+%Given a sequence of input words $w_1, ..., w_n \in V$, the model first retrieves fixed-dimensionality vector representations $x_1, ..., x_n$, where $x_i$ is the row of $W_{emb}$ corresponding to the word $w_i$.
+%It then computes a sequence of hidden and cell states by the following recurrent computation:
+%\begin{align*}
+%	h_1, c_1 &:= 0 \\
+%	h_2, c_2 &:= f_{LSTM}(x_1, h_1, c_1) \\
+%	\dots \\
+%	h_{n+1}, c_{n+1} &:= f_{LSTM}(x_n, h_n, c_n) \\
+%\end{align*}
+%The vector $h_i$ encodes the result of reading the words $w_1, ..., w_{i-1}$.
+%We will write $LSTM(w_1, ..., w_{i-1})$ for $h_i$.
+%
+%The third component of the recurrent language model is the matrix $W_{output} \in \mathbb{R}^{|V| \times d_{LSTM}}$.
+%We obtain per-word predictions of the next word by computing
+%\begin{align*}
+%	s_i := W_{output} h_i \in \mathbb{R}^{|V|} \\
+%	p_i := \operatorname{softmax}(s_i)\in \mathbb{R}^{|V|} 
+%\end{align*}
+%where the softmax transformation normalizes vectors into probability distributions as follows
+%\begin{equation}
+%	\operatorname{softmax}(x)_i := \frac{\exp(x_i)}{\sum_{j=1}^{|V|} \exp(x_j)}
+%\end{equation}
+%Finally, the probability of the word $w_n$ in the context $w_1, ..., w_{n-1}$ is computed as
+%\begin{equation}
+%	p_\theta(w_n|w_1...w_{n-1}) := \frac{\exp((p_n)_{w_n})}{\sum_{w \in V} \exp(x_w)}
+%\end{equation}
+%and thus the surprisal is estimated as
+%\begin{equation}
+%- \log	p_\theta(w_n|w_1...w_{n-1}) := -\log \frac{\exp((p_n)_{w_n})}{\sum_{w \in V} \exp(x_w)}
+%\end{equation}
+%We discuss the choice of the numerical parameters in the next section.
+%
+
+
+
+%We collected data from the actual and random orderings in proportion one to two.
+%The stopping criterion will be described below.
+
+%Due to the randomness both in the sequence of training examples and the random initialization of the network weights, the results of the parameter estimation procedure will vary when run multiple times, especially on smaller datasets.
+%Informally, due to the finiteness of the dataset, multiple parameter settings are compatible with the available training data.
+%Consequently, memory-surprisal tradeoffs estimated on held-out sets will also show some variation.
+%Therefore, we collect multiple samples for the actual orderings to control for variation due to the random initialization of the neural network.
+
+
+%We chose these thresholds based on preliminary simulations which had suggested that these widths were achievable at acceptable computational cost.
+
+%- at least 30 samples from both baseline and real
+%
+%- for the language-level tradeoff curve, either the fraction is zero or the bootstrapped CI has width $\leq 0.2$.
+
+
+
+%
+%(1) is bigram MI always greater in real languages?
+%
+%(2) is the tradeoff curve always lower than for deterministic simple grammar? for deterministic complex grammars? for stochastic simple/complex grammars?
+
+
+
+
+%Training progresses in a series of parameter update steps, constructing updated parameters $\theta_0, \theta_1, \theta_2, \dots$.
+%In the $n$-th update step, we first randomly select a word sequence $w_1 ... w_T$ from the training corpus, and use the LSTM using the current parameter setting $\theta_n$ to compute the per-word surprisals.
+%We then update the parameter vector:
+%\mhahn{maybe better to just say we use SGD}
+%\begin{equation}\label{eq:train}
+%	\theta_{n+1} := \theta_n + \alpha \partial_\theta \left(\sum_{i=1}^T \log p_\theta(w_i|w_1...w_{i-1})\right)
+%\end{equation}
+%where $\alpha \in \mathbb{R}_+$ is the \emph{learning rate}.
 

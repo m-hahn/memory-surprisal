@@ -65,31 +65,10 @@
 \maketitle
 
 
-%
 \begin{abstract}
-
 Online memory limitations are well-established as a factor impacting sentence processing and have been argued to account for crosslinguistic word order regularities. Building off expectation-based models of language processing, we provide an information-theoretic formalization of these memory limitations. We introduce the idea of a memory-surprisal tradeoff: comprehenders can achieve lower average surprisal per word at the cost of storing more information about past context. We show that the shape of the tradeoff is determined in part by word order. In particular, languages will enable more efficient tradeoffs when they exhibit information locality: when predictive information about a word is concentrated in the word’s recent past. We show evidence from corpora of 52 real languages showing that languages allow for more efficient memory-surprisal tradeoffs than random baseline word order grammars. 
-
-%Are languages optimized for processing with limited memory?
-%Memory limitations are well-established as a factor impacting sentence processing, and have been argued to account for crosslinguistic word order regularities.
-%Computational models of language processing implementing memory constraints take various forms and make different kinds of assumptions about the architecture underlying human language processing.
-%We first  establish general information-theoretic lower bounds on memory that hold in any model of language processing, applying both to speakers and listeners. %assuming only that listeners perform incremental prediction.
-%Applying these results to corpora from over 50 languages, we then provide evidence that word orders in human language are optimized for memory demands of speakers and listeners. % producing language and listeners predicting input.
 \end{abstract}
 
-
-%
-%
-%\begin{thm}\label{prop:suboptimal}
-%	For each positive integer $t$, define
-%$I_t := I[w_t, w_0 | w_{1\dots t-1}]$,
-%i.e., the mutual information between words at distance $t$, controlling for redundancy with the intervening words.
-%	Let $T$ be a positive integer, and consider a comprehender using at most $\sum_{t=1}^T t I_t$
-%bits of memory on average.
-%Then this comprehender will incur average surprisal at least
-%	$H[w_t|w_{<t}] + \sum_{t > T} I_t$.
-%\end{thm}
-%
 
  
 \section{Introduction}
@@ -109,7 +88,7 @@ Online memory limitations are well-established as a factor impacting sentence pr
 
 
 \section{Information Locality}\label{sec:info-locality}
-
+\mhahn{not sure about this section}
 TODO derive information locality
 
 Due to the factor $t$ inside each term of the sum, carrying the same amount of information over longer distances requires more memory -- that is, modeling long statistical dependencies is more costly in terms of memory than modeling shorter ones.
@@ -168,7 +147,7 @@ TODO
 
 
 \begin{figure}
-\includegraphics[width=0.5\textwidth]{../code/analyze_neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
+\includegraphics[width=0.5\textwidth]{../code/visualize_neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
 \caption{Histogram}\label{fig:hist-real}
 \end{figure}
 
@@ -411,6 +390,7 @@ TODO
 \section{N-Gram Models}
 
 \input{control-ngrams.tex}
+
 
 
 

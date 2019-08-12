@@ -21,13 +21,8 @@ def readTSV(x):
       for i in range(len(data)):
           data[i][column] = vals[i]
     return (header, data)
-try:
-  with open("../../../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv", "r") as inFile:
+with open("../../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv", "r") as inFile:
      data = readTSV(inFile)
-except IOError:
-  print >> sys.stderr, ("ERROR nothing for this language? "+language)
-  quit()
-
 #print(len(data))
 
 
@@ -50,26 +45,21 @@ for i in range(len(data[1])):
     if typ not in matrixByType:
         matrixByType[typ] = []
     matrixByType[typ].append(matrix[i])
-MAX_DISTANCE = -1
 for typ in matrixByType:
-   tensorized = torch.FloatTensor(matrixByType[typ])
-   MAX_DISTANCE = int(tensorized[:,1].max())
-   matrixByType[typ] = tensorized.view(-1, MAX_DISTANCE, 4)
+   matrixByType[typ] = torch.FloatTensor(matrixByType[typ]).view(-1, 19, 4)
    #print(matrixByType[typ][0])
    misByType[typ] = matrixByType[typ][:,:,2]
 #print(misByType["RANDOM_BY_TYPE"])
-if MAX_DISTANCE == -1:
-  print >> sys.stderr, ("ERROR nothing for this language? "+language)
-  quit()
+
 #data = data %>% group_by(ModelID) %>% mutate(CumulativeMemory = cumsum(Distance*ConditionalMI), CumulativeMI = cumsum(ConditionalMI))
-distance = torch.FloatTensor(range(1,1+MAX_DISTANCE))
+distance = torch.FloatTensor(range(1,20))
 
 cumMIs = {}
 cumMems = {}
 cumInterpolated = {}
 maximalMemory = 0
 for typ, mis in misByType.iteritems():
-  mask = torch.FloatTensor([[1 if j <= i else 0 for j in range(MAX_DISTANCE)] for i in range(MAX_DISTANCE)])
+  mask = torch.FloatTensor([[1 if j <= i else 0 for j in range(19)] for i in range(19)])
   cumulativeMI = torch.matmul(mis, mask.t())
   #print("MIs", mis[0])
   #print("Cum MI", cumulativeMI[0])
@@ -119,11 +109,61 @@ for typ, mis in misByType.iteritems():
      interpolated[:,j] = torch.sum(condition  * interpolation, dim=1)
      foundValues[:,j] = torch.sum(condition, dim=1)
   interpolatedByTypes[typ] = interpolated
-  for i in range(0, interpolated.size()[0]):
-      for j in range(0, len(xPoints)):
-        print "\t".join(map(str, [language, typ, int(matrixByType[typ][i][0][0]), j, float(xPoints[j]), float(interpolated[i,j])]))
-#  print(interpolated.size())
- # print(matrixByType[typ].size())
-#       print "\t".join(map(str,[language, typ, i, float(xPoints[i]), float(interpolated[:,i].median()), bestCI[0], bestCI[1], bestCI[2]]))
+
+import scipy.stats
+import math
+import statsmodels.stats.proportion
+
+#binom = 
+
+
+# Assuming unimodality of RANDOM distribution and that REAL median has been estimated very precisely, get confidence bound on the quantile of REAL in the RANDOM distribution
+
+medians = {}
+
+for real in ["REAL_REAL"]: #, "GROUND"]:
+  medians[real] = interpolatedByTypes[real].median(dim=0)[0]
+#  print(medians[real])
+ # print(medians[real].size())
+  
+  for i in range(39):
+     hereRandom = torch.sort(interpolatedByTypes["RANDOM_BY_TYPE"][:,i])[0]
+
+     worseRandomCount = float((hereRandom < medians[real][i]).sum())
+     sameRandomCount = float((hereRandom == medians[real][i]).sum())
+     betterRandomCount = float((hereRandom > medians[real][i]).sum())
+#     print(worseRandomCount, sameRandomCount, betterRandomCount)
+
+     # The goal here is to provide a confidence lower bound on worseRandomCount
+     if worseRandomCount == 0:
+         print "\t".join(map(str,[language, real, i, 0.0, 0.0, float(xPoints[i])]))
+#                              ["Language", "Type", "Position", "LowerConfidenceBound", "Level", "Memory"])
+
+         bound = 0
+     else:
+   #     print(hereRandom.size())
+        largestPossibleValue = xPoints[i]
+        #print(i, largestPossibleValue, medians[real][i], hereRandom)
+        # if the median is at most the best sample
+        #unaccountedForTarget = 1-math.pow(targetLevel, 1/(float(hereRandom.size()[0])))
+        randomBestWorse = float(hereRandom[int(worseRandomCount)-1])
+        assert randomBestWorse < float(medians[real][i])
+#        print((largestPossibleValue, medians[real][i] , randomBestWorse,   (largestPossibleValue - medians[real][i] + 0.0001) / (largestPossibleValue - randomBestWorse + 0.0001)))
+
+        for unaccountedFor in [float(x)/200 for x in range(1,200)]:
+#          print scipy.stats.binom_test(x=1, n=10, p=0.5, alternative="greater")
+          assert unaccountedFor > 0
+          assert unaccountedFor < 1
+          
+          percentile = unaccountedFor 
+          if sameRandomCount+betterRandomCount == 0:
+             p1 = math.pow(1-unaccountedFor, worseRandomCount)
+          else:
+             p1 = 1-(scipy.stats.binom_test(x=sameRandomCount+betterRandomCount, n=worseRandomCount+sameRandomCount+betterRandomCount, p=unaccountedFor, alternative="greater"))
+          if p1 < 0.001:
+             print "\t".join(map(str,[language, real, i, 1-float(percentile), p1, float(xPoints[i])]))
+#             print("PERCENTILE", worseRandomCount / (worseRandomCount + sameRandomCount + betterRandomCount))
+             assert 1-float(percentile) <= worseRandomCount / (worseRandomCount + sameRandomCount + betterRandomCount)
+             break
 
 

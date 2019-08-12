@@ -22,7 +22,7 @@ def readTSV(x):
           data[i][column] = vals[i]
     return (header, data)
 try:
-  with open("../../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv", "r") as inFile:
+  with open("../../../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv", "r") as inFile:
      data = readTSV(inFile)
 except IOError:
   print >> sys.stderr, ("ERROR nothing for this language? "+language)

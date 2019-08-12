@@ -40,13 +40,12 @@ At a given point in time, the listener's memory state $L_t$ is determined by the
 As a consequence, $L_t$ contains no information about the process beyond what is contained in the last word observed $w_{t-1}$ and in the memory state before that word was observed $L_{t-1}$.
 This is formalized as a statement about conditional probabilities:
 	\begin{equation}\label{eq:listener-markov}
-		p(L_1| (w_{t})_{t \in \mathbb{Z}}, L_0)   = p((w_{t})_{t \in \mathbb{Z}} | L_0, w_1)
-%p((w_{t})_t| L_0, L_1, w_1)   = p((w_{t})_t| L_0, w_1)
+		p(L_1| (w_{t})_{t \in \mathbb{Z}}, L_0)   = p(L_1 | L_0, w_1)
 	\end{equation}
 This says that $L_1$ contains no information about the utterances beyond what is contained in $L_0$ and $w_1$.	
 As a consequence, the listener has no knowledge of the speaker's state beyond the information provided in their prior communication.
 This is a simplification, as the listener could obtain information about the speaker from other sources, such as their common environment (weather, ...).
-For the study of memory in sentence processing, this seems fair. Discuss this more.
+\mhahn{For the study of memory in sentence processing, this seems fair. Discuss this more.}
 
 %
 %First, we assume that the listener's internal state cannot depend on the future beyond its dependency on the past.

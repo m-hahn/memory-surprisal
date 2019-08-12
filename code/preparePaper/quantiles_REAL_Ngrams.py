@@ -1,6 +1,4 @@
 # ./python27 tradeoffPrepareTable_OnlyWordForms_BoundedVocab.py > ../results-table-word-level.tex
-import sys
-import os
 
 with open("../../ud_languages.txt", "r") as inFile:
    languages = inFile.read().strip().split("\n")
@@ -30,27 +28,18 @@ def h(frame, line, name):
     return line[frame[0][name]]
 
 
-#with open("tradeoff/effectSize.tsv", "r") as inFile:
-#   effectSize = readTSV(inFile)
-
-#with open("tradeoff/effectSize_diff.tsv", "r") as inFile:
-#   effectSize_diff = readTSV(inFile)
-
 
 
 entries = []
 
 for language in languages:
 #   line = languageKey[language]
-   components = [language.replace("_"," ").replace("-Adap", "")]
-   #components.append( "\\multirow{4}{*}{\includegraphics[width=0.25\\textwidth]{neural/figures/"+language+"-entropy-memory.pdf}}")
-   if not os.path.isfile("../analyze_ngrams/visualize/figures/"+language+"-listener-surprisal-memory-MEDIANS_onlyWordForms_boundedVocab.pdf"):
-      print("No data for "+language)
-      continue
-   components.append( "\includegraphics[width=0.25\\textwidth]{../code/analyze_ngrams/visualize/figures/"+language+"-listener-surprisal-memory-MEDIANS_onlyWordForms_boundedVocab.pdf}" )
-   entries.append(components)
 
-ROWS_PER_PART = 4
+   components = [language.replace("_"," ").replace("-Adap", "")]
+   components.append( "\includegraphics[width=0.25\\textwidth]{ngrams/figures/"+language+"-listener-surprisal-memory-QUANTILES_onlyWordForms_boundedVocab_REAL_NGRAMS.pdf}" )
+   entries.append(components) #   print >> outFile, ("  &  ".join([str(x) for x in components]) + "  \\\\ [10.25ex] \\hline" )
+
+ROWS_PER_PART = 5
 COLUMNS = 4
 entries += [["",""] for x in range((COLUMNS-(len(entries)%COLUMNS))%COLUMNS)]
 
@@ -66,7 +55,7 @@ if True:
        outputRows.append( " \\\\ ")
 
 for part in range(len(entries)/(COLUMNS*ROWS_PER_PART)+1):
-  with open("../../writeup/tables/medians_ngrams_"+str(part)+".tex", "w") as outFile:
+  with open("../../writeup/tables/quantiles_REAL_NGRAMS_"+str(part)+".tex", "w") as outFile:
       for row in range(part*ROWS_PER_PART, (part+1)*ROWS_PER_PART):
           if 4*row >= len(outputRows):
               break
