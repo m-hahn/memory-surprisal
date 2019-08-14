@@ -62,7 +62,7 @@ while len(languages) > 0:
          typ = "RANDOM_BY_TYPE"
          print("Not enough RANDOM_BY_TYPE")
     else:
-       commandCurve = ["./python27", "yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_Adjusted.py", language, "RANDOM_BY_TYPE", real_type]
+       commandCurve = ["./python27", "yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_Adjusted.py", language, "RANDOM_BY_TYPE", real_type, "0.001"]
        inCurve = [x.split("\t") for x in subprocess.check_output(commandCurve).strip().split("\n")]
    #    print(inCurve)
        distanceCurve = float(inCurve[1][0])

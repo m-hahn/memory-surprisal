@@ -3,7 +3,7 @@ import sys
 language = sys.argv[1]
 random = sys.argv[2] if len(sys.argv) > 2 else "RANDOM_BY_TYPE"
 real = sys.argv[3] if len(sys.argv) > 3 else "REAL_REAL"
-PRECISION = 0.01
+PRECISION = sys.argv[4] if len(sys.argv) > 4 else 0.01 
 
 def readTSV(x):
     header = next(x).strip().split("\t")

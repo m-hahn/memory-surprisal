@@ -3,6 +3,7 @@ import sys
 language = sys.argv[1]
 random = sys.argv[2] if len(sys.argv) > 2 else "RANDOM_BY_TYPE"
 real = sys.argv[3] if len(sys.argv) > 3 else "REAL_REAL"
+PRECISION = 0.001
 
 def readTSV(x):
     header = next(x).strip().split("\t")
@@ -153,8 +154,6 @@ result2 = sorted(result2)
 result1Mean = sum(result1)/samplesNumber
 result2Mean = sum(result2)/samplesNumber
 
-
-PRECISION = 0.001
 result1Low = result1[int(PRECISION * samplesNumber)]
 result1High = result1[int((1-PRECISION) * samplesNumber)]
 result2Low = result2[int(PRECISION * samplesNumber)]
