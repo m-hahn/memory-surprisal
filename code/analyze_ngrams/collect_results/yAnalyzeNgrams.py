@@ -56,7 +56,7 @@ for i in range(len(params)):
 correctParameters = " ".join(params2)
 
 
-types = [" REAL_REAL ", "RANDOM_MODEL ", "RANDOM_BY_TYPE "]
+types = [" REAL_REAL ", "RANDOM_MODEL ", "RANDOM_BY_TYPE ", " GROUND "]
 
 for fileName in files:
   if args.language not in fileName:
