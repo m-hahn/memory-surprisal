@@ -3,12 +3,8 @@
 
 from ud_languages import languages
 
-# Languages with small corpora: Belarusian', Irish', 'Lithuanian', 'Marathi', 'Tamil', 
-# Other: , 'Polish-LFG'
-
 import os
 import random
-
 
 import subprocess
 
@@ -32,6 +28,5 @@ while len(languages) > 0:
   if relevantModelExists:
      languages.remove(language)
      continue
-  subprocess.call(["/u/nlp/anaconda/ubuntu_16/envs/py27-mhahn/bin/python2.7", "inferWeightsCrossVariationalAllCorpora_NoPunct_NEWPYTORCH_Coarse.py", language, language])
-#  break
+  subprocess.call(["/u/nlp/anaconda/ubuntu_16/envs/py27-mhahn/bin/python2.7", "inferWeightsCrossVariationalAllCorpora_NoPunct_NEWPYTORCH_Coarse.py", language])
 

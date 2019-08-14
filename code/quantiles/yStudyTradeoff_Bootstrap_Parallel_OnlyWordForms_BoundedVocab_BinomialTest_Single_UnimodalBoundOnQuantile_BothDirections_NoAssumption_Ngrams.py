@@ -2,7 +2,17 @@
 
 import sys
 
-language = sys.argv[1]
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--language", dest="language", type=str)
+parser.add_argument("--level", dest="level", type=float, default=0.001)
+args=parser.parse_args()
+print(args)
+
+
+
+language = args.language
+level = args.level
 
 def readTSV(x):
     header = next(x).strip().split("\t")
@@ -160,7 +170,7 @@ for real in ["REAL_REAL"]: #, "GROUND"]:
              p1 = math.pow(1-unaccountedFor, worseRandomCount)
           else:
              p1 = 1-(scipy.stats.binom_test(x=sameRandomCount+betterRandomCount, n=worseRandomCount+sameRandomCount+betterRandomCount, p=unaccountedFor, alternative="greater"))
-          if p1 < 0.001:
+          if p1 < args.level:
              print "\t".join(map(str,[language, real, i, 1-float(percentile), p1, float(xPoints[i])]))
 #             print("PERCENTILE", worseRandomCount / (worseRandomCount + sameRandomCount + betterRandomCount))
              assert 1-float(percentile) <= worseRandomCount / (worseRandomCount + sameRandomCount + betterRandomCount)

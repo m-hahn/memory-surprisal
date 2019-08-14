@@ -21,10 +21,14 @@ def readUDCorpus(language, partition):
         files = filter(lambda x:x.startswith("UD_"+language.replace("-Adap", "")), files)
       data = []
       for name in files:
+
+        # Skip Sign Language Treebanks
         if "Sign" in name:
            print >> sys.stderr, "Skipping "+name
            continue
         assert ("Sign" not in name)
+
+        # Skip Non-Native Treebanks
         if "Chinese-CFL" in name:
            print >> sys.stderr, "Skipping "+name
            continue

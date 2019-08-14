@@ -5,12 +5,15 @@ PATH = "memory-need-ngrams"
 path = "/u/scr/mhahn/deps/"+PATH+"/"
 files = os.listdir(path)
 import sys
-sortBy = int(sys.argv[1])
-#horizon = int(sys.argv[2])
-language = sys.argv[2]
-assert len(sys.argv) == 3
-#restrictToFinished = (sys.argv[4] == "True")
-#onlyOptimized = (not (len(sys.argv) > 5 and sys.argv[5] == "False"))
+
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--language", dest="language", type=str)
+args=parser.parse_args()
+print(args)
+
+
 def f(a):
    
    x = list(map(float,a.split(" ")))
@@ -20,10 +23,8 @@ def f(a):
    assert len(decay) == horizon
 
    memory = sum([i*(x[(i-1 if i>0 else 0)]-x[i]) for i in range(len(x))])
-#   memory = sum([i*max(0, x[(i-1 if i>0 else 0)]-x[i]) for i in range(len(x))])
 
    residual = x[horizon-1]
-   # memory + aggregate surprisal -- this measures (as a lower bound) how many bits are required to encode the future, when the past is given (should  be low)
    balanced = sum([i*(x[(i-1 if i>0 else 0)]-x[i]) for i in range(horizon)]) + horizon*x[horizon-1]
 
    mi = x[0] - x[horizon-1]
@@ -35,11 +36,8 @@ resultsPerType = {}
 
 
 
-
-filenames = [x for x in os.listdir("/u/scr/mhahn/deps/memory-need-ngrams/") if x.startswith("search-"+language+"_yWithMo") and len(open("/u/scr/mhahn/deps/memory-need-ngrams/"+x, "r").read().split("\n"))>=30]
+filenames = [x for x in os.listdir("/u/scr/mhahn/deps/memory-need-ngrams/") if x.startswith("search-"+args.language+"_yWithMo") and len(open("/u/scr/mhahn/deps/memory-need-ngrams/"+x, "r").read().split("\n"))>=30]
 assert len(filenames) == 1, filenames
-#print([x for x in os.listdir("/u/scr/mhahn/deps/memory-need-ngrams/") if x.startswith("search-"+language+"_yWithMo")])
-#print("/u/scr/mhahn/deps/memory-need-ngrams/search-"+language+"yWithMo")
 if len(filenames) == 0:
    quit()
 with open("/u/scr/mhahn/deps/memory-need-ngrams/"+filenames[0], "r") as inFile:
@@ -61,14 +59,13 @@ correctParameters = " ".join(params2)
 types = [" REAL_REAL ", "RANDOM_MODEL ", "RANDOM_BY_TYPE "]
 
 for fileName in files:
-  if language not in fileName:
+  if args.language not in fileName:
        continue
   if not fileName.startswith("estimates"):
      continue
 
   with open(path+fileName, "r") as inFile:
      result = inFile.read().split("\n")
-#     print(correctParameters, result[0])
      if (correctParameters+" " not in result[0]+" "):
          continue
      print(fileName)
@@ -79,7 +76,6 @@ for fileName in files:
         resultsPerType[typeOfResult] = []
      if "idForProcess" in result[0]:
         continue
-#     print(result)
      result[1] = list(map(lambda x:x if x=="" else float(x), result[1].replace("[","").replace("]","").split(" ")))
      balanced, memory, residual, mi, decay, unigramCE  = f(result[2])
      duration = len(result[1])
@@ -89,16 +85,17 @@ for fileName in files:
      q = fileName[q+7:]
      idOfModel = str(int(q[:q.index("_")]))
 
-
-
      resultsPerType[typeOfResult].append({"Parameters" : result[0], "Memory" : memory, "Residual" : residual, "ModelID" : idOfModel, "TotalMI" : mi, "Decay" : decay, "UnigramCE" : unigramCE})
 
 
 
+outpath1 = "../../../results/raw/ngrams/"+args.language+"_ngrams_after_tuning.tsv"
+outpath2 = "../../../results/raw/ngrams/"+args.language+"_ngrams_decay_after_tuning.tsv"
+
 header = ["Type", "Memory", "Residual", "ModelID", "TotalMI"]
 headerDecay = ["Type", "Distance", "ConditionalMI", "TotalMI", "ModelID", "UnigramCE"]
-with open("../../../results/raw/ngrams/"+language+"_ngrams_after_tuning.tsv", "w") as outFile:
- with open("../../../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv", "w") as outFileDecay:
+with open(outpath1, "w") as outFile:
+ with open(outpath2, "w") as outFileDecay:
 
   print >> outFile, "\t".join(header)
   print >> outFileDecay, "\t".join(headerDecay)
@@ -108,7 +105,6 @@ with open("../../../results/raw/ngrams/"+language+"_ngrams_after_tuning.tsv", "w
         continue
      print
      print typeOfResult[:-1]
-#     print "\n".join(map(lambda x:str(x[:-1]),sorted(resultsPerType.get(typeOfResult[:-1], []), key=lambda x:x[sortBy])))
      for rand in resultsPerType.get(typeOfResult[:-1], []):
         parameters = rand["Parameters"].split(" ")
         print(rand) 
@@ -121,8 +117,6 @@ with open("../../../results/raw/ngrams/"+language+"_ngrams_after_tuning.tsv", "w
         for i in range(1,len(rand["Decay"])):
            rand["Distance"] = i
            rand["ConditionalMI"] = max(0, rand["Decay"][i])
-           print >> outFileDecay, "\t".join([str(rand[x]) for x in headerDecay]) #map(str,[parameters[0], parameters[1], parameters[2], parameters[8], i, max(0, rand[9][i]), rand[7], rand[6], rand[10]]))
- 
-  #yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast.py	Basque	eu	0.1	100	512	1	0.002	RANDOM_MODEL	0.23	16	20	43.3432767303	1.55933869897	4.17839380314
-print "../../../results/raw/ngrams/"+language+"_ngrams_after_tuning.tsv" 
-print "../../../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv"
+           print >> outFileDecay, "\t".join([str(rand[x]) for x in headerDecay]) 
+print "../../../results/raw/ngrams/"+args.language+"_ngrams_after_tuning.tsv" 
+print "../../../results/raw/ngrams/"+args.language+"_ngrams_decay_after_tuning.tsv"

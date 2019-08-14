@@ -1,38 +1,6 @@
 
-# COMPLETED BUT NOT ACTED UPON YET:
-#/u/scr/mhahn/deps/memory-need-neural-wordforms/search-Chinese_yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_OnlyWordForms_BoundedVocab.py_model_268360264_RANDOM_BY_TYPE.txt
-
-#/u/scr/mhahn/deps/memory-need-neural-wordforms/search-Japanese_yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_OnlyWordForms_BoundedVocab.py_model_211880338_RANDOM_BY_TYPE.txt
-
-#/u/scr/mhahn/deps/memory-need-neural-wordforms/search-Hindi_yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_OnlyWordForms_BoundedVocab.py_model_268655573_RANDOM_BY_TYPE.txt
-
-# /u/scr/mhahn/deps/memory-need-neural-wordforms/search-Finnish_yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_OnlyWordForms_BoundedVocab.py_model_419202267_RANDOM_BY_TYPE.txt
-
-# /u/scr/mhahn/deps/memory-need-neural-wordforms/search-Arabic_yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_OnlyWordForms_BoundedVocab.py_model_935243410_RANDOM_BY_TYPE.txt
-
-########################
-
-# /juicier/scr120/scr/mhahn/deps/memory-need-neural-morph/search-Marathi_yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py_model_757248863_RANDOM_BY_TYPE.txt
-# CUDA_VISIBLE_DEVICES=0 taskset --cpu-list 16,17,18,19 python yHyperParamSearchGPUs_CorPost_Automated.py Marathi 0 4 NONE RANDOM_BY_TYPE
-
-# [('3.3079685078046754', [3.302960537265581], [0.2, 50, 256, 2, 0.001, 0.1, 8], '3.2080932739168984', '3.4078437416924525'), ('3.34386549952088', [3.3389472492405625], [0.2, 100, 128, 1, 0.005, 0.35, 32], '3.243990265633085', '3.4437407334086747'), ('3.343972929071012', [3.3390546815861275], [0.4, 300, 256, 3, 0.005, 0.45, 8], '3.244097695205056', '3.443848162936968'), ('3.3669866071194567', [3.3621262268852425], [0.1, 50, 128, 1, 0.001, 0.25, 8],
-# /juicier/scr120/scr/mhahn/deps/memory-need-neural-morph/search-Greek_yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py_model_347375241_RANDOM_BY_TYPE.txt
-
-
-
-
-
-# based on https://github.com/thuijskens/bayesian-optimization/blob/master/python/gp.py
-
-
-# CUDA_VISIBLE_DEVICES=1 taskset --cpu-list 1 python yHyperParamSearch.py Spanish
-
-# Medieval Portuguese:
-#  /juicier/scr120/scr/mhahn/deps/memory-need-neural-morph/search-ISWOC_Portuguese_yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS.py_model_780546065_RANDOM_BY_TYPE.txt
-
 import subprocess
 import random
-#yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast.py Basque eu 0.33 100 512 1 0.01 REAL 0.33 8 10 ; 
 
 from math import exp
 
@@ -45,7 +13,7 @@ myID = random.randint(0,1000000000)
 import sys
 
 language = sys.argv[1]
-gpus = int(sys.argv[2]) #map(int,sys.argv[2].split(","))
+gpus = int(sys.argv[2]) 
 assert gpus == 1
 
 numberOfJobs = int(sys.argv[3])
@@ -70,6 +38,9 @@ import sklearn.gaussian_process as gp
 
 from scipy.stats import norm
 from scipy.optimize import minimize
+
+#####################################################################################
+# Based on https://github.com/thuijskens/bayesian-optimization/blob/master/python/gp.py
 
 def expected_improvement(x, gaussian_process, evaluated_loss, greater_is_better=False, n_params=1):
     """ expected_improvement
@@ -108,6 +79,9 @@ def expected_improvement(x, gaussian_process, evaluated_loss, greater_is_better=
 
     return expected_improvement
 
+
+#################################################################
+
 n_iters = 10
 sample_loss = None
 
@@ -122,7 +96,6 @@ bounds.append(["dropout2", float] + [x/20.0 for x in range(10)])
 bounds.append(["batch_size", int, 2, 4, 8, 16, 32, 64])
 bounds.append(["replaceWordsProbability", float] + [x/20.0 for x in range(10)]) 
 
-#x0=[0.5] * len(names)
 
 values = [x[2:] for x in bounds]
 names = [x[0] for x in bounds]
@@ -162,7 +135,6 @@ if priorKnowledge is not None:
          xp_raw.append(map(lambda x:float(x) if "." in x else int(x),line[2:]))
 print xp_raw
 
-# 4.699497452695695	[4.66408287849234]	0.35	200	128	1	0.005	0.3	18
 
 
 
@@ -219,9 +191,6 @@ while True:
     assert len(runningProcesses) == len(positionsInXPs)
     assert len(runningProcesses) == len(theirXPs)
     assert len(runningProcesses) == len(theirGPUs)
-#    print "PROCESSES"
-#    print runningProcesses
-#    print theirIDs
 
     canReplace = None
     if len(runningProcesses) >= numberOfJobs: # wait until some process terminates
@@ -248,12 +217,8 @@ while True:
 
     if len(posteriorMeans) > 50 and random.random() > 0.8:
        print "Sampling old point, to see whether it really looks good"
-#       print posteriorMeans
        nextPoint = random.choice(posteriorMeans[:10])[2]
- #      print nextPoint
-  #     quit()
     else:        
-#       if len(runningProcesses) < numberOfJobs:
        if len(xp_raw) - numberOfJobs < 20: # choose randomly until we have 20 datapoints to base our posterior on
           print "Choose randomly"
           nextPoint = sample()
@@ -276,10 +241,7 @@ while True:
     
     my_env = os.environ.copy()
 
-#    quit()
-#    subprocess.call(command)
     FNULL = open(os.devnull, "w")
-#    p = None
     gpu = np.argmin(perGPU)
     print "GPU "+str(gpu)+" out of "+str(gpus)
     perGPU[gpu] += 1
@@ -287,7 +249,6 @@ while True:
     command = map(str,["/u/nlp/anaconda/ubuntu_16/envs/py27-mhahn/bin/python2.7", version, language, language] + extractArguments(nextPoint) + [20, idForProcess, "GPU"+str(gpu)])
     print " ".join(command)
 
-    #my_env["CUDA_VISIBLE_DEVICES"] = str(gpus[gpu])
     p = subprocess.Popen(command, stdout=FNULL, env=my_env) # stderr=FNULL, 
     runningProcesses.append(p)
     theirIDs.append(idForProcess)
@@ -296,9 +257,6 @@ while True:
     theirGPUs.append(gpu)
     print "ALLOCATED GPUs"
     print theirGPUs
-#    sampledResult = 
-#    x_to_predict = x.reshape(-1, n_params)
-#
     mu, sigma = model.predict(np.array(represent(nextPoint)).reshape(-1, len(bounds)), return_std=True)
     sampledResult = np.random.normal(loc=mu, scale=sigma)
 

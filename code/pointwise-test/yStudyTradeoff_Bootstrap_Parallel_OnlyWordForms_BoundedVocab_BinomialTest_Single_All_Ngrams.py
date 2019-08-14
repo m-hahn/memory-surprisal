@@ -8,6 +8,6 @@ with open("../../results/tradeoff/listener-curve-binomial-test-ngrams.tsv", "w")
   print >> outFile, "\t".join(["Language", "Type", "Position", "Memory", "BetterEmpirical", "pValue"])
   for language in languages:
      print(language)
-     print >> outFile, subprocess.check_output(["./python27", "yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_Ngrams.py", language]).strip()
+     print >> outFile, subprocess.check_output(["./python27", "yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single.py", "--language", language, "--base_directory", "ngrams", "--suffix", "_ngrams_decay_after_tuning"]).strip()
 
 

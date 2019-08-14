@@ -5,14 +5,9 @@ import sys
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--language", dest="language", type=str)
-parser.add_argument("--base_directory", dest="base_directory", type=str)
-parser.add_argument("--suffix", dest="suffix", type=str, default="")
-
 args=parser.parse_args()
 print(args)
 
-assert args.base_directory in ["word-level", "ngrams"]
-#assert args.suffix == {"word-level" : "_onlyWordForms_boundedVocab", "ngrams" : ""}[args.base_directory]
 
 
 language = args.language
@@ -34,7 +29,7 @@ def readTSV(x):
       for i in range(len(data)):
           data[i][column] = vals[i]
     return (header, data)
-with open("../../results/raw/"+args.base_directory+"/"+language+args.suffix+".tsv", "r") as inFile:
+with open("../../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv", "r") as inFile:
      data = readTSV(inFile)
 
 import torch
@@ -105,8 +100,6 @@ for typ, mis in misByType.iteritems():
 import scipy.stats
 
 for real in ["REAL_REAL", "GROUND"]:
-    if real not in interpolatedByTypes:
-         continue
     interpolated = interpolatedByTypes[real]
     median = interpolated.median(dim=0)[0]
     

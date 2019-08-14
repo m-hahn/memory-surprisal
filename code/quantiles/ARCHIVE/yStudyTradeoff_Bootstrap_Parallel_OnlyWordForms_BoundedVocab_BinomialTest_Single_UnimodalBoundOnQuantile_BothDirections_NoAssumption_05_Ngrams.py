@@ -1,4 +1,4 @@
-# This one is mentioned in the paper source
+# Better than yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_MaxControl.py by modeling the median of REAL
 
 import sys
 
@@ -111,32 +111,59 @@ for typ, mis in misByType.iteritems():
   interpolatedByTypes[typ] = interpolated
 
 import scipy.stats
+import math
+import statsmodels.stats.proportion
+
+#binom = 
+
+
+# Assuming unimodality of RANDOM distribution and that REAL median has been estimated very precisely, get confidence bound on the quantile of REAL in the RANDOM distribution
+
+medians = {}
 
 for real in ["REAL_REAL"]: #, "GROUND"]:
-    interpolated = interpolatedByTypes[real]
-   # print(interpolated.size())
-    median = interpolated.median(dim=0)[0]
-  #  print(median.size())
-    
-    comparison = interpolatedByTypes["RANDOM_BY_TYPE"] < median.unsqueeze(0)
-    comparisonReverse = interpolatedByTypes["RANDOM_BY_TYPE"] > median.unsqueeze(0)
+  medians[real] = interpolatedByTypes[real].median(dim=0)[0]
+#  print(medians[real])
+ # print(medians[real].size())
+  
+  for i in range(39):
+     hereRandom = torch.sort(interpolatedByTypes["RANDOM_BY_TYPE"][:,i])[0]
 
- #   print(comparison.size())
-    comparisonMean = comparison.float().sum(dim=0)
-    comparisonReverseMean = comparisonReverse.float().sum(dim=0)
+     worseRandomCount = float((hereRandom < medians[real][i]).sum())
+     sameRandomCount = float((hereRandom == medians[real][i]).sum())
+     betterRandomCount = float((hereRandom > medians[real][i]).sum())
+#     print(worseRandomCount, sameRandomCount, betterRandomCount)
 
-#    print(comparisonMean)
-    for i in range(39):
-       p1 = (scipy.stats.binom_test(x=comparisonMean[i], n=comparison.size()[0], alternative="greater"))
-#       p2 = (scipy.stats.binom_test(x=comparisonReverseMean[i], n=comparison.size()[0]))
+     # The goal here is to provide a confidence lower bound on worseRandomCount
+     if worseRandomCount == 0:
+         print "\t".join(map(str,[language, real, i, 0.0, 0.0, float(xPoints[i])]))
+#                              ["Language", "Type", "Position", "LowerConfidenceBound", "Level", "Memory"])
 
-#       print "\t".join(map(str,[language, real, i, float(xPoints[i]), float(comparisonMean[i]/comparison.size()[0]), float(comparisonReverseMean[i]/comparison.size()[0]), p1, p2]))
-       print "\t".join(map(str,[language, real, i, float(xPoints[i]), float(comparisonMean[i]/comparison.size()[0]), p1]))
+         bound = 0
+     else:
+   #     print(hereRandom.size())
+        largestPossibleValue = xPoints[i]
+        #print(i, largestPossibleValue, medians[real][i], hereRandom)
+        # if the median is at most the best sample
+        #unaccountedForTarget = 1-math.pow(targetLevel, 1/(float(hereRandom.size()[0])))
+        randomBestWorse = float(hereRandom[int(worseRandomCount)-1])
+        assert randomBestWorse < float(medians[real][i])
+#        print((largestPossibleValue, medians[real][i] , randomBestWorse,   (largestPossibleValue - medians[real][i] + 0.0001) / (largestPossibleValue - randomBestWorse + 0.0001)))
+
+        for unaccountedFor in [float(x)/200 for x in range(1,200)]:
+#          print scipy.stats.binom_test(x=1, n=10, p=0.5, alternative="greater")
+          assert unaccountedFor > 0
+          assert unaccountedFor < 1
+          
+          percentile = unaccountedFor 
+          if sameRandomCount+betterRandomCount == 0:
+             p1 = math.pow(1-unaccountedFor, worseRandomCount)
+          else:
+             p1 = 1-(scipy.stats.binom_test(x=sameRandomCount+betterRandomCount, n=worseRandomCount+sameRandomCount+betterRandomCount, p=unaccountedFor, alternative="greater"))
+          if p1 < 0.05:
+             print "\t".join(map(str,[language, real, i, 1-float(percentile), p1, float(xPoints[i])]))
+#             print("PERCENTILE", worseRandomCount / (worseRandomCount + sameRandomCount + betterRandomCount))
+             assert 1-float(percentile) <= worseRandomCount / (worseRandomCount + sameRandomCount + betterRandomCount)
+             break
 
 
-
-
-#  mis = list(interpolated[:,-5].numpy())
-#  for i in range(len(mis)):
-#     print("\t".join(map(str,[language, typ, float(xPoints[-5]), mis[i]])))
-#

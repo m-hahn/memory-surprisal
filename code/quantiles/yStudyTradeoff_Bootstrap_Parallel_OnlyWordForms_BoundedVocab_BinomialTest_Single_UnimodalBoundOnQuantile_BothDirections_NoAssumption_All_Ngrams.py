@@ -8,6 +8,6 @@ with open("../../results/tradeoff/listener-curve-binomial-confidence-bound-quant
   print >> outFile, "\t".join(["Language", "Type", "Position", "LowerConfidenceBound", "Level", "Memory"])
   for language in languages:
      print(language)
-     print >> outFile, subprocess.check_output(["./python27", "yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_UnimodalBoundOnQuantile_BothDirections_NoAssumption_Ngrams.py", language]).strip()
+     print >> outFile, subprocess.check_output(["./python27", "yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_UnimodalBoundOnQuantile_BothDirections_NoAssumption_Ngrams.py", "--language", language, "--level", "0.001"]).strip()
 
 
