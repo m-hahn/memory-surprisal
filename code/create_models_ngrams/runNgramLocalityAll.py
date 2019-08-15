@@ -26,7 +26,7 @@ for language in languages:
     for i in range(len(params)):
       params2.append("--"+argumentNames[i])
       params2.append(params[i])
-    paramsString = " ".join(params2)
+    paramsString = " ".join([str(x) for x in params2])
 #    command = ["/u/nlp/anaconda/ubuntu_16/envs/py27-mhahn/bin/python2.7", "yHyperParamSearchGPUs_CorPost_Automated_OnlyWordForms_Slurm_Ngrams.py", language, "1", "2", "NONE", "RANDOM_BY_TYPE", "0.02", "30"]
     for MODEL_TYPE in ["GROUND", "REAL_REAL", "RANDOM_BY_TYPE"]:
 
