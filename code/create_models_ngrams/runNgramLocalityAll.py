@@ -39,7 +39,7 @@ for language in languages:
 
 
        print(language, MODEL_TYPE, existing)
-       continue
+#       continue
        for _ in range({"REAL_REAL" : 5, "RANDOM_BY_TYPE" : 20, "GROUND" : 5}[MODEL_TYPE] - existing):
           command = map(str,["/u/nlp/anaconda/ubuntu_16/envs/py27-mhahn/bin/python2.7", version, "--language", language, "--model", MODEL_TYPE] + params2)
           print(command)
