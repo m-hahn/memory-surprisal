@@ -37,7 +37,7 @@ resultsPerType = {}
 
 
 filenames = [x for x in os.listdir("/u/scr/mhahn/deps/memory-need-ngrams/") if x.startswith("search-"+args.language+"_yWithMo") and len(open("/u/scr/mhahn/deps/memory-need-ngrams/"+x, "r").read().split("\n"))>=30]
-assert len(filenames) == 1, filenames
+#assert len(filenames) == 1, filenames
 if len(filenames) == 0:
    quit()
 with open("/u/scr/mhahn/deps/memory-need-ngrams/"+filenames[0], "r") as inFile:
