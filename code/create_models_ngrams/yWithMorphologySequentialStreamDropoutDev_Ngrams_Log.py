@@ -91,7 +91,6 @@ def initializeOrderTable():
           keys.add(key)
           distanceCounts[key] = distanceCounts.get(key,0.0) + 1.0
           distanceSum[key] = distanceSum.get(key,0.0) + abs(line["index"] - line["head"])
-   #print orderTable
    dhLogits = {}
    for key in keys:
       hd = orderTable.get((key[0], key[1], key[2], "HD"), 0) + 1.0
@@ -101,30 +100,21 @@ def initializeOrderTable():
       originalDistanceWeights[key] = (distanceSum[key] / distanceCounts[key])
    return dhLogits, vocab, keys, depsVocab
 
-#import torch.distributions
 import torch.nn as nn
 import torch
 from torch.autograd import Variable
 
 
-# "linearization_logprobability"
-def recursivelyLinearize(sentence, position, result, gradients_from_the_left_sum):
+def recursivelyLinearize(sentence, position, result):
    line = sentence[position-1]
-   # Loop Invariant: these are the gradients relevant at everything starting at the left end of the domain of the current element
-   allGradients = gradients_from_the_left_sum #+ sum(line.get("children_decisions_logprobs",[]))
 
-
-
-   # there are the gradients of its children
    if "children_DH" in line:
       for child in line["children_DH"]:
-         allGradients = recursivelyLinearize(sentence, child, result, allGradients)
+         recursivelyLinearize(sentence, child, result)
    result.append(line)
-   line["relevant_logprob_sum"] = allGradients
    if "children_HD" in line:
       for child in line["children_HD"]:
-         allGradients = recursivelyLinearize(sentence, child, result, allGradients)
-   return allGradients
+         recursivelyLinearize(sentence, child, result)
 
 import numpy.random
 
@@ -149,28 +139,29 @@ def orderSentence(sentence, dhLogits, printThings):
    logits = [None]*len(sentence)
    logProbabilityGradient = 0
    if args.model == "REAL_REAL":
+       # Collect tokens to be removed (i.e., punctuation)
       eliminated = []
    for line in sentence:
       if line["dep"] == "root":
           root = line["index"]
           continue
-      if line["dep"].startswith("punct"): # assumes that punctuation does not have non-punctuation dependents!
+      # Exclude Punctuation
+      if line["dep"].startswith("punct"):
          if args.model == "REAL_REAL":
             eliminated.append(line)
          continue
+      # Determine ordering relative to head
       key = (sentence[line["head"]-1]["posUni"], line["dep"], line["posUni"])
       line["dependency_key"] = key
       dhLogit = dhWeights[stoi_deps[key]]
       if args.model == "REAL":
-         dhSampled = (line["head"] > line["index"]) #(random() < probability.data.numpy()[0])
+         dhSampled = (line["head"] > line["index"])
       else:
-         dhSampled = (dhLogit > 0) #(random() < probability.data.numpy())
-
-      
+         dhSampled = (dhLogit > 0) 
      
       direction = "DH" if dhSampled else "HD"
       if printThings: 
-         print "\t".join(map(str,["ORD", line["index"], ("|".join(line["morph"])+"           ")[:10], ("->".join(list(key)) + "         ")[:22], line["head"], dhLogit, dhSampled, direction]))
+         print "\t".join(map(str,["ORD", line["index"], ("->".join(list(key)) + "         ")[:22], line["head"], dhLogit, dhSampled, direction]))
 
       headIndex = line["head"]-1
       sentence[headIndex]["children_"+direction] = (sentence[headIndex].get("children_"+direction, []) + [line["index"]])
@@ -200,7 +191,7 @@ def orderSentence(sentence, dhLogits, printThings):
 
    
    linearized = []
-   recursivelyLinearize(sentence, root, linearized, 0)
+   recursivelyLinearize(sentence, root, linearized)
    if args.model == "REAL_REAL":
       linearized = filter(lambda x:"removed" not in x, sentence)
    if printThings or len(linearized) == 0:
@@ -210,32 +201,18 @@ def orderSentence(sentence, dhLogits, printThings):
 
 
 dhLogits, vocab, vocab_deps, depsVocab = initializeOrderTable()
-#print morphKeyValuePairs
-#quit()
 
-morphKeyValuePairs = list(morphKeyValuePairs)
-itos_morph = morphKeyValuePairs
-stoi_morph = dict(zip(itos_morph, range(len(itos_morph))))
 
 
 posUni = list(posUni)
 itos_pos_uni = posUni
 stoi_pos_uni = dict(zip(posUni, range(len(posUni))))
 
-posFine = list(posFine)
-itos_pos_ptb = posFine
-stoi_pos_ptb = dict(zip(posFine, range(len(posFine))))
-
-
-
 itos_pure_deps = sorted(list(depsVocab)) 
 stoi_pure_deps = dict(zip(itos_pure_deps, range(len(itos_pure_deps))))
    
-
 itos_deps = sorted(vocab_deps)
 stoi_deps = dict(zip(itos_deps, range(len(itos_deps))))
-
-#print itos_deps
 
 dhWeights = [0.0] * len(itos_deps)
 distanceWeights = [0.0] * len(itos_deps)
@@ -243,12 +220,7 @@ distanceWeights = [0.0] * len(itos_deps)
 
 import os
 
-if args.model == "RANDOM_MODEL":
-  for key in range(len(itos_deps)):
-     dhWeights[key] = random() - 0.5
-     distanceWeights[key] = random()
-  originalCounter = "NA"
-elif args.model == "REAL" or args.model == "REAL_REAL":
+if args.model == "REAL" or args.model == "REAL_REAL":
   originalCounter = "NA"
 elif args.model == "RANDOM_BY_TYPE":
   dhByType = {}
@@ -259,19 +231,6 @@ elif args.model == "RANDOM_BY_TYPE":
   for key in range(len(itos_deps)):
      dhWeights[key] = dhByType[itos_deps[key][1].split(":")[0]]
      distanceWeights[key] = distByType[itos_deps[key][1].split(":")[0]]
-  originalCounter = "NA"
-elif args.model == "RANDOM_BY_TYPE_CONS":
-  distByType = {}
-  for dep in itos_pure_deps:
-    distByType[dep.split(":")[0]] = random()
-  for key in range(len(itos_deps)):
-     dhWeights[key] = 1.0
-     distanceWeights[key] = distByType[itos_deps[key][1].split(":")[0]]
-  originalCounter = "NA"
-elif args.model == "RANDOM_MODEL_CONS":
-  for key in range(len(itos_deps)):
-     dhWeights[key] = 1.0
-     distanceWeights[key] = random()
   originalCounter = "NA"
 elif args.model == "GROUND":
   groundPath = "/u/scr/mhahn/deps/manual_output_ground_coarse/"
@@ -287,8 +246,6 @@ elif args.model == "GROUND":
      for line in inFile:
          line = line.strip().split("\t")
          assert int(line[headerGrammar.index("Counter")]) >= 1000000
-#         if line[headerGrammar.index("Language")] == language:
-#           print(line)
          dependency = line[headerGrammar.index("Dependency")]
          dhHere = float(line[headerGrammar.index("DH_Mean_NoPunct")])
          distHere = float(line[headerGrammar.index("Distance_Mean_NoPunct")])
@@ -302,10 +259,7 @@ elif args.model == "GROUND":
 else:
   assert False, args.model
 
-lemmas = list(vocab_lemmas.iteritems())
-lemmas = sorted(lemmas, key = lambda x:x[1], reverse=True)
-itos_lemmas = map(lambda x:x[0], lemmas)
-stoi_lemmas = dict(zip(itos_lemmas, range(len(itos_lemmas))))
+
 
 words = list(vocab.iteritems())
 words = sorted(words, key = lambda x:x[1], reverse=True)
@@ -323,7 +277,6 @@ vocab_size = len(itos)
 
 
 
-crossEntropy = 10.0
 
 
 
@@ -333,9 +286,8 @@ import torch.nn.functional
 
 
 
+crossEntropy = 10.0
 counter = 0
-
-
 lastDevLoss = None
 failedDevRuns = 0
 devLosses = [] 
@@ -344,33 +296,23 @@ devLosses = []
 
 
 def createStreamContinuous(corpus):
-#    global counter
     global crossEntropy
     global devLosses
 
     input_indices = [2] # Start of Segment
     wordStartIndices = []
-#    sentenceStartIndices = []
     sentCount = 0
     for sentence in corpus:
        sentCount += 1
        if sentCount % 10 == 0:
          print ["DEV SENTENCES", sentCount]
 
-#       if sentCount == 100:
-       #printHere = (sentCount % 10 == 0)
        ordered, _ = orderSentence(sentence, dhLogits, sentCount % 500 == 0)
 
-#       sentenceStartIndices.append(len(input_indices))
        for line in ordered+["EOS"]:
-#          wordStartIndices.append(len(input_indices))
           if line == "EOS":
             yield "EOS"
           else:
-#            targetWord = stoi[]
-#            if targetWord >= vocab_size:
- #              yield line["posUni"]
-  #          else:
             yield line["word"]
 
 
@@ -405,7 +347,7 @@ def getStartEnd(k):
    if k == 0:
       return start, end
    # Start is the FIRST train place that is >=
-   # Start is the FIRST train place that is >
+   # End is the FIRST train place that is >
    l = 0
    l2 = 0
    for j in range(len(dev)):
@@ -442,7 +384,7 @@ newProbability = [None for _ in idev]
 devSurprisalTable = []
 for k in range(0,args.cutoff):
    print(k)
-   startK, endK = getStartEnd(k)
+   startK, endK = getStartEnd(k) # Possible speed optimization: There is some redundant computation here, could be reused from the previous iteration. But the algorithm is very fast already.
    startK2, endK2 = getStartEnd(k+1)
    cachedFollowingCounts = {}
    for j in range(len(idev)):
