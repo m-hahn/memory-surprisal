@@ -1,5 +1,11 @@
 A wide range of work has argued that natural language orders information in ways that reduce memory effort.
-An early example is \cite{miller-finitary-1963}, who attributed the unacceptability of multiple center embeddings in English to limitations of human working memory.
+This strand of research has brought together linguistic typologists documenting language universals, corpus linguists studying production preferences, psycholinguistics studying processing difficulty, and computer scientists studying formal properties of grammars.
+
+
+
+
+An early example is \cite{miller-finitary-1963}, who attributed the unacceptability of multiple center embeddings in English to limitations of human working memory; following work has studied how different grammars induce different memory requirements in terms of the number of symbols that must be stored at each point to produce or parse a sentence \citet{yngve1960model,yngve1961depth,abney1991memory,gibson1991computational,resnik1992left}.
+
 \cite{hawkins-efficiency-2003} provides cross-linguistic evidence that word orders are optimized for processing based on local contexts.
 Further work has found computational, corpus-based evidence that memory limitations impact language structure and production.
 In particular, languages have been shown to shorten the length of syntactic dependency lengths \citep{futrell-large-scale-2015}.
@@ -15,6 +21,24 @@ We approach this question by first providing general information-theoretic lower
 We will consider a general setting of a listener performing incremental prediction.
 Our result immediatly entails a link between boundedness of memory and locality, which had been stipulated or derived from assumptions about memory architecture in previous models \citep{gibson-linguistic-1998, lewis-activation-based-2005, futrell-noisy-context-2017}.
 We will then use corpus data from over 52 languages to provide evidence that their word orders help lower memory cost.
+
+
+% Production argument
+% Idea: A producer wants to approximate a language conditional on a production target G.
+% Ie producer finds m_t to minimize loss: D[ w_t | w_{<t}, g   ||   w_t  | m_t  ] + a * H[m_t]
+% That is, the memory has to contain both the previous words and the current production goal.
+% The loss comes out to I[ w_t : w_{<t},g | m_t] + a * H[m_t]
+%                       = I[w_t : w_{<t} | m_t] + I[w_t : g | w_{<t}, m_t] + a * H[m_t]
+% Now let's decompose the memory m_t into two parts:
+% the part about the previous words: call this r_t
+% the part about the current goal: call this g_t. And let's assume H[g|g_t]=0, i.e. the memory stores
+% all the information about the goal.
+% Then H[m_t] = H[r_t] + H[g_t|r_t].
+% Now we have loss:
+%     I[w_t : w_{<t} | r_t, g] + I[w_t : g | w_{<t}, r_t, g] + a H[r_t, g_t]
+%   = I[w_t : w_{<t} | r_t, g] + a H[r_t, g_t] 
+% Now we have H[r_t, g_t] >= H[r_t] >= \sum t I_t.
+% And then we have 
 
 %TODO mention prior work
 %
