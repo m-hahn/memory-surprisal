@@ -18,15 +18,19 @@ print(args)
 
 
 def f(a):
+   # Collect surprisals resulting from different context lengths
    x = list(map(float,a.split(" ")))[:args.horizon]
 
+   # Collect estimates for It
    decay = [(x[(i-1 if i>0 else 0)]-x[i]) for i in range(len(x))]
    assert len(decay) == args.horizon
 
+   # Estimate of the Excess Entropy
    memory = sum([i*(x[(i-1 if i>0 else 0)]-x[i]) for i in range(len(x))])
+   assert memory == sum([i*decay[i] for i in range(len(decay))])
 
    residual = x[args.horizon-1]
-   balanced = sum([i*(x[(i-1 if i>0 else 0)]-x[i]) for i in range(args.horizon)]) + args.horizon*x[args.horizon-1]
+   balanced = None
 
    mi = x[0] - x[args.horizon-1]
 
@@ -61,12 +65,12 @@ for fileName in sorted(files):
          continue
      if " "+language+" " not in result[0]:
         continue
-     if args.onlyOptimized: # changed this line (March 8, 2019)
+     if args.onlyOptimized:
        if type(parameterKeys[language]) == type((1,2)):
-         if not all([x in result[0] for x in  parameterKeys[language]]): # not in result[0] or parameterKeys[language][1] not in result[0]):
+         if not all([x in result[0] for x in  parameterKeys[language]]): 
            continue
        else:
-         if not parameterKeys[language] in result[0]: # all([x in result[0] for x in  ]): # not in result[0] or parameterKeys[language][1] not in result[0]):
+         if not parameterKeys[language] in result[0]: 
            continue
 
      typeOfResult = filter(lambda x:x in result[0], types)[0][:-1]

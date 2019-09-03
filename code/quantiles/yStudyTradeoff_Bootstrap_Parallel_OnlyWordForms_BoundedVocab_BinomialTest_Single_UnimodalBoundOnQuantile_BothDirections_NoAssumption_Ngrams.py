@@ -131,7 +131,9 @@ import statsmodels.stats.proportion
 
 medians = {}
 
-for real in ["REAL_REAL"]: #, "GROUND"]:
+for real in ["REAL_REAL", "GROUND"]:
+ # if real not in medians:
+#       assert False, (real, list(medians), "../../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv")
   medians[real] = interpolatedByTypes[real].median(dim=0)[0]
 #  print(medians[real])
  # print(medians[real].size())

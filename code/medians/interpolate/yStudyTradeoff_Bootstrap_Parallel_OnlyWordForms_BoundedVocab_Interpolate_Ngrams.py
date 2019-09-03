@@ -28,12 +28,6 @@ except IOError:
   print >> sys.stderr, ("ERROR nothing for this language? "+language)
   quit()
 
-#print(len(data))
-
-
-
-#data = data %>% group_by(ModelID) %>% mutate(CumulativeMemory = cumsum(Distance*ConditionalMI), CumulativeMI = cumsum(ConditionalMI))
-
 import torch
 
 def g(frame, name, i):
@@ -43,10 +37,8 @@ matrix = [[g(data, "ModelID", i), g(data, "Distance", i), g(data, "ConditionalMI
 
 matrixByType = {}
 misByType = {}
-#unigramCEByType = {}
 for i in range(len(data[1])):
     typ = g(data, "Type", i)
-#    print(i,typ, len(data[1]))
     if typ not in matrixByType:
         matrixByType[typ] = []
     matrixByType[typ].append(matrix[i])
@@ -57,11 +49,9 @@ for typ in matrixByType:
    matrixByType[typ] = tensorized.view(-1, MAX_DISTANCE, 4)
    #print(matrixByType[typ][0])
    misByType[typ] = matrixByType[typ][:,:,2]
-#print(misByType["RANDOM_BY_TYPE"])
 if MAX_DISTANCE == -1:
   print >> sys.stderr, ("ERROR nothing for this language? "+language)
   quit()
-#data = data %>% group_by(ModelID) %>% mutate(CumulativeMemory = cumsum(Distance*ConditionalMI), CumulativeMI = cumsum(ConditionalMI))
 distance = torch.FloatTensor(range(1,1+MAX_DISTANCE))
 
 cumMIs = {}
@@ -71,22 +61,17 @@ maximalMemory = 0
 for typ, mis in misByType.iteritems():
   mask = torch.FloatTensor([[1 if j <= i else 0 for j in range(MAX_DISTANCE)] for i in range(MAX_DISTANCE)])
   cumulativeMI = torch.matmul(mis, mask.t())
-  #print("MIs", mis[0])
-  #print("Cum MI", cumulativeMI[0])
   cumulativeMemory = torch.matmul(distance*mis, mask.t())
-  #print("Cum Mem", cumulativeMemory[0])
   cumMIs[typ] = cumulativeMI
   cumMems[typ] = cumulativeMemory
   maximalMemory = max(maximalMemory, float(torch.max(cumulativeMemory)))
 
-#print("MAXIMAL MEMORY", maximalMemory)
 
 
 for typ, mis in misByType.iteritems():  
   cumMIs[typ] = torch.cat([0*cumMIs[typ][:,-1].unsqueeze(1), cumMIs[typ], cumMIs[typ][:,-1].unsqueeze(1)], dim=1)
   cumMems[typ] = torch.cat([0*(cumMems[typ][:,-1].unsqueeze(1)), cumMems[typ], maximalMemory + 0*(cumMems[typ][:,-1].unsqueeze(1))], dim=1)
 
-  #print(cumMIs[typ][0])
 import math
 
 xPoints = torch.FloatTensor([maximalMemory*x/40.0 for x in range(1,40)])
@@ -96,22 +81,13 @@ interpolatedByTypes = {}
 for typ, mis in misByType.iteritems():  
   cumulativeMI = cumMIs[typ]
   cumulativeMemory = cumMems[typ]
- # print(cumulativeMemory[0])
-#  print(cumulativeMI[0])
-#0.0 to 2.0
-  #print(cumMIs[typ].size())
-  #print("X POINTS", xPoints)
   xBigger = (cumMems[typ].unsqueeze(2) > xPoints.unsqueeze(0).unsqueeze(0))
   xSmaller = (cumMems[typ].unsqueeze(2) <= xPoints.unsqueeze(0).unsqueeze(0))
 
-  #print(torch.all(xSmaller + xBigger == 1))
-
-  #print(xBigger.size())
   interpolated = torch.zeros(cumulativeMemory.size()[0], len(xPoints))
   foundValues = torch.zeros(cumulativeMemory.size()[0], len(xPoints))
   for j in range(0,len(xPoints)):
      condition = (xBigger[:,1:,j] * xSmaller[:,:-1,j]).float()
-     #print(j, condition[0])
      memoryDifference = ((cumulativeMemory[:,1:] - cumulativeMemory[:,:-1]))
      slope = (xPoints[j] - cumulativeMemory[:,:-1]) / memoryDifference
      slope[memoryDifference == 0] = 1/2
@@ -122,8 +98,5 @@ for typ, mis in misByType.iteritems():
   for i in range(0, interpolated.size()[0]):
       for j in range(0, len(xPoints)):
         print "\t".join(map(str, [language, typ, int(matrixByType[typ][i][0][0]), j, float(xPoints[j]), float(interpolated[i,j])]))
-#  print(interpolated.size())
- # print(matrixByType[typ].size())
-#       print "\t".join(map(str,[language, typ, i, float(xPoints[i]), float(interpolated[:,i].median()), bestCI[0], bestCI[1], bestCI[2]]))
 
 

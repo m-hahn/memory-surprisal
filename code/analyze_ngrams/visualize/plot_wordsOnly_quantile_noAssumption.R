@@ -4,17 +4,16 @@ library(ggplot2)
 
 # Plots CIs for the quantile
 
-fullData_ConfidenceLowerBound = read.csv("../../../results/tradeoff/listener-curve-binomial-confidence-bound-quantile-noAssumption-Ngrams.tsv", sep="\t") #%>% filter(Type != "GROUND")
-fullData_ConfidenceLowerBound_05 = read.csv("../../../results/tradeoff/listener-curve-binomial-confidence-bound-quantile-noAssumption-Ngrams-05.tsv", sep="\t") #%>% filter(Type != "GROUND")
+# ../../results/tradeoff/listener-curve-binomial-confidence-bound-quantile-noAssumption-05.tsv
+fullData_ConfidenceLowerBound = read.csv("../../results/tradeoff/listener-curve-binomial-confidence-bound-quantile-noAssumption.tsv", sep="\t")
+fullData_ConfidenceLowerBound_05 = read.csv("../../results/tradeoff/listener-curve-binomial-confidence-bound-quantile-noAssumption-05.tsv", sep="\t")
 
-fullData_BinomialTest = read.csv("../../../results/tradeoff/listener-curve-binomial-test-ngrams.tsv", sep="\t") #%>% filter(Type != "GROUND")
+fullData_BinomialTest = read.csv("../../results/tradeoff/listener-curve-binomial-test.tsv", sep="\t")
 
 memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
     data = fullData_ConfidenceLowerBound %>% filter(Language == language)
     data2 = fullData_BinomialTest %>% filter(Language == language)
     data3 = fullData_ConfidenceLowerBound_05 %>% filter(Language == language)
-    #data = merge(data, data2, by=c("Language", "Position", "Type"))
-    #data$Memory = data$Memory.x
     plot = ggplot(data, aes(x=Memory, y=LowerConfidenceBound, fill=Type, color=Type))
     plot = plot + geom_line(size=1, linetype="dotted") 
     plot = plot + geom_line(data=data3, size=2, linetype="dashed") 
@@ -28,14 +27,13 @@ memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
     plot = plot + ylab("Quantile")
     plot = plot + xlab("Memory")
     plot = plot + theme(text = element_text(size=20))
-    ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory-QUANTILES_onlyWordForms_boundedVocab_REAL_NGRAMS.pdf", sep=""), height=3.5, width=4.5)
+    ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory-QUANTILES_onlyWordForms_boundedVocab_noAssumption.pdf", sep=""), height=3.5, width=4.5)
     return(plot)
 }
 
-languages = read.csv("../../corpusSizes.tsv", sep="\t")
-languages = languages$Language
+languages = read.csv("languages.tsv", sep="\t")
 
-for(language in languages) {
+for(language in languages$Language) {
    memListenerSurpPlot_onlyWordForms_boundedVocab(language)
 }
 

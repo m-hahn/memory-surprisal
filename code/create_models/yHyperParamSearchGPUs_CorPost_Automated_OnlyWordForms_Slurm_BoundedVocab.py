@@ -246,7 +246,7 @@ while True:
     print "GPU "+str(gpu)+" out of "+str(gpus)
     perGPU[gpu] += 1
 
-    command = map(str,["/u/nlp/anaconda/ubuntu_16/envs/py27-mhahn/bin/python2.7", version, language, language] + extractArguments(nextPoint) + [20, idForProcess, "GPU"+str(gpu)])
+    command = map(str,["/u/nlp/anaconda/ubuntu_16/envs/py27-mhahn/bin/python2.7", version, language, language] + extractArguments(nextPoint) + [20, idForProcess, "GPU"+str(gpu), "True"])
     print " ".join(command)
 
     p = subprocess.Popen(command, stdout=FNULL, env=my_env) # stderr=FNULL, 

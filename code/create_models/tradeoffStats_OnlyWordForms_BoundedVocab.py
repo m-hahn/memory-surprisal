@@ -21,16 +21,11 @@ def readTSV(x):
           data[i][column] = vals[i]
     return (header, data)
 try:
-  with open("/u/scr/mhahn/"+language+"_after_tuning_onlyWordForms_boundedVocab.tsv", "r") as inFile:
+  with open("../../results/raw/word-level/"+language+"_after_tuning_onlyWordForms_boundedVocab.tsv", "r") as inFile:
      data = readTSV(inFile)
 except IOError:
    print("\t".join(map(str, [language, 0,0  ])))
    quit()
-#print(len(data))
-
-
-
-#data = data %>% group_by(ModelID) %>% mutate(CumulativeMemory = cumsum(Distance*ConditionalMI), CumulativeMI = cumsum(ConditionalMI))
 
 import torch
 
@@ -41,10 +36,8 @@ matrix = [[g(data, "ModelID", i) ] for i in range(len(data[1]))]
 
 matrixByType = {}
 misByType = {}
-#unigramCEByType = {}
 for i in range(len(data[1])):
     typ = g(data, "Type", i)
-#    print(i,typ, len(data[1]))
     if typ not in matrixByType:
         matrixByType[typ] = []
     matrixByType[typ].append(matrix[i])

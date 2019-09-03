@@ -1,15 +1,15 @@
 # DOES not produce reasonable results. Better to just provide empirical quantile plots.  
 
 library(tidyr)
-    library(dplyr)
-    library(ggplot2)
+library(dplyr)
+library(ggplot2)
 
 # Plots CIs for the quantile
 
 # Plots medians with confidence intervals
 
-fullData = read.csv("../results/tradeoff/ngrams/listener-curve-ci-median.tsv", sep="\t")
-randomRuns = read.csv("../results/tradeoff/ngrams/listener-curve-interpolated.tsv", sep="\t") %>% filter(Type == "RANDOM_BY_TYPE")
+fullData = read.csv("../../../results/tradeoff/ngrams/listener-curve-ci-median.tsv", sep="\t")
+randomRuns = read.csv("../../../results/tradeoff/ngrams/listener-curve-interpolated.tsv", sep="\t") %>% filter(Type == "RANDOM_BY_TYPE")
 
 library(MASS)
 
@@ -17,7 +17,7 @@ memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
     library(tidyr)
     library(dplyr)
     library(ggplot2)
-    dataL = read.csv(paste("../results/raw/ngrams/",language,"_ngrams_decay_after_tuning.tsv", sep=""), sep="\t")
+    dataL = read.csv(paste("../../../results/raw/ngrams/",language,"_ngrams_decay_after_tuning.tsv", sep=""), sep="\t")
     UnigramCE = mean(dataL$UnigramCE)
 
     dataR = randomRuns %>% filter(Language == language)
@@ -27,7 +27,7 @@ memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
     plot = plot + theme_classic() + theme(legend.position="none") 
     plot = plot + geom_line(aes(x=Memory, y=UnigramCE-MedianLower), linetype="dashed") + geom_line(aes(x=Memory, y=UnigramCE-MedianUpper), linetype="dashed")
 
-quantiles = data.frame(Memory = c(), MI = c(), Density = c())
+    quantiles = data.frame(Memory = c(), MI = c(), Density = c())
     if(nrow(dataR) > 0) {
         for(i in (1:max(dataR$Position))) {
            dataRP = dataR  %>% filter(Position == i )
@@ -36,16 +36,9 @@ quantiles = data.frame(Memory = c(), MI = c(), Density = c())
            quantiles = rbind(quantiles, dens %>% mutate(Memory = dataRP$Memory[[1]]))
         }
         quantiles$Type = "RANDOM_BY_TYPE"
- plot = plot + geom_line(data = quantiles, aes(x=Memory, y=UnigramCE-MI, group=Quantile), linetype = "dotted", size=0.5) 
-       
+        plot = plot + geom_line(data = quantiles, aes(x=Memory, y=UnigramCE-MI, group=Quantile), linetype = "dotted", size=0.5) 
     }
-
-
-
-
-# plot = plot + geom_density2d(data=dataR, aes(x=Memory, y=UnigramCE-Surprisal))
-
-
+    # plot = plot + geom_density2d(data=dataR, aes(x=Memory, y=UnigramCE-Surprisal))
     ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory-MEDIANS_QUANTILES_onlyWordForms_boundedVocab.pdf", sep=""))
     return(plot)
 }

@@ -5,8 +5,24 @@
 %bounds.append(["cutoff", int, 2,3,4,5,6,7,8,9,10]) #,7,8,9,10]) #, 1024]) #, 1024]) # 64, 128,
 %
 
-We use Interpolated Kneser-Ney.
-Hyperparameters are tuned with the same strategy as for the neural network models.
+We use a version of Kneser-Ney Smoothing.
+For a sequence $w_1\dots w_k$, $N(w_{1\dots k})$ is the number of times $w_{1\dots k}$ occurs in the training set.
+The unigram probabilities are estimated as
+\begin{equation}
+	p_1(w_t) :=   \frac{N(w_t) + \delta}{|Train| + |V| \cdot \delta}
+\end{equation}
+where $\delta \in \mathbb{R}_+$ is a hyperparameter.
+Here $|Train|$ is the number of tokens in the training set, $|V|$ is the number of types occurring in train or held-out data.
+Higher-order probabilities $p_t(w_t|w_{0 \dots t-1})$ are estimated recursively as follows.
+Let $\gamma > 0$ be a hyperparameter.
+If $N(w_{0 \dots t-1}) < \gamma$, set $p_t(w_t|w_{0 \dots t-1}) := p_{t-1}(w_t|w_{1\dots t-1})$.
+Otherwise, we interpolate between $n$-th order and lower-order estimates:
+\begin{equation}
+	p_t(w_t|w_{0 \dots t-1}) :=  \frac{\operatorname{max}(N(w_{0\dots t}) - \alpha, 0.0) + \alpha \cdot \#\{w : N(w_{0 \dots t-1}w) > 0\} \cdot p_{t-1}(w_t|w_{1\dots t-1})}{N(w_{0\dots t-1})}
+\end{equation}
+where $\alpha \in [0,1]$ is also a hyperparameter.
+
+Hyperparameters $\alpha, \gamma, \delta$ are tuned with the same strategy as for the neural network models.
 
 
 
