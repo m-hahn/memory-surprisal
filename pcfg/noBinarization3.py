@@ -430,6 +430,20 @@ inStackDistribution = sorted(list(inStackDistribution.items()), key=lambda x:x[1
 print(len(inStackDistribution))
 print(inStackDistribution[-1])
 
+inStackDistributionSum = sum([x[1] for x in inStackDistribution])
+
+nonAndPreterminals = {}
+
+for preterminal in terminals:
+    nonAndPreterminals[preterminal] = sum([y for x, y in terminals[preterminal].iteritems()])
+
+for nonterminal in binary_rules:
+    if nonterminal not in nonAndPreterminals:
+       nonAndPreterminals[nonterminal]=0
+    nonAndPreterminals[nonterminal] += sum([y for x, y in binary_rules[nonterminal].iteritems()])
+
+
+
 # Future version: this is simply done with a neural net, not a cached distribution
 
 corpusBase = corpus_cached["dev"]
@@ -462,9 +476,11 @@ for sentence in corpus:
       completed = []
       for y, x in inStackDistribution[-100:]:
                               # Heuristic, Stack, ToBeParsed, ActualProbabilitySoFar
-          heapq.heappush(beam, (-log(x), y, (start, start+5), -log(x)))
+          heapq.heappush(beam, (-log(x) + log(inStackDistributionSum), y, (start, start+5), -log(x) + log(inStackDistributionSum)))
       while len(beam) > 0:
          print("BEAM", len(beam))
+         print(beam[:5])
+         print(beam[-5:])
          bestCandidate = heapq.heappop(beam)
          heuristic, stack, toBeParsed, actualProbabilitySoFar = bestCandidate
          print("Best", bestCandidate)
@@ -472,10 +488,14 @@ for sentence in corpus:
          # Integrate the next word
          predictedNonOrPreterminal = stack[-1][1][0]
          if predictedNonOrPreterminal in terminals:
+#            assert predictedNonOrPreterminal not in binary_rules, (predictedNonOrPreterminal, terminals[predictedNonOrPreterminal])
             print(predictedNonOrPreterminal)
             actualWord = linearized[toBeParsed[0]]
             print(actualWord)
-            count = -log(terminals[predictedNonOrPreterminal].get(actualWord, 1e-5)) # TODO make this actual probabilities
+            if actualWord not in terminals[predictedNonOrPreterminal]: # just forget about this branch (later add some smoothing, or just OOV)
+               print("Forget about this branch", actualWord, predictedNonOrPreterminal)
+               continue
+            count = -log(terminals[predictedNonOrPreterminal][actualWord]) + log(nonAndPreterminals[predictedNonOrPreterminal]) # TODO make this actual probabilities
             nextStack = stack[:-1] +  ((stack[-1][0], stack[-1][1][1:]),)
             print(count)
             print(nextStack)
@@ -491,12 +511,13 @@ for sentence in corpus:
             else:
               assert len(nextStack[-1][1]) > 0
               heapq.heappush(beam, nextCandidate)
-         else:
+         if predictedNonOrPreterminal in binary_rules:
             # get all productions for predictedNonOrPreterminal
             for rule, ruleCount in binary_rules[predictedNonOrPreterminal].iteritems():
               #print("RULE", rule)
               newStack = stack + ((predictedNonOrPreterminal, rule),)
-              nextCandidate = (actualProbabilitySoFar - log(ruleCount), newStack, toBeParsed, actualProbabilitySoFar - log(ruleCount))
+              ruleProb = - log(ruleCount) + log(nonAndPreterminals[predictedNonOrPreterminal])
+              nextCandidate = (actualProbabilitySoFar + ruleProb, newStack, toBeParsed, actualProbabilitySoFar + ruleProb)
               heapq.heappush(beam, nextCandidate)
 #            quit()
       print(completed)
