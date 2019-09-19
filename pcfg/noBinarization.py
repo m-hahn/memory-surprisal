@@ -164,20 +164,17 @@ def orderSentenceRec(tree, sentence, printThings, linearized):
               del childrenAsTrees[-1]
           else:
              childrenAsTrees[-1]["dependency"] = dependency
-      return {"category" : label, "children" : childrenAsTrees, "dependency" : "NONE"}
+      if len(childrenAsTrees) == 0:
+         return None
+      else:
+         return {"category" : label, "children" : childrenAsTrees, "dependency" : "NONE"}
 
 def numberSpans(tree, start, sentence):
    if type(tree) != nltk.tree.Tree:
       if tree.startswith("*") or tree == "0":
         return start, ([]), ([])
       else:
-        #print("CHILDREN", start, sentence[start].get("children", []))
         outgoing = ([(start, x) for x in sentence[start].get("children", [])])
-        #if len(sentence[start].get("children", [])) > 0:
-           #print("OUTGOING", outgoing)
-           #assert len(outgoing) > 0
-#        if sentence[start]["head"] == 0:
-#             print("ROOT", start)
         return start+1, ([(sentence[start]["head"]-1, start)]), outgoing
    else:
       tree.start = start
@@ -188,14 +185,11 @@ def numberSpans(tree, start, sentence):
         incoming +=  incomingC
         outgoing += outgoingC
       tree.end = start
-      #print(incoming, outgoing, tree.start, tree.end)
-   #   print(tree.start, tree.end, incoming, [(hd,dep) for hd, dep in incoming if hd < tree.start or hd>= tree.end])
       incoming = ([(hd,dep) for hd, dep in incoming if hd < tree.start or hd>= tree.end])
       outgoing = ([(hd,dep) for hd, dep in outgoing if dep < tree.start or dep>= tree.end])
 
       tree.incoming = incoming
       tree.outgoing = outgoing
-      #print(incoming, outgoing)
       return start, incoming, outgoing
 
 import copy
@@ -206,16 +200,16 @@ def binarize(tree):
        return tree
    else:
 #       print(tree)
-       if len(tree["children"]) <= 1: # remove unary projections
+       if len(tree["children"]) == 0:
+           assert False
+       elif len(tree["children"]) <= 1: # remove unary projections
+#          print("Removing Unary: "+tree["category"])
           result = binarize(tree["children"][0]) #{"category" : tree["category"], "dependency" : tree["dependency"], "children" : children}
           result["category"] = tree["category"]
           return result
        else:
-          children = [binarize(x) for x in tree["children"][:]]
-          left = children[0]
-          for child in children[1:]:
-             left = {"category" : tree["category"]+"_BAR", "children" : [left, child], "dependency" : tree["dependency"]}
-          return left
+          children = [binarize(x) for x in tree["children"]]
+          return {"category" : tree["category"], "children" : children, "dependency" : tree["dependency"]}
 
 def orderSentence(tree, printThings):
    global model
@@ -366,16 +360,17 @@ def addCounts(tree):
          unary_rules[nonterminal][nonterminalChild] += 1
       elif len(tree["children"]) == 2:
          nonterminal = tree["category"]#+"@"+tree["dependency"]       
-         left  = tree["children"][0]
-         right = tree["children"][1]
+         childCats = tuple([x["category"] for x in tree["children"]])
+#         left  = tree["children"][0]
+ #        right = tree["children"][1]
    
-         nonterminalLeft  = left["category"]#+"@"+left["dependency"]       
-         nonterminalRight = right["category"]#+"@"+right["dependency"]       
+  #       nonterminalLeft  = left["category"]#+"@"+left["dependency"]       
+   #      nonterminalRight = right["category"]#+"@"+right["dependency"]       
          if nonterminal not in binary_rules:
               binary_rules[nonterminal] = {}
-         if (nonterminalLeft, nonterminalRight) not in binary_rules[nonterminal]:
-            binary_rules[nonterminal][(nonterminalLeft, nonterminalRight)] = 0
-         binary_rules[nonterminal][(nonterminalLeft, nonterminalRight)] += 1
+         if childCats not in binary_rules[nonterminal]:
+            binary_rules[nonterminal][childCats] = 0
+         binary_rules[nonterminal][childCats] += 1
 
 
 roots = {}
@@ -410,7 +405,7 @@ print(unary_rules)
 #print(terminals)
 print(len(binary_rules))
 print(sorted(list(binary_rules["S"].items()), key=lambda x:x[1]))
-print(sorted(list(binary_rules["S_BAR"].items()), key=lambda x:x[1]))
+#print(sorted(list(binary_rules["S_BAR"].items()), key=lambda x:x[1]))
 print(roots)
 
 
@@ -427,6 +422,41 @@ print(roots)
 
 # merge symbols
 
+inStackDistribution = sorted(list(inStackDistribution.items()), key=lambda x:x[1])
+print(inStackDistribution)
+print(len(inStackDistribution))
+
+
+corpusBase = corpus_cached["dev"]
+corpus = corpusBase.iterator()
+
+def linearizeTree2String(tree, sent):
+   if tree["children"] is None:
+       sent.append(tree["word"])
+   else:
+      for x in tree["children"]:
+          linearizeTree2String(x, sent)
+
+sentCount = 0
+for sentence in corpus:
+   sentCount += 1
+   ordered = orderSentence(sentence,  sentCount % 50 == 0)
+
+   print(ordered)
+   linearized = []
+   linearizeTree2String(ordered, linearized)
+   print(linearized)
+
+
+   for start in range(10):
+      consumed = []
+      beam = [(x[0], -log(x[1])) for x in inStackDistribution[-100:]]
+      for length in range(5):
+         consumed.append(linearized[start+length])
+         print(beam)
+         # now update the beam
+      print(start, consumed)
+   break
 
 
 
