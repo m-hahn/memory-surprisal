@@ -378,6 +378,18 @@ roots = {}
 
 inStackDistribution = {}
 
+leftCornerCounts = {}
+
+def updateLeftCorner(nonterminal, preterminal):
+    if nonterminal not in leftCornerCounts:
+       leftCornerCounts[nonterminal] = {}
+       leftCornerCounts[nonterminal]["__TOTAL__"] = 0
+    if preterminal not in leftCornerCounts[nonterminal]:
+       leftCornerCounts[nonterminal][preterminal] = 0
+    leftCornerCounts[nonterminal][preterminal] += 1
+    leftCornerCounts[nonterminal]["__TOTAL__"] += 1
+  
+
 # stack = incomplete constituents that have been started
 def updateInStackDistribution(tree, stack):
    if tree["children"] is None:
@@ -385,11 +397,18 @@ def updateInStackDistribution(tree, stack):
 #      print(stack)
       assert len(stack[-1][1]) > 0, stack
       inStackDistribution[stack] = inStackDistribution.get(stack, 0) + 1
+      updateLeftCorner(tree["category"], tree["category"])
+      return tree["category"]
    else:
      leftSide = tree["category"]
      rightSide = tuple([x["category"] for x in tree["children"]])
+     leftCorner = None
      for i, child in enumerate(tree["children"]):
-        updateInStackDistribution(tree["children"][0], stack + ((leftSide, rightSide[i:])     ,))
+        lc = updateInStackDistribution(tree["children"][0], stack + ((leftSide, rightSide[i:])  ,))
+        if leftCorner is None:
+           leftCorner = lc
+     updateLeftCorner(tree["category"], leftCorner)
+     return leftCorner
 
 sentCount = 0
 for sentence in corpus:
@@ -400,7 +419,9 @@ for sentence in corpus:
    roots[ordered["category"]] = roots.get(ordered["category"], 0) + 1
    print(sentCount, ordered["category"])
    # update inStackDistribution
-   updateInStackDistribution(ordered, (("root", (ordered["category"],),),))
+   leftCorner = updateInStackDistribution(ordered, (("root", (ordered["category"],),),))
+   updateLeftCorner("root", leftCorner)
+
  #  break
 
 print(list(binary_rules))
@@ -412,7 +433,7 @@ print(sorted(list(binary_rules["S"].items()), key=lambda x:x[1]))
 print(roots)
 
 
-
+print(leftCornerCounts)
 
 
 # construct count matrices
@@ -436,11 +457,26 @@ nonAndPreterminals = {}
 
 for preterminal in terminals:
     nonAndPreterminals[preterminal] = sum([y for x, y in terminals[preterminal].iteritems()])
+    terminals[preterminal]["__TOTAL__"] = nonAndPreterminals[preterminal]
+
+
 
 for nonterminal in binary_rules:
     if nonterminal not in nonAndPreterminals:
        nonAndPreterminals[nonterminal]=0
     nonAndPreterminals[nonterminal] += sum([y for x, y in binary_rules[nonterminal].iteritems()])
+
+
+
+# construct the reachability heuristic
+
+# all nonAndPreterminals
+# all words
+
+
+assert "PRN" in leftCornerCounts, nonAndPreterminals["PRN"]
+assert "MD" in leftCornerCounts, nonAndPreterminals["PRN"]
+
 
 
 
@@ -455,6 +491,31 @@ def linearizeTree2String(tree, sent):
    else:
       for x in tree["children"]:
           linearizeTree2String(x, sent)
+
+
+def getLeftCornerHeuristic(nonterminal, terminal):
+    counts = []
+    totals=[]
+    leftCornerLogLosses=[]
+    for preterminal in terminals:
+       count = terminals[preterminal].get(terminal,0)
+       total = terminals[preterminal]["__TOTAL__"]
+       counts.append(count)
+       totals.append(total)
+       leftCornerCount = leftCornerCounts[nonterminal].get(preterminal, 1e-10)
+       leftCornerTotal = leftCornerCounts[nonterminal]["__TOTAL__"]
+       leftCornerLogLosses.append(-log(leftCornerCount) + log(leftCornerTotal))
+    totalCountTerminal = sum(counts)
+    totalSurprisal = 0
+    for i in range(len(counts)):
+       pretGivenTerm = float(counts[i]) / totalCountTerminal
+       totalSurprisal += pretGivenTerm * leftCornerLogLosses[i]
+     #  print(pretGivenTerm, leftCornerLogLosses[i])
+    #print(totalSurprisal)
+    return totalSurprisal
+       # \int_preterminal p(preterminal|terminal) \log p(preterminal...|nonterminal)
+       # p(preterminal|terminal) = p(terminal|preterminal) p(preterminal) / p(terminal)
+ 
 
 import heapq
 
@@ -476,7 +537,7 @@ for sentence in corpus:
       completed = []
       for y, x in inStackDistribution[-100:]:
                               # Heuristic, Stack, ToBeParsed, ActualProbabilitySoFar
-          heapq.heappush(beam, (-log(x) + log(inStackDistributionSum), y, (start, start+5), -log(x) + log(inStackDistributionSum)))
+          heapq.heappush(beam, (-log(x) + log(inStackDistributionSum) + getLeftCornerHeuristic(y[-1][1][0], linearized[start]), y, (start, start+5), -log(x) + log(inStackDistributionSum)))
       while len(beam) > 0:
          print("BEAM", len(beam))
          print(beam[:5])
@@ -505,10 +566,11 @@ for sentence in corpus:
                       break
                 nextStack = nextStack[:-2] + ((nextStack[-2][0], nextStack[-2][1][1:]),)
                 print("Stripped", nextStack)
-            nextCandidate = (actualProbabilitySoFar + count, nextStack, (toBeParsed[0]+1, toBeParsed[1]), actualProbabilitySoFar + count)
             if len(nextStack) == 0:
+               nextCandidate = (actualProbabilitySoFar + count, nextStack, (toBeParsed[0]+1, toBeParsed[1]), actualProbabilitySoFar + count)
                completed.append(nextCandidate) # TODO those should instead be revived as stacks looking for a new sentence
             else:
+              nextCandidate = (actualProbabilitySoFar + count + getLeftCornerHeuristic(nextStack[-1][1][0], linearized[toBeParsed[0]+1]), nextStack, (toBeParsed[0]+1, toBeParsed[1]), actualProbabilitySoFar + count)
               assert len(nextStack[-1][1]) > 0
               heapq.heappush(beam, nextCandidate)
          if predictedNonOrPreterminal in binary_rules:
@@ -517,7 +579,7 @@ for sentence in corpus:
               #print("RULE", rule)
               newStack = stack + ((predictedNonOrPreterminal, rule),)
               ruleProb = - log(ruleCount) + log(nonAndPreterminals[predictedNonOrPreterminal])
-              nextCandidate = (actualProbabilitySoFar + ruleProb, newStack, toBeParsed, actualProbabilitySoFar + ruleProb)
+              nextCandidate = (actualProbabilitySoFar + ruleProb + getLeftCornerHeuristic(newStack[-1][1][0], linearized[toBeParsed[0]]), newStack, toBeParsed, actualProbabilitySoFar + ruleProb)
               heapq.heappush(beam, nextCandidate)
 #            quit()
       print(completed)
