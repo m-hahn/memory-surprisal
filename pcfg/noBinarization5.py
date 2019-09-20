@@ -411,6 +411,8 @@ for sentence in corpus:
    updateLeftCorner("root", leftCorner)
    addCounts(ordered)
 
+   # Only first sentence
+#   break
 
 binary_rules["root"] = {}
 for r in roots:
@@ -471,8 +473,8 @@ for nonterminal in binary_rules:
 # all words
 
 
-assert "PRN" in leftCornerCounts, nonAndPreterminals["PRN"]
-assert "MD" in leftCornerCounts, nonAndPreterminals["PRN"]
+#assert "PRN" in leftCornerCounts, nonAndPreterminals["PRN"]
+#assert "MD" in leftCornerCounts, nonAndPreterminals["PRN"]
 
 
 
@@ -510,7 +512,7 @@ def getLeftCornerHeuristic(nonterminal, terminal):
 
 #           print(preterminalsList[i], terminal, pretGivenTerm, leftCornerLogLosses[i])
     if terminal in terminals.get(nonterminal, {}):
-        assert abs(log(leftCornerProb)) < 10,  ("leftCornerHeuristic", nonterminal, terminal, -log(leftCornerProb), [(x, counts[i], leftCornerCounts[nonterminal].get(x, 1e-10)) for i, x in  enumerate(preterminalsList) if terminal in terminals[x]])
+        assert abs(log(leftCornerProb)) < 15,  ("leftCornerHeuristic", nonterminal, terminal, -log(leftCornerProb), [(x, counts[i], leftCornerCounts[nonterminal].get(x, 1e-10)) for i, x in  enumerate(preterminalsList) if terminal in terminals[x]])
 #    print ("leftCornerHeuristic", nonterminal, terminal, -log(leftCornerProb), [(x, counts[i], leftCornerCounts[nonterminal].get(x, 1e-10)) for i, x in  enumerate(preterminalsList) if terminal in terminals[x]])
     
     result = -log(leftCornerProb+1e-20)
@@ -550,13 +552,14 @@ for sentence in corpus:
 
          iterationCount += 1
          # clean up (pruning)
-         for i in range(len(beams)):
+         if iterationCount % 10 == 0:
+          for i in range(len(beams)):
             if i < farthest and len(beams[i]) > 10000:
                 del beams[i][10000:]
             beamHere = beams[i]
             nextBeam = beams[i+1] if i+1 < len(beams) else completed
             if len(nextBeam) > 0 and len(beamHere) > 0:
-               factor = log(1e-11) + 3*log(len(nextBeam))
+               factor = max(0, log(1e-11) + 3*log(len(nextBeam)))
                if beamHere[int(0.9*len(beamHere))][0] > nextBeam[0][0] - factor:
                    upper = len(beamHere)
                    lower = 0
@@ -566,10 +569,10 @@ for sentence in corpus:
                            upper = mid
                        else:
                            lower = mid
-                   #print("CAN REMOVE", i, upper, len(beamHere))
+               #    print("CAN REMOVE", factor, i, upper, len(beamHere), len(nextBeam))
                    del beams[i][upper:]
                    assert len(beams[i]) <= upper
-                   #print("DONE PRUNING")
+#                   print("DONE PRUNING")
                    #quit()
 
 #         print(factor)
@@ -622,10 +625,12 @@ for sentence in corpus:
                  assert len(nextStack[-1][1]) > 0
                  heapq.heappush(beams[toBeParsed[0]+1-start], nextCandidate)
          if predictedNonOrPreterminal in binary_rules:
-            if len(stack) > 7: # prune
+            if len(stack) > 10: # prune
                continue
             # get all productions for predictedNonOrPreterminal
             for rule, ruleCount in binary_rules[predictedNonOrPreterminal].iteritems():
+              if ruleCount < 2:
+                  continue
               #print("RULE", rule)
               newStack = stack + ((predictedNonOrPreterminal, rule),)
               ruleProb = - log(ruleCount) + log(nonAndPreterminals[predictedNonOrPreterminal])
@@ -636,6 +641,10 @@ for sentence in corpus:
               heapq.heappush(beams[toBeParsed[0]-start], nextCandidate)
 #            quit()
       print(completed)
+      surprisals = [x[0] for x in completed]
+      maxs = max(surprisals)
+      expsurprisals = log(sum([exp(x-maxs) for x in surprisals]))+maxs
+      print(expsurprisals/(len(linearized)+1))
       quit() 
       for length in range(5):
          # for each 
