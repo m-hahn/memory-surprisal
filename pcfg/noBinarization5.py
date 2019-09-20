@@ -265,9 +265,10 @@ elif model == "REAL" or model == "REAL_REAL":
 elif model == "RANDOM_BY_TYPE":
   #dhByType = {}
   distByType = {}
+  generateGrammar = random.Random(5)
   for dep in itos_pure_deps:
  #   dhByType[dep] = random() - 0.5
-    distByType[dep] = random()
+    distByType[dep] = generateGrammar.random()
   for key in range(len(itos_deps)):
 #     dhWeights[key] = dhByType[itos_deps[key]]
      distanceWeights[key] = distByType[itos_deps[key]]
@@ -410,6 +411,11 @@ for sentence in corpus:
    updateLeftCorner("root", leftCorner)
    addCounts(ordered)
 
+
+binary_rules["root"] = {}
+for r in roots:
+   binary_rules["root"][(r,)] = roots[r]
+
  #  break
 
 print(list(binary_rules))
@@ -438,6 +444,9 @@ inStackDistribution = sorted(list(inStackDistribution.items()), key=lambda x:x[1
 #print(inStackDistribution)
 print(len(inStackDistribution))
 print(inStackDistribution[-1])
+print(inStackDistribution[-200:])
+#quit()
+
 
 inStackDistributionSum = sum([x[1] for x in inStackDistribution])
 
@@ -481,26 +490,32 @@ def linearizeTree2String(tree, sent):
           linearizeTree2String(x, sent)
 
 
+leftCornerCached = {}
+
 def getLeftCornerHeuristic(nonterminal, terminal):
+    if (nonterminal, terminal) in leftCornerCached:
+        return leftCornerCached[(nonterminal, terminal)]
     counts = []
     totals=[]
-    leftCornerLogLosses=[]
-    for preterminal in terminals:
+    leftCornerProb = 0
+    preterminalsList = list(terminals)
+    for preterminal in preterminalsList:
        count = terminals[preterminal].get(terminal,0)
        total = terminals[preterminal]["__TOTAL__"]
        counts.append(count)
        totals.append(total)
        leftCornerCount = leftCornerCounts[nonterminal].get(preterminal, 1e-10)
        leftCornerTotal = leftCornerCounts[nonterminal]["__TOTAL__"]
-       leftCornerLogLosses.append(-log(leftCornerCount) + log(leftCornerTotal))
-    totalCountTerminal = sum(counts)
-    totalSurprisal = 0
-    for i in range(len(counts)):
-       pretGivenTerm = float(counts[i]) / totalCountTerminal
-       totalSurprisal += pretGivenTerm * leftCornerLogLosses[i]
-     #  print(pretGivenTerm, leftCornerLogLosses[i])
-    #print(totalSurprisal)
-    return totalSurprisal
+       leftCornerProb += (float(leftCornerCount) / leftCornerTotal) * float(count)/total
+
+#           print(preterminalsList[i], terminal, pretGivenTerm, leftCornerLogLosses[i])
+    if terminal in terminals.get(nonterminal, {}):
+        assert abs(log(leftCornerProb)) < 10,  ("leftCornerHeuristic", nonterminal, terminal, -log(leftCornerProb), [(x, counts[i], leftCornerCounts[nonterminal].get(x, 1e-10)) for i, x in  enumerate(preterminalsList) if terminal in terminals[x]])
+#    print ("leftCornerHeuristic", nonterminal, terminal, -log(leftCornerProb), [(x, counts[i], leftCornerCounts[nonterminal].get(x, 1e-10)) for i, x in  enumerate(preterminalsList) if terminal in terminals[x]])
+    
+    result = -log(leftCornerProb+1e-20)
+    leftCornerCached[(nonterminal, terminal)] = result
+    return result
        # \int_preterminal p(preterminal|terminal) \log p(preterminal...|nonterminal)
        # p(preterminal|terminal) = p(terminal|preterminal) p(preterminal) / p(terminal)
  
@@ -518,63 +533,107 @@ for sentence in corpus:
    linearizeTree2String(ordered, linearized)
    print(linearized)
 
-
+   LENGTH = len(linearized)
    for start in range(10):
       consumed = []
-      beam = []
+      beams = [[] for _ in range(LENGTH)]
       completed = []
-      for y, x in inStackDistribution[-100:]:
+   #   for y, x in inStackDistribution[-100:]:
                               # Heuristic, Stack, ToBeParsed, ActualProbabilitySoFar
-          heapq.heappush(beam, (-log(x) + log(inStackDistributionSum) + getLeftCornerHeuristic(y[-1][1][0], linearized[start]), y, (start, start+5), -log(x) + log(inStackDistributionSum)))
-      while len(beam) > 0:
-         print("BEAM", len(beam))
-         print(beam[:5])
-         print(beam[-5:])
-         bestCandidate = heapq.heappop(beam)
+  #        heapq.heappush(beams[start-start], (-log(x) + log(inStackDistributionSum) + getLeftCornerHeuristic(y[-1][1][0], linearized[start]), y, (start, start+5), -log(x) + log(inStackDistributionSum)))
+      heapq.heappush(beams[start-start], (0, (("_", ("root",)),), (start, start+LENGTH), 0))
+
+      sumAllDs = [0 for x in beams]     
+      iterationCount = 0
+      while sum([len(x) for x in beams]) > 0:
+         farthest = [i for i in range(len(beams)) if len(beams[i])>0][-1]
+
+         iterationCount += 1
+         # clean up (pruning)
+         for i in range(len(beams)):
+            if i < farthest and len(beams[i]) > 10000:
+                del beams[i][10000:]
+            beamHere = beams[i]
+            nextBeam = beams[i+1] if i+1 < len(beams) else completed
+            if len(nextBeam) > 0 and len(beamHere) > 0:
+               factor = log(1e-11) + 3*log(len(nextBeam))
+               if beamHere[int(0.9*len(beamHere))][0] > nextBeam[0][0] - factor:
+                   upper = len(beamHere)
+                   lower = 0
+                   while upper-lower > 1:
+                       mid = (upper+lower)/2
+                       if beamHere[mid][0] > nextBeam[0][0] - factor:
+                           upper = mid
+                       else:
+                           lower = mid
+                   #print("CAN REMOVE", i, upper, len(beamHere))
+                   del beams[i][upper:]
+                   assert len(beams[i]) <= upper
+                   #print("DONE PRUNING")
+                   #quit()
+
+#         print(factor)
+         if iterationCount % 1000 == 0:
+           print("BEAM", [len(x) for x in beams])
+           print([log(sumAllDs[i+1]+1e-10)-log(sumAllDs[i]+1e-10) for i in range(len(sumAllDs)-1)])
+           print(linearized[:LENGTH])
+#         print(beam[:5])
+ #        print(beam[-5:])
+         bestPerBeam = [(i, beams[i][0][0]) for i in range(len(beams)) if len(beams[i]) > 0 and (i+1 == len(beams) or (len(beams[i]) < 10000 or len(beams[i+1]) == 0))]
+      #   print([(i, beams[i][0][0]) for i in range(len(beams)) if len(beams[i]) > 0])
+       #  print([(i, beams[i][-1][0]) for i in range(len(beams)) if len(beams[i]) > 0])
+        # print(completed)
+         bestBeam, _ = min(bestPerBeam, key=lambda x:x[1])
+         bestCandidate = heapq.heappop(beams[bestBeam])
+
          heuristic, stack, toBeParsed, actualProbabilitySoFar = bestCandidate
-         print("Best", bestCandidate)
-         print(stack[-1])
+         assert toBeParsed[0]-start == bestBeam
+      #   print("Best", bestCandidate)
+       #  print(stack[-1])
          # Integrate the next word
          predictedNonOrPreterminal = stack[-1][1][0]
-         if predictedNonOrPreterminal in terminals:
+         if predictedNonOrPreterminal in terminals and linearized[toBeParsed[0]] in terminals[predictedNonOrPreterminal]:
 #            assert predictedNonOrPreterminal not in binary_rules, (predictedNonOrPreterminal, terminals[predictedNonOrPreterminal])
-            print(predictedNonOrPreterminal)
+ #           print(predictedNonOrPreterminal)
             actualWord = linearized[toBeParsed[0]]
-            print(actualWord)
-            if actualWord not in terminals[predictedNonOrPreterminal]: # just forget about this branch (later add some smoothing, or just OOV)
-               print("Forget about this branch", actualWord, predictedNonOrPreterminal)
-               continue
+#            print(actualWord)
             ruleProb = -log(terminals[predictedNonOrPreterminal][actualWord]) + log(nonAndPreterminals[predictedNonOrPreterminal]) # TODO make this actual probabilities
             nextStack = stack[:-1] +  ((stack[-1][0], stack[-1][1][1:]),)
-            print(ruleProb)
-            print(nextStack)
+ #           print(ruleProb)
+  #          print(nextStack)
             while len(nextStack[-1][1]) == 0:
                 if len(nextStack) == 1:
                       nextStack = ()
                       break
                 nextStack = nextStack[:-2] + ((nextStack[-2][0], nextStack[-2][1][1:]),)
-                print("Stripped", nextStack)
+   #             print("Stripped", nextStack)
             if len(nextStack) == 0:
-               nextCandidate = (actualProbabilitySoFar + ruleProb, nextStack, (toBeParsed[0]+1, toBeParsed[1]), actualProbabilitySoFar + ruleProb)
-               completed.append(nextCandidate) # TODO those should instead be revived as stacks looking for a new sentence
+               _=0
+               #nextCandidate = (actualProbabilitySoFar + ruleProb, nextStack, (toBeParsed[0]+1, toBeParsed[1]), actualProbabilitySoFar + ruleProb)
+               #completed.append(nextCandidate) # TODO those should instead be revived as stacks looking for a new sentence
             else:
-              heuristicAdded = getLeftCornerHeuristic(nextStack[-1][1][0], linearized[toBeParsed[0]+1])
-              if heuristicAdded > 20: # prune right away
-                 continue
-              nextCandidate = (actualProbabilitySoFar + ruleProb + heuristicAdded, nextStack, (toBeParsed[0]+1, toBeParsed[1]), actualProbabilitySoFar + ruleProb)
-              assert len(nextStack[-1][1]) > 0
-              heapq.heappush(beam, nextCandidate)
+              sumAllDs[toBeParsed[0]-start] += exp(-(actualProbabilitySoFar + ruleProb))
+              if toBeParsed[0]+1-start == len(beams):
+                 nextCandidate = (actualProbabilitySoFar + ruleProb, nextStack, (toBeParsed[0]+1, toBeParsed[1]), actualProbabilitySoFar + ruleProb)
+                 heapq.heappush(completed, nextCandidate)
+              else:
+                 heuristicAdded = getLeftCornerHeuristic(nextStack[-1][1][0], linearized[toBeParsed[0]+1])
+                 nextCandidate = (actualProbabilitySoFar + ruleProb + heuristicAdded, nextStack, (toBeParsed[0]+1, toBeParsed[1]), actualProbabilitySoFar + ruleProb)
+                 assert len(nextStack[-1][1]) > 0
+                 heapq.heappush(beams[toBeParsed[0]+1-start], nextCandidate)
          if predictedNonOrPreterminal in binary_rules:
+            if len(stack) > 7: # prune
+               continue
             # get all productions for predictedNonOrPreterminal
             for rule, ruleCount in binary_rules[predictedNonOrPreterminal].iteritems():
               #print("RULE", rule)
               newStack = stack + ((predictedNonOrPreterminal, rule),)
               ruleProb = - log(ruleCount) + log(nonAndPreterminals[predictedNonOrPreterminal])
               heuristicAdded = getLeftCornerHeuristic(newStack[-1][1][0], linearized[toBeParsed[0]])
-              if heuristicAdded > 20: # prune right away
-                 continue
+              #if heuristicAdded > 20: # prune right away
+               #  continue
               nextCandidate = (actualProbabilitySoFar + ruleProb + heuristicAdded, newStack, toBeParsed, actualProbabilitySoFar + ruleProb)
-              heapq.heappush(beam, nextCandidate)
+              heapq.heappush(beams[toBeParsed[0]-start], nextCandidate)
 #            quit()
       print(completed)
       quit() 
