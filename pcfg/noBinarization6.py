@@ -484,7 +484,7 @@ for nonterminal in binary_rules:
 
 # Future version: this is simply done with a neural net, not a cached distribution
 
-corpusBase = corpus_cached["train"]
+corpusBase = corpus_cached["dev"]
 corpus = corpusBase.iterator()
 
 def linearizeTree2String(tree, sent):
@@ -632,7 +632,7 @@ for sentence in corpus:
                continue
             # get all productions for predictedNonOrPreterminal
             for rule, ruleCount in binary_rules[predictedNonOrPreterminal].iteritems():
-              if ruleCount < 2:
+              if ruleCount < 10:
                   continue
               #print("RULE", rule)
               newStack = stack + ((predictedNonOrPreterminal, rule),)
@@ -648,22 +648,21 @@ for sentence in corpus:
       maxs = max(surprisals)
       expsurprisals = log(sum([exp(x-maxs) for x in surprisals]))+maxs
       print(expsurprisals/(len(linearized)+1))
-      quit() 
-      for length in range(5):
-         # for each 
-         consumed.append(linearized[start+length])
-         print(beam) # the beam is a stack of partially satisfied rule expansions,
-         # get the corresponding preterminals
-         newBeam = []
-         for i in range(len(beam)):
-             stack, logloss = beam[i]
-             last = stack[-1]
-             print(last)
-             # like in Roark parser: maintain priority queue, and have optimistic estimate of the probability, using only the next available symbol
-         # 
-         quit()
-         # now update the beam
-      print(start, consumed)
+#      for length in range(5):
+#         # for each 
+#         consumed.append(linearized[start+length])
+#         print(beam) # the beam is a stack of partially satisfied rule expansions,
+#         # get the corresponding preterminals
+#         newBeam = []
+#         for i in range(len(beam)):
+#             stack, logloss = beam[i]
+#             last = stack[-1]
+#             print(last)
+#             # like in Roark parser: maintain priority queue, and have optimistic estimate of the probability, using only the next available symbol
+#         # 
+#         quit()
+#         # now update the beam
+#      print(start, consumed)
    break
 
 

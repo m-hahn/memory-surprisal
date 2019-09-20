@@ -1,5 +1,4 @@
-# Seems to work, but inefficient
-
+# Seems to work, but (1) inefficient, (2) no smoothing
 
 import random
 import sys
@@ -205,14 +204,19 @@ def binarize(tree):
 #       print(tree)
        if len(tree["children"]) == 0:
            assert False
-       elif len(tree["children"]) <= 1: # remove unary projections
+       if len(tree["children"]) <= 1: # remove unary projections
 #          print("Removing Unary: "+tree["category"])
           result = binarize(tree["children"][0]) #{"category" : tree["category"], "dependency" : tree["dependency"], "children" : children}
           result["category"] = tree["category"]
           return result
        else:
           children = [binarize(x) for x in tree["children"]]
-          return {"category" : tree["category"], "children" : children, "dependency" : tree["dependency"]}
+          left = children[0]
+          for child in children[1:]:
+             left = {"category" : tree["category"]+"_BAR", "children" : [left, child], "dependency" : tree["dependency"]}
+          return left
+
+#          return {"category" : tree["category"], "children" : children, "dependency" : tree["dependency"]}
 
 def orderSentence(tree, printThings):
    global model
@@ -355,7 +359,9 @@ def addCounts(tree):
          addCounts(child)
       if True:
          nonterminal = tree["category"]#+"@"+tree["dependency"]       
+         assert len(tree["children"]) == 2
          childCats = tuple([x["category"] for x in tree["children"]])
+         assert len(childCats) == 2
          if nonterminal not in binary_rules:
               binary_rules[nonterminal] = {}
          if childCats not in binary_rules[nonterminal]:
@@ -402,12 +408,30 @@ def updateInStackDistribution(tree, stack):
      assert tree["category"] in leftCornerCounts
      return leftCorner
 
+
+def linearizeTree2String(tree, sent):
+   if tree["children"] is None:
+       sent.append(tree["word"])
+   else:
+      for x in tree["children"]:
+          linearizeTree2String(x, sent)
+
+
 sentCount = 0
 for sentence in corpus:
    sentCount += 1
    ordered = orderSentence(sentence,  sentCount % 50 == 0)
+
+
+   linearized = []
+   linearizeTree2String(ordered, linearized)
+   if len(linearized) > 10:
+      continue
+
 #   print(ordered)
    roots[ordered["category"]] = roots.get(ordered["category"], 0) + 1
+   roots["__TOTAL__"] = roots.get("__TOTAL__", 0) + 1
+
    print(sentCount, ordered["category"])
    # update inStackDistribution
    leftCorner = updateInStackDistribution(ordered, (("root", (ordered["category"],),),))
@@ -415,11 +439,11 @@ for sentence in corpus:
    addCounts(ordered)
 
    # Only first sentence
-#   break
+   break
 
-binary_rules["root"] = {}
-for r in roots:
-   binary_rules["root"][(r,)] = roots[r]
+#binary_rules["root"] = {}
+#for r in roots:
+#   binary_rules["root"][(r,)] = roots[r]
 
  #  break
 
@@ -427,7 +451,7 @@ print(list(binary_rules))
 print(unary_rules)
 #print(terminals)
 print(len(binary_rules))
-print(sorted(list(binary_rules["S"].items()), key=lambda x:x[1]))
+#print(sorted(list(binary_rules["S"].items()), key=lambda x:x[1]))
 #print(sorted(list(binary_rules["S_BAR"].items()), key=lambda x:x[1]))
 print(roots)
 
@@ -487,12 +511,6 @@ for nonterminal in binary_rules:
 corpusBase = corpus_cached["train"]
 corpus = corpusBase.iterator()
 
-def linearizeTree2String(tree, sent):
-   if tree["children"] is None:
-       sent.append(tree["word"])
-   else:
-      for x in tree["children"]:
-          linearizeTree2String(x, sent)
 
 
 leftCornerCached = {}
@@ -525,8 +543,19 @@ def getLeftCornerHeuristic(nonterminal, terminal):
        # p(preterminal|terminal) = p(terminal|preterminal) p(preterminal) / p(terminal)
  
 
-import heapq
 
+def logSumExp(x,y):
+   if x is None:
+     return y
+   if y is None:
+     return x
+   constant = max(x,y)
+   return constant + log(exp(x-constant) + exp(y-constant))
+
+
+itos_setOfNonterminals = sorted(list(set(list(binary_rules) + list(terminals))))
+stoi_setOfNonterminals = dict(zip(itos_setOfNonterminals, range(len(itos_setOfNonterminals))))
+print(itos_setOfNonterminals)
 
 sentCount = 0
 for sentence in corpus:
@@ -536,135 +565,62 @@ for sentence in corpus:
    print(ordered)
    linearized = []
    linearizeTree2String(ordered, linearized)
-   print(linearized)
+   if len(linearized) > 10:
+      continue
 
-   LENGTH = len(linearized)
-   for start in range(10):
-      consumed = []
-      beams = [[] for _ in range(LENGTH)]
-      completed = []
-   #   for y, x in inStackDistribution[-100:]:
-                              # Heuristic, Stack, ToBeParsed, ActualProbabilitySoFar
-  #        heapq.heappush(beams[start-start], (-log(x) + log(inStackDistributionSum) + getLeftCornerHeuristic(y[-1][1][0], linearized[start]), y, (start, start+5), -log(x) + log(inStackDistributionSum)))
-      heapq.heappush(beams[start-start], (0, (("_", ("root",)),), (start, start+LENGTH), 0))
+   chart = [[[None for _ in itos_setOfNonterminals] for _ in linearized] for _ in linearized]
 
-      sumAllDs = [0 for x in beams]     
-      iterationCount = 0
-      while sum([len(x) for x in beams]) > 0:
-         farthest = [i for i in range(len(beams)) if len(beams[i])>0][-1]
+   for length in range(1, len(linearized)+1): # the NUMBER of words spanned. start+length is the first word OUTSIDE the constituent
+      for start in range(len(linearized)): # the index of the first word taking part in the thing
+         print(start, length)
+         if start+length-1 >= len(linearized):
+            continue
+         if length == 1:
+              for preterminal in terminals:
+                  count = terminals[preterminal].get(linearized[start], 0)
+                  if count > 0:
+                      chart[start][start][stoi_setOfNonterminals[preterminal]] = log(count) - log(nonAndPreterminals[preterminal])
+#                      print(chart[start][start][stoi_setOfNonterminals[preterminal]], preterminal, linearized[start])
+                      assert chart[start][start][stoi_setOfNonterminals[preterminal]] <= 0
+              assert start == start+length-1
+         else:
+             for start2 in range(start+1, len(linearized)):
+               for nonterminal, rules in binary_rules.iteritems():
+                 for rule in rules.iteritems():
+#                     print(rule)
+                     assert len(rule[0]) == 2
 
-         iterationCount += 1
-         # clean up (pruning)
-         if iterationCount % 10 == 0:
-          for i in range(len(beams)):
-            if i < farthest and len(beams[i]) > 10000:
-                del beams[i][10000:]
-            beamHere = beams[i]
-            nextBeam = beams[i+1] if i+1 < len(beams) else completed
-            if len(nextBeam) > 0 and len(beamHere) > 0:
-               factor = max(0, log(1e-11) + 3*log(len(nextBeam)))
-               if beamHere[int(0.9*len(beamHere))][0] > nextBeam[0][0] - factor:
-                   upper = len(beamHere)
-                   lower = 0
-                   while upper-lower > 1:
-                       mid = (upper+lower)/2
-                       if beamHere[mid][0] > nextBeam[0][0] - factor:
-                           upper = mid
-                       else:
-                           lower = mid
-               #    print("CAN REMOVE", factor, i, upper, len(beamHere), len(nextBeam))
-                   del beams[i][upper:]
-                   assert len(beams[i]) <= upper
-#                   print("DONE PRUNING")
-                   #quit()
+                     (leftCat, rightCat), ruleCount = rule
+                     left = chart[start][start2-1][stoi_setOfNonterminals[leftCat]]
+                     right = chart[start2][start+length-1][stoi_setOfNonterminals[rightCat]]
+                     if left is None or right is None:
+                        continue
+                     assert left <= 0, left
+                     assert right <= 0, right
 
-#         print(factor)
-         if iterationCount % 1000 == 0:
-           print("BEAM", [len(x) for x in beams])
-           print([log(sumAllDs[i+1]+1e-10)-log(sumAllDs[i]+1e-10) for i in range(len(sumAllDs)-1)])
-           print(linearized[:LENGTH])
-#         print(beam[:5])
- #        print(beam[-5:])
-         bestPerBeam = [(i, beams[i][0][0]) for i in range(len(beams)) if len(beams[i]) > 0 and (i+1 == len(beams) or (len(beams[i]) < 10000 or len(beams[i+1]) == 0))]
-      #   print([(i, beams[i][0][0]) for i in range(len(beams)) if len(beams[i]) > 0])
-       #  print([(i, beams[i][-1][0]) for i in range(len(beams)) if len(beams[i]) > 0])
-        # print(completed)
-         bestBeam, _ = min(bestPerBeam, key=lambda x:x[1])
-         bestCandidate = heapq.heappop(beams[bestBeam])
+#                     print((leftCat, rightCat, ruleCount))
+                     ruleProb = log(ruleCount) - log(nonAndPreterminals[nonterminal])
 
-         heuristic, stack, toBeParsed, actualProbabilitySoFar = bestCandidate
-         assert toBeParsed[0]-start == bestBeam
-      #   print("Best", bestCandidate)
-       #  print(stack[-1])
-         # Integrate the next word
-         predictedNonOrPreterminal = stack[-1][1][0]
-         if predictedNonOrPreterminal in terminals and linearized[toBeParsed[0]] in terminals[predictedNonOrPreterminal]:
-#            assert predictedNonOrPreterminal not in binary_rules, (predictedNonOrPreterminal, terminals[predictedNonOrPreterminal])
- #           print(predictedNonOrPreterminal)
-            actualWord = linearized[toBeParsed[0]]
-#            print(actualWord)
-            ruleProb = -log(terminals[predictedNonOrPreterminal][actualWord]) + log(nonAndPreterminals[predictedNonOrPreterminal]) # TODO make this actual probabilities
-            nextStack = stack[:-1] +  ((stack[-1][0], stack[-1][1][1:]),)
- #           print(ruleProb)
-  #          print(nextStack)
-            while len(nextStack[-1][1]) == 0:
-                if len(nextStack) == 1:
-                      nextStack = ()
-                      break
-                nextStack = nextStack[:-2] + ((nextStack[-2][0], nextStack[-2][1][1:]),)
-   #             print("Stripped", nextStack)
-            if len(nextStack) == 0:
-               _=0
-               #nextCandidate = (actualProbabilitySoFar + ruleProb, nextStack, (toBeParsed[0]+1, toBeParsed[1]), actualProbabilitySoFar + ruleProb)
-               #completed.append(nextCandidate) # TODO those should instead be revived as stacks looking for a new sentence
-            else:
-              sumAllDs[toBeParsed[0]-start] += exp(-(actualProbabilitySoFar + ruleProb))
-              if toBeParsed[0]+1-start == len(beams):
-                 nextCandidate = (actualProbabilitySoFar + ruleProb, nextStack, (toBeParsed[0]+1, toBeParsed[1]), actualProbabilitySoFar + ruleProb)
-                 heapq.heappush(completed, nextCandidate)
-              else:
-                 heuristicAdded = getLeftCornerHeuristic(nextStack[-1][1][0], linearized[toBeParsed[0]+1])
-                 nextCandidate = (actualProbabilitySoFar + ruleProb + heuristicAdded, nextStack, (toBeParsed[0]+1, toBeParsed[1]), actualProbabilitySoFar + ruleProb)
-                 assert len(nextStack[-1][1]) > 0
-                 heapq.heappush(beams[toBeParsed[0]+1-start], nextCandidate)
-         if predictedNonOrPreterminal in binary_rules:
-            if len(stack) > 10: # prune
-               continue
-            # get all productions for predictedNonOrPreterminal
-            for rule, ruleCount in binary_rules[predictedNonOrPreterminal].iteritems():
-              if ruleCount < 2:
-                  continue
-              #print("RULE", rule)
-              newStack = stack + ((predictedNonOrPreterminal, rule),)
-              ruleProb = - log(ruleCount) + log(nonAndPreterminals[predictedNonOrPreterminal])
-              heuristicAdded = getLeftCornerHeuristic(newStack[-1][1][0], linearized[toBeParsed[0]])
-              #if heuristicAdded > 20: # prune right away
-               #  continue
-              nextCandidate = (actualProbabilitySoFar + ruleProb + heuristicAdded, newStack, toBeParsed, actualProbabilitySoFar + ruleProb)
-              heapq.heappush(beams[toBeParsed[0]-start], nextCandidate)
-#            quit()
-      print(completed)
-      surprisals = [x[0] for x in completed]
-      maxs = max(surprisals)
-      expsurprisals = log(sum([exp(x-maxs) for x in surprisals]))+maxs
-      print(expsurprisals/(len(linearized)+1))
-      quit() 
-      for length in range(5):
-         # for each 
-         consumed.append(linearized[start+length])
-         print(beam) # the beam is a stack of partially satisfied rule expansions,
-         # get the corresponding preterminals
-         newBeam = []
-         for i in range(len(beam)):
-             stack, logloss = beam[i]
-             last = stack[-1]
-             print(last)
-             # like in Roark parser: maintain priority queue, and have optimistic estimate of the probability, using only the next available symbol
-         # 
-         quit()
-         # now update the beam
-      print(start, consumed)
-   break
+                     assert ruleProb <= 0, (ruleCount, nonAndPreterminals[nonterminal])
+                     new = left + right + ruleProb
+                     entry = chart[start][start+length-1][stoi_setOfNonterminals[nonterminal]]
+                     chart[start][start+length-1][stoi_setOfNonterminals[nonterminal]] = logSumExp(new, entry)
+       #              print(nonterminal, left, right, ruleProb, entry, chart[start][start+length-1][stoi_setOfNonterminals[nonterminal]])
+                     assert new <= 0
+                     assert entry <= 0
 
+   for root in itos_setOfNonterminals:
+       count = roots.get(root, 0)
+       iroot = stoi_setOfNonterminals[root]
+       if chart[0][-1][iroot] is not None:
+          if count == 0:
+             chart[0][-1][iroot] = None
+          else:
+            chart[0][-1][iroot] += log(count) - log(roots["__TOTAL__"])
+            assert chart[0][-1][iroot] <= 0
+   print(chart[0][-1])
 
+   fullProb = log(sum([exp(x) if x is not None else 0 for x in chart[0][-1]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
+   print("Surprisal", fullProb/(len(linearized)+1))
+   quit()
 
