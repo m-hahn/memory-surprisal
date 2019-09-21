@@ -1,4 +1,4 @@
-#Like cky2.py, but computes prefix probabilities
+#Like cky3.py, but computes prefix AND suffix probabilities
 
 import random
 import sys
@@ -562,24 +562,29 @@ print(itos_setOfNonterminals)
 
 
 
-matrix = torch.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals])
+matrixLeft = torch.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the LEFT edge
+matrixRight = torch.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the RIGHT edge
+
 for parent in binary_rules:
-   for (left, _), ruleCount in binary_rules[parent].iteritems():
+   for (left, right), ruleCount in binary_rules[parent].iteritems():
       ruleProb = exp(log(ruleCount) - log(nonAndPreterminals[parent]+ 10 + 0.1*len(wordCounts)))
-      matrix[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[left]] -= ruleProb
+      matrixLeft[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[left]] -= ruleProb
+      matrixRight[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[right]] -= ruleProb
       assert ruleProb > 0, ruleCount
 
 for i in range(len(itos_setOfNonterminals)):
-    matrix[i][i] += 1
-print(matrix)
-print(matrix.sum(dim=1))
-inverted = torch.inverse(matrix)
-print(inverted)
-print(inverted.size())
+    matrixLeft[i][i] += 1
+    matrixRight[i][i] += 1
+print(matrixLeft)
+print(matrixLeft.sum(dim=1))
+invertedLeft = torch.inverse(matrixLeft)
+invertedRight = torch.inverse(matrixRight)
+print(invertedLeft)
+print(invertedLeft.size())
 #for i in range(len(itos_setOfNonterminals)):
-#   inverted[i][i] -= 1
-print(inverted)
-print(inverted.sum())
+#   invertedLeft[i][i] -= 1
+print(invertedLeft)
+print(invertedLeft.sum())
 #quit()
 
 
@@ -624,13 +629,20 @@ for sentence in corpus:
                      chart[start][start][stoi_setOfNonterminals[preterminal]] = log(count) - log(nonAndPreterminals[preterminal]+ 10 + 0.1*len(wordCounts))
                      assert chart[start][start][stoi_setOfNonterminals[preterminal]] < 0
               assert start == start+length-1
+              if start == 0:
+                print("At the start", start, linearized[start])
+                for preterminal in terminals:
+                   preterminalID = stoi_setOfNonterminals[preterminal]
+                   for nonterminalID in range(len(itos_setOfNonterminals)):
+                     if invertedRight[nonterminalID][preterminalID] > 0:
+                       chartToEnd[start][nonterminalID] = logSumExp(chartToEnd[start][nonterminalID], log(invertedRight[nonterminalID][preterminalID]) + chart[start][start][preterminalID])
               if start == len(linearized)-1:
                 print("At the end", start, linearized[start])
                 for preterminal in terminals:
                    preterminalID = stoi_setOfNonterminals[preterminal]
                    for nonterminalID in range(len(itos_setOfNonterminals)):
-                     if inverted[nonterminalID][preterminalID] > 0:
-                       chartFromStart[start][nonterminalID] = logSumExp(chartFromStart[start][nonterminalID], log(inverted[nonterminalID][preterminalID]) + chart[start][start][preterminalID])
+                     if invertedLeft[nonterminalID][preterminalID] > 0:
+                       chartFromStart[start][nonterminalID] = logSumExp(chartFromStart[start][nonterminalID], log(invertedLeft[nonterminalID][preterminalID]) + chart[start][start][preterminalID])
          else:
              for start2 in range(start+1, len(linearized)):
                for nonterminal, rules in binary_rules.iteritems():
@@ -657,13 +669,13 @@ for sentence in corpus:
               #       if start+length == len(linearized): # TODO would be better to do this after this LENGTH has been processed, to avoid doing it for every rule separately
               #           for nonterminalID in range(len(itos_setOfNonterminals)):
       #       #               print(chartFromStart[start][nonterminalID])
-     #        #               print(inverted)
+     #        #               print(invertedLeft)
     #         #               print(nonterminalID, nonterminal)
-   #          #               print(inverted[nonterminalID][nonterminal])
+   #          #               print(invertedLeft[nonterminalID][nonterminal])
   #           #               print(new)
 
-              #              if inverted[nonterminalID][stoi_setOfNonterminals[nonterminal]] > 0:
-              #                 chartFromStart[start][nonterminalID] = logSumExp(chartFromStart[start][nonterminalID], log(inverted[nonterminalID][stoi_setOfNonterminals[nonterminal]]) + new)
+              #              if invertedLeft[nonterminalID][stoi_setOfNonterminals[nonterminal]] > 0:
+              #                 chartFromStart[start][nonterminalID] = logSumExp(chartFromStart[start][nonterminalID], log(invertedLeft[nonterminalID][stoi_setOfNonterminals[nonterminal]]) + new)
 
                      # TODO now also add prefix and suffix counts???
                      assert new <= 0
@@ -694,9 +706,46 @@ for sentence in corpus:
                   assert entry <= 0
                   # TODO now add additional counts above (the last rule from Goodman Fig 2.20)
 
+   for end in range(len(linearized)): # now construct potential constituents that end at `end', but end outside of the portion
+         # construct constituents that arise by combining two (one that starts within the string, and one that doesn't)
+         for end2 in range(0, end):
+            for nonterminal, rules in binary_rules.iteritems():
+              for rule in rules.iteritems():
+                  assert len(rule[0]) == 2
+
+                  (leftCat, rightCat), ruleCount = rule
+                  left = chartToEnd[end2][stoi_setOfNonterminals[leftCat]]
+                  right = chart[end2+1][end][stoi_setOfNonterminals[rightCat]]
+                  if left is None or right is None:
+                     continue
+                  assert left <= 0, left
+                  assert right <= 0, right
+
+                  ruleProb = log(ruleCount) - log(nonAndPreterminals[nonterminal]+ 10 + 0.1*len(wordCounts))
+
+                  assert ruleProb <= 0, (ruleCount, nonAndPreterminals[nonterminal]+ 10 + 0.1*len(wordCounts))
+                  new = left + right + ruleProb
+                  entry = chartToEnd[start][stoi_setOfNonterminals[nonterminal]]
+                  chartToEnd[end][stoi_setOfNonterminals[nonterminal]] = logSumExp(new, entry)
+
+                  assert new <= 0
+                  assert entry <= 0
+                  # TODO now add additional counts above (the last rule from Goodman Fig 2.20)
+
                  
              
            # for each of those, also construct constituents where only part on the left is observed
+
+   for root in itos_setOfNonterminals:
+       count = roots.get(root, 0)
+       iroot = stoi_setOfNonterminals[root]
+       if chartToEnd[-1][iroot] is not None:
+          if count == 0:
+             chartToEnd[-1][iroot] = None
+          else:
+            chartToEnd[-1][iroot] += log(count) - log(roots["__TOTAL__"])
+            assert chartToEnd[-1][iroot] <= 0
+
 
    for root in itos_setOfNonterminals:
        count = roots.get(root, 0)
@@ -710,8 +759,12 @@ for sentence in corpus:
 #   print(itos_setOfNonterminals)
 #   print(chart[0][-1])
    
-   fullProb = log(sum([exp(x) if x is not None else 0 for x in chartFromStart[0]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
    print(chartFromStart)
-   print("Prefix surprisal", fullProb/(len(linearized)+1))
+   print(chartToEnd)
+
+   prefixProb = log(sum([exp(x) if x is not None else 0 for x in chartFromStart[0]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
+   print("Prefix surprisal", prefixProb/(len(linearized)+1))
 #   quit()
+   suffixProb = log(sum([exp(x) if x is not None else 0 for x in chartToEnd[-1]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
+   print("Suffix surprisal", suffixProb/(len(linearized)+1))
 
