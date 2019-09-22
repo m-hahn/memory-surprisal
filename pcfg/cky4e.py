@@ -406,7 +406,7 @@ def plus(x,y):
       return None
    return x+y
 
-MAX_BOUNDARY = 20
+MAX_BOUNDARY = 7
 surprisalTableSums = [0 for _ in range(MAX_BOUNDARY)]
 surprisalTableCounts = [0 for _ in range(MAX_BOUNDARY)]
 
@@ -503,15 +503,21 @@ if True:
       
                         assert ruleProb <= 0, (ruleCount, nonAndPreterminals[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
                         new = left + right + ruleProb
-                        entry = chartFromStart[start][stoi_setOfNonterminals[nonterminal]]
-                        chartFromStart[start][stoi_setOfNonterminals[nonterminal]] = logSumExp(new, entry)
+
+                        for nonterminalUpper in itos_setOfNonterminals:
+                           if invertedLeft[stoi_setOfNonterminals[nonterminalUpper]][stoi_setOfNonterminals[nonterminal]] > 0:
+                             logFactorForEnvironments = log(invertedLeft[stoi_setOfNonterminals[nonterminalUpper]][stoi_setOfNonterminals[nonterminal]])
+                             entry = chartFromStart[start][stoi_setOfNonterminals[nonterminalUpper]]
+                             chartFromStart[start][stoi_setOfNonterminals[nonterminalUpper]] = logSumExp(new + logFactorForEnvironments, entry)
+                             assert chartFromStart[start][stoi_setOfNonterminals[nonterminalUpper]] <= 1e-7, chartFromStart[start][stoi_setOfNonterminals[nonterminalUpper]]
       
                         assert new <= 1e-7
                         assert entry <= 1e-7
                         # TODO now add additional counts above (the last rule from Goodman Fig 2.20)
       
   
-         
+         print("Full Chart from start", chartFromStart) 
+        
          print("Chart from start", chartFromStart[0]) 
   
          for root in itos_setOfNonterminals:

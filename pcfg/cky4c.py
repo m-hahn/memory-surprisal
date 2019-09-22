@@ -651,9 +651,18 @@ for sentence in corpus:
       
                         assert ruleProb <= 0, (ruleCount, nonAndPreterminals[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
                         new = left + right + ruleProb
-                        entry = chartFromStart[start][stoi_setOfNonterminals[nonterminal]]
-                        chartFromStart[start][stoi_setOfNonterminals[nonterminal]] = logSumExp(new, entry)
-      
+ #                       entry = chartFromStart[start][stoi_setOfNonterminals[nonterminal]]
+#                        chartFromStart[start][stoi_setOfNonterminals[nonterminal]] = logSumExp(new, entry)
+     
+
+                        for nonterminalUpper in itos_setOfNonterminals:
+                           if invertedLeft[stoi_setOfNonterminals[nonterminalUpper]][stoi_setOfNonterminals[nonterminal]] > 0:
+                             logFactorForEnvironments = log(invertedLeft[stoi_setOfNonterminals[nonterminalUpper]][stoi_setOfNonterminals[nonterminal]])
+                             entry = chartFromStart[start][stoi_setOfNonterminals[nonterminalUpper]]
+                             chartFromStart[start][stoi_setOfNonterminals[nonterminalUpper]] = logSumExp(new + logFactorForEnvironments, entry)
+                             assert chartFromStart[start][stoi_setOfNonterminals[nonterminalUpper]] <= 1e-7, chartFromStart[start][stoi_setOfNonterminals[nonterminalUpper]]
+
+ 
                         assert new <= 0
                         assert entry <= 0
                         # TODO now add additional counts above (the last rule from Goodman Fig 2.20)

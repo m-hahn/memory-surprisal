@@ -530,14 +530,14 @@ for i in range(len(itos_setOfNonterminals)):
     matrixRight[i][i] += 1
 print(matrixLeft)
 print(matrixLeft.sum(dim=1))
-invertedLeft = torch.inverse(matrixLeft)
-invertedRight = torch.inverse(matrixRight)
+invertedLeft = torch.inverse(matrixLeft).tolist()
+invertedRight = torch.inverse(matrixRight).tolist()
 print(invertedLeft)
-print(invertedLeft.size())
+#print(invertedLeft.size())
 #for i in range(len(itos_setOfNonterminals)):
 #   invertedLeft[i][i] -= 1
 print(invertedLeft)
-print(invertedLeft.sum())
+#print(invertedLeft.sum())
 #quit()
 
 
@@ -645,9 +645,18 @@ for sentence in corpus:
       
                         assert ruleProb <= 0, (ruleCount, nonAndPreterminals[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
                         new = left + right + ruleProb
-                        entry = chartFromStart[start][stoi_setOfNonterminals[nonterminal]]
-                        chartFromStart[start][stoi_setOfNonterminals[nonterminal]] = logSumExp(new, entry)
-      
+ #                       entry = chartFromStart[start][stoi_setOfNonterminals[nonterminal]]
+#                        chartFromStart[start][stoi_setOfNonterminals[nonterminal]] = logSumExp(new, entry)
+     
+                        nonterminalID = stoi_setOfNonterminals[nonterminal]
+                        for nonterminalUpper in xrange(len(itos_setOfNonterminals)):
+                           if invertedLeft[nonterminalUpper][nonterminalID] > 0:
+                             logFactorForEnvironments = log(invertedLeft[nonterminalUpper][nonterminalID])
+                             entry = chartFromStart[start][nonterminalUpper]
+                             chartFromStart[start][nonterminalUpper] = logSumExp(new + logFactorForEnvironments, entry)
+                             assert chartFromStart[start][nonterminalUpper] <= 1e-7, chartFromStart[start][nonterminalUpper]
+
+ 
                         assert new <= 0
                         assert entry <= 0
                         # TODO now add additional counts above (the last rule from Goodman Fig 2.20)
