@@ -380,8 +380,8 @@ print("matrixRight")
 print(matrixRight)
 print(matrixLeft)
 print(matrixLeft.sum(dim=1))
-invertedLeft = torch.inverse(matrixLeft)
-invertedRight = torch.inverse(matrixRight)
+invertedLeft = torch.inverse(matrixLeft).tolist()
+invertedRight = torch.inverse(matrixRight).tolist()
 print(itos_setOfNonterminals)
 print("invertedRight")
 print(invertedRight)
@@ -488,6 +488,7 @@ if True:
                # construct constituents that arise by combining two (one that ends within the string, and one that doesn't)
                for start2 in range(start+1, BOUNDARY):
                   for nonterminal, rules in binary_rules.iteritems():
+                    newAccumulated = None
                     for rule in rules.iteritems():
                         assert len(rule[0]) == 2
       
@@ -503,15 +504,26 @@ if True:
       
                         assert ruleProb <= 0, (ruleCount, nonAndPreterminals[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
                         new = left + right + ruleProb
-                        entry = chartFromStart[start][stoi_setOfNonterminals[nonterminal]]
-                        chartFromStart[start][stoi_setOfNonterminals[nonterminal]] = logSumExp(new, entry)
+                        newAccumulated = logSumExp(newAccumulated, new)
+                    nonterminalID = stoi_setOfNonterminals[nonterminal]
+                    if newAccumulated is not None:
+                      for nonterminalUpper in xrange(len(itos_setOfNonterminals)):
+                        if invertedLeft[nonterminalUpper][nonterminalID] > 0:
+                          logFactorForEnvironments = log(invertedLeft[nonterminalUpper][nonterminalID])
+                          entry = chartFromStart[start][nonterminalUpper]
+                          chartFromStart[start][nonterminalUpper] = logSumExp(plus(newAccumulated, logFactorForEnvironments), entry)
+                          assert chartFromStart[start][nonterminalUpper] <= 1e-7, chartFromStart[start][nonterminalUpper]
+
+ 
+#                        assert new <= 0
+ #                       assert entry <= 0
+                        # TODO now add additional counts above (the last rule from Goodman Fig 2.20)
       
-                        assert new <= 1e-7
-                        assert entry <= 1e-7
                         # TODO now add additional counts above (the last rule from Goodman Fig 2.20)
       
   
-         
+         print("Full Chart from start", chartFromStart) 
+        
          print("Chart from start", chartFromStart[0]) 
   
          for root in itos_setOfNonterminals:
