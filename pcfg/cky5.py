@@ -1,4 +1,5 @@
-#Like cky3.py, but computes prefix AND suffix probabilities
+#Like cky4.py, but aims to compute infix probabilities. NOT stationary ones, but a different kind that might heuristically approximate the real ones.
+# TODO  unclear why it's not deterministic
 
 import random
 import sys
@@ -441,7 +442,7 @@ for sentence in corpus:
    addCounts(ordered)
 
    # Only first sentence
-   if sentCount > 100:
+   if sentCount > 10000:
      break
 
 #binary_rules["root"] = {}
@@ -495,7 +496,10 @@ for nonterminal in binary_rules:
        nonAndPreterminals[nonterminal]=0
     nonAndPreterminals[nonterminal] += sum([y for x, y in binary_rules[nonterminal].iteritems()])
 
-
+nonAndPreterminals["__TOTAL__"] = 0
+for nonterminal in nonAndPreterminals:
+    nonAndPreterminals["__TOTAL__"] += nonAndPreterminals[nonterminal]
+assert "__TOTAL__" in nonAndPreterminals
 
 # construct the reachability heuristic
 
@@ -564,21 +568,38 @@ print(itos_setOfNonterminals)
 
 matrixLeft = torch.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the LEFT edge
 matrixRight = torch.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the RIGHT edge
+matrixEither = torch.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces general reachability (`outside probability' of a path)
 
 for parent in binary_rules:
    for (left, right), ruleCount in binary_rules[parent].iteritems():
       ruleProb = exp(log(ruleCount) - log(nonAndPreterminals[parent]+ 10 + 0.1*len(wordCounts)))
       matrixLeft[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[left]] -= ruleProb
       matrixRight[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[right]] -= ruleProb
+
+      matrixEither[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[left]] -= ruleProb/2
+      matrixEither[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[right]] -= ruleProb/2
+
       assert ruleProb > 0, ruleCount
+
+print(matrixEither.sum(dim=1))
+#quit()
 
 for i in range(len(itos_setOfNonterminals)):
     matrixLeft[i][i] += 1
     matrixRight[i][i] += 1
+    matrixEither[i][i] += 1
+
 print(matrixLeft)
 print(matrixLeft.sum(dim=1))
 invertedLeft = torch.inverse(matrixLeft)
 invertedRight = torch.inverse(matrixRight)
+invertedEither = torch.inverse(matrixEither)
+print(invertedEither.sum(dim=1))
+print(invertedEither.max())
+
+#quit()
+
+
 print(invertedLeft)
 print(invertedLeft.size())
 #for i in range(len(itos_setOfNonterminals)):
@@ -593,6 +614,11 @@ print(invertedLeft.sum())
 
 # Second: Each Non-OOV nonterminal also has small mass for any preterminal
 
+
+def plus(x,y):
+   if x is None or y is None:
+      return None
+   return x+y
 
 sentCount = 0
 for sentence in corpus:
@@ -630,14 +656,14 @@ for sentence in corpus:
                      assert chart[start][start][stoi_setOfNonterminals[preterminal]] < 0
               assert start == start+length-1
               if start == 0:
-                print("At the start", start, linearized[start])
+  #              print("At the start", start, linearized[start])
                 for preterminal in terminals:
                    preterminalID = stoi_setOfNonterminals[preterminal]
                    for nonterminalID in range(len(itos_setOfNonterminals)):
                      if invertedRight[nonterminalID][preterminalID] > 0:
                        chartToEnd[start][nonterminalID] = logSumExp(chartToEnd[start][nonterminalID], log(invertedRight[nonterminalID][preterminalID]) + chart[start][start][preterminalID])
               if start == len(linearized)-1:
-                print("At the end", start, linearized[start])
+   #             print("At the end", start, linearized[start])
                 for preterminal in terminals:
                    preterminalID = stoi_setOfNonterminals[preterminal]
                    for nonterminalID in range(len(itos_setOfNonterminals)):
@@ -666,18 +692,6 @@ for sentence in corpus:
                      entry = chart[start][start+length-1][stoi_setOfNonterminals[nonterminal]]
                      chart[start][start+length-1][stoi_setOfNonterminals[nonterminal]] = logSumExp(new, entry)
                      
-              #       if start+length == len(linearized): # TODO would be better to do this after this LENGTH has been processed, to avoid doing it for every rule separately
-              #           for nonterminalID in range(len(itos_setOfNonterminals)):
-      #       #               print(chartFromStart[start][nonterminalID])
-     #        #               print(invertedLeft)
-    #         #               print(nonterminalID, nonterminal)
-   #          #               print(invertedLeft[nonterminalID][nonterminal])
-  #           #               print(new)
-
-              #              if invertedLeft[nonterminalID][stoi_setOfNonterminals[nonterminal]] > 0:
-              #                 chartFromStart[start][nonterminalID] = logSumExp(chartFromStart[start][nonterminalID], log(invertedLeft[nonterminalID][stoi_setOfNonterminals[nonterminal]]) + new)
-
-                     # TODO now also add prefix and suffix counts???
                      assert new <= 0
                      assert entry <= 0
    for start in range(len(linearized)): # now construct potential constituents that start at `start', but end outside of the portion
@@ -734,7 +748,47 @@ for sentence in corpus:
 
                  
              
-           # for each of those, also construct constituents where only part on the left is observed
+   # for each of those, also construct constituents where only part on the left is observed
+   chartOneParent = [None for _ in itos_setOfNonterminals] # 
+   for nonterminal, rules in binary_rules.iteritems():
+      for rule in rules.iteritems():
+         (leftCat, rightCat), ruleCount = rule
+         for boundary in range(len(linearized)-1):
+            left = chartToEnd[boundary][stoi_setOfNonterminals[leftCat]]
+            right = chartFromStart[boundary+1][stoi_setOfNonterminals[rightCat]]
+
+            if left is None or right is None:
+               continue
+            assert left <= 0, left
+            assert right <= 0, right
+
+            ruleProb = log(ruleCount) - log(nonAndPreterminals[nonterminal]+ 10 + 0.1*len(wordCounts))
+
+            assert ruleProb <= 0, (ruleCount, nonAndPreterminals[nonterminal]+ 10 + 0.1*len(wordCounts))
+            new = left + right + ruleProb
+            entry = chartOneParent[stoi_setOfNonterminals[nonterminal]]
+            chartOneParent[stoi_setOfNonterminals[nonterminal]] = logSumExp(new, entry)
+#   print(chartOneParent)
+ #  print("Now estimate paths up to the ROOT (so far very heuristic and unclear what it does)")
+   totalLogProb = None
+   assert "__TOTAL__" in nonAndPreterminals
+
+   for nonterminal in  nonAndPreterminals:
+       if nonterminal == "__TOTAL__":
+            continue
+      # print("1",chartOneParent[stoi_setOfNonterminals[nonterminal]], log(nonAndPreterminals[nonterminal]) - log(nonAndPreterminals["__TOTAL__"]))
+     #  print(2,chartFromStart[0][stoi_setOfNonterminals[nonterminal]] , log(nonAndPreterminals[nonterminal]) - log(nonAndPreterminals["__TOTAL__"]))
+    #   print(3,chartToEnd[-1][stoi_setOfNonterminals[nonterminal]] , log(nonAndPreterminals[nonterminal]) - log(nonAndPreterminals["__TOTAL__"]))
+
+       totalLogProb = logSumExp(totalLogProb, plus(chartOneParent[stoi_setOfNonterminals[nonterminal]] , log(nonAndPreterminals[nonterminal]) - log(nonAndPreterminals["__TOTAL__"])))
+       totalLogProb = logSumExp(totalLogProb, plus(chartFromStart[0][stoi_setOfNonterminals[nonterminal]] , log(nonAndPreterminals[nonterminal]) - log(nonAndPreterminals["__TOTAL__"])))
+       totalLogProb = logSumExp(totalLogProb, plus(chartToEnd[-1][stoi_setOfNonterminals[nonterminal]] , log(nonAndPreterminals[nonterminal]) - log(nonAndPreterminals["__TOTAL__"])))
+   #    print(totalLogProb)
+
+   print("Approximate Total Probability", totalLogProb, totalLogProb/(len(linearized)+1))
+   #quit()
+            
+
 
    for root in itos_setOfNonterminals:
        count = roots.get(root, 0)
@@ -759,8 +813,8 @@ for sentence in corpus:
 #   print(itos_setOfNonterminals)
 #   print(chart[0][-1])
    
-   print(chartFromStart)
-   print(chartToEnd)
+#   print(chartFromStart)
+ #  print(chartToEnd)
 
    prefixProb = log(sum([exp(x) if x is not None else 0 for x in chartFromStart[0]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
    print("Prefix surprisal", prefixProb/(len(linearized)+1))
