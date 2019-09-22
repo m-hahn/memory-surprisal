@@ -1,6 +1,8 @@
 #Like cky3.py, but computes prefix AND suffix probabilities
-# TODO Somewhat confusing that the surprisals don't really decay with position
+# TODO use tests to verify this one
 
+##############
+# Other (approximate) option for infix probs: add a few `empty words' around the string, without any penalties for per-word production
 
 import random
 import sys
@@ -601,6 +603,7 @@ for sentence in corpus:
                         assert entry <= 0
       #############################
       # Now consider different endpoints
+      valuesPerBoundary = [0]
       for BOUNDARY in range(1, len(linearized)+1):
          chartToEnd = [[None for _ in itos_setOfNonterminals] for _ in range(BOUNDARY)]
          chartFromStart = [[None for _ in itos_setOfNonterminals] for _ in range(BOUNDARY)]
@@ -705,6 +708,8 @@ for sentence in corpus:
 
          surprisalTableSums[BOUNDARY-1] += prefixProb
          surprisalTableCounts[BOUNDARY-1] += 1
+         valuesPerBoundary.append(prefixProb)
          print(BOUNDARY, prefixProb, linearized)
+         assert prefixProb  < valuesPerBoundary[-2], "bug or numerical problem?"
       print(sentCount, [surprisalTableSums[0]/surprisalTableCounts[0]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[i] for i in range(4)]) 
   
