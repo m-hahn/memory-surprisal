@@ -1,5 +1,6 @@
 #Like cky3.py, but computes prefix AND suffix probabilities
 # TODO use tests to verify this one
+# Removed backwards probabilities
 
 ##############
 # Other (approximate) option for infix probs: add a few `empty words' around the string, without any penalties for per-word production
@@ -551,7 +552,7 @@ def plus(x,y):
       return None
    return x+y
 
-MAX_BOUNDARY = 5
+MAX_BOUNDARY = 10
 surprisalTableSums = [0 for _ in range(MAX_BOUNDARY)]
 surprisalTableCounts = [0 for _ in range(MAX_BOUNDARY)]
 
@@ -611,7 +612,6 @@ for sentence in corpus:
       # Now consider different endpoints
       valuesPerBoundary = [0]
       for BOUNDARY in range(1, len(linearized)+1):
-         chartToEnd = [[None for _ in itos_setOfNonterminals] for _ in range(BOUNDARY)]
          chartFromStart = [[None for _ in itos_setOfNonterminals] for _ in range(BOUNDARY)]
       
          for start in range(BOUNDARY): # the index of the first word taking part in the thing
@@ -619,12 +619,6 @@ for sentence in corpus:
                continue
             if 1 == 1: # TODO for words at the boundary, immediately add prefix and suffix counts
                  assert start == start+1-1
-                 if start == 0:
-                   for preterminal in terminals:
-                      preterminalID = stoi_setOfNonterminals[preterminal]
-                      for nonterminalID in range(len(itos_setOfNonterminals)):
-                        if invertedRight[nonterminalID][preterminalID] > 0:
-                          chartToEnd[start][nonterminalID] = logSumExp(chartToEnd[start][nonterminalID], log(invertedRight[nonterminalID][preterminalID]) + chart[start][start][preterminalID])
                  if start == BOUNDARY-1:
                    for preterminal in terminals:
                       preterminalID = stoi_setOfNonterminals[preterminal]
@@ -658,44 +652,10 @@ for sentence in corpus:
                         assert entry <= 0
                         # TODO now add additional counts above (the last rule from Goodman Fig 2.20)
       
-         for end in range(BOUNDARY)[::-1]: # now construct potential constituents that end at `end', but end outside of the portion
-               # construct constituents that arise by combining two (one that starts within the string, and one that doesn't)
-               for end2 in range(0, end):
-                  for nonterminal, rules in binary_rules.iteritems():
-                    for rule in rules.iteritems():
-                        assert len(rule[0]) == 2
-      
-                        (leftCat, rightCat), ruleCount = rule
-                        left = chartToEnd[end2][stoi_setOfNonterminals[leftCat]]
-                        right = chart[end2+1][end][stoi_setOfNonterminals[rightCat]]
-                        if left is None or right is None:
-                           continue
-                        assert left <= 0, left
-                        assert right <= 0, right
-      
-                        ruleProb = log(ruleCount) - log(nonAndPreterminals[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
-      
-                        assert ruleProb <= 0, (ruleCount, nonAndPreterminals[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
-                        new = left + right + ruleProb
-                        entry = chartToEnd[start][stoi_setOfNonterminals[nonterminal]]
-                        chartToEnd[end][stoi_setOfNonterminals[nonterminal]] = logSumExp(new, entry)
-      
-                        assert new <= 0
-                        assert entry <= 0
                         # TODO now add additional counts above (the last rule from Goodman Fig 2.20)
       
   
-         for root in itos_setOfNonterminals:
-             count = roots.get(root, 0)
-             iroot = stoi_setOfNonterminals[root]
-             if chartToEnd[-1][iroot] is not None:
-                if count == 0:
-                   chartToEnd[-1][iroot] = None
-                else:
-                  chartToEnd[-1][iroot] += log(count) - log(roots["__TOTAL__"])
-                  assert chartToEnd[-1][iroot] <= 0
-   
-   
+  
          for root in itos_setOfNonterminals:
              count = roots.get(root, 0)
              iroot = stoi_setOfNonterminals[root]
@@ -709,7 +669,6 @@ for sentence in corpus:
          prefixProb = log(sum([exp(x) if x is not None else 0 for x in chartFromStart[0]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
 #         print("Prefix surprisal", prefixProb/(len(linearized)))
    #      quit()
-         suffixProb = log(sum([exp(x) if x is not None else 0 for x in chartToEnd[-1]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
  #        print("Suffix surprisal", suffixProb/(len(linearized)))
 
          surprisalTableSums[BOUNDARY-1] += prefixProb
@@ -717,5 +676,5 @@ for sentence in corpus:
          valuesPerBoundary.append(prefixProb)
          print(BOUNDARY, prefixProb, linearized)
          assert prefixProb  < valuesPerBoundary[-2], "bug or numerical problem?"
-      print(sentCount, [surprisalTableSums[0]/surprisalTableCounts[0]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[i] for i in range(4)]) 
+      print(sentCount, [surprisalTableSums[0]/surprisalTableCounts[0]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[i] for i in range(END-1)]) 
   
