@@ -1,5 +1,5 @@
-#Like cky4.py, but aims to compute infix probabilities. NOT stationary ones, but a different kind that might heuristically approximate the real ones.
-# TODO  unclear why it's not deterministic
+# Like cky5.py, but somewhat reorganized
+# TODO why are prefix and suffix surprisals mostly similar? Can't the grammar distinguish those?
 
 import random
 import sys
@@ -634,8 +634,6 @@ for sentence in corpus:
 
    chart = [[[None for _ in itos_setOfNonterminals] for _ in linearized] for _ in linearized]
 
-   chartToEnd = [[None for _ in itos_setOfNonterminals] for _ in linearized]
-   chartFromStart = [[None for _ in itos_setOfNonterminals] for _ in linearized]
 
 
    for length in range(1, len(linearized)+1): # the NUMBER of words spanned. start+length is the first word OUTSIDE the constituent
@@ -655,20 +653,20 @@ for sentence in corpus:
                      chart[start][start][stoi_setOfNonterminals[preterminal]] = log(count) - log(nonAndPreterminals[preterminal]+ 10 + 0.1*len(wordCounts))
                      assert chart[start][start][stoi_setOfNonterminals[preterminal]] < 0
               assert start == start+length-1
-              if start == 0:
-  #              print("At the start", start, linearized[start])
-                for preterminal in terminals:
-                   preterminalID = stoi_setOfNonterminals[preterminal]
-                   for nonterminalID in range(len(itos_setOfNonterminals)):
-                     if invertedRight[nonterminalID][preterminalID] > 0:
-                       chartToEnd[start][nonterminalID] = logSumExp(chartToEnd[start][nonterminalID], log(invertedRight[nonterminalID][preterminalID]) + chart[start][start][preterminalID])
-              if start == len(linearized)-1:
-   #             print("At the end", start, linearized[start])
-                for preterminal in terminals:
-                   preterminalID = stoi_setOfNonterminals[preterminal]
-                   for nonterminalID in range(len(itos_setOfNonterminals)):
-                     if invertedLeft[nonterminalID][preterminalID] > 0:
-                       chartFromStart[start][nonterminalID] = logSumExp(chartFromStart[start][nonterminalID], log(invertedLeft[nonterminalID][preterminalID]) + chart[start][start][preterminalID])
+#              if start == 0:
+#  #              print("At the start", start, linearized[start])
+#                for preterminal in terminals:
+#                   preterminalID = stoi_setOfNonterminals[preterminal]
+#                   for nonterminalID in range(len(itos_setOfNonterminals)):
+#                     if invertedRight[nonterminalID][preterminalID] > 0:
+#                       chartToEnd[start][nonterminalID] = logSumExp(chartToEnd[start][nonterminalID], log(invertedRight[nonterminalID][preterminalID]) + chart[start][start][preterminalID])
+#              if start == len(linearized)-1:
+#   #             print("At the end", start, linearized[start])
+#                for preterminal in terminals:
+#                   preterminalID = stoi_setOfNonterminals[preterminal]
+#                   for nonterminalID in range(len(itos_setOfNonterminals)):
+#                     if invertedLeft[nonterminalID][preterminalID] > 0:
+#                       chartFromStart[start][nonterminalID] = logSumExp(chartFromStart[start][nonterminalID], log(invertedLeft[nonterminalID][preterminalID]) + chart[start][start][preterminalID])
          else:
              for start2 in range(start+1, len(linearized)):
                for nonterminal, rules in binary_rules.iteritems():
@@ -694,6 +692,33 @@ for sentence in corpus:
                      
                      assert new <= 0
                      assert entry <= 0
+
+
+   #############################
+   chartToEnd = [[None for _ in itos_setOfNonterminals] for _ in linearized]
+   chartFromStart = [[None for _ in itos_setOfNonterminals] for _ in linearized]
+
+   for length in [1]: # the NUMBER of words spanned. start+length is the first word OUTSIDE the constituent
+      for start in range(len(linearized)): # the index of the first word taking part in the thing
+         if start+length-1 >= len(linearized):
+            continue
+         if length == 1: # TODO for words at the boundary, immediately add prefix and suffix counts
+              assert start == start+length-1
+              if start == 0:
+  #              print("At the start", start, linearized[start])
+                for preterminal in terminals:
+                   preterminalID = stoi_setOfNonterminals[preterminal]
+                   for nonterminalID in range(len(itos_setOfNonterminals)):
+                     if invertedRight[nonterminalID][preterminalID] > 0:
+                       chartToEnd[start][nonterminalID] = logSumExp(chartToEnd[start][nonterminalID], log(invertedRight[nonterminalID][preterminalID]) + chart[start][start][preterminalID])
+              if start == len(linearized)-1:
+   #             print("At the end", start, linearized[start])
+                for preterminal in terminals:
+                   preterminalID = stoi_setOfNonterminals[preterminal]
+                   for nonterminalID in range(len(itos_setOfNonterminals)):
+                     if invertedLeft[nonterminalID][preterminalID] > 0:
+                       chartFromStart[start][nonterminalID] = logSumExp(chartFromStart[start][nonterminalID], log(invertedLeft[nonterminalID][preterminalID]) + chart[start][start][preterminalID])
+
    for start in range(len(linearized)): # now construct potential constituents that start at `start', but end outside of the portion
          # construct constituents that arise by combining two (one that ends within the string, and one that doesn't)
          for start2 in range(start+1, len(linearized)):
@@ -788,6 +813,10 @@ for sentence in corpus:
    print("Approximate Total Probability", totalLogProb, totalLogProb/(len(linearized)+1))
    #quit()
             
+   #########################################################
+
+
+
 
 
    for root in itos_setOfNonterminals:

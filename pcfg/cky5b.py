@@ -6,39 +6,7 @@ import sys
 
 objectiveName = "LM"
 
-#language = sys.argv[1]
-#languageCode = sys.argv[2]
-#dropout_rate = float(sys.argv[3]) if len(sys.argv) > 3 else 0.33
-#emb_dim = int(sys.argv[4]) if len(sys.argv) > 4 else 100
-#rnn_dim = int(sys.argv[5]) if len(sys.argv) > 5 else 512
-#rnn_layers = int(sys.argv[6]) if len(sys.argv) > 6 else 2
-#lr_lm = float(sys.argv[7]) if len(sys.argv) > 7 else 0.1
-model = "RANDOM_MODEL" #sys.argv[8]
-#input_dropoutRate = float(sys.argv[9]) # 0.33
-#batchSize = int(sys.argv[10])
-#replaceWordsProbability = float(sys.argv[11])
-#horizon = int(sys.argv[12]) if len(sys.argv) > 12 else 20
-#prescripedID = sys.argv[13] if len(sys.argv)> 13 else None
-#gpuNumber = sys.argv[14] if len(sys.argv) > 14 else "GPU0"
-#assert gpuNumber.startswith("GPU")
-#gpuNumber = int(gpuNumber[3:])
-#
-##if len(sys.argv) == 13:
-##  del sys.argv[12]
-#assert len(sys.argv) in [12,13,14, 15]
-#
-#
-#assert dropout_rate <= 0.5
-#assert input_dropoutRate <= 0.5
-#
-#devSurprisalTable = [None] * horizon
-#if prescripedID is not None:
-#  myID = int(prescripedID)
-#else:
-#  myID = random.randint(0,10000000)
-#
-#
-#TARGET_DIR = "/u/scr/mhahn/deps/memory-need-neural-wordforms/"
+model = "REAL_REAL" #sys.argv[8]
 
 
 posUni = set() #[ "ADJ", "ADP", "ADV", "AUX", "CONJ", "DET", "INTJ", "NOUN", "NUM", "PART", "PRON", "PROPN", "PUNCT", "SCONJ", "SYM", "VERB", "X"] 
@@ -161,12 +129,12 @@ def orderSentenceRec(tree, sentence, printThings, linearized):
 #      print(logits)
    
       childrenAsTrees = []
-      for child, _, dependency in logits:
+      for child in childrenLinearized:
           childrenAsTrees.append(orderSentenceRec(child, sentence, printThings, linearized))
           if childrenAsTrees[-1] is None: # this will happen for punctuation etc 
               del childrenAsTrees[-1]
           else:
-             childrenAsTrees[-1]["dependency"] = dependency
+             childrenAsTrees[-1]["dependency"] = "Something"
       if len(childrenAsTrees) == 0:
          return None
       else:
@@ -817,8 +785,10 @@ for sentence in corpus:
  #  print(chartToEnd)
 
    prefixProb = log(sum([exp(x) if x is not None else 0 for x in chartFromStart[0]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
-   print("Prefix surprisal", prefixProb/(len(linearized)+1))
+   print("Prefix surprisal", prefixProb/(len(linearized)))
 #   quit()
    suffixProb = log(sum([exp(x) if x is not None else 0 for x in chartToEnd[-1]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
-   print("Suffix surprisal", suffixProb/(len(linearized)+1))
+   print("Suffix surprisal", suffixProb/(len(linearized)))
    print(len(linearized))
+   print(linearized)
+   quit()
