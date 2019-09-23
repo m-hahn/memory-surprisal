@@ -581,16 +581,18 @@ def plus(x,y):
       return None
    return x+y
 
-MAX_BOUNDARY = 20
+MAX_BOUNDARY = 5
 surprisalTableSums = [0 for _ in range(MAX_BOUNDARY)]
 surprisalTableCounts = [0 for _ in range(MAX_BOUNDARY)]
 
 
-LEFT_CONTEXT = 10
+LEFT_CONTEXT = 3
 
 sentCount = 0
 for sentence in corpus:
    sentCount += 1
+ #  if sentCount > 1:
+#     quit()
    ordered = orderSentence(sentence,  sentCount % 50 == 0)
 
    linearized0 = []
@@ -688,5 +690,6 @@ for sentence in corpus:
          valuesPerBoundary.append(prefixProb)
          print(BOUNDARY, prefixProb, linearized)
          assert prefixProb  < valuesPerBoundary[-2], "bug or numerical problem?"
-      print(sentCount, [surprisalTableSums[0]/surprisalTableCounts[-1]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[-1] for i in range(MAX_BOUNDARY-1)]) 
+      surprisals = [surprisalTableSums[i]/(surprisalTableCounts[i]+1e-9) for i in range(MAX_BOUNDARY)]
+      print(sentCount, [surprisals[i+1] - surprisals[i] for i in range(MAX_BOUNDARY-1)]) # [surprisalTableSums[0]/surprisalTableCounts[-1]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[-1] for i in range(MAX_BOUNDARY-1)]) 
   
