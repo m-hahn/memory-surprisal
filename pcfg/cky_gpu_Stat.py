@@ -414,6 +414,18 @@ for sentence in corpus:
    updateLeftCorner("root", leftCorner)
    addCounts(ordered)
 
+
+# Nontermainl ROOT
+binary_rules["_SENTENCES_"] = {("ROOT", "_SENTENCES_") : 100000}
+terminals["_EOS_"] = {"_eos_" : 1000000}
+
+binary_rules["ROOT"] = {(left, "_EOS_") : count for left, count in roots.items() if left != "__TOTAL__"}
+
+
+
+
+
+
    # Only first sentence
  #  if sentCount > 100:
   #   break
@@ -659,17 +671,17 @@ for sentence in corpus:
                   resultLog = (torch.log(result) + right_max).view(-1, BATCHSIZE)
                   chartFromStart[start] = logSumExp(chartFromStart[start], resultLog)
   
-         for root in itos_setOfNonterminals:
-             count = roots.get(root, 0)
-             iroot = stoi_setOfNonterminals[root]
-             if chartFromStart[0][iroot] is not None:
-                if count == 0:
-                   chartFromStart[0][iroot] = torch.cuda.FloatTensor([float("-Inf") for _ in range(BATCHSIZE)])
-                else:
-                  chartFromStart[0][iroot] += log(count) - log(roots["__TOTAL__"])
-  
+#         for root in itos_setOfNonterminals:
+#             count = roots.get(root, 0)
+#             iroot = stoi_setOfNonterminals[root]
+#             if chartFromStart[0][iroot] is not None:
+#                if count == 0:
+#                   chartFromStart[0][iroot] = torch.cuda.FloatTensor([float("-Inf") for _ in range(BATCHSIZE)])
+#                else:
+#                  chartFromStart[0][iroot] += log(count) - log(roots["__TOTAL__"])
+#  
 
-         prefixProb = log(sum([exp(float(x[0])) if x[0] is not None else 0 for x in chartFromStart[0]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
+         prefixProb = float(chartFromStart[0][stoi_setOfNonterminals["_SENTENCES_"]]) #log(sum([exp(float(x[0])) if x[0] is not None else 0 for x in chartFromStart[0]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
 
          surprisalTableSums[BOUNDARY-1] += prefixProb
          surprisalTableCounts[BOUNDARY-1] += 1
