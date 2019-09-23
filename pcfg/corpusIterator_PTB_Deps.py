@@ -22,7 +22,7 @@ def addTrees(sec, trees):
 def getPTB(partition):
    trees = []
    if partition == "train":
-     sections = range(0, 1) # 19
+     sections = range(0, 5) # 19
    elif partition in ["dev", "valid"]: # 19-21
      sections = range(19, 20) #, 22)
    elif partition == "test": # 22-24
@@ -73,7 +73,7 @@ class CorpusIterator_PTB():
         yield self.processSentence(sentence)
    def processSentence(self, sentenceAndTree):
         tree, sentence = sentenceAndTree
-        sentence = map(lambda x:x.split("\t"), sentence.split("\n"))
+        sentence = list(map(lambda x:x.split("\t"), sentence.split("\n")))
         result = []
         for i in range(len(sentence)):
 #           print sentence[i]
