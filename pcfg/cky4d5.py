@@ -679,7 +679,7 @@ for sentence in corpus:
 
                   result = torch.tensordot(torch.exp(left), torch.exp(right-right_max), dims=([1], [0]))
                   resultLog = (torch.log(result) + right_max).view(-1, BATCHSIZE)
-                  chartFromStart[start] = resultLog
+                  chartFromStart[start] = logSumExp(chartFromStart[start], resultLog)
   
   
          for root in itos_setOfNonterminals:

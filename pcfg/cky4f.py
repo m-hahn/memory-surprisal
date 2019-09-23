@@ -387,11 +387,11 @@ print("invertedRight")
 print(invertedRight)
 
 print(invertedLeft)
-print(invertedLeft.size())
+#print(invertedLeft.size())
 #for i in range(len(itos_setOfNonterminals)):
 #   invertedLeft[i][i] -= 1
 print(invertedLeft)
-print(invertedLeft.sum())
+#print(invertedLeft.sum())
 #quit()
 
 

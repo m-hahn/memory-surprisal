@@ -1,7 +1,13 @@
 #Like cky3.py, but computes prefix AND suffix probabilities
 # TODO use tests to verify this one
-# Based on cky4c.py
-# Tests using toy example
+# Removed backwards probabilities
+# Optimization for cky4d2.py
+# Currently the most advanced version of the code
+# Computes infix probabilities assuming there are a fixed number of unknown words to the left
+# Optimized (fastest CPU version)
+# Using cky4e.py toy version
+
+# Uses Python2
 
 ##############
 # Other (approximate) option for infix probs: add a few `empty words' around the string, without any penalties for per-word production
@@ -373,24 +379,35 @@ for parent in binary_rules:
       matrixRight[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[right]] -= ruleProb
       assert ruleProb > 0, ruleCount
 
+binary_rules_numeric = {}
+for parent in binary_rules:
+   parenti = stoi_setOfNonterminals[parent]
+   binary_rules_numeric[parenti] = {}
+#   print(len(binary_rules[parent]))
+   for (left, right), ruleCount in binary_rules[parent].iteritems():
+       lefti = stoi_setOfNonterminals[left]
+       righti = stoi_setOfNonterminals[right]
+       binary_rules_numeric[parenti][(lefti, righti)] = ruleCount
+#print(len(binary_rules_numeric))
+#quit()
+
+nonAndPreterminals_numeric = {}
+for nonterminal in nonAndPreterminals:
+   nonAndPreterminals_numeric[stoi_setOfNonterminals[nonterminal]] = nonAndPreterminals[nonterminal]
+
+
 for i in range(len(itos_setOfNonterminals)):
     matrixLeft[i][i] += 1
     matrixRight[i][i] += 1
-print("matrixRight")
-print(matrixRight)
 print(matrixLeft)
 print(matrixLeft.sum(dim=1))
 invertedLeft = torch.inverse(matrixLeft).tolist()
 invertedRight = torch.inverse(matrixRight).tolist()
-print(itos_setOfNonterminals)
-print("invertedRight")
-print(invertedRight)
-
-print(invertedLeft)
+#print(invertedLeft)
 #print(invertedLeft.size())
 #for i in range(len(itos_setOfNonterminals)):
 #   invertedLeft[i][i] -= 1
-print(invertedLeft)
+#print(invertedLeft)
 #print(invertedLeft.sum())
 #quit()
 
@@ -412,6 +429,8 @@ surprisalTableCounts = [0 for _ in range(MAX_BOUNDARY)]
 
 sentCount = 0
 
+LEFT_CONTEXT = 0
+
 if True:
    linearized0 = "yxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
    for END in [MAX_BOUNDARY]:
@@ -425,6 +444,10 @@ if True:
             if start+length-1 >= len(linearized):
                continue
             if length == 1: # TODO for words at the boundary, immediately add prefix and suffix counts
+               if start < LEFT_CONTEXT:
+                 for preterminal in terminals:
+                    chart[start][start][stoi_setOfNonterminals[preterminal]] = 0
+               else:
                  if wordCounts.get(linearized[start],0) < OOV_THRESHOLD: # OOV
                     for preterminal in terminals:
                         chart[start][start][stoi_setOfNonterminals[preterminal]] = log(OOV_COUNT) - log(nonAndPreterminals[preterminal]+OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
@@ -439,24 +462,24 @@ if True:
                  assert start == start+length-1
             else:
                 for start2 in range(start+1, len(linearized)):
-                  for nonterminal, rules in binary_rules.iteritems():
+                  for nonterminal, rules in binary_rules_numeric.iteritems():
                     for rule in rules.iteritems():
                         assert len(rule[0]) == 2
    
                         (leftCat, rightCat), ruleCount = rule
-                        left = chart[start][start2-1][stoi_setOfNonterminals[leftCat]]
-                        right = chart[start2][start+length-1][stoi_setOfNonterminals[rightCat]]
+                        left = chart[start][start2-1][leftCat]
+                        right = chart[start2][start+length-1][rightCat]
                         if left is None or right is None:
                            continue
                         assert left <= 0, left
                         assert right <= 0, right
    
-                        ruleProb = log(ruleCount) - log(nonAndPreterminals[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
+                        ruleProb = log(ruleCount) - log(nonAndPreterminals_numeric[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
    
-                        assert ruleProb <= 0, (ruleCount, nonAndPreterminals[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
+                        assert ruleProb <= 0, (ruleCount, nonAndPreterminals_numeric[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
                         new = left + right + ruleProb
-                        entry = chart[start][start+length-1][stoi_setOfNonterminals[nonterminal]]
-                        chart[start][start+length-1][stoi_setOfNonterminals[nonterminal]] = logSumExp(new, entry)
+                        entry = chart[start][start+length-1][nonterminal]
+                        chart[start][start+length-1][nonterminal] = logSumExp(new, entry)
                         
                         assert new <= 0
                         assert entry <= 0
@@ -466,7 +489,7 @@ if True:
       print("CHART00", chart[0][0])
      
       valuesPerBoundary = [0]
-      for BOUNDARY in range(1, len(linearized)+1):
+      for BOUNDARY in range(LEFT_CONTEXT+1, len(linearized)+1):
          chartFromStart = [[None for _ in itos_setOfNonterminals] for _ in range(BOUNDARY)]
       
          for start in range(BOUNDARY): # the index of the first word taking part in the thing
@@ -482,30 +505,30 @@ if True:
                           if chart[start][start][preterminalID] is None:
                              continue
                           chartFromStart[start][nonterminalID] = logSumExp(chartFromStart[start][nonterminalID], log(invertedLeft[nonterminalID][preterminalID]) + chart[start][start][preterminalID])
-                          assert chartFromStart[start][nonterminalID] <= 1e-7, (chartFromStart[start][nonterminalID], log(invertedLeft[nonterminalID][preterminalID]), chart[start][start][preterminalID])
+      
          print("Lexical chartFromStart", chartFromStart[BOUNDARY-1])
          for start in range(BOUNDARY)[::-1]: # now construct potential constituents that start at `start', but end outside of the portion
                # construct constituents that arise by combining two (one that ends within the string, and one that doesn't)
                for start2 in range(start+1, BOUNDARY):
-                  for nonterminal, rules in binary_rules.iteritems():
+                  for nonterminal, rules in binary_rules_numeric.iteritems():
                     newAccumulated = None
                     for rule in rules.iteritems():
                         assert len(rule[0]) == 2
       
                         (leftCat, rightCat), ruleCount = rule
-                        left = chart[start][start2-1][stoi_setOfNonterminals[leftCat]]
-                        right = chartFromStart[start2][stoi_setOfNonterminals[rightCat]]
+                        left = chart[start][start2-1][leftCat]
+                        right = chartFromStart[start2][rightCat]
                         if left is None or right is None:
                            continue
                         assert left <= 1e-7, left
                         assert right <= 1e-7, right
       
-                        ruleProb = log(ruleCount) - log(nonAndPreterminals[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
+                        ruleProb = log(ruleCount) - log(nonAndPreterminals_numeric[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
       
-                        assert ruleProb <= 0, (ruleCount, nonAndPreterminals[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
+                        assert ruleProb <= 0, (ruleCount, nonAndPreterminals_numeric[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
                         new = left + right + ruleProb
                         newAccumulated = logSumExp(newAccumulated, new)
-                    nonterminalID = stoi_setOfNonterminals[nonterminal]
+                    nonterminalID = nonterminal
                     if newAccumulated is not None:
                       for nonterminalUpper in xrange(len(itos_setOfNonterminals)):
                         if invertedLeft[nonterminalUpper][nonterminalID] > 0:
@@ -544,7 +567,7 @@ if True:
          surprisalTableSums[BOUNDARY-1] += prefixProb
          surprisalTableCounts[BOUNDARY-1] += 1
          valuesPerBoundary.append(prefixProb)
-         print(BOUNDARY, prefixProb, linearized, valuesPerBoundary)
+         print(BOUNDARY, prefixProb, linearized)
          assert prefixProb  <= valuesPerBoundary[-2]+1e-7, "bug or numerical problem?"
-      print(sentCount, [surprisalTableSums[0]/surprisalTableCounts[0]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[i] for i in range(END-1)]) 
+      print(sentCount, [surprisalTableSums[0]/surprisalTableCounts[-1]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[-1] for i in range(END-1)]) 
   

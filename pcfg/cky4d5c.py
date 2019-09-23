@@ -1,7 +1,12 @@
 #Like cky3.py, but computes prefix AND suffix probabilities
 # TODO use tests to verify this one
-# Based on cky4c.py
-# Tests using toy example
+# Attempt at vectorization of cky4c5.py
+# Further development of cky4d3.py
+# Uses GPU (runs fast)
+# TODO check whether it matches the CPU version, debug if not. Also add minibatching to make it even faster.
+# Tests using toy example from cky4f.py
+
+# Uses Python3
 
 ##############
 # Other (approximate) option for infix probs: add a few `empty words' around the string, without any penalties for per-word production
@@ -128,7 +133,7 @@ def orderSentenceRec(tree, sentence, printThings, linearized):
   
         logits = [(x, distanceWeights[stoi_deps[key]], key) for x, key in zip(children, keys)]
         logits = sorted(logits, key=lambda x:-x[1])
-        childrenLinearized = map(lambda x:x[0], logits)
+        childrenLinearized = list(map(lambda x:x[0], logits))
       else:
         childrenLinearized = children
 #      print(logits)
@@ -217,18 +222,17 @@ vocab, depsVocab = initializeOrderTable()
 
 posFine = list(posFine)
 itos_pos_fine = posFine
-stoi_pos_fine = dict(zip(posFine, range(len(posFine))))
+stoi_pos_fine = dict(list(zip(posFine, range(len(posFine)))))
 
 
 
 itos_pure_deps = sorted(list(depsVocab)) 
-stoi_pure_deps = dict(zip(itos_pure_deps, range(len(itos_pure_deps))))
+stoi_pure_deps = dict(list(zip(itos_pure_deps, range(len(itos_pure_deps)))))
    
 
 itos_deps = itos_pure_deps
 stoi_deps = stoi_pure_deps
 
-#print itos_deps
 
 #dhWeights = [0.0] * len(itos_deps)
 distanceWeights = [0.0] * len(itos_deps)
@@ -255,13 +259,13 @@ elif model == "RANDOM_BY_TYPE":
      distanceWeights[key] = distByType[itos_deps[key]]
   originalCounter = "NA"
 
-lemmas = list(vocab_lemmas.iteritems())
+lemmas = list(vocab_lemmas.items())
 lemmas = sorted(lemmas, key = lambda x:x[1], reverse=True)
 
-words = list(vocab.iteritems())
+words = list(vocab.items())
 words = sorted(words, key = lambda x:x[1], reverse=True)
-itos = map(lambda x:x[0], words)
-stoi = dict(zip(itos, range(len(itos))))
+itos = list(map(lambda x:x[0], words))
+stoi = dict(list(zip(itos, range(len(itos)))))
 
 if len(itos) > 6:
    assert stoi[itos[5]] == 5
@@ -270,10 +274,6 @@ if len(itos) > 6:
 vocab_size = 10000
 vocab_size = min(len(itos),vocab_size)
 
-print posFine
-print morphKeyValuePairs
-print itos[:vocab_size]
-print "VOCABULARY "+str(len(posFine)+vocab_size+3)
 outVocabSize = len(posFine)+vocab_size+3
 
 
@@ -314,7 +314,7 @@ corpus = corpusBase.iterator()
 
 binary_rules = {}
 binary_rules["S"] = {("Y", "X") : 2} #, ("X", "X") : 1}
-binary_rules["X"] = {("X", "X") : 1}
+binary_rules["X"] = {("Y", "X") : 1}
 
 
 terminals = {}
@@ -329,13 +329,13 @@ roots["__TOTAL__"] = 2
 nonAndPreterminals = {}
 
 for preterminal in terminals:
-    nonAndPreterminals[preterminal] = sum([y for x, y in terminals[preterminal].iteritems()])
+    nonAndPreterminals[preterminal] = sum([y for x, y in terminals[preterminal].items()])
     terminals[preterminal]["__TOTAL__"] = nonAndPreterminals[preterminal]
 
 for nonterminal in binary_rules:
     if nonterminal not in nonAndPreterminals:
        nonAndPreterminals[nonterminal]=0
-    nonAndPreterminals[nonterminal] += sum([y for x, y in binary_rules[nonterminal].iteritems()])
+    nonAndPreterminals[nonterminal] += sum([y for x, y in binary_rules[nonterminal].items()])
 
 
 
@@ -343,22 +343,24 @@ for nonterminal in binary_rules:
 
 
 def logSumExp(x,y):
-   if x is None:
-     return y
-   if y is None:
-     return x
-   constant = max(x,y)
-   return constant + log(exp(x-constant) + exp(y-constant))
+   constant = torch.max(x,y)
+   resultInner = torch.exp(x-constant) + torch.exp(y-constant)
+   result = constant + torch.log(resultInner)
+   nothingX = (x == float("-Inf"))
+   nothingY = (y == float("-Inf"))
+   result[nothingX] = y[nothingX]
+   result[nothingY] = x[nothingY]
+   return result
 
 
 itos_setOfNonterminals = sorted(list(set(list(binary_rules) + list(terminals))))
-stoi_setOfNonterminals = dict(zip(itos_setOfNonterminals, range(len(itos_setOfNonterminals))))
+stoi_setOfNonterminals = dict(list(zip(itos_setOfNonterminals, range(len(itos_setOfNonterminals)))))
 print(itos_setOfNonterminals)
 
 
 
-matrixLeft = torch.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the LEFT edge
-matrixRight = torch.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the RIGHT edge
+matrixLeft = torch.cuda.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the LEFT edge
+matrixRight = torch.cuda.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the RIGHT edge
 
 # One thing to keep in mind is that a bit of probability mass is wasted, namely that of training words ending up OOV
 OOV_THRESHOLD = 0
@@ -367,30 +369,51 @@ OTHER_WORDS_SMOOTHING = 0.0
 
 
 for parent in binary_rules:
-   for (left, right), ruleCount in binary_rules[parent].iteritems():
+   for (left, right), ruleCount in binary_rules[parent].items():
       ruleProb = exp(log(ruleCount) - log(nonAndPreterminals[parent]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
       matrixLeft[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[left]] -= ruleProb
       matrixRight[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[right]] -= ruleProb
       assert ruleProb > 0, ruleCount
 
+
+
+nonAndPreterminals_numeric = {}
+for nonterminal in nonAndPreterminals:
+   nonAndPreterminals_numeric[stoi_setOfNonterminals[nonterminal]] = nonAndPreterminals[nonterminal]
+
+
+
+binary_rules_matrix = torch.cuda.FloatTensor([[[float("-inf") for _ in range(len(itos_setOfNonterminals))]  for _ in range(len(itos_setOfNonterminals))] for _ in range(len(itos_setOfNonterminals))])
+
+binary_rules_numeric = {}
+for parent in binary_rules:
+   parenti = stoi_setOfNonterminals[parent]
+   binary_rules_numeric[parenti] = {}
+#   print(len(binary_rules[parent]))
+   for (left, right), ruleCount in binary_rules[parent].items():
+       lefti = stoi_setOfNonterminals[left]
+       righti = stoi_setOfNonterminals[right]
+       binary_rules_numeric[parenti][(lefti, righti)] = ruleCount
+       binary_rules_matrix[parenti][lefti][righti] = log(ruleCount) - log(nonAndPreterminals_numeric[parenti]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
+
+
+#print(len(binary_rules_numeric))
+#quit()
+
 for i in range(len(itos_setOfNonterminals)):
     matrixLeft[i][i] += 1
     matrixRight[i][i] += 1
-print("matrixRight")
-print(matrixRight)
 print(matrixLeft)
 print(matrixLeft.sum(dim=1))
-invertedLeft = torch.inverse(matrixLeft).tolist()
-invertedRight = torch.inverse(matrixRight).tolist()
-print(itos_setOfNonterminals)
-print("invertedRight")
-print(invertedRight)
+invertedLeft = torch.inverse(matrixLeft)
+log_invertedLeft = torch.log(invertedLeft)
 
-print(invertedLeft)
+invertedRight = torch.inverse(matrixRight).tolist()
+#print(invertedLeft)
 #print(invertedLeft.size())
 #for i in range(len(itos_setOfNonterminals)):
 #   invertedLeft[i][i] -= 1
-print(invertedLeft)
+#print(invertedLeft)
 #print(invertedLeft.sum())
 #quit()
 
@@ -406,122 +429,115 @@ def plus(x,y):
       return None
    return x+y
 
-MAX_BOUNDARY = 7
+MAX_BOUNDARY = 20
 surprisalTableSums = [0 for _ in range(MAX_BOUNDARY)]
 surprisalTableCounts = [0 for _ in range(MAX_BOUNDARY)]
 
+
+LEFT_CONTEXT = 0
+
 sentCount = 0
 
+BATCHSIZE=1
+
 if True:
-   linearized0 = "yxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   linearized0 = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxy"
    for END in [MAX_BOUNDARY]:
       linearized = linearized0[0:END]
       if len(linearized) < END:
          continue
-      chart = [[[None for _ in itos_setOfNonterminals] for _ in linearized] for _ in linearized]
+      chart = [[torch.cuda.FloatTensor([[float("-Inf") for _ in range(BATCHSIZE)] for _ in itos_setOfNonterminals]) for _ in linearized] for _ in linearized]
      
       for length in range(1, len(linearized)+1): # the NUMBER of words spanned. start+length is the first word OUTSIDE the constituent
          for start in range(len(linearized)): # the index of the first word taking part in the thing
             if start+length-1 >= len(linearized):
                continue
             if length == 1: # TODO for words at the boundary, immediately add prefix and suffix counts
+               if start < LEFT_CONTEXT:
+                 for preterminal in terminals:
+                    chart[start][start][stoi_setOfNonterminals[preterminal]].fill_(0)
+               else:
                  if wordCounts.get(linearized[start],0) < OOV_THRESHOLD: # OOV
                     for preterminal in terminals:
-                        chart[start][start][stoi_setOfNonterminals[preterminal]] = log(OOV_COUNT) - log(nonAndPreterminals[preterminal]+OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
-                        assert chart[start][start][stoi_setOfNonterminals[preterminal]] <= 0
+                        chart[start][start][stoi_setOfNonterminals[preterminal]].fill_(log(OOV_COUNT) - log(nonAndPreterminals[preterminal]+OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
                  else:
                     for preterminal in terminals:
                         count = terminals[preterminal].get(linearized[start], 0) + OTHER_WORDS_SMOOTHING
                         assert count > 0 or OTHER_WORDS_SMOOTHING == 0
                         if count > 0:
-                           chart[start][start][stoi_setOfNonterminals[preterminal]] = log(count) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
-                           assert chart[start][start][stoi_setOfNonterminals[preterminal]] <= 0
+                           chart[start][start][stoi_setOfNonterminals[preterminal]].fill_(log(count) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
                  assert start == start+length-1
             else:
                 for start2 in range(start+1, len(linearized)):
-                  for nonterminal, rules in binary_rules.iteritems():
-                    for rule in rules.iteritems():
-                        assert len(rule[0]) == 2
-   
-                        (leftCat, rightCat), ruleCount = rule
-                        left = chart[start][start2-1][stoi_setOfNonterminals[leftCat]]
-                        right = chart[start2][start+length-1][stoi_setOfNonterminals[rightCat]]
-                        if left is None or right is None:
-                           continue
-                        assert left <= 0, left
-                        assert right <= 0, right
-   
-                        ruleProb = log(ruleCount) - log(nonAndPreterminals[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
-   
-                        assert ruleProb <= 0, (ruleCount, nonAndPreterminals[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
-                        new = left + right + ruleProb
-                        entry = chart[start][start+length-1][stoi_setOfNonterminals[nonterminal]]
-                        chart[start][start+length-1][stoi_setOfNonterminals[nonterminal]] = logSumExp(new, entry)
-                        
-                        assert new <= 0
-                        assert entry <= 0
+                  left = chart[start][start2-1].view(-1)
+                  right = chart[start2][start+length-1].view(-1)
+                  maxLeft = torch.max(left)
+                  maxRight = torch.max(right)
+                  if float(maxLeft) == float("-inf") or float(maxRight) == float("-inf"): # everything will be 0
+                     continue
+                  resultLeft = torch.tensordot(torch.exp(left-maxLeft), torch.exp(binary_rules_matrix), dims=([0], [1]))
+                  resultTotal = torch.tensordot(resultLeft, torch.exp(right-maxRight), dims=([1], [0]))
+                  resultTotalLog = torch.log(resultTotal)+maxLeft+maxRight
+                  resultTotalLog[resultTotal <= 0].fill_(float("-inf"))
+#                  print("..................")
+ #                 print(left, right, maxLeft, maxRight, float(maxLeft) == float("-inf"), float(maxRight) == float("-inf"))
+  #                print(resultTotal)
+   #               print(resultTotalLog)
+    #              assert float(resultTotalLog.max()) != float("nan")
+                  entry = chart[start][start+length-1]
+                  chart[start][start+length-1] = logSumExp(resultTotalLog.view(-1, BATCHSIZE), entry)
+
+                       
+#                        assert new <= 0
+ #                       assert entry <= 0
       #############################
       # Now consider different endpoints
       print("CHART", chart)
       print("CHART00", chart[0][0])
      
       valuesPerBoundary = [0]
-      for BOUNDARY in range(1, len(linearized)+1):
-         chartFromStart = [[None for _ in itos_setOfNonterminals] for _ in range(BOUNDARY)]
-      
-         for start in range(BOUNDARY): # the index of the first word taking part in the thing
-            if start+1-1 >= BOUNDARY:
-               continue
-            if 1 == 1: # TODO for words at the boundary, immediately add prefix and suffix counts
-                 assert start == start+1-1
-                 if start == BOUNDARY-1:
-                   for preterminal in terminals:
-                      preterminalID = stoi_setOfNonterminals[preterminal]
-                      for nonterminalID in range(len(itos_setOfNonterminals)):
-                        if invertedLeft[nonterminalID][preterminalID] > 0:
-                          if chart[start][start][preterminalID] is None:
-                             continue
-                          chartFromStart[start][nonterminalID] = logSumExp(chartFromStart[start][nonterminalID], log(invertedLeft[nonterminalID][preterminalID]) + chart[start][start][preterminalID])
-                          assert chartFromStart[start][nonterminalID] <= 1e-7, (chartFromStart[start][nonterminalID], log(invertedLeft[nonterminalID][preterminalID]), chart[start][start][preterminalID])
+      for BOUNDARY in range(LEFT_CONTEXT+1, len(linearized)+1):
+         chartFromStart = [torch.cuda.FloatTensor([[float("-Inf") for _ in range(BATCHSIZE)] for _ in itos_setOfNonterminals]) for _ in range(BOUNDARY)]
+
+         if True:      
+             left = log_invertedLeft
+             right = chart[BOUNDARY-1][BOUNDARY-1].view(-1)
+             right_max = torch.max(right)
+             if float(right_max) != float("-inf"):
+                 result = torch.tensordot(torch.exp(left), torch.exp(right-right_max), dims=([1], [0]))
+                 resultLog = (torch.log(result) + right_max).view(-1, BATCHSIZE)
+                 chartFromStart[BOUNDARY-1] = resultLog
+                 assert "nan" not in str(chartFromStart[BOUNDARY-1])
          print("Lexical chartFromStart", chartFromStart[BOUNDARY-1])
          for start in range(BOUNDARY)[::-1]: # now construct potential constituents that start at `start', but end outside of the portion
-               # construct constituents that arise by combining two (one that ends within the string, and one that doesn't)
                for start2 in range(start+1, BOUNDARY):
-                  for nonterminal, rules in binary_rules.iteritems():
-                    newAccumulated = None
-                    for rule in rules.iteritems():
-                        assert len(rule[0]) == 2
-      
-                        (leftCat, rightCat), ruleCount = rule
-                        left = chart[start][start2-1][stoi_setOfNonterminals[leftCat]]
-                        right = chartFromStart[start2][stoi_setOfNonterminals[rightCat]]
-                        if left is None or right is None:
-                           continue
-                        assert left <= 1e-7, left
-                        assert right <= 1e-7, right
-      
-                        ruleProb = log(ruleCount) - log(nonAndPreterminals[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
-      
-                        assert ruleProb <= 0, (ruleCount, nonAndPreterminals[nonterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
-                        new = left + right + ruleProb
-                        newAccumulated = logSumExp(newAccumulated, new)
-                    nonterminalID = stoi_setOfNonterminals[nonterminal]
-                    if newAccumulated is not None:
-                      for nonterminalUpper in xrange(len(itos_setOfNonterminals)):
-                        if invertedLeft[nonterminalUpper][nonterminalID] > 0:
-                          logFactorForEnvironments = log(invertedLeft[nonterminalUpper][nonterminalID])
-                          entry = chartFromStart[start][nonterminalUpper]
-                          chartFromStart[start][nonterminalUpper] = logSumExp(plus(newAccumulated, logFactorForEnvironments), entry)
-                          assert chartFromStart[start][nonterminalUpper] <= 1e-7, chartFromStart[start][nonterminalUpper]
 
+                  left = chart[start][start2-1].view(-1)
+                  right = chartFromStart[start2].view(-1)
+                  maxLeft = torch.max(left)
+                  maxRight = torch.max(right)
+                  if float(maxLeft) == float("-inf") or float(maxRight) == float("-inf"): # everything will be 0
+                     continue
+                  resultLeft = torch.tensordot(torch.exp(left-maxLeft), torch.exp(binary_rules_matrix), dims=([0], [1]))
+                  resultTotal = torch.tensordot(resultLeft, torch.exp(right-maxRight), dims=([1], [0]))
+                  resultTotalLog = torch.log(resultTotal)+maxLeft+maxRight
+                  resultTotalLog[resultTotal <= 0].fill_(float("-inf"))
+
+                  assert "nan" not in str(resultTotalLog)
+
+
+                  left = log_invertedLeft
+                  right = resultTotalLog
+                  right_max = torch.max(right)
+
+                  if float(right_max) == float("-inf"): # everything will be 0
+                     continue
+
+                  result = torch.tensordot(torch.exp(left), torch.exp(right-right_max), dims=([1], [0]))
+                  resultLog = (torch.log(result) + right_max).view(-1, BATCHSIZE)
+                  chartFromStart[start] = logSumExp(chartFromStart[start], resultLog)
+                  assert "nan" not in str(chartFromStart[start])
  
-#                        assert new <= 0
- #                       assert entry <= 0
-                        # TODO now add additional counts above (the last rule from Goodman Fig 2.20)
-      
-                        # TODO now add additional counts above (the last rule from Goodman Fig 2.20)
-      
-  
          print("Full Chart from start", chartFromStart) 
         
          print("Chart from start", chartFromStart[0]) 
@@ -531,20 +547,19 @@ if True:
              iroot = stoi_setOfNonterminals[root]
              if chartFromStart[0][iroot] is not None:
                 if count == 0:
-                   chartFromStart[0][iroot] = None
+                   chartFromStart[0][iroot] = torch.cuda.FloatTensor([float("-Inf") for _ in range(BATCHSIZE)])
                 else:
                   chartFromStart[0][iroot] += log(count) - log(roots["__TOTAL__"])
-                  assert chartFromStart[0][iroot] <= 1e-7
   
-         prefixProb = log(sum([exp(x) if x is not None else 0 for x in chartFromStart[0]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
+
+         prefixProb = log(sum([exp(float(x[0])) if x[0] is not None else 0 for x in chartFromStart[0]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
 #         print("Prefix surprisal", prefixProb/(len(linearized)))
    #      quit()
- #        print("Suffix surprisal", suffixProb/(len(linearized)))
 
          surprisalTableSums[BOUNDARY-1] += prefixProb
          surprisalTableCounts[BOUNDARY-1] += 1
          valuesPerBoundary.append(prefixProb)
          print(BOUNDARY, prefixProb, linearized, valuesPerBoundary)
          assert prefixProb  <= valuesPerBoundary[-2]+1e-7, "bug or numerical problem?"
-      print(sentCount, [surprisalTableSums[0]/surprisalTableCounts[0]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[i] for i in range(END-1)]) 
+      print(sentCount, [surprisalTableSums[0]/surprisalTableCounts[-1]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[-1] for i in range(END-1)]) 
   
