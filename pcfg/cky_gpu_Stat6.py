@@ -5,7 +5,7 @@
 # - try minibatching
 
 # Uses Python3
-
+assert False, "slower than the tensordot version (?)"
 
 import random
 import sys
@@ -416,7 +416,7 @@ binary_rules["_SENTENCES_"] = {("ROOT", "_SENTENCES_") : 100000}
 terminals["_EOS_"] = {"_eos_" : 1000000}
 
 binary_rules["ROOT"] = {(left, "_EOS_") : count for left, count in roots.items() if left != "__TOTAL__"}
-wordCounts["_eos_"] = 1000000
+
 
 
 
@@ -598,7 +598,7 @@ def runOnCorpus():
      linearized0 = []
      linearizeTree2String(ordered, linearized0)
      chunk += linearized0 + ["_eos_"]
-     while len(chunk) > MAX_BOUNDARY:
+     if len(chunk) > MAX_BOUNDARY:
         linearized = chunk[:MAX_BOUNDARY]
         chunk = chunk[1:]
         computeSurprisals(linearized)
@@ -621,7 +621,6 @@ def computeSurprisals(linearized):
                     chart[start][start][stoi_setOfNonterminals[preterminal]].fill_(0)
                else:
                  if wordCounts.get(linearized[start],0) < OOV_THRESHOLD: # OOV
-                    print("OOV", linearized[start])
                     for preterminal in terminals:
                         chart[start][start][stoi_setOfNonterminals[preterminal]].fill_(log(OOV_COUNT) - log(nonAndPreterminals[preterminal]+OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
                  else:
@@ -638,8 +637,18 @@ def computeSurprisals(linearized):
                   if float(maxLeft) == float("-inf") or float(maxRight) == float("-inf"): # everything will be 0
                      continue
                   
-                  resultLeft = torch.tensordot(torch.exp(left-maxLeft), binary_rules_matrix, dims=([0], [1]))
-                  resultTotal = torch.tensordot(resultLeft, torch.exp(right-maxRight), dims=([1], [0]))
+                  # VERSION WITH TENSORDOT
+#                  resultLeft = torch.tensordot(torch.exp(left-maxLeft), binary_rules_matrix, dims=([0], [1]))
+ #                 resultTotal = torch.tensordot(resultLeft, torch.exp(right-maxRight), dims=([1], [0]))
+
+                  # VERSION WITH BILINEAR
+   #               print(left.size(), right.size())
+                  resultTotal = torch.nn.functional.bilinear(torch.exp(left-maxLeft), torch.exp(right-maxRight), binary_rules_matrix)
+                  #print(resultTotal)
+                  #print(resultTotal2)
+                  #assert (resultTotal-resultTotal2).abs().max() < 1e-5, (resultTotal-resultTotal2).abs().max()
+#                  quit()
+
                   resultTotalLog = torch.log(resultTotal)+(maxLeft+maxRight)
                   resultTotalLog[resultTotal <= 0].fill_(float("-inf"))
                   entry = chart[start][start+length-1]

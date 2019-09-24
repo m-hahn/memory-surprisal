@@ -1,11 +1,11 @@
 # Based on cky4d5.py
 # Fixing NA issue
 # Things to do:
-# - try sparse tensors (note full 1-19 gives 402 nonterminals)
+# - try sparse tensors (note full 1-19 gives 402 nonterminals) -- currently doesn't work, because sparse tensors don't support tensordot
 # - try minibatching
 
 # Uses Python3
-
+assert False, "sparse version currently doesn't work"
 
 import random
 import sys
@@ -416,7 +416,7 @@ binary_rules["_SENTENCES_"] = {("ROOT", "_SENTENCES_") : 100000}
 terminals["_EOS_"] = {"_eos_" : 1000000}
 
 binary_rules["ROOT"] = {(left, "_EOS_") : count for left, count in roots.items() if left != "__TOTAL__"}
-wordCounts["_eos_"] = 1000000
+
 
 
 
@@ -544,7 +544,7 @@ for nonterminal in nonAndPreterminals:
 
 
 
-binary_rules_matrix = torch.cuda.FloatTensor([[[0 for _ in range(len(itos_setOfNonterminals))]  for _ in range(len(itos_setOfNonterminals))] for _ in range(len(itos_setOfNonterminals))])
+binary_rules_matrix = torch.cuda.sparse.FloatTensor([[[0 for _ in range(len(itos_setOfNonterminals))]  for _ in range(len(itos_setOfNonterminals))] for _ in range(len(itos_setOfNonterminals))])
 
 binary_rules_numeric = {}
 for parent in binary_rules:
@@ -556,7 +556,9 @@ for parent in binary_rules:
        righti = stoi_setOfNonterminals[right]
        binary_rules_numeric[parenti][(lefti, righti)] = ruleCount
        binary_rules_matrix[parenti][lefti][righti] = exp(log(ruleCount) - log(nonAndPreterminals_numeric[parenti]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
-
+# Now sparsify the matrix
+binary_rules_matrix = binary_rules_matrix.to_sparse()
+#quit()
 
 #print(len(binary_rules_numeric))
 #quit()
@@ -598,7 +600,7 @@ def runOnCorpus():
      linearized0 = []
      linearizeTree2String(ordered, linearized0)
      chunk += linearized0 + ["_eos_"]
-     while len(chunk) > MAX_BOUNDARY:
+     if len(chunk) > MAX_BOUNDARY:
         linearized = chunk[:MAX_BOUNDARY]
         chunk = chunk[1:]
         computeSurprisals(linearized)
@@ -621,7 +623,6 @@ def computeSurprisals(linearized):
                     chart[start][start][stoi_setOfNonterminals[preterminal]].fill_(0)
                else:
                  if wordCounts.get(linearized[start],0) < OOV_THRESHOLD: # OOV
-                    print("OOV", linearized[start])
                     for preterminal in terminals:
                         chart[start][start][stoi_setOfNonterminals[preterminal]].fill_(log(OOV_COUNT) - log(nonAndPreterminals[preterminal]+OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
                  else:
@@ -637,7 +638,6 @@ def computeSurprisals(linearized):
                   maxRight = torch.max(right)
                   if float(maxLeft) == float("-inf") or float(maxRight) == float("-inf"): # everything will be 0
                      continue
-                  
                   resultLeft = torch.tensordot(torch.exp(left-maxLeft), binary_rules_matrix, dims=([0], [1]))
                   resultTotal = torch.tensordot(resultLeft, torch.exp(right-maxRight), dims=([1], [0]))
                   resultTotalLog = torch.log(resultTotal)+(maxLeft+maxRight)
