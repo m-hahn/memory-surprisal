@@ -627,7 +627,7 @@ def computeSurprisals(linearized):
                  for preterminal in terminals:
                     chart[start][start][:,stoi_setOfNonterminals[preterminal]].fill_(0)
                else:
-                 for batch in range(BATCHSIZE):
+                 for batch in range(BATCHSIZE): # TODO speed this up as a single matrix multiplication
                     if wordCounts.get(linearized[batch][start],0) < OOV_THRESHOLD: # OOV
                #        print("OOV", linearized[batch][start])
                        for preterminal in terminals:
