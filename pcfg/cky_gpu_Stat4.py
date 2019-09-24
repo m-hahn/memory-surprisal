@@ -1,16 +1,10 @@
 # Based on cky4d5.py
-# Weird: It seems the surprisals don't really decay monotonically.
-
-# One way to achieve more-or-less stationarity easily:
-# - S* -> S_ S*
-# - S_ -> SOS Root EOS
-# And just concatenate sentences 
-# While this is not a proper PCFG, the prefix computation works just as well
-# As before, model with some fixed number of left context words (can vary)
+# Fixing NA issue
+# Attempt without log (doesn't work)
+assert False
 
 # Uses Python3
 
-# Transition matrix needn't be in logspace
 
 import random
 import sys
@@ -549,7 +543,7 @@ for nonterminal in nonAndPreterminals:
 
 
 
-binary_rules_matrix = torch.cuda.FloatTensor([[[float("-inf") for _ in range(len(itos_setOfNonterminals))]  for _ in range(len(itos_setOfNonterminals))] for _ in range(len(itos_setOfNonterminals))])
+binary_rules_matrix = torch.cuda.FloatTensor([[[0 for _ in range(len(itos_setOfNonterminals))]  for _ in range(len(itos_setOfNonterminals))] for _ in range(len(itos_setOfNonterminals))])
 
 binary_rules_numeric = {}
 for parent in binary_rules:
@@ -560,7 +554,7 @@ for parent in binary_rules:
        lefti = stoi_setOfNonterminals[left]
        righti = stoi_setOfNonterminals[right]
        binary_rules_numeric[parenti][(lefti, righti)] = ruleCount
-       binary_rules_matrix[parenti][lefti][righti] = log(ruleCount) - log(nonAndPreterminals_numeric[parenti]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
+       binary_rules_matrix[parenti][lefti][righti] = exp(log(ruleCount) - log(nonAndPreterminals_numeric[parenti]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
 
 
 #print(len(binary_rules_numeric))
@@ -572,9 +566,9 @@ for i in range(len(itos_setOfNonterminals)):
 print(matrixLeft)
 print(matrixLeft.sum(dim=1))
 invertedLeft = torch.inverse(matrixLeft)
-log_invertedLeft = torch.log(invertedLeft)
+#log_invertedLeft = torch.log(invertedLeft)
 
-invertedRight = torch.inverse(matrixRight).tolist()
+#invertedRight = torch.inverse(matrixRight).tolist()
 
 
 def plus(x,y):
@@ -614,7 +608,7 @@ def runOnCorpus():
 def computeSurprisals(linearized):
       assert len(linearized) == MAX_BOUNDARY
 
-      chart = [[torch.cuda.FloatTensor([[float("-Inf") for _ in range(BATCHSIZE)] for _ in itos_setOfNonterminals]) for _ in linearized] for _ in linearized]
+      chart = [[torch.cuda.FloatTensor([[0 for _ in range(BATCHSIZE)] for _ in itos_setOfNonterminals]) for _ in linearized] for _ in linearized]
      
       for length in range(1, len(linearized)+1): # the NUMBER of words spanned. start+length is the first word OUTSIDE the constituent
          for start in range(len(linearized)): # the index of the first word taking part in the thing
@@ -627,11 +621,11 @@ def computeSurprisals(linearized):
                else:
                  if wordCounts.get(linearized[start],0) < OOV_THRESHOLD: # OOV
                     for preterminal in terminals:
-                        chart[start][start][stoi_setOfNonterminals[preterminal]].fill_(log(OOV_COUNT) - log(nonAndPreterminals[preterminal]+OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
+                        chart[start][start][stoi_setOfNonterminals[preterminal]].fill_(exp(log(OOV_COUNT) - log(nonAndPreterminals[preterminal]+OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))))
                  else:
                     for preterminal in terminals:
                         count = terminals[preterminal].get(linearized[start], 0) + OTHER_WORDS_SMOOTHING
-                        chart[start][start][stoi_setOfNonterminals[preterminal]].fill_(log(count) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
+                        chart[start][start][stoi_setOfNonterminals[preterminal]].fill_(exp(log(count) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))))
                  assert start == start+length-1
             else:
                 for start2 in range(start+1, len(linearized)):
@@ -639,28 +633,28 @@ def computeSurprisals(linearized):
                   right = chart[start2][start+length-1].view(-1)
                   maxLeft = torch.max(left)
                   maxRight = torch.max(right)
-                  if float(maxLeft) == float("-inf") or float(maxRight) == float("-inf"): # everything will be 0
+                  if float(maxLeft) == 0 or float(maxRight) == 0: # everything will be 0
                      continue
-                  resultLeft = torch.tensordot(torch.exp(left-maxLeft), torch.exp(binary_rules_matrix), dims=([0], [1]))
-                  resultTotal = torch.tensordot(resultLeft, torch.exp(right-maxRight), dims=([1], [0]))
-                  resultTotalLog = torch.log(resultTotal)+maxLeft+maxRight
-                  resultTotalLog[resultTotal <= 0].fill_(float("-inf"))
+                  resultLeft = torch.tensordot(left/maxLeft, binary_rules_matrix, dims=([0], [1]))
+                  resultTotal = torch.tensordot(resultLeft, right/maxRight, dims=([1], [0]))
+                  resultTotalLog = resultTotal*(maxLeft*maxRight)
                   entry = chart[start][start+length-1]
-                  chart[start][start+length-1] = logSumExp(resultTotalLog.view(-1, BATCHSIZE), entry)
-
+                  #assert "nan" not in str(entry.max())
+                  #assert "nan" not in str(resultTotalLog.max())
+                  chart[start][start+length-1] = resultTotalLog.view(-1, BATCHSIZE) + entry
+                  #assert "nan" not in str(chart[start][start+length-1].max())
       #############################
       # Now consider different endpoints
       valuesPerBoundary = [0]
       for BOUNDARY in range(LEFT_CONTEXT+1, len(linearized)+1):
-         chartFromStart = [torch.cuda.FloatTensor([[float("-Inf") for _ in range(BATCHSIZE)] for _ in itos_setOfNonterminals]) for _ in range(BOUNDARY)]
+         chartFromStart = [torch.cuda.FloatTensor([[0 for _ in range(BATCHSIZE)] for _ in itos_setOfNonterminals]) for _ in range(BOUNDARY)]
 
          if True:      
-             left = log_invertedLeft
              right = chart[BOUNDARY-1][BOUNDARY-1].view(-1)
              right_max = torch.max(right)
              
-             result = torch.tensordot(torch.exp(left), torch.exp(right-right_max), dims=([1], [0]))
-             resultLog = (torch.log(result) + right_max).view(-1, BATCHSIZE)
+             result = torch.tensordot(invertedLeft, right/right_max, dims=([1], [0]))
+             resultLog = (result * right_max).view(-1, BATCHSIZE)
              chartFromStart[BOUNDARY-1] = resultLog
       
          for start in range(BOUNDARY)[::-1]: # now construct potential constituents that start at `start', but end outside of the portion
@@ -670,20 +664,18 @@ def computeSurprisals(linearized):
                   right = chartFromStart[start2].view(-1)
                   maxLeft = torch.max(left)
                   maxRight = torch.max(right)
-                  if float(maxLeft) == float("-inf") or float(maxRight) == float("-inf"): # everything will be 0
+                  if float(maxLeft) == 0 or float(maxRight) == 0: # everything will be 0
                      continue
-                  resultLeft = torch.tensordot(torch.exp(left-maxLeft), torch.exp(binary_rules_matrix), dims=([0], [1]))
-                  resultTotal = torch.tensordot(resultLeft, torch.exp(right-maxRight), dims=([1], [0]))
-                  resultTotalLog = torch.log(resultTotal)+maxLeft+maxRight
-                  resultTotalLog[resultTotal <= 0].fill_(float("-inf"))
+                  resultLeft = torch.tensordot(left/maxLeft, binary_rules_matrix, dims=([0], [1]))
+                  resultTotal = torch.tensordot(resultLeft, right/maxRight, dims=([1], [0]))
+#                  resultTotalLog = torch.log(resultTotal)+maxLeft+maxRight
+ #                 resultTotalLog[resultTotal <= 0].fill_(float("-inf"))
 
-                  left = log_invertedLeft
-                  right = resultTotalLog
-                  right_max = torch.max(right)
+ #                 resultTotalLog_max = torch.max(resultTotalLog)
 
-                  result = torch.tensordot(torch.exp(left), torch.exp(right-right_max), dims=([1], [0]))
-                  resultLog = (torch.log(result) + right_max).view(-1, BATCHSIZE)
-                  chartFromStart[start] = logSumExp(chartFromStart[start], resultLog)
+                  result = torch.tensordot(invertedLeft, resultTotal, dims=([1], [0]))
+                  resultLog = (result * (maxLeft*maxRight)).view(-1, BATCHSIZE)
+                  chartFromStart[start] = chartFromStart[start] + resultLog
   
 #         for root in itos_setOfNonterminals:
 #             count = roots.get(root, 0)
@@ -695,7 +687,8 @@ def computeSurprisals(linearized):
 #                  chartFromStart[0][iroot] += log(count) - log(roots["__TOTAL__"])
 #  
 
-         prefixProb = float(chartFromStart[0][stoi_setOfNonterminals["_SENTENCES_"]]) #log(sum([exp(float(x[0])) if x[0] is not None else 0 for x in chartFromStart[0]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
+         print(chartFromStart[0])
+         prefixProb = log(float(chartFromStart[0][stoi_setOfNonterminals["_SENTENCES_"]])) #log(sum([exp(float(x[0])) if x[0] is not None else 0 for x in chartFromStart[0]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
 
          surprisalTableSums[BOUNDARY-1] += prefixProb
          surprisalTableCounts[BOUNDARY-1] += 1

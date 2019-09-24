@@ -1,16 +1,8 @@
 # Based on cky4d5.py
-# Weird: It seems the surprisals don't really decay monotonically.
-
-# One way to achieve more-or-less stationarity easily:
-# - S* -> S_ S*
-# - S_ -> SOS Root EOS
-# And just concatenate sentences 
-# While this is not a proper PCFG, the prefix computation works just as well
-# As before, model with some fixed number of left context words (can vary)
+# Fixing NA issue
 
 # Uses Python3
 
-# Transition matrix needn't be in logspace
 
 import random
 import sys
@@ -549,7 +541,7 @@ for nonterminal in nonAndPreterminals:
 
 
 
-binary_rules_matrix = torch.cuda.FloatTensor([[[float("-inf") for _ in range(len(itos_setOfNonterminals))]  for _ in range(len(itos_setOfNonterminals))] for _ in range(len(itos_setOfNonterminals))])
+binary_rules_matrix = torch.cuda.FloatTensor([[[0 for _ in range(len(itos_setOfNonterminals))]  for _ in range(len(itos_setOfNonterminals))] for _ in range(len(itos_setOfNonterminals))])
 
 binary_rules_numeric = {}
 for parent in binary_rules:
@@ -560,7 +552,7 @@ for parent in binary_rules:
        lefti = stoi_setOfNonterminals[left]
        righti = stoi_setOfNonterminals[right]
        binary_rules_numeric[parenti][(lefti, righti)] = ruleCount
-       binary_rules_matrix[parenti][lefti][righti] = log(ruleCount) - log(nonAndPreterminals_numeric[parenti]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts))
+       binary_rules_matrix[parenti][lefti][righti] = exp(log(ruleCount) - log(nonAndPreterminals_numeric[parenti]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
 
 
 #print(len(binary_rules_numeric))
@@ -572,9 +564,9 @@ for i in range(len(itos_setOfNonterminals)):
 print(matrixLeft)
 print(matrixLeft.sum(dim=1))
 invertedLeft = torch.inverse(matrixLeft)
-log_invertedLeft = torch.log(invertedLeft)
+#log_invertedLeft = torch.log(invertedLeft)
 
-invertedRight = torch.inverse(matrixRight).tolist()
+#invertedRight = torch.inverse(matrixRight).tolist()
 
 
 def plus(x,y):
@@ -641,13 +633,15 @@ def computeSurprisals(linearized):
                   maxRight = torch.max(right)
                   if float(maxLeft) == float("-inf") or float(maxRight) == float("-inf"): # everything will be 0
                      continue
-                  resultLeft = torch.tensordot(torch.exp(left-maxLeft), torch.exp(binary_rules_matrix), dims=([0], [1]))
+                  resultLeft = torch.tensordot(torch.exp(left-maxLeft), binary_rules_matrix, dims=([0], [1]))
                   resultTotal = torch.tensordot(resultLeft, torch.exp(right-maxRight), dims=([1], [0]))
                   resultTotalLog = torch.log(resultTotal)+maxLeft+maxRight
                   resultTotalLog[resultTotal <= 0].fill_(float("-inf"))
                   entry = chart[start][start+length-1]
+                  #assert "nan" not in str(entry.max())
+                  #assert "nan" not in str(resultTotalLog.max())
                   chart[start][start+length-1] = logSumExp(resultTotalLog.view(-1, BATCHSIZE), entry)
-
+                  #assert "nan" not in str(chart[start][start+length-1].max())
       #############################
       # Now consider different endpoints
       valuesPerBoundary = [0]
@@ -655,11 +649,10 @@ def computeSurprisals(linearized):
          chartFromStart = [torch.cuda.FloatTensor([[float("-Inf") for _ in range(BATCHSIZE)] for _ in itos_setOfNonterminals]) for _ in range(BOUNDARY)]
 
          if True:      
-             left = log_invertedLeft
              right = chart[BOUNDARY-1][BOUNDARY-1].view(-1)
              right_max = torch.max(right)
              
-             result = torch.tensordot(torch.exp(left), torch.exp(right-right_max), dims=([1], [0]))
+             result = torch.tensordot(invertedLeft, torch.exp(right-right_max), dims=([1], [0]))
              resultLog = (torch.log(result) + right_max).view(-1, BATCHSIZE)
              chartFromStart[BOUNDARY-1] = resultLog
       
@@ -672,17 +665,16 @@ def computeSurprisals(linearized):
                   maxRight = torch.max(right)
                   if float(maxLeft) == float("-inf") or float(maxRight) == float("-inf"): # everything will be 0
                      continue
-                  resultLeft = torch.tensordot(torch.exp(left-maxLeft), torch.exp(binary_rules_matrix), dims=([0], [1]))
+                  resultLeft = torch.tensordot(torch.exp(left-maxLeft), binary_rules_matrix, dims=([0], [1]))
                   resultTotal = torch.tensordot(resultLeft, torch.exp(right-maxRight), dims=([1], [0]))
-                  resultTotalLog = torch.log(resultTotal)+maxLeft+maxRight
-                  resultTotalLog[resultTotal <= 0].fill_(float("-inf"))
+#                  resultTotalLog = torch.log(resultTotal)+maxLeft+maxRight
+ #                 resultTotalLog[resultTotal <= 0].fill_(float("-inf"))
 
-                  left = log_invertedLeft
-                  right = resultTotalLog
-                  right_max = torch.max(right)
+ #                 resultTotalLog_max = torch.max(resultTotalLog)
 
-                  result = torch.tensordot(torch.exp(left), torch.exp(right-right_max), dims=([1], [0]))
-                  resultLog = (torch.log(result) + right_max).view(-1, BATCHSIZE)
+                  result = torch.tensordot(invertedLeft, resultTotal, dims=([1], [0]))
+                  resultLog = (torch.log(result) + maxLeft+maxRight).view(-1, BATCHSIZE)
+                  resultLog[result <= 0].fill_(float("-inf"))
                   chartFromStart[start] = logSumExp(chartFromStart[start], resultLog)
   
 #         for root in itos_setOfNonterminals:
