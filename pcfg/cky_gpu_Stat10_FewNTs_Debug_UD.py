@@ -12,8 +12,9 @@ import sys
 
 objectiveName = "LM"
 
-model = sys.argv[1] #"REAL_REAL" #sys.argv[8]
-assert model in ["REAL_REAL", "RANDOM_BY_TYPE"]
+language = sys.argv[1]
+model = sys.argv[2] #"REAL_REAL" #sys.argv[8]
+assert model in ["REAL", "RANDOM_BY_TYPE"]
 
 posUni = set() #[ "ADJ", "ADP", "ADV", "AUX", "CONJ", "DET", "INTJ", "NOUN", "NUM", "PART", "PRON", "PROPN", "PUNCT", "SCONJ", "SYM", "VERB", "X"] 
 
@@ -25,7 +26,7 @@ from math import log, exp
 from random import random, shuffle, randint
 
 
-from corpusIterator_PTB_Deps import CorpusIterator_PTB
+from corpusIterator_V import CorpusIterator_V
 
 originalDistanceWeights = {}
 
@@ -35,9 +36,9 @@ vocab_lemmas = {}
 
 import nltk.tree
 
-corpus_cached = {}
-corpus_cached["train"] = CorpusIterator_PTB("PTB", "train")
-corpus_cached["dev"] = CorpusIterator_PTB("PTB", "dev")
+#corpus_cached = {}
+#corpus_cached["train"] = CorpusIterator_PTB("PTB", "train")
+#corpus_cached["dev"] = CorpusIterator_PTB("PTB", "dev")
 
 
 def descendTree(tree, vocab, posFine, depsVocab):
@@ -57,25 +58,83 @@ def descendTree(tree, vocab, posFine, depsVocab):
     #    print(child)
 def initializeOrderTable():
    orderTable = {}
+   keys = set()
    vocab = {}
    distanceSum = {}
    distanceCounts = {}
    depsVocab = set()
    for partition in ["train", "dev"]:
-     for sentenceAndTree in corpus_cached[partition].iterator():
-      _, sentence = sentenceAndTree
-      #descendTree(sentence, vocab, posFine, depsVocab)
-
+     for sentence in CorpusIterator_V(language,partition, storeMorph=True).iterator():
       for line in sentence:
           vocab[line["word"]] = vocab.get(line["word"], 0) + 1
-          posFine.add(line["posFine"])
+          vocab_lemmas[line["lemma"]] = vocab_lemmas.get(line["lemma"], 0) + 1
+
           depsVocab.add(line["dep"])
-   return vocab, depsVocab
+          posFine.add(line["posFine"])
+          posUni.add(line["posUni"])
+  
+          for morph in line["morph"]:
+              morphKeyValuePairs.add(morph)
+          if line["dep"] == "root":
+             continue
+
+          posHere = line["posUni"]
+          posHead = sentence[line["head"]-1]["posUni"]
+          dep = line["dep"]
+          direction = "HD" if line["head"] < line["index"] else "DH"
+          key = (posHead, dep, posHere)
+          keyWithDir = (posHead, dep, posHere, direction)
+          orderTable[keyWithDir] = orderTable.get(keyWithDir, 0) + 1
+          keys.add(key)
+          distanceCounts[key] = distanceCounts.get(key,0.0) + 1.0
+          distanceSum[key] = distanceSum.get(key,0.0) + abs(line["index"] - line["head"])
+   #print orderTable
+   dhLogits = {}
+   for key in keys:
+      hd = orderTable.get((key[0], key[1], key[2], "HD"), 0) + 1.0
+      dh = orderTable.get((key[0], key[1], key[2], "DH"), 0) + 1.0
+      dhLogit = log(dh) - log(hd)
+      dhLogits[key] = dhLogit
+      originalDistanceWeights[key] = (distanceSum[key] / distanceCounts[key])
+   return dhLogits, vocab, keys, depsVocab
 
 #import torch.distributions
 import torch.nn as nn
 import torch
 from torch.autograd import Variable
+
+
+# "linearization_logprobability"
+def recursivelyLinearize(sentence, position, result, gradients_from_the_left_sum):
+   line = sentence[position-1]
+   # Loop Invariant: these are the gradients relevant at everything starting at the left end of the domain of the current element
+   allGradients = gradients_from_the_left_sum #+ sum(line.get("children_decisions_logprobs",[]))
+
+#   if "linearization_logprobability" in line:
+#      allGradients += line["linearization_logprobability"] # the linearization of this element relative to its siblings affects everything starting at the start of the constituent, but nothing to the left of it
+#   else:
+#      assert line["dep"] == "root"
+
+   leftChildren = []
+   # there are the gradients of its children
+   if "children_DH" in line:
+      for child in line["children_DH"]:
+         leftChildren.append(recursivelyLinearize(sentence, child, result, allGradients))
+   result.append(line)
+   line["relevant_logprob_sum"] = allGradients
+   rightChildren = []
+   if "children_HD" in line:
+      for child in line["children_HD"]:
+         rightChildren.append(recursivelyLinearize(sentence, child, result, allGradients))
+    
+   inner = {"word" : line["word"], "category" :line["posUni"], "children" : None, "line" : line}
+   while rightChildren:
+      sibling = rightChildren.pop(0)
+      inner = {"category" : line["posUni"]+"_R_"+sibling["line"]["coarse_dep"], "children" : [inner, sibling], "line" : line}
+   while leftChildren:
+      sibling = leftChildren.pop(-1)
+      inner = {"category" : line["posUni"]+"_L_"+sibling["line"]["coarse_dep"], "children" : [sibling, inner], "line" : line}
+   return inner
 
 import numpy.random
 
@@ -84,178 +143,291 @@ logsoftmax = torch.nn.LogSoftmax()
 
 
 
+def orderChildrenRelative(sentence, remainingChildren, reverseSoftmax):
+       global model
+#       childrenLinearized = []
+#       while len(remainingChildren) > 0:
+       if model == "REAL":
+          return remainingChildren
+       logits = [(x, distanceWeights[stoi_deps[sentence[x-1]["dependency_key"]]]) for x in remainingChildren]
+       logits = sorted(logits, key=lambda x:x[1], reverse=(not reverseSoftmax))
+       childrenLinearized = list(map(lambda x:x[0], logits))
+           
+#           #print logits
+#           if reverseSoftmax:
+#              
+#              logits = -logits
+#           #print (reverseSoftmax, logits)
+#           softmax = softmax_layer(logits.view(1,-1)).view(-1)
+#           selected = numpy.random.choice(range(0, len(remainingChildren)), p=softmax.data.numpy())
+#    #       log_probability = torch.log(softmax[selected])
+#   #        assert "linearization_logprobability" not in sentence[remainingChildren[selected]-1]
+#  #         sentence[remainingChildren[selected]-1]["linearization_logprobability"] = log_probability
+#           childrenLinearized.append(remainingChildren[selected])
+#           del remainingChildren[selected]
+       return childrenLinearized           
+#           softmax = torch.distributions.Categorical(logits=logits)
+#           selected = softmax.sample()
+#           print selected
+#           quit()
+#           softmax = torch.cat(logits)
 
-def orderSentenceRec(tree, sentence, printThings, linearized):
-   label = tree.label()
-   if "-" in label:
-      label = label[:label.index("-")]
-   children = [child for child in tree]
-   if type(children[0]) != nltk.tree.Tree:
-      assert all([type(x) != nltk.tree.Tree for x in children])
-      assert len(list(children)) == 1, list(children)
-      for c in children:
-        if len(label) == 0 or label in ["'", ":", "``", ",", "''", "#", ".", "-NONE-"] or label[0] == "-" or "*-" in c:
-           continue
-        word = sentence[tree.start]["word"] #c.lower(), )
-        if word != c.lower().replace("\/","/"):
-           print(142, word, c.lower())
-        return {"word" : word, "category" : label, "children" : None, "dependency" : "NONE"}
-   else:
-      assert all([type(x) == nltk.tree.Tree for x in children])
-      children = [child for child in children if child.start < child.end] # remove children that consist of gaps or otherwise eliminated tokens
+##def orderSentenceRec(tree, sentence, printThings, linearized):
+##   label = tree.label()
+##   if "-" in label:
+##      label = label[:label.index("-")]
+##   children = [child for child in tree]
+##   if type(children[0]) != nltk.tree.Tree:
+##      assert all([type(x) != nltk.tree.Tree for x in children])
+##      assert len(list(children)) == 1, list(children)
+##      for c in children:
+##        if len(label) == 0 or label in ["'", ":", "``", ",", "''", "#", ".", "-NONE-"] or label[0] == "-" or "*-" in c:
+##           continue
+##        word = sentence[tree.start]["word"] #c.lower(), )
+##        if word != c.lower().replace("\/","/"):
+##           print(142, word, c.lower())
+##        return {"word" : word, "category" : label, "children" : None, "dependency" : "NONE"}
+##   else:
+##      assert all([type(x) == nltk.tree.Tree for x in children])
+##      children = [child for child in children if child.start < child.end] # remove children that consist of gaps or otherwise eliminated tokens
+##
+##      # find which children seem to be dependents of which other children
+##      if model != "REAL_REAL": 
+##        childDeps = [None for _ in children]
+##        for i in range(len(children)):
+##           incomingFromOutside = [x for x in tree.incoming if x in children[i].incoming]
+##           if len(incomingFromOutside) > 0:
+##              childDeps[i] = sentence[incomingFromOutside[-1][1]]["dep"]
+##              if len(incomingFromOutside) > 1:
+##                  print("FROM OUTSIDE", [sentence[incomingFromOutside[x][1]]["dep"] for x in range(len(incomingFromOutside))])
+##           for j in range(len(children)):
+##              if i == j:
+##                 continue
+##              incomingFromJ = [x for x in children[i].incoming if x in children[j].outgoing]
+##              if len(incomingFromJ) > 0:
+##                 if len(incomingFromJ) > 1:
+##                    duplicateDeps = tuple([sentence[incomingFromJ[x][1]]["dep"] for x in range(len(incomingFromJ))])
+##                    if not (duplicateDeps == ("obj", "xcomp")):
+##                       print("INCOMING FROM NEIGHBOR", duplicateDeps)
+##                 childDeps[i] = sentence[incomingFromJ[-1][1]]["dep"]
+##        assert None not in childDeps, (childDeps, children)
+##  
+##        keys = childDeps
+##  
+##        logits = [(x, distanceWeights[stoi_deps[key]], key) for x, key in zip(children, keys)]
+##        logits = sorted(logits, key=lambda x:-x[1])
+##        childrenLinearized = list(map(lambda x:x[0], logits))
+##      else:
+##        childrenLinearized = children
+###      print(logits)
+##   
+##      childrenAsTrees = []
+##      for child in childrenLinearized:
+##          childrenAsTrees.append(orderSentenceRec(child, sentence, printThings, linearized))
+##          if childrenAsTrees[-1] is None: # this will happen for punctuation etc 
+##              del childrenAsTrees[-1]
+##          else:
+##             childrenAsTrees[-1]["dependency"] = "Something"
+##      if len(childrenAsTrees) == 0:
+##         return None
+##      else:
+##         return {"category" : label, "children" : childrenAsTrees, "dependency" : "NONE"}
+##
+##
+##import copy
+##
+##def binarize(tree):
+##   # tree is a single node, i.e. a dict
+##   if tree["children"] is None:
+##       return tree
+##   else:
+###       print(tree)
+##       if len(tree["children"]) == 0:
+##           assert False
+##       if len(tree["children"]) <= 1: # remove unary projections
+###          print("Removing Unary: "+tree["category"])
+##          result = binarize(tree["children"][0]) #{"category" : tree["category"], "dependency" : tree["dependency"], "children" : children}
+###          result["category"] = tree["category"] # TODO not sure why this makes a difference (together with adding/removing _BAR)
+##          return result
+##       else:
+##          children = [binarize(x) for x in tree["children"]]
+##          left = children[0]
+##          for child in children[1:]:
+##             left = {"category" : tree["category"], "children" : [left, child], "dependency" : tree["dependency"]} # +"_BAR"
+##          return left
+##
+###          return {"category" : tree["category"], "children" : children, "dependency" : tree["dependency"]}
 
-      # find which children seem to be dependents of which other children
-      if model != "REAL_REAL": 
-        childDeps = [None for _ in children]
-        for i in range(len(children)):
-           incomingFromOutside = [x for x in tree.incoming if x in children[i].incoming]
-           if len(incomingFromOutside) > 0:
-              childDeps[i] = sentence[incomingFromOutside[-1][1]]["dep"]
-              if len(incomingFromOutside) > 1:
-                  print("FROM OUTSIDE", [sentence[incomingFromOutside[x][1]]["dep"] for x in range(len(incomingFromOutside))])
-           for j in range(len(children)):
-              if i == j:
-                 continue
-              incomingFromJ = [x for x in children[i].incoming if x in children[j].outgoing]
-              if len(incomingFromJ) > 0:
-                 if len(incomingFromJ) > 1:
-                    duplicateDeps = tuple([sentence[incomingFromJ[x][1]]["dep"] for x in range(len(incomingFromJ))])
-                    if not (duplicateDeps == ("obj", "xcomp")):
-                       print("INCOMING FROM NEIGHBOR", duplicateDeps)
-                 childDeps[i] = sentence[incomingFromJ[-1][1]]["dep"]
-        assert None not in childDeps, (childDeps, children)
-  
-        keys = childDeps
-  
-        logits = [(x, distanceWeights[stoi_deps[key]], key) for x, key in zip(children, keys)]
-        logits = sorted(logits, key=lambda x:-x[1])
-        childrenLinearized = list(map(lambda x:x[0], logits))
-      else:
-        childrenLinearized = children
-#      print(logits)
-   
-      childrenAsTrees = []
-      for child in childrenLinearized:
-          childrenAsTrees.append(orderSentenceRec(child, sentence, printThings, linearized))
-          if childrenAsTrees[-1] is None: # this will happen for punctuation etc 
-              del childrenAsTrees[-1]
-          else:
-             childrenAsTrees[-1]["dependency"] = "Something"
-      if len(childrenAsTrees) == 0:
-         return None
-      else:
-         return {"category" : label, "children" : childrenAsTrees, "dependency" : "NONE"}
-
-def numberSpans(tree, start, sentence):
-   if type(tree) != nltk.tree.Tree:
-      if tree.startswith("*") or tree == "0":
-        return start, ([]), ([])
-      else:
-        outgoing = ([(start, x) for x in sentence[start].get("children", [])])
-        return start+1, ([(sentence[start]["head"]-1, start)]), outgoing
-   else:
-      tree.start = start
-      incoming = ([])
-      outgoing = ([])
-      for child in tree:
-        start, incomingC, outgoingC = numberSpans(child, start, sentence)
-        incoming +=  incomingC
-        outgoing += outgoingC
-      tree.end = start
-      incoming = ([(hd,dep) for hd, dep in incoming if hd < tree.start or hd>= tree.end])
-      outgoing = ([(hd,dep) for hd, dep in outgoing if dep < tree.start or dep>= tree.end])
-
-      tree.incoming = incoming
-      tree.outgoing = outgoing
-      return start, incoming, outgoing
-
-import copy
-
-def binarize(tree):
-   # tree is a single node, i.e. a dict
-   if tree["children"] is None:
-       return tree
-   else:
-#       print(tree)
-       if len(tree["children"]) == 0:
-           assert False
-       if len(tree["children"]) <= 1: # remove unary projections
-#          print("Removing Unary: "+tree["category"])
-          result = binarize(tree["children"][0]) #{"category" : tree["category"], "dependency" : tree["dependency"], "children" : children}
-#          result["category"] = tree["category"] # TODO not sure why this makes a difference (together with adding/removing _BAR)
-          return result
-       else:
-          children = [binarize(x) for x in tree["children"]]
-          left = children[0]
-          for child in children[1:]:
-             left = {"category" : tree["category"], "children" : [left, child], "dependency" : tree["dependency"]} # +"_BAR"
-          return left
-
-#          return {"category" : tree["category"], "children" : children, "dependency" : tree["dependency"]}
-
-def orderSentence(tree, printThings):
+def orderSentence(sentence, printThings):
    global model
-   linearized = []
-   tree, sentence = tree
-   for i in range(len(sentence)):
-      line = sentence[i]
+
+   root = None
+   logits = [None]*len(sentence)
+   logProbabilityGradient = 0
+   if model == "REAL_REAL":
+      eliminated = []
+   for line in sentence:
       if line["dep"] == "root":
+          root = line["index"]
+          continue
+      if line["dep"].startswith("punct"): # assumes that punctuation does not have non-punctuation dependents!
+         if model == "REAL_REAL":
+            eliminated.append(line)
          continue
-      head = line["head"] - 1
-      if "children" not in sentence[head]:
-        sentence[head]["children"] = []
-      sentence[head]["children"].append(i)
-   end, incoming, outgoing = numberSpans(tree, 0, sentence)
-   assert len(incoming) == 1, incoming
-   assert len(outgoing) == 0, outgoing
-   if (end != len(sentence)):
-      print(tree.leaves())
-      print([x["word"] for x in sentence])
-   return binarize(orderSentenceRec(tree, sentence, printThings, linearized))
+      key = (sentence[line["head"]-1]["posUni"], line["dep"], line["posUni"])
+      line["dependency_key"] = key
+      dhLogit = dhWeights[stoi_deps[key]]
+#      probability = 1/(1 + torch.exp(-dhLogit))
+      if model == "REAL":
+         dhSampled = (line["head"] > line["index"]) #(random() < probability.data.numpy()[0])
+      else:
+         dhSampled = (dhLogit > 0) #(random() < probability.data.numpy())
+#      logProbabilityGradient = (1 if dhSampled else -1) * (1-probability)
+#      line["ordering_decision_gradient"] = logProbabilityGradient
+      #line["ordering_decision_log_probability"] = torch.log(1/(1 + torch.exp(- (1 if dhSampled else -1) * dhLogit)))
 
-vocab, depsVocab = initializeOrderTable()
+      
+     
+      direction = "DH" if dhSampled else "HD"
+#torch.exp(line["ordering_decision_log_probability"]).data.numpy()[0],
+      if printThings: 
+         print("\t".join(list(map(str,["ORD", line["index"], ("|".join(line["morph"])+"           ")[:10], ("->".join(list(key)) + "         ")[:22], line["head"], dhLogit, dhSampled, direction]))))
 
+      headIndex = line["head"]-1
+      sentence[headIndex]["children_"+direction] = (sentence[headIndex].get("children_"+direction, []) + [line["index"]])
+      #sentence[headIndex]["children_decisions_logprobs"] = (sentence[headIndex].get("children_decisions_logprobs", []) + [line["ordering_decision_log_probability"]])
+
+
+   if model != "REAL_REAL":
+      for line in sentence:
+         if "children_DH" in line:
+            childrenLinearized = orderChildrenRelative(sentence, line["children_DH"][:], False)
+            line["children_DH"] = childrenLinearized
+         if "children_HD" in line:
+            childrenLinearized = orderChildrenRelative(sentence, line["children_HD"][:], True)
+            line["children_HD"] = childrenLinearized
+   elif model == "REAL_REAL":
+       while len(eliminated) > 0:
+          line = eliminated[0]
+          del eliminated[0]
+          if "removed" in line:
+             continue
+          line["removed"] = True
+          if "children_DH" in line:
+            assert 0 not in line["children_DH"]
+            eliminated = eliminated + [sentence[x-1] for x in line["children_DH"]]
+          if "children_HD" in line:
+            assert 0 not in line["children_HD"]
+            eliminated = eliminated + [sentence[x-1] for x in line["children_HD"]]
+
+#         shuffle(line["children_HD"])
+   
+   linearized = []
+   tree = recursivelyLinearize(sentence, root, linearized, 0)
+   if model == "REAL_REAL":
+      linearized = list(filter(lambda x:"removed" not in x, sentence))
+   if printThings or len(linearized) == 0:
+     print(" ".join(list(map(lambda x:x["word"], sentence))))
+     print(" ".join(list(map(lambda x:x["word"], linearized))))
+   return tree
+
+
+dhLogits, vocab, vocab_deps, depsVocab = initializeOrderTable()
+#print morphKeyValuePairs
+#quit()
+
+morphKeyValuePairs = list(morphKeyValuePairs)
+itos_morph = morphKeyValuePairs
+stoi_morph = dict(zip(itos_morph, range(len(itos_morph))))
+
+
+posUni = list(posUni)
+itos_pos_uni = posUni
+stoi_pos_uni = dict(zip(posUni, range(len(posUni))))
 
 posFine = list(posFine)
-itos_pos_fine = posFine
-stoi_pos_fine = dict(list(zip(posFine, range(len(posFine)))))
+itos_pos_ptb = posFine
+stoi_pos_ptb = dict(zip(posFine, range(len(posFine))))
 
 
 
 itos_pure_deps = sorted(list(depsVocab)) 
-stoi_pure_deps = dict(list(zip(itos_pure_deps, range(len(itos_pure_deps)))))
+stoi_pure_deps = dict(zip(itos_pure_deps, range(len(itos_pure_deps))))
    
 
-itos_deps = itos_pure_deps
-stoi_deps = stoi_pure_deps
+itos_deps = sorted(vocab_deps)
+stoi_deps = dict(zip(itos_deps, range(len(itos_deps))))
 
 
-#dhWeights = [0.0] * len(itos_deps)
+dhWeights = [0.0] * len(itos_deps)
 distanceWeights = [0.0] * len(itos_deps)
 
 
 import os
 
 if model == "RANDOM_MODEL":
+  assert False
   for key in range(len(itos_deps)):
-     #dhWeights[key] = random() - 0.5
+     dhWeights[key] = random() - 0.5
      distanceWeights[key] = random()
   originalCounter = "NA"
 elif model == "REAL" or model == "REAL_REAL":
   originalCounter = "NA"
 elif model == "RANDOM_BY_TYPE":
-  #dhByType = {}
+  dhByType = {}
   distByType = {}
   for dep in itos_pure_deps:
- #   dhByType[dep] = random() - 0.5
-    distByType[dep] = random()
+    dhByType[dep.split(":")[0]] = random() - 0.5
+    distByType[dep.split(":")[0]] = random()
   for key in range(len(itos_deps)):
-#     dhWeights[key] = dhByType[itos_deps[key]]
-     distanceWeights[key] = distByType[itos_deps[key]]
+     dhWeights[key] = dhByType[itos_deps[key][1].split(":")[0]]
+     distanceWeights[key] = distByType[itos_deps[key][1].split(":")[0]]
   originalCounter = "NA"
+elif model == "RANDOM_BY_TYPE_CONS":
+  distByType = {}
+  for dep in itos_pure_deps:
+    distByType[dep.split(":")[0]] = random()
+  for key in range(len(itos_deps)):
+     dhWeights[key] = 1.0
+     distanceWeights[key] = distByType[itos_deps[key][1].split(":")[0]]
+  originalCounter = "NA"
+elif model == "RANDOM_MODEL_CONS":
+  for key in range(len(itos_deps)):
+     dhWeights[key] = 1.0
+     distanceWeights[key] = random()
+  originalCounter = "NA"
+elif model == "GROUND":
+  groundPath = "/u/scr/mhahn/deps/manual_output_ground_coarse/"
+  import os
+  files = [x for x in os.listdir(groundPath) if x.startswith(language+"_infer")]
+  print(files)
+  assert len(files) > 0
+  with open(groundPath+files[0], "r") as inFile:
+     headerGrammar = next(inFile).strip().split("\t")
+     print(headerGrammar)
+     dhByDependency = {}
+     distByDependency = {}
+     for line in inFile:
+         line = line.strip().split("\t")
+         assert int(line[headerGrammar.index("Counter")]) >= 1000000
+#         if line[headerGrammar.index("Language")] == language:
+#           print(line)
+         dependency = line[headerGrammar.index("Dependency")]
+         dhHere = float(line[headerGrammar.index("DH_Mean_NoPunct")])
+         distHere = float(line[headerGrammar.index("Distance_Mean_NoPunct")])
+         print(dependency, dhHere, distHere)
+         dhByDependency[dependency] = dhHere
+         distByDependency[dependency] = distHere
+  for key in range(len(itos_deps)):
+     dhWeights[key] = dhByDependency[itos_deps[key][1].split(":")[0]]
+     distanceWeights[key] = distByDependency[itos_deps[key][1].split(":")[0]]
+  originalCounter = "NA"
+
 
 lemmas = list(vocab_lemmas.items())
 lemmas = sorted(lemmas, key = lambda x:x[1], reverse=True)
+itos_lemmas = list(map(lambda x:x[0], lemmas))
+stoi_lemmas = dict(zip(itos_lemmas, range(len(itos_lemmas))))
 
 words = list(vocab.items())
 words = sorted(words, key = lambda x:x[1], reverse=True)
@@ -271,9 +443,6 @@ vocab_size = min(len(itos),vocab_size)
 
 outVocabSize = len(posFine)+vocab_size+3
 
-
-itos_total = ["EOS", "EOW", "SOS"] + itos_pos_fine + itos[:vocab_size]
-assert len(itos_total) == outVocabSize
 
 
 
@@ -296,8 +465,8 @@ devLosses = []
 lossModule = nn.NLLLoss()
 lossModuleTest = nn.NLLLoss(size_average=False, reduce=False, ignore_index=2)
 
-corpusBase = corpus_cached["train"]
-corpus = corpusBase.iterator()
+#corpusBase = corpus_cached["train"]
+#corpus = corpusBase.iterator()
 
 
 
@@ -389,7 +558,9 @@ def linearizeTree2String(tree, sent):
 
 
 sentCount = 0
-for sentence in corpus:
+
+print("Collecting counts from training corpus")
+for sentence in CorpusIterator_V(language,"train").iterator():
    sentCount += 1
    ordered = orderSentence(sentence,  sentCount % 50 == 0)
 
@@ -432,16 +603,16 @@ wordCounts["_eos_"] = 1000000
 
  #  break
 
-print(list(binary_rules))
-print(unary_rules)
+#print(list(binary_rules))
+#print(unary_rules)
 #print(terminals)
-print(len(binary_rules))
+#print(len(binary_rules))
 #print(sorted(list(binary_rules["S"].items()), key=lambda x:x[1]))
 #print(sorted(list(binary_rules["S_BAR"].items()), key=lambda x:x[1]))
-print(roots)
+#print(roots)
 
 
-print(leftCornerCounts)
+#print(leftCornerCounts)
 
 
 # construct count matrices
@@ -456,9 +627,9 @@ print(leftCornerCounts)
 
 inStackDistribution = sorted(list(inStackDistribution.items()), key=lambda x:x[1])
 #print(inStackDistribution)
-print(len(inStackDistribution))
-print(inStackDistribution[-1])
-print(inStackDistribution[-200:])
+#print(len(inStackDistribution))
+#print(inStackDistribution[-1])
+#print(inStackDistribution[-200:])
 #quit()
 
 
@@ -493,8 +664,8 @@ for nonterminal in binary_rules:
 
 # Future version: this is simply done with a neural net, not a cached distribution
 
-corpusBase = corpus_cached["dev"]
-corpus = corpusBase.iterator()
+#corpusBase = corpus_cached["dev"]
+#corpus = corpusBase.iterator()
 
 
 
@@ -562,6 +733,7 @@ for parent in binary_rules:
 #print(len(binary_rules_numeric))
 #quit()
 
+print("Constructing prefix matrix")
 for i in range(len(itos_setOfNonterminals)):
     matrixLeft[i][i] += 1
     matrixRight[i][i] += 1
@@ -586,7 +758,7 @@ surprisalTableCounts = [0 for _ in range(MAX_BOUNDARY)]
 
 LEFT_CONTEXT = 10
 
-BATCHSIZE = 1000 #200
+BATCHSIZE = 3000 #200
 
 sentCount = 0
 def iterator_dense(corpus):
@@ -605,15 +777,27 @@ def iterator_dense(corpus):
 
 
 def runOnCorpus():
-  iterator = iterator_dense(corpus)
+  global BATCHSIZE
+  global chart
+  chart = [[torch.cuda.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(BATCHSIZE)]) for _ in range(MAX_BOUNDARY)] for _ in range(MAX_BOUNDARY)]
+
+  iterator = iterator_dense(CorpusIterator_V(language,"dev").iterator())
   chunk = []
   while True:
-     linearized = [next(iterator) for _ in range(BATCHSIZE)]
+     linearized = []
+     try:
+       for _ in range(BATCHSIZE):
+          linearized.append(next(iterator))
+     except StopIteration:
+       if len(linearized) == 0:
+          break
+       BATCHSIZE = len(linearized) 
+       chart = [[torch.cuda.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(BATCHSIZE)]) for _ in range(MAX_BOUNDARY)] for _ in range(MAX_BOUNDARY)]
+
      computeSurprisals(linearized)
      surprisals = [surprisalTableSums[i]/(surprisalTableCounts[i]+1e-9) for i in range(MAX_BOUNDARY)]
      print(sentCount, [surprisals[i+1] - surprisals[i] for i in range(MAX_BOUNDARY-1)]) # [surprisalTableSums[0]/surprisalTableCounts[-1]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[-1] for i in range(MAX_BOUNDARY-1)]) 
 
-chart = [[torch.cuda.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(BATCHSIZE)]) for _ in range(MAX_BOUNDARY)] for _ in range(MAX_BOUNDARY)]
 
 
 itos = set(["_OOV_", "_EMPTY_"])
@@ -629,9 +813,10 @@ assert "_OOV_" in itos
 stoi = dict(list(zip(itos, list(range(len(itos))))))
 assert "_OOV_" in itos
 
-print(stoi)
+#print(stoi)
 assert "_OOV_" in stoi
 
+print("Constructing lexical probabilities")
 lexicalProbabilities_matrix = torch.FloatTensor([[float("-inf") for _ in itos] for _ in stoi_setOfNonterminals])
 
 for preterminal in terminals:
@@ -760,4 +945,6 @@ def computeSurprisals(linearized):
          print(BOUNDARY, prefixProb/BATCHSIZE, linearized[0])
          assert prefixProb  < valuesPerBoundary[-2], "bug or numerical problem?"
 #         print(len(nonAndPreterminals_numeric))  
+print("Reading data")
+
 runOnCorpus() 
