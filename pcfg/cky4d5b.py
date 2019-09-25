@@ -434,7 +434,7 @@ surprisalTableSums = [0 for _ in range(MAX_BOUNDARY)]
 surprisalTableCounts = [0 for _ in range(MAX_BOUNDARY)]
 
 
-LEFT_CONTEXT = 5
+LEFT_CONTEXT = 3
 
 sentCount = 0
 

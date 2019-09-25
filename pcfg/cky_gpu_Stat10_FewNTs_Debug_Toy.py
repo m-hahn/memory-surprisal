@@ -5,7 +5,6 @@
 # Minibatched version of cky_gpu_Stat3.py
 # Uses Python3
 
-# Unclear what explains difference between this and Non-"Debug" vesion
 
 import random
 import sys
@@ -307,170 +306,25 @@ corpus = corpusBase.iterator()
 
 # run EM
 
-unary_rules = {}
-
 binary_rules = {}
+binary_rules["S"] = {("Y", "X") : 2} #, ("X", "X") : 1}
+binary_rules["X"] = {("X", "X") : 1}
+
 
 terminals = {}
-wordCounts = {}
+terminals["X"] = {"x" : 10}
+terminals["Y"] = {"y" : 10}
+wordCounts = {"x" : 10, "y" : 10}
 
-def addCounts(tree):
-   assert tree["category"] in leftCornerCounts, tree["category"]
-   if tree["children"] is None:
-      nonterminal = tree["category"]#+"@"+tree["dependency"]       
-      terminal = tree["word"]
-      if nonterminal not in terminals:
-        terminals[nonterminal] = {}
-      if terminal not in terminals[nonterminal]:
-          terminals[nonterminal][terminal] = 0
-      terminals[nonterminal][terminal] += 1
-      wordCounts[terminal] = wordCounts.get(terminal,0)+1
-   else:
-      for child in tree["children"]:
-         addCounts(child)
-      if True:
-         nonterminal = tree["category"]#+"@"+tree["dependency"]       
-         assert len(tree["children"]) == 2
-         childCats = tuple([x["category"] for x in tree["children"]])
-         assert len(childCats) == 2
-         if nonterminal not in binary_rules:
-              binary_rules[nonterminal] = {}
-         if childCats not in binary_rules[nonterminal]:
-            binary_rules[nonterminal][childCats] = 0
-         binary_rules[nonterminal][childCats] += 1
+roots = {"S" : 2}
+roots["__TOTAL__"] = 2
 
-
-roots = {}
-
-
-inStackDistribution = {}
-
-leftCornerCounts = {}
-
-def updateLeftCorner(nonterminal, preterminal):
-    if nonterminal not in leftCornerCounts:
-       leftCornerCounts[nonterminal] = {}
-       leftCornerCounts[nonterminal]["__TOTAL__"] = 0
-    if preterminal not in leftCornerCounts[nonterminal]:
-       leftCornerCounts[nonterminal][preterminal] = 0
-    leftCornerCounts[nonterminal][preterminal] += 1
-    leftCornerCounts[nonterminal]["__TOTAL__"] += 1
-  
-
-# stack = incomplete constituents that have been started
-def updateInStackDistribution(tree, stack):
-   if tree["children"] is None:
-      assert len(stack) > 0, tree
-#      print(stack)
-      assert len(stack[-1][1]) > 0, stack
-      inStackDistribution[stack] = inStackDistribution.get(stack, 0) + 1
-      updateLeftCorner(tree["category"], tree["category"])
-      assert tree["category"] in leftCornerCounts
-      return tree["category"]
-   else:
-     leftSide = tree["category"]
-     rightSide = tuple([x["category"] for x in tree["children"]])
-     leftCorner = None
-     for i, child in enumerate(tree["children"]):
-        lc = updateInStackDistribution(child, stack + ((leftSide, rightSide[i:])  ,))
-        if leftCorner is None:
-           leftCorner = lc
-     updateLeftCorner(tree["category"], leftCorner)
-     assert tree["category"] in leftCornerCounts
-     return leftCorner
-
-
-def linearizeTree2String(tree, sent):
-   if tree["children"] is None:
-       sent.append(tree["word"])
-   else:
-      for x in tree["children"]:
-          linearizeTree2String(x, sent)
-
-
-sentCount = 0
-for sentence in corpus:
-   sentCount += 1
-   ordered = orderSentence(sentence,  sentCount % 50 == 0)
-
-
-   linearized = []
-   linearizeTree2String(ordered, linearized)
-#   if len(linearized) > 10:
- #     continue
-
-#   print(ordered)
-   roots[ordered["category"]] = roots.get(ordered["category"], 0) + 1
-   roots["__TOTAL__"] = roots.get("__TOTAL__", 0) + 1
-
-   if sentCount % 100 == 0:
-      print(sentCount, ordered["category"])
-   # update inStackDistribution
-   leftCorner = updateInStackDistribution(ordered, (("root", (ordered["category"],),),))
-   updateLeftCorner("root", leftCorner)
-   addCounts(ordered)
-
-
-# Nontermainl ROOT
-binary_rules["_SENTENCES_"] = {("ROOT", "_SENTENCES_") : 100000}
-terminals["_EOS_"] = {"_eos_" : 1000000}
-
-binary_rules["ROOT"] = {(left, "_EOS_") : count for left, count in roots.items() if left != "__TOTAL__"}
-wordCounts["_eos_"] = 1000000
-
-
-
-
-
-   # Only first sentence
- #  if sentCount > 100:
-  #   break
-
-#binary_rules["root"] = {}
-#for r in roots:
-#   binary_rules["root"][(r,)] = roots[r]
-
- #  break
-
-print(list(binary_rules))
-print(unary_rules)
-#print(terminals)
-print(len(binary_rules))
-#print(sorted(list(binary_rules["S"].items()), key=lambda x:x[1]))
-#print(sorted(list(binary_rules["S_BAR"].items()), key=lambda x:x[1]))
-print(roots)
-
-
-print(leftCornerCounts)
-
-
-# construct count matrices
-
-# construct grammar
-
-# create split
-
-# run EM
-
-# merge symbols
-
-inStackDistribution = sorted(list(inStackDistribution.items()), key=lambda x:x[1])
-#print(inStackDistribution)
-print(len(inStackDistribution))
-print(inStackDistribution[-1])
-print(inStackDistribution[-200:])
-#quit()
-
-
-inStackDistributionSum = sum([x[1] for x in inStackDistribution])
 
 nonAndPreterminals = {}
 
 for preterminal in terminals:
     nonAndPreterminals[preterminal] = sum([y for x, y in terminals[preterminal].items()])
     terminals[preterminal]["__TOTAL__"] = nonAndPreterminals[preterminal]
-
-
 
 for nonterminal in binary_rules:
     if nonterminal not in nonAndPreterminals:
@@ -479,26 +333,7 @@ for nonterminal in binary_rules:
 
 
 
-# construct the reachability heuristic
 
-# all nonAndPreterminals
-# all words
-
-
-#assert "PRN" in leftCornerCounts, nonAndPreterminals["PRN"]
-#assert "MD" in leftCornerCounts, nonAndPreterminals["PRN"]
-
-
-
-
-# Future version: this is simply done with a neural net, not a cached distribution
-
-corpusBase = corpus_cached["dev"]
-corpus = corpusBase.iterator()
-
-
-
-leftCornerCached = {}
 
 
 
@@ -525,9 +360,9 @@ matrixLeft = torch.cuda.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ i
 matrixRight = torch.cuda.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the RIGHT edge
 
 # One thing to keep in mind is that a bit of probability mass is wasted, namely that of training words ending up OOV
-OOV_THRESHOLD = 3
-OOV_COUNT= 10
-OTHER_WORDS_SMOOTHING = 0.1
+OOV_THRESHOLD = 0
+OOV_COUNT= 0
+OTHER_WORDS_SMOOTHING = 0.0
 
 
 for parent in binary_rules:
@@ -583,34 +418,11 @@ surprisalTableSums = [0 for _ in range(MAX_BOUNDARY)]
 surprisalTableCounts = [0 for _ in range(MAX_BOUNDARY)]
 
 
-LEFT_CONTEXT = 10
+LEFT_CONTEXT = 3
 
-BATCHSIZE = 1000 #200
+BATCHSIZE = 1 #200
 
 sentCount = 0
-def iterator_dense(corpus):
-  chunk = []
-  global sentCount
-  sentCount = 0
-  for sentence in corpus:
-     sentCount += 1
-     ordered = orderSentence(sentence,  sentCount % 50 == 0)
-     linearized0 = []
-     linearizeTree2String(ordered, linearized0)
-     chunk += linearized0 + ["_eos_"]
-     while len(chunk) > MAX_BOUNDARY:
-        yield chunk[:MAX_BOUNDARY]
-        chunk = chunk[1:]
-
-
-def runOnCorpus():
-  iterator = iterator_dense(corpus)
-  chunk = []
-  while True:
-     linearized = [next(iterator) for _ in range(BATCHSIZE)]
-     computeSurprisals(linearized)
-     surprisals = [surprisalTableSums[i]/(surprisalTableCounts[i]+1e-9) for i in range(MAX_BOUNDARY)]
-     print(sentCount, [surprisals[i+1] - surprisals[i] for i in range(MAX_BOUNDARY-1)]) # [surprisalTableSums[0]/surprisalTableCounts[-1]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[-1] for i in range(MAX_BOUNDARY-1)]) 
 
 chart = [[torch.cuda.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(BATCHSIZE)]) for _ in range(MAX_BOUNDARY)] for _ in range(MAX_BOUNDARY)]
 
@@ -634,25 +446,30 @@ assert "_OOV_" in stoi
 lexicalProbabilities_matrix = torch.FloatTensor([[float("-inf") for _ in itos] for _ in stoi_setOfNonterminals])
 
 for preterminal in terminals:
-  lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]][stoi["_OOV_"]] = (log(OOV_COUNT) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
+  if OOV_COUNT > 0:
+      lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]][stoi["_OOV_"]] = (log(OOV_COUNT) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
   lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]][stoi["_EMPTY_"]] = 0 # this is intended for the context words
 
   for word in stoi:
     if word == "_OOV_" or word == "_EMPTY_":
          continue
     count = terminals[preterminal].get(word, 0) + OTHER_WORDS_SMOOTHING
-    lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]][stoi[word]] = (log(count) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
+    if count > 0:
+       lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]][stoi[word]] = (log(count) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
 
-for i in range(len(lexicalProbabilities_matrix)):
-   for j in range(len(lexicalProbabilities_matrix[i])):
-       if float(lexicalProbabilities_matrix[i][j]) == float("-inf"):
-         assert itos_setOfNonterminals[i] not in terminals
+#for i in range(len(lexicalProbabilities_matrix)):
+#   for j in range(len(lexicalProbabilities_matrix[i])):
+#       if float(lexicalProbabilities_matrix[i][j]) == float("-inf"):
+#         assert itos_setOfNonterminals[i] not in terminals
 lexicalProbabilities_matrix = lexicalProbabilities_matrix.cuda().t()
 #print(lexicalProbabilities_matrix) # (nonterminals, words)
 # TODO why are there some -inf's?
 
+
+
+
 def computeSurprisals(linearized):
-      assert len(linearized[0]) == MAX_BOUNDARY
+      assert len(linearized[0]) == MAX_BOUNDARY, (len(linearized[0]), MAX_BOUNDARY)
       assert len(linearized) == BATCHSIZE
 
       for x in chart:     
@@ -751,12 +568,16 @@ def computeSurprisals(linearized):
 #                  chartFromStart[0][iroot] += log(count) - log(roots["__TOTAL__"])
 #  
 
-         prefixProb = float(chartFromStart[0][:,stoi_setOfNonterminals["_SENTENCES_"]].sum()) #log(sum([exp(float(x[0])) if x[0] is not None else 0 for x in chartFromStart[0]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
+         prefixProb = float(chartFromStart[0][:,stoi_setOfNonterminals["S"]].sum()) #log(sum([exp(float(x[0])) if x[0] is not None else 0 for x in chartFromStart[0]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
 
          surprisalTableSums[BOUNDARY-1] += prefixProb
          surprisalTableCounts[BOUNDARY-1] += BATCHSIZE
          valuesPerBoundary.append(prefixProb)
          print(BOUNDARY, prefixProb/BATCHSIZE, linearized[0])
-         assert prefixProb  < valuesPerBoundary[-2], "bug or numerical problem?"
+         assert prefixProb  < valuesPerBoundary[-2]+1e-7, "bug or numerical problem?"
 #         print(len(nonAndPreterminals_numeric))  
-runOnCorpus() 
+
+
+
+computeSurprisals(["yxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"[:MAX_BOUNDARY]])
+
