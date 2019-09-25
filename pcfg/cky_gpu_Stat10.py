@@ -187,6 +187,7 @@ def binarize(tree):
           children = [binarize(x) for x in tree["children"]]
           left = children[0]
           for child in children[1:]:
+             # TODO why does removing _BAR break things? (almost zero surprisal of the first word)
              left = {"category" : tree["category"]+"_BAR", "children" : [left, child], "dependency" : tree["dependency"]}
           return left
 
@@ -644,6 +645,7 @@ for preterminal in terminals:
 
 lexicalProbabilities_matrix = lexicalProbabilities_matrix.cuda().t()
 print(lexicalProbabilities_matrix) # (nonterminals, words)
+# TODO why are there some -inf's?
 
 def computeSurprisals(linearized):
       assert len(linearized[0]) == MAX_BOUNDARY
@@ -657,14 +659,14 @@ def computeSurprisals(linearized):
          for start in range(MAX_BOUNDARY): # the index of the first word taking part in the thing
             if start+length-1 >= MAX_BOUNDARY:
                continue
-            if length == 1: # TODO for words at the boundary, immediately add prefix and suffix counts
+            if length == 1: 
                if start < LEFT_CONTEXT:
                  for preterminal in terminals:
                     chart[start][start][:,stoi_setOfNonterminals[preterminal]].fill_(0)
                else:
                  lexical_tensor = torch.LongTensor([0 for _ in range(BATCHSIZE)])
              
-                 for batch in range(BATCHSIZE): # TODO speed this up as a single matrix multiplication
+                 for batch in range(BATCHSIZE): 
                     if wordCounts.get(linearized[batch][start],0) < OOV_THRESHOLD: # OOV
                        lexical_tensor[batch] = stoi["_OOV_"]
                     else:

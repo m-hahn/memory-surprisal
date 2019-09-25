@@ -181,13 +181,13 @@ def binarize(tree):
        if len(tree["children"]) <= 1: # remove unary projections
 #          print("Removing Unary: "+tree["category"])
           result = binarize(tree["children"][0]) #{"category" : tree["category"], "dependency" : tree["dependency"], "children" : children}
-          result["category"] = tree["category"]
+#          result["category"] = tree["category"] # TODO not sure why this makes a difference (together with adding/removing _BAR)
           return result
        else:
           children = [binarize(x) for x in tree["children"]]
           left = children[0]
           for child in children[1:]:
-             left = {"category" : tree["category"]+"_BAR", "children" : [left, child], "dependency" : tree["dependency"]}
+             left = {"category" : tree["category"], "children" : [left, child], "dependency" : tree["dependency"]} # +"_BAR"
           return left
 
 #          return {"category" : tree["category"], "children" : children, "dependency" : tree["dependency"]}
@@ -642,10 +642,13 @@ for preterminal in terminals:
     count = terminals[preterminal].get(word, 0) + OTHER_WORDS_SMOOTHING
     lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]][stoi[word]] = (log(count) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
 
+for i in range(len(lexicalProbabilities_matrix)):
+   for j in range(len(lexicalProbabilities_matrix[i])):
+       if float(lexicalProbabilities_matrix[i][j]) == float("-inf"):
+         assert itos_setOfNonterminals[i] not in terminals
 lexicalProbabilities_matrix = lexicalProbabilities_matrix.cuda().t()
-print(lexicalProbabilities_matrix) # (nonterminals, words)
+#print(lexicalProbabilities_matrix) # (nonterminals, words)
 # TODO why are there some -inf's?
-
 
 def computeSurprisals(linearized):
       assert len(linearized[0]) == MAX_BOUNDARY
