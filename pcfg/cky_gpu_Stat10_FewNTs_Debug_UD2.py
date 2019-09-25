@@ -672,6 +672,13 @@ for nonterminal in binary_rules:
 leftCornerCached = {}
 
 
+def logSumExpList(x):
+   x = torch.stack(x, dim=0)
+   constant = torch.max(x)
+   if constant == float("-inf"):
+     return x[0]
+   result = constant + torch.log(torch.exp(x-constant).sum(dim=0))
+   return result
 
 # Alternative (fast?) implementation of logSumExp
 def logSumExp(x,y):
@@ -841,6 +848,7 @@ def computeSurprisals(linearized):
       assert len(linearized[0]) == MAX_BOUNDARY
       assert len(linearized) == BATCHSIZE
 
+      # Presumably unnecessary
       for x in chart:     
           for y in x:
                y.fill_(float("-Inf"))
@@ -865,6 +873,7 @@ def computeSurprisals(linearized):
                  chart[start][start] = torch.nn.functional.embedding(input=lexical_tensor, weight=lexicalProbabilities_matrix)
                  assert start == start+length-1
             else:
+                entries = []
                 for start2 in range(start+1, MAX_BOUNDARY):
                   left = chart[start][start2-1]
                   right = chart[start2][start+length-1]
@@ -876,8 +885,8 @@ def computeSurprisals(linearized):
                   resultTotal = torch.bmm(resultLeft, torch.exp(right-maxRight).view(BATCHSIZE, -1, 1)).squeeze(2)
                   resultTotal = torch.nn.functional.relu(resultTotal) # because some values end up being slightly negative in result
                   resultTotalLog = torch.log(resultTotal)+(maxLeft+maxRight)
-                  entry = chart[start][start+length-1]
-                  chart[start][start+length-1] = logSumExp(resultTotalLog, entry)
+                  entries.append(resultTotalLog)
+                chart[start][start+length-1] = logSumExpList(entries)
       #############################
       # Now consider different endpoints
       valuesPerBoundary = [0]
@@ -891,7 +900,8 @@ def computeSurprisals(linearized):
              resultLog = (torch.log(result) + right_max)
              chartFromStart[BOUNDARY-1] = resultLog
       
-         for start in range(BOUNDARY)[::-1]: # now construct potential constituents that start at `start', but end outside of the portion
+         for start in range(BOUNDARY-1)[::-1]: # now construct potential constituents that start at `start', but end outside of the portion
+               entries = []
                for start2 in range(start+1, BOUNDARY):
                   left = chart[start][start2-1]
                   right = chartFromStart[start2]
@@ -904,7 +914,8 @@ def computeSurprisals(linearized):
                   result = torch.tensordot(resultTotal, invertedLeft, dims=([1], [1]))
                   result = torch.nn.functional.relu(result) # because some values end up being slightly negative in result
                   resultLog = (torch.log(result) + (maxLeft+maxRight))
-                  chartFromStart[start] = logSumExp(chartFromStart[start], resultLog)
+                  entries.append(resultLog)
+               chartFromStart[start] = logSumExpList(entries)
          prefixProb = float(chartFromStart[0][:,stoi_setOfNonterminals["_SENTENCES_"]].sum()) #log(sum([exp(float(x[0])) if x[0] is not None else 0 for x in chartFromStart[0]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
 
          surprisalTableSums[BOUNDARY-1] += prefixProb
