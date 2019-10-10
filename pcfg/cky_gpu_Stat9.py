@@ -1,6 +1,6 @@
 # Based on cky4d5.py
 # Fixing NA issue
-# Facing an NA issue when going 0-19
+# Based on Stat7 and Stat8 (Stat8 hackily fixed an NA issue arising from slightly negative numbers than somewhere weren't caught by <=0)
 
 # Minibatched version of cky_gpu_Stat3.py
 # Uses Python3
@@ -653,16 +653,11 @@ def computeSurprisals(linearized):
                   resultLeft = torch.tensordot(torch.exp(left-maxLeft), binary_rules_matrix, dims=([1], [1]))
  #                 print(resultLeft.size(), right.size())
 #                  quit()
-                  print(resultLeft, right)
                   resultTotal = torch.bmm(resultLeft, torch.exp(right-maxRight).view(BATCHSIZE, -1, 1)).squeeze(2)
                   resultTotalLog = torch.log(resultTotal)+(maxLeft+maxRight)
                   resultTotalLog[resultTotal <= 0].fill_(float("-inf"))
                   entry = chart[start][start+length-1]
-                  print(entry)
-                  assert "nan" not in str(entry.max())
-                  assert "nan" not in str(resultTotalLog.max())
                   chart[start][start+length-1] = logSumExp(resultTotalLog, entry)
-                  assert "nan" not in str(chart[start][start+length-1].max())
       #############################
       # Now consider different endpoints
       valuesPerBoundary = [0]
@@ -674,9 +669,6 @@ def computeSurprisals(linearized):
              right_max = torch.max(right)
              result = torch.tensordot(torch.exp(right-right_max), invertedLeft, dims=([1], [1]))
              resultLog = (torch.log(result) + right_max)
-             assert "nan" not in str(result.max())
-             print(right_max)
-             assert "nan" not in str(resultLog.max())
              chartFromStart[BOUNDARY-1] = resultLog
       
          for start in range(BOUNDARY)[::-1]: # now construct potential constituents that start at `start', but end outside of the portion
@@ -698,54 +690,14 @@ def computeSurprisals(linearized):
  #                 resultTotalLog[resultTotal <= 0].fill_(float("-inf"))
 
  #                 resultTotalLog_max = torch.max(resultTotalLog)
-                  assert "nan" not in str(resultLeft.max())  
-                  assert "nan" not in str(resultTotal.max())  
 
                   result = torch.tensordot(resultTotal, invertedLeft, dims=([1], [1]))
 
                   result = torch.nn.functional.relu(result) # because some values end up being slightly negative in result
 
-                  assert "nan" not in str(result.max())  
-                  assert "nan" not in str(maxLeft)  
-                  assert "nan" not in str(maxRight)  
                   resultLog = (torch.log(result) + (maxLeft+maxRight))
-                  print(709, result[resultLog != resultLog]) # has small negative numbers
-                  print(710, torch.log(result[resultLog != resultLog]))# as nan
-                  print(711, torch.log(result[resultLog != resultLog]) + (maxLeft+maxRight))
-                  print(712, resultLog[resultLog != resultLog])
-
-                  print(714, torch.log(result)[resultLog != resultLog])
-                  print(715, resultLog[result <= 0])
-                  print(716, result[result <= 0])
-
-#                  print(maxLeft+maxRight)
-                  assert "nan" not in str(result.max())  
-#                  assert "nan" not in str(resultLog.max())  
-
-#                  print(resultLog)
- #                 print(maxLeft, maxRight)
-
- #                 assert "nan" not in str(resultLog.max())  
                   resultLog[result <= 0].fill_(float("-inf"))
-
-                  print(728, result[resultLog != resultLog]) # has small negative numbers
-                  print(7281, result[resultLog != resultLog] <=0) # has small negative numbers
-                  print(729, torch.log(result[resultLog != resultLog]))# as nan
-                  print(730, torch.log(result[resultLog != resultLog]) + (maxLeft+maxRight))
-                  print(731, resultLog[resultLog != resultLog])
-
-                  print(732, torch.log(result)[resultLog != resultLog])
-                  print(733, resultLog[result <= 0])
-                  print(734, result[result <= 0])
-
-
-                  assert "nan" not in str(resultLog.max())  
-
-
-                  assert "nan" not in str(chartFromStart[start].max())  
                   chartFromStart[start] = logSumExp(chartFromStart[start], resultLog)
-                  assert "nan" not in str(resultLog.max())  
-                  assert "nan" not in str(chartFromStart[start].max())  
 #         for root in itos_setOfNonterminals:
 #             count = roots.get(root, 0)
 #             iroot = stoi_setOfNonterminals[root]

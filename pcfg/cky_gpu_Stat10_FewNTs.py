@@ -1,6 +1,6 @@
 # Based on cky4d5.py
 # Fixing NA issue
-# Facing an NA issue when going 0-19
+# Based on Stat9
 
 # Minibatched version of cky_gpu_Stat3.py
 # Uses Python3
@@ -86,14 +86,14 @@ logsoftmax = torch.nn.LogSoftmax()
 
 def orderSentenceRec(tree, sentence, printThings, linearized):
    label = tree.label()
-   if label[-1] in "1234567890":
-        label = label[:label.rfind("-")]
+   if "-" in label:
+      label = label[:label.index("-")]
    children = [child for child in tree]
    if type(children[0]) != nltk.tree.Tree:
       assert all([type(x) != nltk.tree.Tree for x in children])
       assert len(list(children)) == 1, list(children)
       for c in children:
-        if label in ["'", ":", "``", ",", "''", "#", ".", "-NONE-"] or label[0] == "-" or "*-" in c:
+        if len(label) == 0 or label in ["'", ":", "``", ",", "''", "#", ".", "-NONE-"] or label[0] == "-" or "*-" in c:
            continue
         word = sentence[tree.start]["word"] #c.lower(), )
         if word != c.lower().replace("\/","/"):
@@ -501,15 +501,16 @@ leftCornerCached = {}
 
 
 
-
+# Alternative (fast?) implementation of logSumExp
 def logSumExp(x,y):
-   constant = torch.max(x,y)
-   resultInner = torch.exp(x-constant) + torch.exp(y-constant)
-   result = constant + torch.log(resultInner)
-   nothingX = (x == float("-Inf"))
-   nothingY = (y == float("-Inf"))
-   result[nothingX] = y[nothingX]
-   result[nothingY] = x[nothingY]
+   constantX = torch.max(x)
+   if constantX == float("-Inf"):
+     return y
+   constantY = torch.max(y)
+   if constantY == float("-Inf"):
+     return x
+   resultInner = torch.exp(x-(constantX+constantY)) + torch.exp(y-(constantX+constantY))
+   result = (constantX + constantY) + torch.log(resultInner)
    return result
 
 
@@ -583,7 +584,7 @@ surprisalTableCounts = [0 for _ in range(MAX_BOUNDARY)]
 
 LEFT_CONTEXT = 10
 
-BATCHSIZE = 100 #200
+BATCHSIZE = 1000 #200
 
 sentCount = 0
 def iterator_dense(corpus):
@@ -613,6 +614,39 @@ def runOnCorpus():
 chart = [[torch.cuda.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(BATCHSIZE)]) for _ in range(MAX_BOUNDARY)] for _ in range(MAX_BOUNDARY)]
 
 
+itos = set(["_OOV_", "_EMPTY_"])
+assert "_OOV_" in itos
+
+for preterminal in terminals:
+  for word in terminals[preterminal]:
+    itos.add(word)
+assert "_OOV_" in itos
+itos = list(itos)
+assert "_OOV_" in itos
+
+stoi = dict(list(zip(itos, list(range(len(itos))))))
+assert "_OOV_" in itos
+
+print(stoi)
+assert "_OOV_" in stoi
+
+lexicalProbabilities_matrix = torch.FloatTensor([[float("-inf") for _ in itos] for _ in stoi_setOfNonterminals])
+
+for preterminal in terminals:
+  lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]][stoi["_OOV_"]] = (log(OOV_COUNT) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
+  lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]][stoi["_EMPTY_"]] = 0 # this is intended for the context words
+
+  for word in stoi:
+    if word == "_OOV_" or word == "_EMPTY_":
+         continue
+    count = terminals[preterminal].get(word, 0) + OTHER_WORDS_SMOOTHING
+    lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]][stoi[word]] = (log(count) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
+
+lexicalProbabilities_matrix = lexicalProbabilities_matrix.cuda().t()
+print(lexicalProbabilities_matrix) # (nonterminals, words)
+# TODO why are there some -inf's?
+
+
 def computeSurprisals(linearized):
       assert len(linearized[0]) == MAX_BOUNDARY
       assert len(linearized) == BATCHSIZE
@@ -625,44 +659,43 @@ def computeSurprisals(linearized):
          for start in range(MAX_BOUNDARY): # the index of the first word taking part in the thing
             if start+length-1 >= MAX_BOUNDARY:
                continue
-            if length == 1: # TODO for words at the boundary, immediately add prefix and suffix counts
+            if length == 1: 
                if start < LEFT_CONTEXT:
                  for preterminal in terminals:
                     chart[start][start][:,stoi_setOfNonterminals[preterminal]].fill_(0)
                else:
-                 for batch in range(BATCHSIZE): # TODO speed this up as a single matrix multiplication
+                 lexical_tensor = torch.LongTensor([0 for _ in range(BATCHSIZE)])
+             
+                 for batch in range(BATCHSIZE): 
                     if wordCounts.get(linearized[batch][start],0) < OOV_THRESHOLD: # OOV
-               #        print("OOV", linearized[batch][start])
-                       for preterminal in terminals:
-                           chart[start][start][batch,stoi_setOfNonterminals[preterminal]] = (log(OOV_COUNT) - log(nonAndPreterminals[preterminal]+OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
+                       lexical_tensor[batch] = stoi["_OOV_"]
                     else:
-                       for preterminal in terminals:
-                           count = terminals[preterminal].get(linearized[batch][start], 0) + OTHER_WORDS_SMOOTHING
-                           chart[start][start][batch,stoi_setOfNonterminals[preterminal]] = (log(count) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
+                       lexical_tensor[batch] = stoi[linearized[batch][start]]
+                 lexical_tensor = lexical_tensor.cuda()
+                 chart[start][start] = torch.nn.functional.embedding(input=lexical_tensor, weight=lexicalProbabilities_matrix)
                  assert start == start+length-1
             else:
                 for start2 in range(start+1, MAX_BOUNDARY):
   #                print(chart[start][start2-1].size(), chart[start2][start+length-1].size(), binary_rules_matrix.size())
                   left = chart[start][start2-1]
                   right = chart[start2][start+length-1]
-                  maxLeft = torch.max(left)
-                  maxRight = torch.max(right)
+                  maxLeft = torch.max(left) #, dim=1, keepdim=True)[0]
+                  maxRight = torch.max(right) #, dim=1, keepdim=True)[0]
                   if float(maxLeft) == float("-inf") or float(maxRight) == float("-inf"): # everything will be 0
                      continue
-                  
                   resultLeft = torch.tensordot(torch.exp(left-maxLeft), binary_rules_matrix, dims=([1], [1]))
- #                 print(resultLeft.size(), right.size())
-#                  quit()
-                  print(resultLeft, right)
                   resultTotal = torch.bmm(resultLeft, torch.exp(right-maxRight).view(BATCHSIZE, -1, 1)).squeeze(2)
+
+                  if True:
+                     resultTotal = torch.nn.functional.relu(resultTotal) # because some values end up being slightly negative in result
+
                   resultTotalLog = torch.log(resultTotal)+(maxLeft+maxRight)
-                  resultTotalLog[resultTotal <= 0].fill_(float("-inf"))
+                  if False:
+                     resultTotalLog[resultTotal <= 0].fill_(float("-inf"))
+#                  assert "nan" not in str(resultTotalLog.max())
+
                   entry = chart[start][start+length-1]
-                  print(entry)
-                  assert "nan" not in str(entry.max())
-                  assert "nan" not in str(resultTotalLog.max())
                   chart[start][start+length-1] = logSumExp(resultTotalLog, entry)
-                  assert "nan" not in str(chart[start][start+length-1].max())
       #############################
       # Now consider different endpoints
       valuesPerBoundary = [0]
@@ -674,9 +707,6 @@ def computeSurprisals(linearized):
              right_max = torch.max(right)
              result = torch.tensordot(torch.exp(right-right_max), invertedLeft, dims=([1], [1]))
              resultLog = (torch.log(result) + right_max)
-             assert "nan" not in str(result.max())
-             print(right_max)
-             assert "nan" not in str(resultLog.max())
              chartFromStart[BOUNDARY-1] = resultLog
       
          for start in range(BOUNDARY)[::-1]: # now construct potential constituents that start at `start', but end outside of the portion
@@ -698,54 +728,15 @@ def computeSurprisals(linearized):
  #                 resultTotalLog[resultTotal <= 0].fill_(float("-inf"))
 
  #                 resultTotalLog_max = torch.max(resultTotalLog)
-                  assert "nan" not in str(resultLeft.max())  
-                  assert "nan" not in str(resultTotal.max())  
 
                   result = torch.tensordot(resultTotal, invertedLeft, dims=([1], [1]))
 
                   result = torch.nn.functional.relu(result) # because some values end up being slightly negative in result
 
-                  assert "nan" not in str(result.max())  
-                  assert "nan" not in str(maxLeft)  
-                  assert "nan" not in str(maxRight)  
                   resultLog = (torch.log(result) + (maxLeft+maxRight))
-                  print(709, result[resultLog != resultLog]) # has small negative numbers
-                  print(710, torch.log(result[resultLog != resultLog]))# as nan
-                  print(711, torch.log(result[resultLog != resultLog]) + (maxLeft+maxRight))
-                  print(712, resultLog[resultLog != resultLog])
-
-                  print(714, torch.log(result)[resultLog != resultLog])
-                  print(715, resultLog[result <= 0])
-                  print(716, result[result <= 0])
-
-#                  print(maxLeft+maxRight)
-                  assert "nan" not in str(result.max())  
-#                  assert "nan" not in str(resultLog.max())  
-
-#                  print(resultLog)
- #                 print(maxLeft, maxRight)
-
- #                 assert "nan" not in str(resultLog.max())  
-                  resultLog[result <= 0].fill_(float("-inf"))
-
-                  print(728, result[resultLog != resultLog]) # has small negative numbers
-                  print(7281, result[resultLog != resultLog] <=0) # has small negative numbers
-                  print(729, torch.log(result[resultLog != resultLog]))# as nan
-                  print(730, torch.log(result[resultLog != resultLog]) + (maxLeft+maxRight))
-                  print(731, resultLog[resultLog != resultLog])
-
-                  print(732, torch.log(result)[resultLog != resultLog])
-                  print(733, resultLog[result <= 0])
-                  print(734, result[result <= 0])
-
-
-                  assert "nan" not in str(resultLog.max())  
-
-
-                  assert "nan" not in str(chartFromStart[start].max())  
+                  if False: # On the GPU, it seems log(0) = -inf
+                     resultLog[result <= 0].fill_(float("-inf"))
                   chartFromStart[start] = logSumExp(chartFromStart[start], resultLog)
-                  assert "nan" not in str(resultLog.max())  
-                  assert "nan" not in str(chartFromStart[start].max())  
 #         for root in itos_setOfNonterminals:
 #             count = roots.get(root, 0)
 #             iroot = stoi_setOfNonterminals[root]
