@@ -16,10 +16,13 @@ emb_dim = int(sys.argv[4]) if len(sys.argv) > 4 else 100
 rnn_dim = int(sys.argv[5]) if len(sys.argv) > 5 else 512
 rnn_layers = int(sys.argv[6]) if len(sys.argv) > 6 else 2
 lr_lm = float(sys.argv[7]) if len(sys.argv) > 7 else 0.1
-model = sys.argv[8] if len(sys.argv) > 8 else "RANDOM_BY_TYPE"
-input_dropoutRate = float(sys.argv[9]) if len(sys.argv) > 9 else 0.0
-batchSize = int(sys.argv[10]) if len(sys.argv) > 10 else 2
-replaceWordsProbability = float(sys.argv[11]) if len(sys.argv) > 11 else 0.0
+model = sys.argv[8]
+
+assert model == "RANDOM_BY_TYPE_BRANCHING_ENT"
+
+input_dropoutRate = float(sys.argv[9]) # 0.33
+batchSize = int(sys.argv[10])
+replaceWordsProbability = float(sys.argv[11])
 horizon = int(sys.argv[12]) if len(sys.argv) > 12 else 20
 prescripedID = sys.argv[13] if len(sys.argv)> 13 else None
 gpuNumber = sys.argv[14] if len(sys.argv) > 14 else "GPU0"
@@ -28,7 +31,7 @@ gpuNumber = int(gpuNumber[3:])
 
 #if len(sys.argv) == 13:
 #  del sys.argv[12]
-#assert len(sys.argv) in [12,13,14, 15]
+assert len(sys.argv) in [12,13,14, 15]
 
 
 assert dropout_rate <= 0.5
@@ -45,12 +48,46 @@ import sys
 print  >> sys.stderr, ("DOING PARAMETER SEARCH?", DOING_PARAMETER_SEARCH)
 assert not DOING_PARAMETER_SEARCH
 
-TARGET_DIR = "/u/scr/mhahn/deps/memory-need-neural-wordforms/"
+TARGET_DIR = "/u/scr/mhahn/deps/memory-need-neural-wordforms_fullVocab/"
 
 #with open("/juicier/scr120/scr/mhahn/deps/LOG"+language+"_"+__file__+"_model_"+str(myID)+".txt", "w") as outFile:
  #   print >> outFile, " ".join(sys.argv)
 
 
+with open("../memory-surprisal/code/branching_entropy/branching_entropy_coarse_byRelation.tsv", "r") as inFile:
+   branchingEntropies = [x.split("\t") for x in inFile.read().split("\n")]
+   header = branchingEntropies[0]
+   header = dict(zip(header, range(len(header))))
+   branchingEntropies = branchingEntropies[1:]
+   branchingEntropies = [x for x in branchingEntropies if x[header["Language"]] == language]
+   assert len(branchingEntropies) > 0
+branchingEntropies = dict([(x[1], float(x[2])) for x in branchingEntropies])
+print(branchingEntropies)
+
+from math import log
+
+def f(x):
+   return -(x*log(x) + (1-x) * log(1-x))
+
+branchingDeterministicProbabilities = {}
+
+for dep, ent in branchingEntropies.iteritems():
+ # print(ent)
+  upper = 1.0
+  lower = 0.5
+  while abs(upper-lower) > 0.0001:
+    mean = (upper+lower)/2
+    if f(mean) < ent:
+       upper = mean
+    else:
+       lower = mean
+#  print(lower, upper, f(lower), ent)
+  branchingDeterministicProbabilities[dep] = (lower+upper)/2
+  print(dep, "PROB DET", branchingDeterministicProbabilities[dep], ent)
+#quit()
+
+
+# ./python27 yWithMorphologySequentialStreamDropoutDev_BaselineLanguage_Fast_SaveLast_NoFinePOS_OnlyWordForms_FullVocab_ByBranchingEntropy.py North_Sami North_Sami 0.4 300 256 1 0.1 REAL_REAL 0.35 2 0.15 20
 
 posUni = set() #[ "ADJ", "ADP", "ADV", "AUX", "CONJ", "DET", "INTJ", "NOUN", "NUM", "PART", "PRON", "PROPN", "PUNCT", "SCONJ", "SYM", "VERB", "X"] 
 
@@ -58,15 +95,17 @@ posFine = set() #[ "``", ",", ":", ".", "''", "$", "ADD", "AFX", "CC",  "CD", "D
 
 
 
-#deps = ["acl", "acl:relcl", "advcl", "advmod", "amod", "appos", "aux", "auxpass", "case", "cc", "ccomp", "compound", "compound:prt", "conj", "conj:preconj", "cop", "csubj", "csubjpass", "dep", "det", "det:predet", "discourse", "dobj", "expl", "foreign", "goeswith", "iobj", "list", "mark", "mwe", "neg", "nmod", "nmod:npmod", "nmod:poss", "nmod:tmod", "nsubj", "nsubjpass", "nummod", "parataxis", "punct", "remnant", "reparandum", "root", "vocative", "xcomp"] 
+deps = ["acl", "acl:relcl", "advcl", "advmod", "amod", "appos", "aux", "auxpass", "case", "cc", "ccomp", "compound", "compound:prt", "conj", "conj:preconj", "cop", "csubj", "csubjpass", "dep", "det", "det:predet", "discourse", "dobj", "expl", "foreign", "goeswith", "iobj", "list", "mark", "mwe", "neg", "nmod", "nmod:npmod", "nmod:poss", "nmod:tmod", "nsubj", "nsubjpass", "nummod", "parataxis", "punct", "remnant", "reparandum", "root", "vocative", "xcomp"] 
+
 #deps = ["acl", " advcl", " advmod", " amod", " appos", " aux", " case cc", " ccompclf", " compound", " conj", " cop", " csubjdep", " det", " discourse", " dislocated", " expl", " fixed", " flat", " goeswith", " iobj", " list", " mark", " nmod", " nsubj", " nummod", " obj", " obl", " orphan", " parataxis", " punct", " reparandum", " root", " vocative", " xcomp"]
+
 
 from math import log, exp
 from random import random, shuffle, randint
 
-#header = ["index", "word", "lemma", "posUni", "posFine", "morph", "head", "dep", "_", "_"]
+header = ["index", "word", "lemma", "posUni", "posFine", "morph", "head", "dep", "_", "_"]
 
-from corpusIterator_V import CorpusIterator_V
+from corpusIterator import CorpusIterator
 
 originalDistanceWeights = {}
 
@@ -82,7 +121,7 @@ def initializeOrderTable():
    distanceCounts = {}
    depsVocab = set()
    for partition in ["train", "dev"]:
-     for sentence in CorpusIterator_V(language,partition, storeMorph=True).iterator():
+     for sentence in CorpusIterator(language,partition, storeMorph=True).iterator():
       for line in sentence:
           vocab[line["word"]] = vocab.get(line["word"], 0) + 1
           vocab_lemmas[line["lemma"]] = vocab_lemmas.get(line["lemma"], 0) + 1
@@ -204,13 +243,18 @@ def orderSentence(sentence, dhLogits, printThings):
       line["dependency_key"] = key
       dhLogit = dhWeights[stoi_deps[key]]
 #      probability = 1/(1 + torch.exp(-dhLogit))
+      line["coarse_dep"] = line["dep"].split(":")[0]
+ #     print(branchingEntropies[line["coarse_dep"]])
+#      quit()
       if model == "REAL":
+         assert False
          dhSampled = (line["head"] > line["index"]) #(random() < probability.data.numpy()[0])
       else:
-         dhSampled = (dhLogit > 0) #(random() < probability.data.numpy())
-#      logProbabilityGradient = (1 if dhSampled else -1) * (1-probability)
-#      line["ordering_decision_gradient"] = logProbabilityGradient
-      #line["ordering_decision_log_probability"] = torch.log(1/(1 + torch.exp(- (1 if dhSampled else -1) * dhLogit)))
+         assert branchingDeterministicProbabilities[line["coarse_dep"]] >= 0.5
+         if random() < branchingDeterministicProbabilities[line["coarse_dep"]]:
+            dhSampled = (dhLogit > 0)
+         else:
+            dhSampled = (dhLogit < 0)
 
       
      
@@ -325,13 +369,15 @@ import os
 #      distanceWeights[stoi_deps[key]] = float(line[header.index("DistanceWeight")].replace("[", "").replace("]",""))
 #      originalCounter = int(line[header.index("Counter")])
 if model == "RANDOM_MODEL":
+  assert False
   for key in range(len(itos_deps)):
      dhWeights[key] = random() - 0.5
      distanceWeights[key] = random()
   originalCounter = "NA"
 elif model == "REAL" or model == "REAL_REAL":
+  assert False
   originalCounter = "NA"
-elif model == "RANDOM_BY_TYPE":
+elif model == "RANDOM_BY_TYPE_BRANCHING_ENT":
   dhByType = {}
   distByType = {}
   for dep in itos_pure_deps:
@@ -342,6 +388,7 @@ elif model == "RANDOM_BY_TYPE":
      distanceWeights[key] = distByType[itos_deps[key][1].split(":")[0]]
   originalCounter = "NA"
 elif model == "RANDOM_BY_TYPE_CONS":
+  assert False
   distByType = {}
   for dep in itos_pure_deps:
     distByType[dep.split(":")[0]] = random()
@@ -350,6 +397,7 @@ elif model == "RANDOM_BY_TYPE_CONS":
      distanceWeights[key] = distByType[itos_deps[key][1].split(":")[0]]
   originalCounter = "NA"
 elif model == "RANDOM_MODEL_CONS":
+  assert False
   for key in range(len(itos_deps)):
      dhWeights[key] = 1.0
      distanceWeights[key] = random()
@@ -403,8 +451,10 @@ if len(itos) > 6:
 #for sentence in getNextSentence():
 #   print orderSentence(sentence, dhLogits)
 
-vocab_size = 10000
+vocab_size = 50000
 vocab_size = min(len(itos),vocab_size)
+import sys
+print >> sys.stderr, ("VOCAB_SIZE", vocab_size)
 #print itos[:vocab_size]
 #quit()
 
@@ -740,7 +790,7 @@ def computeDevLoss():
    devLoss = 0.0
    devWords = 0
 #   corpusDev = getNextSentence("dev")
-   corpusDev = CorpusIterator_V(language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
+   corpusDev = CorpusIterator(language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
    stream = createStreamContinuous(corpusDev)
 
    surprisalTable = [0 for _ in range(horizon)]
@@ -775,7 +825,7 @@ def computeDevLoss():
 
 DEV_PERIOD = 5000
 epochCount = 0
-corpusBase = CorpusIterator_V(language, storeMorph=True)
+corpusBase = CorpusIterator(language, storeMorph=True)
 while failedDevRuns == 0:
   epochCount += 1
   print "Starting new epoch, permuting corpus"

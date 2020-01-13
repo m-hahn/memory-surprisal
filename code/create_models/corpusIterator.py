@@ -9,7 +9,7 @@ SUBSTITUTE_TEST_FOR_DEV = ["UD_North_Sami", "UD_Irish", "UD_Buryat-BDT", "UD_Arm
 SUBSTITUTE_DEV_FOR_TRAIN = ["UD_Armenian-ArmTDP"]
 
 def readUDCorpus(language, partition):
-      basePaths = ["/u/scr/corpora/Universal_Dependencies_2.2/ud-treebanks-v2.2/", "/u/scr/corpora/Universal_Dependencies_2.1/ud-treebanks-v2.1/", "/u/scr/corpora/Universal_Dependencies_2.3/ud-treebanks-v2.3/"]
+      basePaths = ["/u/scr/corpora/Universal_Dependencies/Universal_Dependencies_2.2/ud-treebanks-v2.2/", "/u/scr/corpora/Universal_Dependencies/Universal_Dependencies_2.1/ud-treebanks-v2.1/", "/u/scr/corpora/Universal_Dependencies/Universal_Dependencies_2.3/ud-treebanks-v2.3/"]
       files = []
       while len(files) == 0:
         if len(basePaths) == 0:
