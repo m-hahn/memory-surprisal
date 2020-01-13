@@ -2,8 +2,8 @@
 *.log
 *.bbl
 *.blg
-*.pdf
 *.swo
 *.swp
 *.pyc
 results/per-run/
+writeup/paper.pdf
