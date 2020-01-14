@@ -114,6 +114,11 @@ If a word $w_{T-t}$, $t$ steps in the past, contains one bit of information abou
 The amount of such information is $I_t$. This explains the factor $t$.
 
 
+Assumptions:
+
+The memory representations at time $t+1$ are entirely determined by the memory representations at time $t$ and the word $w_t$.
+
+
 The theorem allows us to estimate the extra surprisal associated with each amount of memory capacity for a language.
 The quantities $\operatorname{I}_t$ can be estimated as the difference between the cross-entropy of language models that have access to the last $t-1$ or $t$ words.
 Given such estimates of $\operatorname{I}_t$, we estimate tradeoff curves as in Figure~\ref{fig:tradeoff} by tracing out $T=1, 2, \dots$.
@@ -126,7 +131,7 @@ It provides a \emph{lower bound} on the amount of information that needs to be s
 
 
 
-
+There are theories of retrieval where the main bottleneck lies not in capacity, but in difficulty of retrieval. See General Discussion.
 
 
 
@@ -240,6 +245,32 @@ We visualize this for the two processes from Figure~\ref{fig:basic} in Figure~\r
 
 
 
+
+\subsection{Information Locality}\label{sec:info-locality}
+
+Due to the factor $t$ inside each term of the sum, carrying the same amount of information over longer distances requires more memory -- that is, modeling long statistical dependencies is more costly in terms of memory than modeling shorter ones.
+This formalizes a general, assumption-free, link between memory and locality in language production.
+In Section~\ref{sec:listener}, we will extend this analysis to listeners performing incremental prediction.
+%incremental prediction.
+
+%We will write $I_t$ as an abbreviation for $\operatorname{I}[w_t, w_0 | w_1, ..., w_{t-1}]$.
+The proposition implies that memory is decreased if $I_t$ decreases quickly as $t \rightarrow \infty$ -- that is, if the contributions of long-term dependencies in the process are small.
+In particular, memory load can only be finite if $I_t$ decreases fast enough for the infinite sum to converge to a finite value.
+%This confirms the intuition that finiteness of memory entails that the contribution of long-term 
+
+%\paragraph{Discussion}
+%We have treated the process $(w_t)_t$ as a discrete-time process whose time steps correspond to words, but this is immaterial to the analysis.
+%The analysis is not even restricted to discrete timesteps: We can replace thes sum in Proposition~\ref{prop:suboptimal} with an integral to get a continuous-time version.
+
+We illustrate Proposition~\ref{prop:lower-bound} in Figure~\ref{fig:basic}.
+We consider two processes A and B, where $I_t := 5t^{-1.5}$ for $A$ and $I_t := 3.5 t^{-2.5}$ for $B$.
+The curves of $I_t$, as a function of the distance $t$, are shown in Figure~\ref{fig:basic} (left).
+In both cases, $I_t$ converges to zero as $t$ grows to infinity. 
+However, $I_t$ decays more quickly for Process A (red).
+This means that predictive information about an observation is concentrated more strongly in the recent past.
+In Figure~\ref{fig:basic} (right), we show $t\cdot I_t$ as a function of $t$.
+Note that the area under the curve is equal to (\ref{eq:memory-bound}).
+This area is smaller for the red process, as $I_t$ decays more quickly there.  
 
 
 

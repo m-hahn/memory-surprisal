@@ -1,0 +1,361 @@
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage{showlabels}
+\usepackage{fullpage}
+\usepackage{pslatex}
+%\usepackage{latexsym}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{url}
+%\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{rotating}
+\usepackage{natbib}
+\usepackage{amssymb}
+
+\usepackage{tikz-dependency}
+\usepackage{longtable}
+
+
+\newcommand{\R}[0]{\mathbb{R}}
+\newcommand{\E}[0]{\mathbb{E}}
+\newcommand{\Ff}[0]{\mathcal{F}}
+
+\usepackage{multirow}
+
+\newcommand{\soft}[1]{}
+\newcommand{\nopreview}[1]{}
+\newcommand\comment[1]{{\color{red}#1}}
+\newcommand\mhahn[1]{{\color{red}(#1)}}
+\newcommand\note[1]{{\color{red}(#1)}}
+\newcommand\jd[1]{{\color{red}(#1)}}
+\newcommand\rljf[1]{{\color{red}(#1)}}
+\newcommand{\key}[1]{\textbf{#1}}
+
+\usepackage{amsthm}
+
+\newcommand{\thetad}[0]{{\theta_d}}
+\newcommand{\thetal}[0]{{\theta_{LM}}}
+
+\newcounter{theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{thm}[theorem]{Theorem}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{question}[theorem]{Question}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{lemma}[theorem]{Lemma}
+
+
+\frenchspacing
+%\def\baselinestretch{0.975}
+
+%\emnlpfinalcopy
+%\def\emnlppaperid{496}
+
+\title{Supplementary Information for: Crosslinguistic Word Orders Enable an Efficient Tradeoff between Memory and Surprisal}
+\author{Michael Hahn, Judith Degen, Richard Futrell}
+\date{2018}
+
+\begin{document}
+
+\maketitle
+
+
+
+
+
+
+\begin{figure}[!htbp]
+\includegraphics[width=0.5\textwidth]{../code/visualize_neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
+\caption{Histogram}\label{fig:hist-real}
+\end{figure}
+
+
+\begin{table}[!htbp]
+\begin{longtable}{l|ll||l|llllllllllllll}
+	Language & Training & Held-Out & 	Language & Training & Held-Out\\ \hline
+\input{tables/corpusSizes.tex}
+\end{longtable}
+	\caption{Languages, with the number of training and held-out sentences available.}\label{tab:corpora}
+\end{table}
+
+\begin{table}[!htbp]
+\begin{longtable}{l|ll||l|llllllllllllll}
+	Language & Base. & Real & Language & Base. & Real \\ \hline
+\input{tables/samplesNumber.tex}
+\end{longtable}
+	\caption{Samples drawn per language according to the precision-dependent stopping criterion.}\label{tab:samples}
+\end{table}
+
+
+
+\begin{table}[!htbp]
+\begin{longtable}{l|lll||l|lllllllllllllll}
+	Language & Mean & Lower & Upper & Language & Mean & Lower & Upper \\ \hline
+\input{tables/boot_g_REAL.tex}
+\end{longtable}
+	\caption{Bootstrapped estimates for $G$.}\label{tab:boot-g}
+\end{table}
+
+
+
+\begin{table}[!htbp]
+\begin{longtable}{ccccccccccccccclll}
+\input{tables/medians_REAL_0.tex}
+\end{longtable}
+	\caption{Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median, dotted lines indicate empirical quantiles ($10\%, 20\%, \dots, 80\%, 90\%$). Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
+\end{table}
+
+\begin{table}[!htbp]
+\begin{longtable}{ccccccccccccccclll}
+\input{tables/medians_REAL_1.tex}
+\end{longtable}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}[!htbp]
+\begin{longtable}{ccccccccccccccclll}
+\input{tables/medians_REAL_2.tex}
+\end{longtable}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}[!htbp]
+\begin{longtable}{ccccccccccccccclll}
+\input{tables/medians_REAL_3.tex}
+\end{longtable}
+	\caption{Medians (cont.)}
+\end{table}
+
+
+
+
+
+
+
+\begin{table}[!htbp]
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/slice-hists_REAL_0.tex}
+\end{tabular}
+	\caption{Histograms: Surprisal, at maximum memory.}\label{tab:slice-hists-real}
+\end{table}
+
+\begin{table}[!htbp]
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/slice-hists_REAL_1.tex}
+\end{tabular}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}[!htbp]
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/slice-hists_REAL_2.tex}
+\end{tabular}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}[!htbp]
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/slice-hists_REAL_3.tex}
+\end{tabular}
+	\caption{Medians (cont.)}
+\end{table}
+
+
+%\begin{table}
+%\begin{tabular}{cccccccccccccccccc}
+%\input{tables/quantiles_REAL_0.tex}
+%\end{tabular}
+%	\caption{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
+%\end{table}
+%
+%\begin{table}
+%\begin{tabular}{cccccccccccccccccc}
+%\input{tables/quantiles_REAL_1.tex}
+%\end{tabular}
+%	\caption{Quantiles (part 2)}
+%\end{table}
+%
+%\begin{table}
+%\begin{tabular}{cccccccccccccccccc}
+%\input{tables/quantiles_REAL_2.tex}
+%\end{tabular}
+%	\caption{Quantiles (part 3)}
+%\end{table}
+%
+%
+%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{table}[!htbp]
+\begin{tabular}{l|ll||l|llllllllllllll}
+	Language & Base. & MLE & Language & Base. & MLE \\ \hline
+\input{tables/samplesNumber_ground.tex}
+\end{tabular}
+	\caption{Experiment 3: Samples drawn per language according to the precision-dependent stopping criterion.}\label{tab:samples}
+\end{table}
+
+
+
+
+
+\begin{table}[!htbp]
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/medians_0.tex}
+\end{tabular}
+	\caption{Experiment 3. Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
+\end{table}
+
+\begin{table}[!htbp]
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/medians_1.tex}
+\end{tabular}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}[!htbp]
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/medians_2.tex}
+\end{tabular}
+	\caption{Medians (cont.)}
+\end{table}
+
+\begin{table}[!htbp]
+\begin{tabular}{ccccccccccccccclll}
+\input{tables/medians_3.tex}
+\end{tabular}
+	\caption{Medians (cont.)}
+\end{table}
+
+
+
+
+\begin{table}[!htbp]
+\begin{tabular}{ccccccccccccccccll}
+\input{tables/medianDiff_0.tex}
+\end{tabular}
+	\caption{Median Differences between Real and Baseline: For each memory budget, we provide the difference in median surprisal between real languages and random baselines; for real orders (blue) and maximum likelihood grammars (red). Lower values indicate lower surprisal compared to baselines. Solid lines indicate sample means. Dashed lines indicate 95 $\%$ confidence intervals.}\label{tab:median_diffs}
+\end{table}
+
+\begin{table}[!htbp]
+\begin{tabular}{ccccccccccccccccll}
+\input{tables/medianDiff_1.tex}
+\end{tabular}
+	\caption{Median Differences (Part 2)}
+\end{table}
+
+\begin{table}[!htbp]
+\begin{tabular}{ccccccccccccccccll}
+\input{tables/medianDiff_2.tex}
+\end{tabular}
+	\caption{Median Differences (Part 3)}
+\end{table}
+
+\begin{table}[!htbp]
+\begin{tabular}{ccccccccccccccccll}
+\input{tables/medianDiff_3.tex}
+\end{tabular}
+	\caption{Median Differences (Part 4)}
+\end{table}
+
+
+
+
+
+
+\begin{table}[!htbp]
+\begin{tabular}{cccccccccccccccccc}
+\input{tables/quantiles_noAssumption_0.tex}
+\end{tabular}
+	\caption{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
+\end{table}
+
+\begin{table}[!htbp]
+\begin{tabular}{cccccccccccccccccc}
+\input{tables/quantiles_noAssumption_1.tex}
+\end{tabular}
+	\caption{Quantiles (part 2)}
+\end{table}
+
+\begin{table}[!htbp]
+\begin{tabular}{cccccccccccccccccc}
+\input{tables/quantiles_noAssumption_2.tex}
+\end{tabular}
+	\caption{Quantiles (part 3)}
+\end{table}
+
+
+
+
+
+
+
+\section{N-Gram Models}
+
+\input{control-ngrams.tex}
+
+
+
+
+%-- English, Korean, Russian
+%-- UD$\_$Polish-LFG (released in 2.2, not included in original experiment) (13,744 sentences)
+%-- character-level Russian
+%\section{Character-Level Modeling}
+%\section{Non-UD Dependency Treebanks}
+%- other treebanks
+%-- spoken Japanese (T{\"u}ba-J/S)
+%-- another Vietnamese dependency treebank \citep{nguyen-bktreebank:-2017} (5,639 sentences)
+%-- another Chinese dependency treebank LDC2012T05
+%Due to the sizes of these treebanks, can also do experiment with full word forms.
+%
+%
+%\section{Constituency Treebank}
+%
+%-- Penn treebank \citep{marcus-building-1993}
+%
+%-- spoken English (T{\"u}ba-E/S)
+%
+%-- spoken German (T{\"u}ba-D/S)
+%
+%-- Chinese treebank \citep{xue-chinese-2013}
+
+
+\section{Formal Analysis and Proofs}
+\input{formal-analysis.tex}
+
+
+\bibliographystyle{apalike}
+\bibliography{literature}
+
+\appendix
+
+
+
+
+\end{document}
+
+
+
+
+
+

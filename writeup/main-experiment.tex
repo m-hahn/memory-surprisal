@@ -1,6 +1,6 @@
 
 
-We now investigate whether word orders as found in natural language optimize the two memory-surprisal tradeoffs.
+We now investigate whether word orders as found in natural language reflect optimizization for the memory-surprisal tradeoff.
 We compare the memory-surprisal tradeoffs of 52 actual languages to those of counterfactual reorderings.
 We compare to counterfactual reorderings that differ from the actual languages in their word order rules, i.e., the rules that determine how syntactic structures are ordered into strings of words.\mhahn{where introduce the idea of word order}.
 To create such counterfactual reorderings, we parameterize these word order rules using a method introduced by Gildea and colleagues \citep{gildea-optimizing-2007, gildea-grammars-2010, gildea-human-2015}.
@@ -55,7 +55,7 @@ We provide the sizes of the resulting datasets in Table~\ref{tab:corpora}.
 
 
 
-\subsection{Counterfactual Ordering Grammars}
+\subsection{Baselines: Counterfactual Ordering Grammars}
 We define ordering grammars, small models of the rules by which languages order syntactic structures into sentences.
 Our formalism of ordering grammars adapts the method of \cite{gildea-optimizing-2007, gildea-grammars-2010, gildea-human-2015} to the setting of dependency corpora.
 
@@ -387,161 +387,4 @@ We found that branching direction entropy was strongly correlated with the surpr
 
 \mhahn{One thing that has to be discussed: the absolute values differ between languages}
 
-\section{Experiment 2: Free Word Orders}
-
-Here we match the branching entropies of the baseline grammars with those of the real language.
-
-
-\section{Experiment 3: Fixed Word Orders}
-
-
-A possible concern is that the optimization observed in Experiment 1 might be an artifact of the grammar formalism.
-To address this possibility, we repeated the experiment comparing baseline grammars to grammars that represent the word order of the real languages as faithfully as is possible with the grammar formalism.
-%We test this hypothesis by comparing baseline languages to \emph{fixed-order} versions of the real languages.
-%This enables us to tease apart the impact of the languages' word order rules from the impact of word order freedom.
-
-
-\begin{figure}
-\includegraphics[width=0.5\textwidth]{../code/visualize_neural/figures/full-GROUND-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
-	\caption{Histogram}\label{fig:hist-real}
-\end{figure}
-
-\subsection{Setup}
-
-Everything is identical to Experiment 1, except that we replaced the real orderings with orderings generated from grammars fitted to the word orders found in the real language.
-
-\paragraph{Fitting Ordering Grammars to Actual Orders}
-We create ordering grammars that are fit to the actual orderings of each language.
-These grammars faithfully represent the ordering rules if the actual language, to the extent that is possible in the formalism of ordering grammars.
-
-We construct these grammars by constructing \emph{probabilistic ordering grammars}, and setting the parameters to maximize the \emph{likelihood} of the actually observed orderings.
-We parameterized probabilistic ordering grammars as follows.
-For each relation type $\tau$, we introduce a \emph{direction parameter} $a_\tau \in [0,1]$ and a \emph{distance parameter} $b_\tau \in \mathbb{R}$.
-Each dependent is ordered on the left of its head with probability $a_\tau$ and to the right with probability $1-a_\tau$. 
-Then for each set of co-dependents $\{s_1, \dots , s_n\}$ placed on one side of a head, their order outward from the head is determined by iteratively sampling from the distribution $\operatorname{softmax}(b_{\tau_1}, \dots, b_{\tau_n})$ (\cite{goodfellow2016deep}, p. 184) without replacement. 
-
-Given a dependency tree, a probabilistic ordering grammar assigns a probability distribution over the possible projective linearizations of that tree.
-We use gradient descent to find parameters $a_\tau, b_\tau$ so as to maximize the overall likelihood of the orders in the actual corpus.
-
-
-We convert probabilistic ordering grammars into ordinary ordering grammars by the following method.
-Let $A_-$ be those relations $\tau$ where $a_\tau > 0.5$, similarly for $A_+$ those here $a_\tau \geq 0.5$.
-Then we order all relations in $A_-$ by $b_\tau$ in \emph{decreasing} order, and those in $A_+$ by $b_\tau$ in \emph{increasing} order.
-
-Then ordering a tree following the converted version is equivalent to greedily choosing the highest-probability linearization for the dependents of each head in a tree.
-
-
-We choose this method since maximum-likelihood grammars can be constructed with simple gradient descent.
-Another option would be to use some kind of discrete optimization method to approximate the original orders without a probabilistic method.
-However, discrete optimization is computationally challenging.
-
-\paragraph{Results}
-\mhahn{to what extent do we have to present the large results figures separately for Experiment 1 and this experiment? or maybe we just provide some summary statistics separately, but provide the figures together. or all the big figures go into the SI? I don't mind, I just don't know what people in that audience would expect.}
-
-
-
-
-%
-%\subsection{Discussion: Alternative Models}
-%In view of the NLP literature, the following are the main other options that exist for estimating mutual information and probabilities in sequences:
-%
-%A traditional model uses n-gram models. A challenge of n-gram models is that they do not express any morphosyntactic generalizations. Furthermore, standard n-gram models do not express any generalizations about pairs of words that are not adjacent -- e.g., encoding a generalization about morphological agreement between two words is hard for such a model to capture if the two words are not always adjacent. Both the small scale of available corpora in many languages and free word order in many languages with rich morphology thus seem to make such models unattractive.
-%We evaluate our hypothesis using n-gram models in SI Section X, confirming the conclusions obtained from neural models.
-%
-%A second option is to construct a statistical grammar, such as PCFG.
-%The challenge is to encode statistical morphosyntactic generalizations, and to decide which independence assumptions to put into the model.
-%One can either decide on a language-specific basis which generalizations to put in (laborious and might introduce bias), or choose a general model family that is rich enough to learn generalizations.
-%The second option will make this a machine learning model that, for our purposes, does not seem to be superior to a recurrent neural network.
-%
-
-
-
-%\subsection{Data}
-%\subsection{Setup}
-%The recurrent neural network architecture has a range of adjustable parameters such as the number of neurons.
-%For each language, we used Bayesian optimization using the Expected Improvement acquisition function (CITE) \citep{snoek-practical-2012} to find a good setting of the hyperparameters, taking average surprisal on random grammars as the objective.
-%This biases the hyperparameters towards favoring counterfactual grammars.
-
-%\subsection{Setup}
-
-
-
-
-%\paragraph{Data}
-%Given a sequence of input words $w_1, ..., w_n \in V$, the model 
-%%
-%\textbf{TODO I'm describing this in a lot of detail. Alternatively, we can say this is a standard NLP method and refer to the NLP literature for the definition.}
-%The first component of such a model is an \emph{embedding matrix} $W_{emb} \in \mathbb{R}^{|V| \times d_{emb}}$, where the \emph{vocabulary} $\mathcal{V}$ is a set, containing the words that occur in the corpus, and $d_{emb} \in \mathbb{N}$ is a fixed parameter.
-%This matrix assigns a $d_{emb}$-dimensional vector to each word occurring in the corpus.
-%The second component is an LSTM cell $f_{LSTM}$, a nonlinear transformation mapping an \emph{input} vector $x_{i} \in \mathbb{R}^{d_{emb}}$ a \emph{hidden state} $h_i \in \mathbb{R}^{d_{LSTM}}$ and a \emph{cell state} $c_i \in \mathbb{R}^{d_{LSTM}}$ to a new pair of hidden state and cell states $h_{i+1}, c_{i+1} \in \mathbb{R}^{d_{LSTM}}$.
-%The LSTM cell $f_{LSTM}$ is parameterized by a matrix of numerical parameters $W_{LSTM}$.
-%
-%%Such networks estimate the probability of a word in context as follows.
-%Given a sequence of input words $w_1, ..., w_n \in V$, the model first retrieves fixed-dimensionality vector representations $x_1, ..., x_n$, where $x_i$ is the row of $W_{emb}$ corresponding to the word $w_i$.
-%It then computes a sequence of hidden and cell states by the following recurrent computation:
-%\begin{align*}
-%	h_1, c_1 &:= 0 \\
-%	h_2, c_2 &:= f_{LSTM}(x_1, h_1, c_1) \\
-%	\dots \\
-%	h_{n+1}, c_{n+1} &:= f_{LSTM}(x_n, h_n, c_n) \\
-%\end{align*}
-%The vector $h_i$ encodes the result of reading the words $w_1, ..., w_{i-1}$.
-%We will write $LSTM(w_1, ..., w_{i-1})$ for $h_i$.
-%
-%The third component of the recurrent language model is the matrix $W_{output} \in \mathbb{R}^{|V| \times d_{LSTM}}$.
-%We obtain per-word predictions of the next word by computing
-%\begin{align*}
-%	s_i := W_{output} h_i \in \mathbb{R}^{|V|} \\
-%	p_i := \operatorname{softmax}(s_i)\in \mathbb{R}^{|V|} 
-%\end{align*}
-%where the softmax transformation normalizes vectors into probability distributions as follows
-%\begin{equation}
-%	\operatorname{softmax}(x)_i := \frac{\exp(x_i)}{\sum_{j=1}^{|V|} \exp(x_j)}
-%\end{equation}
-%Finally, the probability of the word $w_n$ in the context $w_1, ..., w_{n-1}$ is computed as
-%\begin{equation}
-%	p_\theta(w_n|w_1...w_{n-1}) := \frac{\exp((p_n)_{w_n})}{\sum_{w \in V} \exp(x_w)}
-%\end{equation}
-%and thus the surprisal is estimated as
-%\begin{equation}
-%- \log	p_\theta(w_n|w_1...w_{n-1}) := -\log \frac{\exp((p_n)_{w_n})}{\sum_{w \in V} \exp(x_w)}
-%\end{equation}
-%We discuss the choice of the numerical parameters in the next section.
-%
-
-
-
-%We collected data from the actual and random orderings in proportion one to two.
-%The stopping criterion will be described below.
-
-%Due to the randomness both in the sequence of training examples and the random initialization of the network weights, the results of the parameter estimation procedure will vary when run multiple times, especially on smaller datasets.
-%Informally, due to the finiteness of the dataset, multiple parameter settings are compatible with the available training data.
-%Consequently, memory-surprisal tradeoffs estimated on held-out sets will also show some variation.
-%Therefore, we collect multiple samples for the actual orderings to control for variation due to the random initialization of the neural network.
-
-
-%We chose these thresholds based on preliminary simulations which had suggested that these widths were achievable at acceptable computational cost.
-
-%- at least 30 samples from both baseline and real
-%
-%- for the language-level tradeoff curve, either the fraction is zero or the bootstrapped CI has width $\leq 0.2$.
-
-
-
-%
-%(1) is bigram MI always greater in real languages?
-%
-%(2) is the tradeoff curve always lower than for deterministic simple grammar? for deterministic complex grammars? for stochastic simple/complex grammars?
-
-
-
-
-%Training progresses in a series of parameter update steps, constructing updated parameters $\theta_0, \theta_1, \theta_2, \dots$.
-%In the $n$-th update step, we first randomly select a word sequence $w_1 ... w_T$ from the training corpus, and use the LSTM using the current parameter setting $\theta_n$ to compute the per-word surprisals.
-%We then update the parameter vector:
-%\mhahn{maybe better to just say we use SGD}
-%\begin{equation}\label{eq:train}
-%	\theta_{n+1} := \theta_n + \alpha \partial_\theta \left(\sum_{i=1}^T \log p_\theta(w_i|w_1...w_{i-1})\right)
-%\end{equation}
-%where $\alpha \in \mathbb{R}_+$ is the \emph{learning rate}.
 
