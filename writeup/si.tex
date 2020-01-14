@@ -17,6 +17,10 @@
 \usepackage{natbib}
 \usepackage{amssymb}
 
+
+
+\usepackage{caption}
+
 \usepackage{tikz-dependency}
 \usepackage{longtable}
 
@@ -68,124 +72,347 @@
 
 
 
-
-\begin{figure}[!htbp]
+\begin{center}
 \includegraphics[width=0.5\textwidth]{../code/visualize_neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
-\caption{Histogram}\label{fig:hist-real}
+\captionof{figure}{Histogram}\label{fig:hist-real}
+\end{center}
+
+
+
+
+\section{Formal Analysis and Proofs}
+
+In this section, we prove the theorem described above.
+
+\subsection{Mathematical Assumptions}
+
+We first make explicit how we formalize language processing for proving the theorem.
+
+\paragraph{Ingredient 1: Language as a Stationary Stochastic Process}
+We represent language as a stochastic process of words $\dots w_{-2} w_{-1} w_0 w_{1} w_{2} \dots$, extending indefinitely both into the past and into the future.
+The symbols $w_i$ belong to a common set, representing the words of the language.\footnote{Could also be phonemes, sentences, ..., any other kind of unit.}
+
+%We model the sequence as a probabilistic sequence; that is, given a context $w_{<t}$, the next word is distributed according to a distribution $p(w_t|w_{<t})$.
+
+The assumption of infinite length is for mathematical convenience and does not affect the substance of our results:
+As we restrict our attention to the processing of individual sentences, which have finite length, we will actually not make use of long-range and infinite contexts.
+
+We make the assumption that this process is \emph{stationary}.
+Formally, this means that the conditional distribution $P(w_t|w_{<t})$ does not depend on $t$, it only depends on the actual sequence $w_{<t}$.
+Informally, this says that the process has no `internal clock', and that the statistical rules of the language do not change at the timescale we are interested in.
+In reality, the statistical rules of language do change: They change as language changes over generations, and they also change between different situations -- e.g., depending on the interlocutor at a given point in time.
+Given that we are interested in memory needs in the processing of \emph{individual sentences}, at a timescale of seconds or minutes, stationarity seems to be a reasonable assumption to make.
+
+
+
+
+
+\begin{figure}
+\includegraphics[width=0.45\textwidth]{figures/markov-condition.png}
+	\caption{Illustration of (\ref{eq:listener-markov}). As the utterance unfolds, the listener maintains a memory state. After receiving word $w_t$, the listener computes their new memory state $m_t$ based on the previous memory state $m_{t-1}$ and the new word $w_t$.}\label{fig:listener-markov}
 \end{figure}
 
 
-\begin{table}[!htbp]
+\paragraph{Ingredient 2: Flow of Information}
+We now analyze memory from the perspective of the listener, who needs to maintain information about the past to predict the future.
+As the speaker's utterance unfolds, the listener maintains a memory state $m_t$.
+
+There are no assumptions about the memory architecture and the nature of its computations.
+We only make a basic assumption about the flow of information (Figure~\ref{fig:listener-markov}):
+At a given point in time, the listener's memory state $m_t$ is determined by the last word $w_t$, and the prior memory state $m_{t-1}$.
+As a consequence, $m_t$ contains no information about the process beyond what is contained in the last word observed $w_{t-1}$ and in the memory state before that word was observed $m_{t-1}$.
+This is formalized as a statement about conditional probabilities:
+	\begin{equation}\label{eq:listener-markov}
+		p(m_1| (w_{t})_{t \in \mathbb{Z}}, m_0)   = p(m_1 | m_0, w_1)
+	\end{equation}
+This says that $m_1$ contains no information about the utterances beyond what is contained in $m_0$ and $w_1$.	
+As a consequence, the listener has no knowledge of the speaker's state beyond the information provided in their prior communication.
+This is a simplification, as the listener could obtain information about the speaker from other sources, such as their common environment (weather, ...).
+\mhahn{For the study of memory in sentence processing, this seems fair. Discuss this more.}
+
+%
+%First, we assume that the listener's internal state cannot depend on the future beyond its dependency on the past.
+%Formally: 
+%\begin{equation}\label{eq:listener-markov-1}
+%m_t \bot w_{>t} | w_{\leq t}
+%\end{equation}
+%This means that the listener has no access to the speaker's state beyond what the speaker has already uttered.
+%
+%Second, we assume that $m_t$ contains no information about the past beyond what is contained in $w_{t-1}$ and $m_{t-1}$:
+%\begin{equation}\label{eq:listener-markov-2}
+%m_t \bot w_{<t} | w_{t-1}, m_{t-1}
+%\end{equation}
+%This means that any information about the past in $m_t$ has to be contained in $m_{t-1}$ -- formalizing the idea that a listener can only remember aspects of the past by keeping them in memory, and that memories of the past cannot `spontaneously' form later in the future.
+
+%The listener can trade off memory and future surprisal:
+%A listener who chooses to store less memory will exerience higher surprisal in the future.
+%A listener can achieve minimal surprisal -- that is, the lowest average surprisal that any model could achieve by predicting the future from the past -- if and only if $m_t$ contains all predictive information about the future that is contained in the past.
+
+%We now describe the memory-surprisal tradeoff. will describe this tradeoff, and show that listener memory is linked to locality in a way similar to speaker memory.
+%Consider a listener who uses $J$ bits of memory on average.
+%What can we say about the listener's surprisal?
+
+\subsection{Proof of the Theorem}
+
+We restate the theorem:
+
+\begin{thm}\label{prop:suboptimal}
+	Let $T$ be any positive integer ($T \in \{1, 2, 3, ...\}$), and consider a listener using at most
+	\begin{equation}\label{eq:memory}
+		\sum_{t=1}^T t I_t
+	\end{equation}
+bits of memory on average.
+Then this listener will incur surprisal at least
+	$$H[w_t|w_{<t}] + \sum_{t > T} I_t$$
+	on average.
+\end{thm}
+
+
+
+We formalize a language as a stationary stochastic process $\dots w_{-2} w_{-1} w_0 w_{1} w_{2} \dots$, extending indefinitely both into the past and into the future.
+The symbols $w_i$ belong to a common set, representing the words of the language.\footnote{Could also be phonemes, sentences, ..., any other kind of unit.}
+We denote the listener's memory state at time $t$, after hearing $w_{<t} = ... w_{t-2} w_{t-1}$ by $m_t$.
+As described above, we assume
+\begin{equation}\label{eq:listener-markov}
+	p(m_{t+1}| (w_{t'})_{t' \in \mathbb{Z}}, m_t)   = p(m_{t+1} | m_t, w_{t})
+\end{equation}
+that is, $m_{t+1}$ contains no information about the utterances beyond what is contained in $m_t$ and $w_{t}$.
+As a consequence, the listener has no knowledge of the speaker's state beyond the information provided in their prior communication.
+
+
+The average number of bits required to encode this state is $\operatorname{H}[m_t]$, which by assumption is at most $\sum_{t=1}^T t I_t$.
+As the listener's predictions are made on the basis of her memory state, her average surprisal is at least $\operatorname{H}[w_t | m_t]$.
+The difference between the listener's surprisal and optimal surprisal is thus at least $\operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]$.
+By the assumption of stationarity, we can, for any positive integer $T$, rewrite this expression as
+\begin{equation}\label{eq:byStation}
+\operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}] =  \frac{1}{T} \sum_{t'=1}^{T} \left(\operatorname{H}[w_{t'} | m_{t'}] - \operatorname{H}[w_{t'} | w_{<t'}]\right) 
+\end{equation}
+
+
+We first show a lemma:
+
+\begin{lemma}
+For any positive integer $t$, the following inequality holds:
+\begin{equation}
+H[w_t | m_t] \geq H[w_t|w_{1 \dots t-1}, m_1]
+\end{equation}
+\end{lemma}
+\begin{proof}[Proof of the Lemma]
+	By Bayes' Theorem
+\begin{align*}
+	p(w_t|m_0, m_1, w_{0\dots t-1}) &= \frac{p(m_1|m_0, w_{0\dots t})}{p(m_1|m_0, w_{0\dots t-1})} \cdot p(w_t|m_0, w_{0\dots t-1})
+\end{align*}
+By Equation~\ref{eq:listener-markov}, the quotient on the RHS is equal to $1$, so
+\begin{align*}
+p(w_t|m_0, m_1, w_{0\dots t-1}) = p(w_t|m_0, w_{0\dots t-1})
+\end{align*}
+So we have a Markov chain
+\begin{equation}
+(w_t) \rightarrow (m_0, w_{0 \dots t-1})   \rightarrow   (m_1, w_{1 \dots t-1})
+\end{equation}
+Thus, by the Data Processing Inequality,
+\begin{equation}
+H[w_t| w_{1 \dots t-1}, m_{1}] \geq H[w_t|w_{0 \dots t-1}, m_0]
+\end{equation}
+Finally, iteratively applying this inequality, we get:
+\begin{align*}
+H[w_t | m_t] \geq H[w_t| w_{t-1}, m_{t-1}] \geq H[w_t| w_{t-2, t-1}, m_{t-2}] \geq ... \geq H[w_t|w_{1 \dots t-1}, m_1]
+\end{align*}
+\end{proof}
+Plugging this inequality into Equation~\ref{eq:byStation} above:
+\begin{align*}
+\operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]& \geq \frac{1}{T} \sum_{t=1}^T ( \operatorname{H}[w_t|w_{1\dots t-1}, m_1] - \operatorname{H}[w_t | w_{1\dots t-1}, w_{\leq 0}]  )    \\
+& = \frac{1}{T} \left(\operatorname{H}[w_{1\dots T} | m_1] - \operatorname{H}[w_{1\dots T} | w_{\leq 0}]\right)  \\
+& = \frac{1}{T} \left(I[w_{1\dots T}|w_{\leq 0}] - I[w_{1\dots T}|m_1]\right) 
+\end{align*}
+The first term $I[w_{1\dots T}|w_{\leq 0}]$ can be rewritten in terms of $I_t$:
+\begin{align*}
+I[w_{1\dots T}|w_{\leq 0}] &= \sum_{i=1}^T \sum_{j=-1}^{-\infty} I[w_i, w_j | w_{j+1}...w_{i-1}] = \sum_{t=1}^T t I_t + T \sum_{t > T} I_t
+\end{align*}
+Therefore
+\begin{align*}
+\operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]& \geq \frac{1}{T} \left(\sum_{t=1}^T t I_t + T \sum_{t > T} I_t - I[w_{1\dots T}|m_1]\right) 
+\end{align*}
+$I[w_{1\dots T}|m_1]$ is at most $\operatorname{H}[m_1]$, which is at most $\sum_{t=1}^T t I_t$ by assumption. Thus, the expression above is bounded by
+\begin{align*}
+\operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]& \geq \frac{1}{T} \left(\sum_{t=1}^T t I_t + T \sum_{t > T} I_t - \sum_{t=1}^T t I_t\right) \\
+&= \sum_{t > T} I_t
+\end{align*}
+Rearranging shows that the listener's surprisal is at least $\operatorname{H}[w_t|m_t] \geq \operatorname{H}[w_t | w_{<t}] + \sum_{t > T} I_t$, as claimed.
+%\end{proof}
+
+
+%Justify linear interpolation: The curve is convex, which is shown by `time-sharing': Use one code $\lambda$ fraction of times, and the other code $1-\lambda$ fraction of times.
+
+
+\subsection{Locality in a model with Memory Retrieval}
+
+Here we show that our information-theoretic analysis is compatible with models placing the main bottleneck in the difficulty of retrieval.
+We describe an information-theoretic formalization of a model that has both a limited WM and an unlimited STM.
+
+We consider a model that maintains both a small working memory $m_t$ and an unlimited short-term memory $s_t$.
+
+Predictions are made based on working memory $m_t$, incurring surprisal $H[w_t|m_t]$.
+In each time step, there is some amount of communication between $m_t$ and $s_t$, corresponding to retrieval operations.
+We model this using a variable $r_t$ representing the information that is retrieved from $s_t$.
+
+This is instantiated by ACT-R.
+We can explicitly explain how this covers the McElree ideas and the Lewis and Vasishth ACT-R model.
+
+This model has two bottlenecks:
+The working memory capacity, which we model as $H[m_t]$, and the amount of information that is added through retrieval, modeled as $H[r_t|m_t]$.
+
+
+%Bounding retrieval = bounding the precision and/or content of retrieved items. Explain more how this relates to McElree and ACT-R.
+
+
+\begin{thm}
+	Assume the average working memory $H[m_t]$ is bounded as $H[L_t] \leq \sum_{t=1}^T t I_t$, and the average amount of retrieval is bounded as $H[R_t] \leq \sum_{t=T+1}^S I_t$ (per word).
+	Then $H[w_t|m_t] \geq H[w_t|x_{<t}] + \sum_{t>S} I_t$.
+\end{thm}
+
+\begin{proof}
+The negative surprisal gap is
+$\leq \frac{1}{T}(I[X_1\dots X_T|(M_0, R_1, ..., R_T)] - \sum_{t=1}^T t I_t - T \sum_{t>T} I_t) \leq  \frac{1}{T}(T\cdot H[R_t] - T \sum_{t>T} I_t) = H[R_t] - \sum_{t>T} I_t$
+
+\end{proof}
+
+
+
+We can also think of this as a multi-objective optimization, aiming to minimize $\lambda_1 WM + \lambda_2 Retrieval$ to achieve a given surprisal level.
+
+If $\frac{\lambda_2}{\lambda_1} \rightarrow \infty$ (retrievals get more expensive), recover previous model.
+
+If $\frac{\lambda_2}{\lambda_1} \rightarrow 0$ (retrievals get cheaper), locality effect gets weaker, and disappears in the limit\footnote{(Of course, even in this limit, there might be additional factors that may still favor locality in a specific implementation of memory -- e.g., in ACT-R, decay and interference are less problematic if there is locality.)}
+
+Objective
+$$\min_{T} \lambda_1 \sum_{t=1}^T t I_t + \lambda_2 \sum_{t=T+1}^S I_t$$
+has solution $T \approx \frac{\lambda_2}{\lambda_1}$.\footnote{Can do simple proof using the continuous-$T$-version.}
+
+
+Consequence: As long as retrievals are more expensive than keeping the same amount in WM, locality is predicted.
+
+
+
+
+\section{Corpus Size per Language}
+
+\begin{center}
 \begin{longtable}{l|ll||l|llllllllllllll}
 	Language & Training & Held-Out & 	Language & Training & Held-Out\\ \hline
 \input{tables/corpusSizes.tex}
 \end{longtable}
-	\caption{Languages, with the number of training and held-out sentences available.}\label{tab:corpora}
-\end{table}
+	\captionof{table}{Languages, with the number of training and held-out sentences available.}\label{tab:corpora}
+\end{center}
 
-\begin{table}[!htbp]
+\section{Samples Drawn per Language}
+
+\begin{center}
 \begin{longtable}{l|ll||l|llllllllllllll}
 	Language & Base. & Real & Language & Base. & Real \\ \hline
 \input{tables/samplesNumber.tex}
 \end{longtable}
-	\caption{Samples drawn per language according to the precision-dependent stopping criterion.}\label{tab:samples}
-\end{table}
+	\captionof{figure}{Samples drawn per language according to the precision-dependent stopping criterion.}\label{tab:samples}
+\end{center}
 
 
 
-\begin{table}[!htbp]
+\begin{center}
 \begin{longtable}{l|lll||l|lllllllllllllll}
 	Language & Mean & Lower & Upper & Language & Mean & Lower & Upper \\ \hline
 \input{tables/boot_g_REAL.tex}
 \end{longtable}
-	\caption{Bootstrapped estimates for $G$.}\label{tab:boot-g}
-\end{table}
+	\captionof{figure}{Bootstrapped estimates for $G$.}\label{tab:boot-g}
+\end{center}
 
 
+\section{Detailed Results per Language}
 
-\begin{table}[!htbp]
+\subsection{Median Surprisal per Memory Budget}
+
+\begin{center}
 \begin{longtable}{ccccccccccccccclll}
 \input{tables/medians_REAL_0.tex}
 \end{longtable}
-	\caption{Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median, dotted lines indicate empirical quantiles ($10\%, 20\%, \dots, 80\%, 90\%$). Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
-\end{table}
+	\captionof{figure}{Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median, dotted lines indicate empirical quantiles ($10\%, 20\%, \dots, 80\%, 90\%$). Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
+\end{center}
 
-\begin{table}[!htbp]
+\begin{center}
 \begin{longtable}{ccccccccccccccclll}
 \input{tables/medians_REAL_1.tex}
 \end{longtable}
-	\caption{Medians (cont.)}
-\end{table}
+	\captionof{figure}{Medians (cont.)}
+\end{center}
 
-\begin{table}[!htbp]
+\begin{center}
 \begin{longtable}{ccccccccccccccclll}
 \input{tables/medians_REAL_2.tex}
 \end{longtable}
-	\caption{Medians (cont.)}
-\end{table}
+	\captionof{figure}{Medians (cont.)}
+\end{center}
 
-\begin{table}[!htbp]
+\begin{center}
 \begin{longtable}{ccccccccccccccclll}
 \input{tables/medians_REAL_3.tex}
 \end{longtable}
-	\caption{Medians (cont.)}
-\end{table}
+	\captionof{figure}{Medians (cont.)}
+\end{center}
 
 
 
 
+\subsection{Surprisal at Maximum Memory}
 
 
-
-\begin{table}[!htbp]
+\begin{center}
 \begin{tabular}{ccccccccccccccclll}
 \input{tables/slice-hists_REAL_0.tex}
 \end{tabular}
-	\caption{Histograms: Surprisal, at maximum memory.}\label{tab:slice-hists-real}
-\end{table}
+	\captionof{figure}{Histograms: Surprisal, at maximum memory.}\label{tab:slice-hists-real}
+\end{center}
 
-\begin{table}[!htbp]
+\begin{center}
 \begin{tabular}{ccccccccccccccclll}
 \input{tables/slice-hists_REAL_1.tex}
 \end{tabular}
-	\caption{Medians (cont.)}
-\end{table}
+	\captionof{figure}{Medians (cont.)}
+\end{center}
 
-\begin{table}[!htbp]
+\begin{center}
 \begin{tabular}{ccccccccccccccclll}
 \input{tables/slice-hists_REAL_2.tex}
 \end{tabular}
-	\caption{Medians (cont.)}
-\end{table}
+	\captionof{figure}{Medians (cont.)}
+\end{center}
 
-\begin{table}[!htbp]
+\begin{center}
 \begin{tabular}{ccccccccccccccclll}
 \input{tables/slice-hists_REAL_3.tex}
 \end{tabular}
-	\caption{Medians (cont.)}
-\end{table}
+	\captionof{figure}{Medians (cont.)}
+\end{center}
 
 
 %\begin{table}
 %\begin{tabular}{cccccccccccccccccc}
 %\input{tables/quantiles_REAL_0.tex}
 %\end{tabular}
-%	\caption{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
-%\end{table}
+%	\captionof{figure}{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
+%\end{center}
 %
 %\begin{table}
 %\begin{tabular}{cccccccccccccccccc}
 %\input{tables/quantiles_REAL_1.tex}
 %\end{tabular}
-%	\caption{Quantiles (part 2)}
-%\end{table}
+%	\captionof{figure}{Quantiles (part 2)}
+%\end{center}
 %
 %\begin{table}
 %\begin{tabular}{cccccccccccccccccc}
 %\input{tables/quantiles_REAL_2.tex}
 %\end{tabular}
-%	\caption{Quantiles (part 3)}
-%\end{table}
+%	\captionof{figure}{Quantiles (part 3)}
+%\end{center}
 %
 %
 %
@@ -203,114 +430,115 @@
 
 
 
+\subsection{Samples Drawn (Experiment 3)}
 
 
 
-
-\begin{table}[!htbp]
+\begin{center}
 \begin{tabular}{l|ll||l|llllllllllllll}
 	Language & Base. & MLE & Language & Base. & MLE \\ \hline
 \input{tables/samplesNumber_ground.tex}
 \end{tabular}
-	\caption{Experiment 3: Samples drawn per language according to the precision-dependent stopping criterion.}\label{tab:samples}
-\end{table}
+	\captionof{figure}{Experiment 3: Samples drawn per language according to the precision-dependent stopping criterion.}\label{tab:samples}
+\end{center}
 
 
 
+\subsection{Medians (Experiment 3)}
 
-
-\begin{table}[!htbp]
+\begin{center}
 \begin{tabular}{ccccccccccccccclll}
 \input{tables/medians_0.tex}
 \end{tabular}
-	\caption{Experiment 3. Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
-\end{table}
+	\captionof{figure}{Experiment 3. Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
+\end{center}
 
-\begin{table}[!htbp]
+\begin{center}
 \begin{tabular}{ccccccccccccccclll}
 \input{tables/medians_1.tex}
 \end{tabular}
-	\caption{Medians (cont.)}
-\end{table}
+	\captionof{figure}{Medians (cont.)}
+\end{center}
 
-\begin{table}[!htbp]
+\begin{center}
 \begin{tabular}{ccccccccccccccclll}
 \input{tables/medians_2.tex}
 \end{tabular}
-	\caption{Medians (cont.)}
-\end{table}
+	\captionof{figure}{Medians (cont.)}
+\end{center}
 
-\begin{table}[!htbp]
+\begin{center}
 \begin{tabular}{ccccccccccccccclll}
 \input{tables/medians_3.tex}
 \end{tabular}
-	\caption{Medians (cont.)}
-\end{table}
+	\captionof{figure}{Medians (cont.)}
+\end{center}
 
 
 
 
-\begin{table}[!htbp]
+\begin{center}
 \begin{tabular}{ccccccccccccccccll}
 \input{tables/medianDiff_0.tex}
 \end{tabular}
-	\caption{Median Differences between Real and Baseline: For each memory budget, we provide the difference in median surprisal between real languages and random baselines; for real orders (blue) and maximum likelihood grammars (red). Lower values indicate lower surprisal compared to baselines. Solid lines indicate sample means. Dashed lines indicate 95 $\%$ confidence intervals.}\label{tab:median_diffs}
-\end{table}
+	\captionof{figure}{Median Differences between Real and Baseline: For each memory budget, we provide the difference in median surprisal between real languages and random baselines; for real orders (blue) and maximum likelihood grammars (red). Lower values indicate lower surprisal compared to baselines. Solid lines indicate sample means. Dashed lines indicate 95 $\%$ confidence intervals.}\label{tab:median_diffs}
+\end{center}
 
-\begin{table}[!htbp]
+\begin{center}
 \begin{tabular}{ccccccccccccccccll}
 \input{tables/medianDiff_1.tex}
 \end{tabular}
-	\caption{Median Differences (Part 2)}
-\end{table}
+	\captionof{figure}{Median Differences (Part 2)}
+\end{center}
 
-\begin{table}[!htbp]
+\begin{center}
 \begin{tabular}{ccccccccccccccccll}
 \input{tables/medianDiff_2.tex}
 \end{tabular}
-	\caption{Median Differences (Part 3)}
-\end{table}
+	\captionof{figure}{Median Differences (Part 3)}
+\end{center}
 
-\begin{table}[!htbp]
+\begin{center}
 \begin{tabular}{ccccccccccccccccll}
 \input{tables/medianDiff_3.tex}
 \end{tabular}
-	\caption{Median Differences (Part 4)}
-\end{table}
+	\captionof{figure}{Median Differences (Part 4)}
+\end{center}
 
 
 
 
 
 
-\begin{table}[!htbp]
+\begin{center}
 \begin{tabular}{cccccccccccccccccc}
 \input{tables/quantiles_noAssumption_0.tex}
 \end{tabular}
-	\caption{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
-\end{table}
+	\captionof{figure}{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
+\end{center}
 
-\begin{table}[!htbp]
+\begin{center}
 \begin{tabular}{cccccccccccccccccc}
 \input{tables/quantiles_noAssumption_1.tex}
 \end{tabular}
-	\caption{Quantiles (part 2)}
-\end{table}
+	\captionof{figure}{Quantiles (part 2)}
+\end{center}
 
-\begin{table}[!htbp]
+\begin{center}
 \begin{tabular}{cccccccccccccccccc}
 \input{tables/quantiles_noAssumption_2.tex}
 \end{tabular}
-	\caption{Quantiles (part 3)}
-\end{table}
+	\captionof{figure}{Quantiles (part 3)}
+\end{center}
 
 
 
 
-
+\section{Details for Neural Network Models}
 
 
 \section{N-Gram Models}
+
 
 \input{control-ngrams.tex}
 
@@ -340,14 +568,11 @@
 %-- Chinese treebank \citep{xue-chinese-2013}
 
 
-\section{Formal Analysis and Proofs}
-\input{formal-analysis.tex}
-
 
 \bibliographystyle{apalike}
 \bibliography{literature}
 
-\appendix
+%\appendix
 
 
 
