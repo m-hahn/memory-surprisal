@@ -1,6 +1,6 @@
 import os
 
-PATH = "memory-need-neural-wordforms"
+PATH = "memory-need-neural-wordforms_infostruc"
 
 path = "/u/scr/mhahn/deps/"+PATH+"/"
 files = os.listdir(path)
@@ -96,18 +96,12 @@ finalShib = { "Russian" : " Russian 0.4 150 256 3 0.05 ", "Erzya-Adap" : "Erzya-
 
 
 
-types = [" REAL_REAL ", "RANDOM_BY_TYPE ", " GROUND ", " RANDOM_BY_TYPE_BRANCHING_ENT "]
+types = [" REAL_REAL ", "RANDOM_BY_TYPE ", " GROUND ", " RANDOM_INFOSTRUC ", " GROUND_INFOSTRUC "]
 
-# removed: " REAL ", 
-# "RANDOM_MODEL_ST ", "RANDOM_BY_TYPE_ST ", "RANDOM_MODEL_CONS ", "RANDOM_BY_TYPE_CONS ", "RANDOM_MODEL_NONP ", "RANDOM_BY_TYPE_NONP ", " TOTALLY_RANDOM ", 
-# , " GROUND_OVS ", " GROUND_SOV "
-# "RANDOM_MODEL ", 
 
 averageUnigramCE = [0.0,0]
 
 for fileName in files:
-  if "Bounded" not in fileName:
-     continue
   if args.language not in fileName:
        continue
   if not fileName.startswith("estimates"):
@@ -159,15 +153,15 @@ for fileName in files:
 
 if averageUnigramCE[1] == 0:
     print("no results")
-    print("/u/scr/mhahn/"+args.language+"_after_tuning_onlyWordForms_boundedVocab.tsv")
-    print("/u/scr/mhahn/"+args.language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv")
+    print("/u/scr/mhahn/"+args.language+"_after_tuning_onlyWordForms_boundedVocab_infostruc.tsv")
+    print("/u/scr/mhahn/"+args.language+"_decay_after_tuning_onlyWordForms_boundedVocab_infostruc.tsv")
     quit()
 
 averageUnigramCE = averageUnigramCE[0] / averageUnigramCE[1]
 
 
-outpath1 = "/u/scr/mhahn/"+args.language+"_after_tuning_onlyWordForms_boundedVocab.tsv"
-outpath2 = "/u/scr/mhahn/"+args.language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv"
+outpath1 = "/u/scr/mhahn/"+args.language+"_after_tuning_onlyWordForms_boundedVocab_infostruc.tsv"
+outpath2 = "/u/scr/mhahn/"+args.language+"_decay_after_tuning_onlyWordForms_boundedVocab_infostruc.tsv"
 
 header = ["Model", "Language", "Code", "Drop1", "Emb", "Dim", "Layers", "lr", "Type", "Drop2", "Batch", "Length", "Balanced", "Memory", "Residual", "Duration", "NonUniformity", "ModelID", "MI"]
 headerDecay = ["Model", "Language", "Code", "Type", "Distance", "ConditionalMI", "TotalMI", "ModelID", "UnigramCE"]
