@@ -8,4 +8,4 @@
 results/per-run/
 writeup/paper.pdf
 commands
-
+*.log

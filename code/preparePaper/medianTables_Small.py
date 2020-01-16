@@ -1,6 +1,6 @@
 # ./python27 tradeoffPrepareTable_OnlyWordForms_BoundedVocab.py > ../results-table-word-level.tex
 
-with open("../../ud_languages.txt", "r") as inFile:
+with open("../ud_languages.txt", "r") as inFile:
    languages = inFile.read().strip().split("\n")
 
 languages = sorted(list(set(languages)))
@@ -45,7 +45,7 @@ for language in languages:
 #   line = languageKey[language]
    components = [language.replace("_"," ").replace("-Adap", "")]
    #components.append( "\\multirow{4}{*}{\includegraphics[width=0.25\\textwidth]{neural/figures/"+language+"-entropy-memory.pdf}}")
-   components.append( "\includegraphics[width=0.1\\textwidth]{neural/figures/"+language+"-listener-surprisal-memory-MEDIANS_onlyWordForms_boundedVocab_REAL.pdf}" )
+   components.append( "\includegraphics[width=0.1\\textwidth]{../code/analysis/visualize_neural/figures/"+language+"-listener-surprisal-memory-MEDIANS_onlyWordForms_boundedVocab_REAL.pdf}" )
    entries.append(components)
 
 ROWS_PER_PART = 7
@@ -66,7 +66,7 @@ if True:
        outputRows.append( " \\\\ ")
 
 part=0
-with open("../../medians_small.tex", "w") as outFile:
+with open("output/medians_small.tex", "w") as outFile:
       for row in range(len(outputRows)):
 #          if COLUMNS*(row) >= len(outputRows):
  #             break
