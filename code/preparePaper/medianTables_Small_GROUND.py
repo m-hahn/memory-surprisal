@@ -39,31 +39,20 @@ with open("../../results/tradeoff/stats-onlyWordForms-boundedVocab_REAL.tsv", "r
 languageKey_stats = dict([(h(stats, line, "Language"), line) for line in stats[1]])
 
 
-
-with open("../corpusSizes.tsv", "r") as inFile:
-  corpusSizes = readTSV(inFile) #dict([x.split("\t") for x in inFile.read().strip().split("\n")])
-languageKey_corpusSizes = dict([(h(corpusSizes, line, "Language"), line) for line in corpusSizes[1]])
-
-
-
-
-with open("../../results/tradeoff/listener-curve-onlyWordForms-boundedVocab_REAL.tsv", "r") as inFile:
-   listener_curve = readTSV(inFile)
-
-languageKey_listener_curve = dict([(h(listener_curve, line, "language"), line) for line in listener_curve[1]])
-
 entries = []
 
 for language in languages:
 #   line = languageKey[language]
-
    components = [language.replace("_"," ").replace("-Adap", "")]
-   components.append( "\includegraphics[width=0.25\\textwidth]{neural/figures/"+language+"-listener-surprisal-memory-QUANTILES_onlyWordForms_boundedVocab_noAssumption.pdf}" )
-   entries.append(components) #   print >> outFile, ("  &  ".join([str(x) for x in components]) + "  \\\\ [10.25ex] \\hline" )
+   #components.append( "\\multirow{4}{*}{\includegraphics[width=0.25\\textwidth]{neural/figures/"+language+"-entropy-memory.pdf}}")
+   components.append( "\includegraphics[width=0.1\\textwidth]{../code/analysis/visualize_neural/figures/"+language+"-listener-surprisal-memory-MEDIANS_onlyWordForms_boundedVocab.pdf}" )
+   entries.append(components)
 
-ROWS_PER_PART = 5
-COLUMNS = 4
-entries += [["",""] for x in range((COLUMNS-(len(entries)%COLUMNS))%COLUMNS)]
+ROWS_PER_PART = 7
+COLUMNS = 9
+while len(entries) % COLUMNS != 0:
+     entries.append(["",""])
+#entries += [["",""] for x in range((COLUMNS-(len(entries)%COLUMNS))%COLUMNS)]
 
 outputRows = []
 if True:
@@ -76,15 +65,13 @@ if True:
        outputRows.append( " & ".join(images[i*COLUMNS:(i+1)*COLUMNS]))
        outputRows.append( " \\\\ ")
 
-for part in range(len(entries)/(COLUMNS*ROWS_PER_PART)+1):
-  with open("../../writeup/tables/quantiles_noAssumption_"+str(part)+".tex", "w") as outFile:
-      for row in range(part*ROWS_PER_PART, (part+1)*ROWS_PER_PART):
-          if 4*row >= len(outputRows):
-              break
-          print >> outFile, outputRows[4*row]
-          print >> outFile, outputRows[4*row+1]
-          print >> outFile, outputRows[4*row+2]
-          print >> outFile, outputRows[4*row+3]
-
+part=0
+with open("output/medians_small_mle.tex", "w") as outFile:
+      for row in range(len(outputRows)):
+#          if COLUMNS*(row) >= len(outputRows):
+ #             break
+  #        for i in range(COLUMNS):
+   #          print(COLUMNS, row, i, COLUMNS*row+i, COLUMNS*row, len(outputRows))
+             print >> outFile, outputRows[row]
 
 
