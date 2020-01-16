@@ -219,10 +219,8 @@ distanceWeights = [0.0] * len(itos_deps)
 import os
 
 if model == "REAL" or model == "REAL_REAL":
-  assert False
   originalCounter = "NA"
 elif model == "RANDOM_BY_TYPE":
-  assert False
   dhByType = {}
   distByType = {}
   for dep in itos_pure_deps:
@@ -234,7 +232,7 @@ elif model == "RANDOM_BY_TYPE":
      dhWeights[key] = dhByType[makeCoarse(dep)]
      distanceWeights[key] = distByType[makeCoarse(dep)]
   originalCounter = "NA"
-elif args.model == "RANDOM_INFOSTRUC":
+elif model == "RANDOM_INFOSTRUC":
   dhByType = {}
   distByType = {}
   for dep in itos_pure_deps:
@@ -247,10 +245,10 @@ elif args.model == "RANDOM_INFOSTRUC":
      dhWeights[key] = dhByType[(makeCoarse(dep), infostruc)]
      distanceWeights[key] = distByType[(makeCoarse(dep), infostruc)]
   originalCounter = "NA"
-elif args.model == "GROUND_INFOSTRUC":
+elif model == "GROUND_INFOSTRUC":
   groundPath = "/u/scr/mhahn/deps/manual_output_ground_coarse_infostruc/"
   import os
-  files = [x for x in os.listdir(groundPath) if x.startswith(args.language+"_infer")]
+  files = [x for x in os.listdir(groundPath) if x.startswith(language+"_infer")]
   print(files)
   assert len(files) > 0
   with open(groundPath+files[0], "r") as inFile:
@@ -276,7 +274,6 @@ elif args.model == "GROUND_INFOSTRUC":
      distanceWeights[key] = distByDependency[name]
   originalCounter = "NA"
 elif model == "GROUND":
-  assert False
   groundPath = "/u/scr/mhahn/deps/manual_output_ground_coarse/"
   import os
   files = [x for x in os.listdir(groundPath) if x.startswith(language+"_infer")]
@@ -303,7 +300,7 @@ elif model == "GROUND":
      distanceWeights[key] = distByDependency[dep]
   originalCounter = "NA"
 else:
-  assert False, args.model
+  assert False, model
 
 
 
