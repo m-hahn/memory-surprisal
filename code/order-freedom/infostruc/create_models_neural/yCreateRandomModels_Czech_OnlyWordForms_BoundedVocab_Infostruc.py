@@ -29,14 +29,10 @@ input_noising = 0.0
 
 
 language = "Czech-PDT"
-if True:
+for _ in range(100):
    MODEL_TYPE = random.choice(["REAL_REAL", "RANDOM_INFOSTRUC", "RANDOM_BY_TYPE"]) # "GROUND", "GROUND_INFOSTRUC", 
    filenames = [x for x in os.listdir(BASE_DIR) if language in x and MODEL_TYPE in x]
-   existing = 0
-   for name in filenames:
-       with open(BASE_DIR+name, "r") as inFile:
-           if paramsString in inFile.read():
-               existing += 1
+   existing = len(filenames)
 
 
    print(language, MODEL_TYPE, existing)
