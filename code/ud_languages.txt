@@ -1,1 +1,1 @@
-../../ud_languages.txt
+../ud_languages.txt
