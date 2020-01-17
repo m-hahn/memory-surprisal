@@ -1,3 +1,6 @@
+
+# could marginalize out all the words that don't occur
+
 # Based on cky4d5.py
 # Fixing NA issue
 # Based on Stat9
@@ -128,7 +131,7 @@ def recursivelyLinearize(sentence, position, result, gradients_from_the_left_sum
          rightChildren.append(recursivelyLinearize(sentence, child, result, allGradients))
    
    head = line["word"]
-   if vocab[head] < 100 or random() < 0.2:
+   if vocab[head] < 10000 or random() < 0.2:
       head = "_"
 
  
@@ -702,10 +705,10 @@ itos_setOfNonterminals = sorted(list(set(list(binary_rules) + list(terminals))))
 stoi_setOfNonterminals = dict(list(zip(itos_setOfNonterminals, range(len(itos_setOfNonterminals)))))
 print(itos_setOfNonterminals)
 
-#quit()
 
-matrixLeft = torch.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the LEFT edge
-matrixRight = torch.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the RIGHT edge
+
+matrixLeft = torch.cuda.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the LEFT edge
+matrixRight = torch.cuda.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the RIGHT edge
 
 # One thing to keep in mind is that a bit of probability mass is wasted, namely that of training words ending up OOV
 OOV_THRESHOLD = 3
@@ -728,7 +731,7 @@ for nonterminal in nonAndPreterminals:
 
 
 
-binary_rules_matrix = torch.FloatTensor([[[0 for _ in range(len(itos_setOfNonterminals))]  for _ in range(len(itos_setOfNonterminals))] for _ in range(len(itos_setOfNonterminals))])
+binary_rules_matrix = torch.cuda.FloatTensor([[[0 for _ in range(len(itos_setOfNonterminals))]  for _ in range(len(itos_setOfNonterminals))] for _ in range(len(itos_setOfNonterminals))])
 
 binary_rules_numeric = {}
 for parent in binary_rules:
@@ -791,10 +794,11 @@ def iterator_dense(corpus):
 def runOnCorpus():
   global BATCHSIZE
   global chart
-  chart = [[torch.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(BATCHSIZE)]) for _ in range(MAX_BOUNDARY)] for _ in range(MAX_BOUNDARY)]
+  chart = [[torch.cuda.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(BATCHSIZE)]) for _ in range(MAX_BOUNDARY)] for _ in range(MAX_BOUNDARY)]
 
   iterator = iterator_dense(CorpusIterator_V(language,"dev").iterator())
   chunk = []
+  surprisals = [0 for _ in range(MAX_BOUNDARY)]
   while True:
      linearized = []
      try:
@@ -804,7 +808,9 @@ def runOnCorpus():
        if len(linearized) == 0:
           break
        BATCHSIZE = len(linearized) 
-       chart = [[torch.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(BATCHSIZE)]) for _ in range(MAX_BOUNDARY)] for _ in range(MAX_BOUNDARY)]
+       chart = [[torch.cuda.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(BATCHSIZE)]) for _ in range(MAX_BOUNDARY)] for _ in range(MAX_BOUNDARY)]
+
+     print(sentCount, [surprisals[i+1] - surprisals[i] for i in range(MAX_BOUNDARY-1)]) # [surprisalTableSums[0]/surprisalTableCounts[-1]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[-1] for i in range(MAX_BOUNDARY-1)]) 
 
      computeSurprisals(linearized)
      surprisals = [surprisalTableSums[i]/(surprisalTableCounts[i]+1e-9) for i in range(MAX_BOUNDARY)]
@@ -845,7 +851,7 @@ for i in range(len(lexicalProbabilities_matrix)):
    for j in range(len(lexicalProbabilities_matrix[i])):
        if float(lexicalProbabilities_matrix[i][j]) == float("-inf"):
          assert itos_setOfNonterminals[i] not in terminals
-lexicalProbabilities_matrix = lexicalProbabilities_matrix.t()
+lexicalProbabilities_matrix = lexicalProbabilities_matrix.cuda().t()
 #print(lexicalProbabilities_matrix) # (nonterminals, words)
 # TODO why are there some -inf's?
 
@@ -874,7 +880,7 @@ def computeSurprisals(linearized):
                        lexical_tensor[batch] = stoi["_OOV_"]
                     else:
                        lexical_tensor[batch] = stoi[linearized[batch][start]]
-                 lexical_tensor = lexical_tensor
+                 lexical_tensor = lexical_tensor.cuda()
                  chart[start][start] = torch.nn.functional.embedding(input=lexical_tensor, weight=lexicalProbabilities_matrix)
                  assert start == start+length-1
             else:
@@ -896,7 +902,7 @@ def computeSurprisals(linearized):
       # Now consider different endpoints
       valuesPerBoundary = [0]
       for BOUNDARY in range(LEFT_CONTEXT+1, MAX_BOUNDARY+1):
-         chartFromStart = [torch.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(BATCHSIZE)]) for _ in range(BOUNDARY)]
+         chartFromStart = [torch.cuda.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(BATCHSIZE)]) for _ in range(BOUNDARY)]
 
          if True:      
              right = chart[BOUNDARY-1][BOUNDARY-1]
