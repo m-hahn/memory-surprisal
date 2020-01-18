@@ -747,15 +747,18 @@ print(itos_setOfNonterminals)
 matrixLeft = torch.cuda.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the LEFT edge
 matrixRight = torch.cuda.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the RIGHT edge
 
-# One thing to keep in mind is that a bit of probability mass is wasted, namely that of training words ending up OOV
 OOV_THRESHOLD = 3
 OOV_COUNT= 0
 OTHER_WORDS_SMOOTHING = 0.0001
 
+preterminalsSet = set(terminals) # terminals is a dict
+print(preterminalsSet)
+relevantWordCount = 1+len([x for x in wordCounts if wordCounts[x] >= OOV_THRESHOLD_TRAINING])
 
 for parent in binary_rules:
    for (left, right), ruleCount in binary_rules[parent].items():
-      ruleProb = exp(log(ruleCount) - log(nonAndPreterminals[parent]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
+      smoothing = OOV_COUNT + OTHER_WORDS_SMOOTHING*relevantWordCount if parent in preterminalsSet else 0
+      ruleProb = exp(log(ruleCount) - log(nonAndPreterminals[parent]+ smoothing))
       matrixLeft[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[left]] -= ruleProb
       matrixRight[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[right]] -= ruleProb
       assert ruleProb > 0, ruleCount
@@ -770,7 +773,6 @@ for nonterminal in nonAndPreterminals:
 
 binary_rules_matrix = torch.cuda.FloatTensor([[[0 for _ in range(len(itos_setOfNonterminals))]  for _ in range(len(itos_setOfNonterminals))] for _ in range(len(itos_setOfNonterminals))])
 
-preterminalsSet = set(terminals) # terminals is a dict
 
 binary_rules_numeric = {}
 for parent in binary_rules:
@@ -781,9 +783,11 @@ for parent in binary_rules:
        lefti = stoi_setOfNonterminals[left]
        righti = stoi_setOfNonterminals[right]
        binary_rules_numeric[parenti][(lefti, righti)] = ruleCount
-       smoothing = OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts) if parent in preterminalsSet else 0
+       smoothing = OOV_COUNT + OTHER_WORDS_SMOOTHING*relevantWordCount if parent in preterminalsSet else 0
        binary_rules_matrix[parenti][lefti][righti] = exp(log(ruleCount) - log(nonAndPreterminals_numeric[parenti] + smoothing))
-   print("BINARY RULES", parent, binary_rules_matrix[parenti].sum())
+   totalProbabilityMass = binary_rules_matrix[parenti].sum()
+   print("BINARY RULES", parent, totalProbabilityMass)
+   assert float(totalProbabilityMass) <= 1.01
 
 #print(len(binary_rules_numeric))
 #quit()
@@ -878,6 +882,8 @@ assert "_eos_" in stoi
 print("Constructing lexical probabilities")
 lexicalProbabilities_matrix = torch.FloatTensor([[float("-inf") for _ in itos] for _ in stoi_setOfNonterminals])
 
+
+
 for preterminal in terminals:
 #  lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]][stoi["_OOV_"]] = (log(OOV_COUNT) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
   lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]][stoi["_EMPTY_"]] = 0 # this is intended for the context words
@@ -890,13 +896,14 @@ for preterminal in terminals:
  #     continue
   #  assert word in wordCounts, (word, terminals[preterminal].get(word, 0))
     count = terminals[preterminal].get(word, 0) + OTHER_WORDS_SMOOTHING
-    lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]][stoi[word]] = (log(count) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
+    lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]][stoi[word]] = (log(count) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(stoi)))
 #  print(itos[:10])
  # print(lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]].exp())
   print("TERMINAL EXPANSION", preterminal, lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]].exp().sum())
 #for nonterminal in binary_rules:
 #  print(nonterminal, lexicalProbabilities_matrix[stoi_setOfNonterminals[nonterminal]])
-quit()
+print(len(stoi), len(wordCounts))
+#quit()
 #quit()
 
 for i in range(len(lexicalProbabilities_matrix)):
@@ -985,7 +992,7 @@ def computeSurprisals(linearized):
          surprisalTableCounts[BOUNDARY-1] += BATCHSIZE
          valuesPerBoundary.append(prefixProb)
          print(BOUNDARY, prefixProb/BATCHSIZE, linearized[0])
-         assert prefixProb  < valuesPerBoundary[-2], "bug or numerical problem?"
+         assert prefixProb/BATCHSIZE - 0.01 < valuesPerBoundary[-2]/BATCHSIZE, ("bug or numerical problem?", (prefixProb/BATCHSIZE, valuesPerBoundary[-2]/BATCHSIZE))
 print("Reading data")
 
 runOnCorpus() 
