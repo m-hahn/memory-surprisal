@@ -1,6 +1,7 @@
 #############################################################
 # cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth7.py
-# Even better modeling surprisal!
+# Even better modeling surprisal! BUT: some weirdness: Gets very good surprisal with:
+# ~/python-py37-mhahn cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth7.py --language=Welsh-Adap_2.4 --model=GROUND --MAX_BOUNDARY=10 --OOV_THRESHOLD_TRAINING=100000 [weird!!!!]
 #############################################################
 
 
@@ -25,6 +26,11 @@ import argparse
 parser = argparse.ArgumentParser()
 
 
+# good options:
+# ~/python-py37-mhahn cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth7.py --language=Welsh-Adap_2.4 --model=GROUND --MAX_BOUNDARY=10 --VOCAB_FOR_RELATION_THRESHOLD=10
+# ~/python-py37-mhahn cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth7.py --language=Welsh-Adap_2.4 --model=GROUND --MAX_BOUNDARY=10 --OOV_THRESHOLD_TRAINING=10
+
+
 parser.add_argument('--language', type=str)
 parser.add_argument('--model', type=str)
 parser.add_argument('--OOV_THRESHOLD_TRAINING', type=int, default=4)
@@ -33,7 +39,7 @@ parser.add_argument('--VOCAB_FOR_RELATION_THRESHOLD', type=int, default=30)
 parser.add_argument('--MAX_BOUNDARY', type=int, default=10)
 
 LEFT_CONTEXT = 5
-OOV_THRESHOLD = 3
+parser.add_argument('--OOV_THRESHOLD', type=int, default = 3)
 OOV_COUNT= 0
 OTHER_WORDS_SMOOTHING = 0.0001
 parser.add_argument('--BATCHSIZE', type=int, default=3000)
@@ -957,7 +963,7 @@ def computeSurprisals(linearized):
                  lexical_tensor = torch.LongTensor([0 for _ in range(args.BATCHSIZE)])
              
                  for batch in range(args.BATCHSIZE): 
-                    if wordCounts.get(linearized[batch][start],0) < OOV_THRESHOLD: # OOV
+                    if wordCounts.get(linearized[batch][start],0) < args.OOV_THRESHOLD: # OOV
                        lexical_tensor[batch] = stoi["_OOV_"]
                     else:
                        lexical_tensor[batch] = stoi[linearized[batch][start]]
