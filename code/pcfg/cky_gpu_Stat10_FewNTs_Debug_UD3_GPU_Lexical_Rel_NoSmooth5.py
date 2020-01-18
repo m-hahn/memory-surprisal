@@ -1,6 +1,5 @@
 #############################################################
-# cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth4.py
-# mostly gets rid of leaking probability mass!!!
+# cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth5.py
 #############################################################
 
 
@@ -144,11 +143,11 @@ def recursivelyLinearize(sentence, position, result, gradients_from_the_left_sum
    while rightChildren:
       sibling = rightChildren.pop(0)
  #     print(sibling)
-      inner = {"category" : line["posUni"]+"_"+head+"_"+sibling["coarse_dep"], "children" : [inner, sibling], "line" : line, "coarse_dep" : line["coarse_dep"]}
+      inner = {"category" : line["posUni"]+"_"+head, "children" : [inner, sibling], "line" : line, "coarse_dep" : line["coarse_dep"]}
    while leftChildren:
       sibling = leftChildren.pop(-1)
 #      print(sibling)
-      inner = {"category" : line["posUni"]+"_"+head+"_"+sibling["coarse_dep"], "children" : [sibling, inner], "line" : line, "coarse_dep" : line["coarse_dep"]}
+      inner = {"category" : line["posUni"]+"_"+head, "children" : [sibling, inner], "line" : line, "coarse_dep" : line["coarse_dep"]}
    return inner
 
 import numpy.random
@@ -902,6 +901,11 @@ for preterminal in terminals:
 #  print(itos[:10])
  # print(lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]].exp())
   print("TERMINAL EXPANSION", preterminal, lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]].exp().sum())
+
+print("This should be all 2s in those entries that can be preterminals, and 1s in those entries that can not be preterminals")
+print(lexicalProbabilities_matrix.exp().sum(dim=1).cuda() + binary_rules_matrix.sum(dim=1).sum(dim=1))
+
+
 #for nonterminal in binary_rules:
 #  print(nonterminal, lexicalProbabilities_matrix[stoi_setOfNonterminals[nonterminal]])
 print(len(stoi), len(wordCounts))
