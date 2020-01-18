@@ -1,5 +1,6 @@
 #############################################################
 # cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth5.py
+# TODO somehow there is a bug occurring when there is overlap between preterminals and the parents of binary rules
 #############################################################
 
 
@@ -746,7 +747,7 @@ print(itos_setOfNonterminals)
 
 
 matrixLeft = torch.cuda.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the LEFT edge
-matrixRight = torch.cuda.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the RIGHT edge
+#matrixRight = torch.cuda.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the RIGHT edge
 
 OOV_THRESHOLD = 3
 OOV_COUNT= 0
@@ -757,38 +758,36 @@ print(preterminalsSet)
 relevantWordCount = 1+len([x for x in wordCounts if wordCounts[x] >= OOV_THRESHOLD_TRAINING])
 
 for parent in binary_rules:
+   smoothing = OOV_COUNT + OTHER_WORDS_SMOOTHING*relevantWordCount if parent in preterminalsSet else 0
    for (left, right), ruleCount in binary_rules[parent].items():
-      smoothing = OOV_COUNT + OTHER_WORDS_SMOOTHING*relevantWordCount if parent in preterminalsSet else 0
       ruleProb = exp(log(ruleCount) - log(nonAndPreterminals[parent]+ smoothing))
       matrixLeft[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[left]] -= ruleProb
-      matrixRight[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[right]] -= ruleProb
+      #matrixRight[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[right]] -= ruleProb
       assert ruleProb > 0, ruleCount
-
-
 
 nonAndPreterminals_numeric = {}
 for nonterminal in nonAndPreterminals:
    nonAndPreterminals_numeric[stoi_setOfNonterminals[nonterminal]] = nonAndPreterminals[nonterminal]
 
-
-
 binary_rules_matrix = torch.cuda.FloatTensor([[[0 for _ in range(len(itos_setOfNonterminals))]  for _ in range(len(itos_setOfNonterminals))] for _ in range(len(itos_setOfNonterminals))])
-
 
 binary_rules_numeric = {}
 for parent in binary_rules:
    parenti = stoi_setOfNonterminals[parent]
    binary_rules_numeric[parenti] = {}
 #   print(len(binary_rules[parent]))
+   smoothing = OOV_COUNT + OTHER_WORDS_SMOOTHING*relevantWordCount if parent in preterminalsSet else 0
+
    for (left, right), ruleCount in binary_rules[parent].items():
        lefti = stoi_setOfNonterminals[left]
        righti = stoi_setOfNonterminals[right]
        binary_rules_numeric[parenti][(lefti, righti)] = ruleCount
-       smoothing = OOV_COUNT + OTHER_WORDS_SMOOTHING*relevantWordCount if parent in preterminalsSet else 0
        binary_rules_matrix[parenti][lefti][righti] = exp(log(ruleCount) - log(nonAndPreterminals_numeric[parenti] + smoothing))
    totalProbabilityMass = binary_rules_matrix[parenti].sum()
    print("BINARY RULES", parent, totalProbabilityMass)
    assert float(totalProbabilityMass) <= 1.01
+
+assert float((matrixLeft + binary_rules_matrix.sum(dim=2)).abs().max()) < 1e-7
 
 #print(len(binary_rules_numeric))
 #quit()
@@ -796,7 +795,7 @@ for parent in binary_rules:
 print("Constructing prefix matrix")
 for i in range(len(itos_setOfNonterminals)):
     matrixLeft[i][i] += 1
-    matrixRight[i][i] += 1
+#    matrixRight[i][i] += 1
 print(matrixLeft)
 print(matrixLeft.sum(dim=1))
 invertedLeft = torch.inverse(matrixLeft)
@@ -810,13 +809,13 @@ def plus(x,y):
       return None
    return x+y
 
-MAX_BOUNDARY = 10
+MAX_BOUNDARY = 2
 # It seems greater MAX_BOUNDARY values result in NAs. Maybe have to stabilise by batch?
 surprisalTableSums = [0 for _ in range(MAX_BOUNDARY)]
 surprisalTableCounts = [0 for _ in range(MAX_BOUNDARY)]
 
 
-LEFT_CONTEXT = 5
+LEFT_CONTEXT = 2
 
 BATCHSIZE = 3000 #200
 
