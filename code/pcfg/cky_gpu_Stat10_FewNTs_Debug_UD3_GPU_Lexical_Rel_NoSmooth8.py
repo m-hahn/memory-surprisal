@@ -4,6 +4,9 @@
 #############################################################
 
 
+# Good for Cantonese:
+#~/python-py37-mhahn cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth8.py --language=Cantonese-Adap_2.4 --model=REAL --MAX_BOUNDARY=10 --VOCAB_FOR_RELATION_THRESHOLD=10 --MERGE_ACROSS_RELATIONS_THRESHOLD=20
+
 # could marginalize out all the words that don't occur
 
 # Based on cky4d5.py
@@ -674,7 +677,8 @@ print(nonterminalsCounts)
 
 assert set(nonterminalsCounts).isdisjoint(set(preterminalsCounts))
 
-for MERGE in range(100):
+for MERGE in range(10000):
+   hasDoneMergingStep = False
    nonAndPreTerminalsCounts = dict(list(nonterminalsCounts.items()) + list(preterminalsCounts.items()))
    
    # could merge across different relations, or could merge across different head words, or across different POS
@@ -692,11 +696,14 @@ for MERGE in range(100):
         merged = "_".join(coordinates + (".".join([x[0][3] for x in rare]),))
 #        print(coordinates, rare, merged)
         conductMerging([x[1] for x in rare], merged)
+        hasDoneMergingStep = True
         break
-   assert set(roots).issubset(set(binary_rules))
+   assert set(roots).issubset(set(binary_rules).union(set(terminals))), set(roots).difference(set(binary_rules))
    assert set(nonterminalsCounts) == set(binary_rules)
    assert set(preterminalsCounts) == set(terminals)
    print("Non- and Pre-Terminals", len(splitRes), MERGE)
+   if not hasDoneMergingStep:
+      break
 
 print("Non- and Pre-Terminals", len(splitRes))
 
@@ -1100,5 +1107,7 @@ def computeSurprisals(linearized):
          print(BOUNDARY, prefixProb/args.BATCHSIZE, linearized[0])
          assert prefixProb/args.BATCHSIZE - 0.01 < valuesPerBoundary[-2]/args.BATCHSIZE, ("bug or numerical problem?", (prefixProb/args.BATCHSIZE, valuesPerBoundary[-2]/args.BATCHSIZE))
 print("Reading data")
+
+print("Number of pre- and non-terminals", len(binary_rules)+len(terminals))
 
 runOnCorpus() 
