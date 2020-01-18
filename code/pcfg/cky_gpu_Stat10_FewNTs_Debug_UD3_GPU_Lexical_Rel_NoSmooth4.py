@@ -134,7 +134,7 @@ def recursivelyLinearize(sentence, position, result, gradients_from_the_left_sum
          rightChildren.append(recursivelyLinearize(sentence, child, result, allGradients))
    
    head = line["word"]
-   if vocab[head] < 10000 or random() < 0.2:
+   if vocab[head] < 1000 or random() < 0.2:
       head = "_"
 
  
@@ -494,6 +494,8 @@ unary_rules = {}
 binary_rules = {}
 
 terminals = {}
+terminalsTotal = {}
+
 wordCounts = {}
 
 def addCounts(tree):
@@ -523,20 +525,22 @@ def addCounts(tree):
 
 
 roots = {}
+rootsTotal = 0
 
 
 inStackDistribution = {}
 
 leftCornerCounts = {}
+leftCornerCountsTotal = {}
 
 def updateLeftCorner(nonterminal, preterminal):
     if nonterminal not in leftCornerCounts:
        leftCornerCounts[nonterminal] = {}
-       leftCornerCounts[nonterminal]["__TOTAL__"] = 0
+       leftCornerCountsTotal[nonterminal] = 0
     if preterminal not in leftCornerCounts[nonterminal]:
        leftCornerCounts[nonterminal][preterminal] = 0
     leftCornerCounts[nonterminal][preterminal] += 1
-    leftCornerCounts[nonterminal]["__TOTAL__"] += 1
+    leftCornerCountsTotal[nonterminal] += 1
   
 
 # stack = incomplete constituents that have been started
@@ -585,7 +589,7 @@ for sentence in CorpusIterator_V(language,"train").iterator():
 
 #   print(ordered)
    roots[ordered["category"]] = roots.get(ordered["category"], 0) + 1
-   roots["__TOTAL__"] = roots.get("__TOTAL__", 0) + 1
+   rootsTotal = rootsTotal + 1
 
    if sentCount % 100 == 0:
       print(sentCount, ordered["category"])
@@ -617,12 +621,19 @@ for preterminal in terminals:
 binary_rules["_SENTENCES_"] = {("ROOT", "_SENTENCES_") : 100000}
 terminals["_EOS_"] = {"_eos_" : 1000000}
 
+assert "__TOTAL__" not in roots
+
 binary_rules["ROOT"] = {(left, "_EOS_") : count for left, count in roots.items() if left != "__TOTAL__"}
 wordCounts["_eos_"] = 1000000
 
+#assert "_eos_" not in itos
+#assert "_eos_" not in stoi
 
+#itos.append("_eos_")
+#stoi["_eos_"] = len(itos)-1
 
-
+#print(itos)
+#quit()
 
    # Only first sentence
  #  if sentCount > 100:
@@ -670,7 +681,7 @@ nonAndPreterminals = {}
 
 for preterminal in terminals:
     nonAndPreterminals[preterminal] = sum([y for x, y in terminals[preterminal].items()])
-    terminals[preterminal]["__TOTAL__"] = nonAndPreterminals[preterminal]
+    terminalsTotal[preterminal] = nonAndPreterminals[preterminal]
 
 
 
@@ -679,6 +690,9 @@ for nonterminal in binary_rules:
        nonAndPreterminals[nonterminal]=0
     nonAndPreterminals[nonterminal] += sum([y for x, y in binary_rules[nonterminal].items()])
 
+print(sorted(list(terminals)))
+print(sorted(list(binary_rules)))
+#quit()
 
 
 # construct the reachability heuristic
@@ -734,7 +748,7 @@ matrixLeft = torch.cuda.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ i
 matrixRight = torch.cuda.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the RIGHT edge
 
 # One thing to keep in mind is that a bit of probability mass is wasted, namely that of training words ending up OOV
-OOV_THRESHOLD = 1
+OOV_THRESHOLD = 3
 OOV_COUNT= 0
 OTHER_WORDS_SMOOTHING = 0.0001
 
@@ -756,6 +770,8 @@ for nonterminal in nonAndPreterminals:
 
 binary_rules_matrix = torch.cuda.FloatTensor([[[0 for _ in range(len(itos_setOfNonterminals))]  for _ in range(len(itos_setOfNonterminals))] for _ in range(len(itos_setOfNonterminals))])
 
+preterminalsSet = set(terminals) # terminals is a dict
+
 binary_rules_numeric = {}
 for parent in binary_rules:
    parenti = stoi_setOfNonterminals[parent]
@@ -765,8 +781,9 @@ for parent in binary_rules:
        lefti = stoi_setOfNonterminals[left]
        righti = stoi_setOfNonterminals[right]
        binary_rules_numeric[parenti][(lefti, righti)] = ruleCount
-       binary_rules_matrix[parenti][lefti][righti] = exp(log(ruleCount) - log(nonAndPreterminals_numeric[parenti]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
-
+       smoothing = OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts) if parent in preterminalsSet else 0
+       binary_rules_matrix[parenti][lefti][righti] = exp(log(ruleCount) - log(nonAndPreterminals_numeric[parenti] + smoothing))
+   print("BINARY RULES", parent, binary_rules_matrix[parenti].sum())
 
 #print(len(binary_rules_numeric))
 #quit()
@@ -856,6 +873,7 @@ assert "_OOV_" in itos
 
 #print(stoi)
 assert "_OOV_" in stoi
+assert "_eos_" in stoi
 
 print("Constructing lexical probabilities")
 lexicalProbabilities_matrix = torch.FloatTensor([[float("-inf") for _ in itos] for _ in stoi_setOfNonterminals])
@@ -873,6 +891,13 @@ for preterminal in terminals:
   #  assert word in wordCounts, (word, terminals[preterminal].get(word, 0))
     count = terminals[preterminal].get(word, 0) + OTHER_WORDS_SMOOTHING
     lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]][stoi[word]] = (log(count) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
+#  print(itos[:10])
+ # print(lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]].exp())
+  print("TERMINAL EXPANSION", preterminal, lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]].exp().sum())
+#for nonterminal in binary_rules:
+#  print(nonterminal, lexicalProbabilities_matrix[stoi_setOfNonterminals[nonterminal]])
+quit()
+#quit()
 
 for i in range(len(lexicalProbabilities_matrix)):
    for j in range(len(lexicalProbabilities_matrix[i])):
