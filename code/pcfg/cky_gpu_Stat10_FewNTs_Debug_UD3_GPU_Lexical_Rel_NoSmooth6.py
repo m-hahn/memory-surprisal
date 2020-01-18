@@ -1,6 +1,6 @@
 #############################################################
-# cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth5.py
-# TODO somehow there is a bug occurring when there is overlap between preterminals and the parents of binary rules
+# cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth6.py
+# Good modeling surprisal!
 #############################################################
 
 
@@ -136,19 +136,19 @@ def recursivelyLinearize(sentence, position, result, gradients_from_the_left_sum
          rightChildren.append(recursivelyLinearize(sentence, child, result, allGradients))
    
    head = line["word"]
-   if vocab[head] < 1000 or random() < 0.2:
+   if vocab[head] < 30 or random() < 0.2:
       head = "_"
 
  
-   inner = {"word" : line["word"], "category" :head, "children" : None, "line" : line, "coarse_dep" : line["coarse_dep"]}
+   inner = {"word" : line["word"], "category" :line["posUni"]+"_P_"+head, "children" : None, "line" : line, "coarse_dep" : line["coarse_dep"]}
    while rightChildren:
       sibling = rightChildren.pop(0)
  #     print(sibling)
-      inner = {"category" : head, "children" : [inner, sibling], "line" : line, "coarse_dep" : line["coarse_dep"]}
+      inner = {"category" : line["posUni"]+"_N_"+head+"_"+sibling["coarse_dep"], "children" : [inner, sibling], "line" : line, "coarse_dep" : line["coarse_dep"]}
    while leftChildren:
       sibling = leftChildren.pop(-1)
 #      print(sibling)
-      inner = {"category" : head, "children" : [sibling, inner], "line" : line, "coarse_dep" : line["coarse_dep"]}
+      inner = {"category" : line["posUni"]+"_N_"+head+"_"+sibling["coarse_dep"], "children" : [sibling, inner], "line" : line, "coarse_dep" : line["coarse_dep"]}
    return inner
 
 import numpy.random
@@ -758,36 +758,40 @@ print(preterminalsSet)
 relevantWordCount = 1+len([x for x in wordCounts if wordCounts[x] >= OOV_THRESHOLD_TRAINING])
 
 for parent in binary_rules:
-   smoothing = OOV_COUNT + OTHER_WORDS_SMOOTHING*relevantWordCount if parent in preterminalsSet else 0
    for (left, right), ruleCount in binary_rules[parent].items():
+      smoothing = OOV_COUNT + OTHER_WORDS_SMOOTHING*relevantWordCount if parent in preterminalsSet else 0
       ruleProb = exp(log(ruleCount) - log(nonAndPreterminals[parent]+ smoothing))
       matrixLeft[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[left]] -= ruleProb
       #matrixRight[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[right]] -= ruleProb
       assert ruleProb > 0, ruleCount
 
+
+
 nonAndPreterminals_numeric = {}
 for nonterminal in nonAndPreterminals:
    nonAndPreterminals_numeric[stoi_setOfNonterminals[nonterminal]] = nonAndPreterminals[nonterminal]
 
+
+
 binary_rules_matrix = torch.cuda.FloatTensor([[[0 for _ in range(len(itos_setOfNonterminals))]  for _ in range(len(itos_setOfNonterminals))] for _ in range(len(itos_setOfNonterminals))])
+
 
 binary_rules_numeric = {}
 for parent in binary_rules:
    parenti = stoi_setOfNonterminals[parent]
    binary_rules_numeric[parenti] = {}
 #   print(len(binary_rules[parent]))
-   smoothing = OOV_COUNT + OTHER_WORDS_SMOOTHING*relevantWordCount if parent in preterminalsSet else 0
-
    for (left, right), ruleCount in binary_rules[parent].items():
        lefti = stoi_setOfNonterminals[left]
        righti = stoi_setOfNonterminals[right]
        binary_rules_numeric[parenti][(lefti, righti)] = ruleCount
+       smoothing = OOV_COUNT + OTHER_WORDS_SMOOTHING*relevantWordCount if parent in preterminalsSet else 0
        binary_rules_matrix[parenti][lefti][righti] = exp(log(ruleCount) - log(nonAndPreterminals_numeric[parenti] + smoothing))
    totalProbabilityMass = binary_rules_matrix[parenti].sum()
    print("BINARY RULES", parent, totalProbabilityMass)
    assert float(totalProbabilityMass) <= 1.01
 
-assert float((matrixLeft + binary_rules_matrix.sum(dim=2)).abs().max()) < 1e-7
+assert float((matrixLeft + binary_rules_matrix.sum(dim=2)).abs().max()) < 1e-5, (float((matrixLeft + binary_rules_matrix.sum(dim=2)).abs().max()))
 
 #print(len(binary_rules_numeric))
 #quit()
@@ -809,7 +813,7 @@ def plus(x,y):
       return None
    return x+y
 
-MAX_BOUNDARY = 4
+MAX_BOUNDARY = 10
 # It seems greater MAX_BOUNDARY values result in NAs. Maybe have to stabilise by batch?
 surprisalTableSums = [0 for _ in range(MAX_BOUNDARY)]
 surprisalTableCounts = [0 for _ in range(MAX_BOUNDARY)]
@@ -817,7 +821,7 @@ surprisalTableCounts = [0 for _ in range(MAX_BOUNDARY)]
 
 LEFT_CONTEXT = 5
 
-BATCHSIZE = 2 #3000 #200
+BATCHSIZE = 3000 #200
 
 sentCount = 0
 def iterator_dense(corpus):
@@ -883,6 +887,7 @@ print("Constructing lexical probabilities")
 lexicalProbabilities_matrix = torch.FloatTensor([[float("-inf") for _ in itos] for _ in stoi_setOfNonterminals])
 
 
+assert len(set(terminals).intersection(set(binary_rules))) == 0, (set(terminals).intersection(set(binary_rules)))
 
 for preterminal in terminals:
 #  lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]][stoi["_OOV_"]] = (log(OOV_COUNT) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
@@ -934,7 +939,6 @@ def computeSurprisals(linearized):
                continue
             if length == 1: 
                if start < LEFT_CONTEXT:
-                 print("Left Context")
                  for preterminal in terminals:
                     chart[start][start][:,stoi_setOfNonterminals[preterminal]].fill_(0)
                else:
@@ -948,7 +952,6 @@ def computeSurprisals(linearized):
                  lexical_tensor = lexical_tensor.cuda()
                  chart[start][start] = torch.nn.functional.embedding(input=lexical_tensor, weight=lexicalProbabilities_matrix)
                  assert start == start+length-1
-               print("CHART", start, start, chart[start][start])
             else:
                 entries = []
                 for start2 in range(start+1, MAX_BOUNDARY):
@@ -964,7 +967,6 @@ def computeSurprisals(linearized):
                   resultTotalLog = torch.log(resultTotal)+(maxLeft+maxRight)
                   entries.append(resultTotalLog)
                 chart[start][start+length-1] = logSumExpList(entries)
-                print("CHART", start, start+length-1, chart[start][start+length-1])
       #############################
       # Now consider different endpoints
       valuesPerBoundary = [0]
@@ -990,7 +992,6 @@ def computeSurprisals(linearized):
                   resultLeft = torch.tensordot(torch.exp(left-maxLeft), binary_rules_matrix, dims=([1], [1]))
                   resultTotal = torch.bmm(resultLeft, torch.exp(right-maxRight).view(BATCHSIZE, -1, 1)).squeeze(2)
                   result = torch.tensordot(resultTotal, invertedLeft, dims=([1], [1]))
-                  print("Potentially offending negative values", result.min())
                   result = torch.nn.functional.relu(result) # because some values end up being slightly negative in result
                   resultLog = (torch.log(result) + (maxLeft+maxRight))
                   entries.append(resultLog)

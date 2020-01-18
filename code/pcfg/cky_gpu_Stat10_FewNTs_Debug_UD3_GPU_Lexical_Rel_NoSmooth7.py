@@ -1,6 +1,6 @@
 #############################################################
-# cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth5.py
-# TODO somehow there is a bug occurring when there is overlap between preterminals and the parents of binary rules
+# cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth7.py
+# Even better modeling surprisal!
 #############################################################
 
 
@@ -20,9 +20,30 @@ import sys
 
 objectiveName = "LM"
 
-language = sys.argv[1]
-model = sys.argv[2] #"REAL_REAL" #sys.argv[8]
-assert model in ["REAL", "RANDOM_BY_TYPE"]
+import argparse
+
+parser = argparse.ArgumentParser()
+
+
+parser.add_argument('--language', type=str)
+parser.add_argument('--model', type=str)
+parser.add_argument('--OOV_THRESHOLD_TRAINING', type=int, default=4)
+parser.add_argument('--VOCAB_FOR_RELATION_THRESHOLD', type=int, default=30)
+
+parser.add_argument('--MAX_BOUNDARY', type=int, default=10)
+
+LEFT_CONTEXT = 5
+OOV_THRESHOLD = 3
+OOV_COUNT= 0
+OTHER_WORDS_SMOOTHING = 0.0001
+parser.add_argument('--BATCHSIZE', type=int, default=3000)
+
+
+args = parser.parse_args()
+
+
+
+assert args.model in ["REAL", "RANDOM_BY_TYPE", "GROUND"]
 
 posUni = set() #[ "ADJ", "ADP", "ADV", "AUX", "CONJ", "DET", "INTJ", "NOUN", "NUM", "PART", "PRON", "PROPN", "PUNCT", "SCONJ", "SYM", "VERB", "X"] 
 
@@ -72,7 +93,7 @@ def initializeOrderTable():
    distanceCounts = {}
    depsVocab = set()
    for partition in ["train", "dev"]:
-     for sentence in CorpusIterator_V(language,partition, storeMorph=True).iterator():
+     for sentence in CorpusIterator_V(args.language,partition, storeMorph=True).iterator():
       for line in sentence:
           vocab[line["word"]] = vocab.get(line["word"], 0) + 1
           vocab_lemmas[line["lemma"]] = vocab_lemmas.get(line["lemma"], 0) + 1
@@ -136,19 +157,19 @@ def recursivelyLinearize(sentence, position, result, gradients_from_the_left_sum
          rightChildren.append(recursivelyLinearize(sentence, child, result, allGradients))
    
    head = line["word"]
-   if vocab[head] < 1000 or random() < 0.2:
+   if vocab[head] < args.VOCAB_FOR_RELATION_THRESHOLD or random() < 0.2:
       head = "_"
 
  
-   inner = {"word" : line["word"], "category" :head, "children" : None, "line" : line, "coarse_dep" : line["coarse_dep"]}
+   inner = {"word" : line["word"], "category" :line["posUni"]+"_P_"+head, "children" : None, "line" : line, "coarse_dep" : line["coarse_dep"]}
    while rightChildren:
       sibling = rightChildren.pop(0)
  #     print(sibling)
-      inner = {"category" : head, "children" : [inner, sibling], "line" : line, "coarse_dep" : line["coarse_dep"]}
+      inner = {"category" : line["posUni"]+"_N_"+head+"_"+sibling["coarse_dep"], "children" : [inner, sibling], "line" : line, "coarse_dep" : line["coarse_dep"]}
    while leftChildren:
       sibling = leftChildren.pop(-1)
 #      print(sibling)
-      inner = {"category" : head, "children" : [sibling, inner], "line" : line, "coarse_dep" : line["coarse_dep"]}
+      inner = {"category" : line["posUni"]+"_N_"+head+"_"+sibling["coarse_dep"], "children" : [sibling, inner], "line" : line, "coarse_dep" : line["coarse_dep"]}
    return inner
 
 import numpy.random
@@ -159,10 +180,9 @@ logsoftmax = torch.nn.LogSoftmax()
 
 
 def orderChildrenRelative(sentence, remainingChildren, reverseSoftmax):
-       global model
 #       childrenLinearized = []
 #       while len(remainingChildren) > 0:
-       if model == "REAL":
+       if args.model == "REAL":
           return remainingChildren
        logits = [(x, distanceWeights[stoi_deps[sentence[x-1]["dependency_key"]]]) for x in remainingChildren]
        logits = sorted(logits, key=lambda x:x[1], reverse=(not reverseSoftmax))
@@ -274,26 +294,25 @@ def orderChildrenRelative(sentence, remainingChildren, reverseSoftmax):
 ###          return {"category" : tree["category"], "children" : children, "dependency" : tree["dependency"]}
 
 def orderSentence(sentence, printThings):
-   global model
 
    root = None
    logits = [None]*len(sentence)
    logProbabilityGradient = 0
-   if model == "REAL_REAL":
+   if args.model == "REAL_REAL":
       eliminated = []
    for line in sentence:
       if line["dep"] == "root":
           root = line["index"]
           continue
       if line["dep"].startswith("punct"): # assumes that punctuation does not have non-punctuation dependents!
-         if model == "REAL_REAL":
+         if args.model == "REAL_REAL":
             eliminated.append(line)
          continue
       key = (sentence[line["head"]-1]["posUni"], line["dep"], line["posUni"])
       line["dependency_key"] = key
       dhLogit = dhWeights[stoi_deps[key]]
 #      probability = 1/(1 + torch.exp(-dhLogit))
-      if model == "REAL":
+      if args.model == "REAL":
          dhSampled = (line["head"] > line["index"]) #(random() < probability.data.numpy()[0])
       else:
          dhSampled = (dhLogit > 0) #(random() < probability.data.numpy())
@@ -313,7 +332,7 @@ def orderSentence(sentence, printThings):
       #sentence[headIndex]["children_decisions_logprobs"] = (sentence[headIndex].get("children_decisions_logprobs", []) + [line["ordering_decision_log_probability"]])
 
 
-   if model != "REAL_REAL":
+   if args.model != "REAL_REAL":
       for line in sentence:
          if "children_DH" in line:
             childrenLinearized = orderChildrenRelative(sentence, line["children_DH"][:], False)
@@ -321,7 +340,7 @@ def orderSentence(sentence, printThings):
          if "children_HD" in line:
             childrenLinearized = orderChildrenRelative(sentence, line["children_HD"][:], True)
             line["children_HD"] = childrenLinearized
-   elif model == "REAL_REAL":
+   elif args.model == "REAL_REAL":
        while len(eliminated) > 0:
           line = eliminated[0]
           del eliminated[0]
@@ -339,7 +358,7 @@ def orderSentence(sentence, printThings):
    
    linearized = []
    tree = recursivelyLinearize(sentence, root, linearized, 0)
-   if model == "REAL_REAL":
+   if args.model == "REAL_REAL":
       linearized = list(filter(lambda x:"removed" not in x, sentence))
    if printThings or len(linearized) == 0:
      print(" ".join(list(map(lambda x:x["word"], sentence))))
@@ -380,15 +399,15 @@ distanceWeights = [0.0] * len(itos_deps)
 
 import os
 
-if model == "RANDOM_MODEL":
+if args.model == "RANDOM_MODEL":
   assert False
   for key in range(len(itos_deps)):
      dhWeights[key] = random() - 0.5
      distanceWeights[key] = random()
   originalCounter = "NA"
-elif model == "REAL" or model == "REAL_REAL":
+elif args.model == "REAL" or args.model == "REAL_REAL":
   originalCounter = "NA"
-elif model == "RANDOM_BY_TYPE":
+elif args.model == "RANDOM_BY_TYPE":
   dhByType = {}
   distByType = {}
   for dep in itos_pure_deps:
@@ -398,7 +417,7 @@ elif model == "RANDOM_BY_TYPE":
      dhWeights[key] = dhByType[itos_deps[key][1].split(":")[0]]
      distanceWeights[key] = distByType[itos_deps[key][1].split(":")[0]]
   originalCounter = "NA"
-elif model == "RANDOM_BY_TYPE_CONS":
+elif args.model == "RANDOM_BY_TYPE_CONS":
   distByType = {}
   for dep in itos_pure_deps:
     distByType[dep.split(":")[0]] = random()
@@ -406,15 +425,15 @@ elif model == "RANDOM_BY_TYPE_CONS":
      dhWeights[key] = 1.0
      distanceWeights[key] = distByType[itos_deps[key][1].split(":")[0]]
   originalCounter = "NA"
-elif model == "RANDOM_MODEL_CONS":
+elif args.model == "RANDOM_MODEL_CONS":
   for key in range(len(itos_deps)):
      dhWeights[key] = 1.0
      distanceWeights[key] = random()
   originalCounter = "NA"
-elif model == "GROUND":
+elif args.model == "GROUND":
   groundPath = "/u/scr/mhahn/deps/manual_output_ground_coarse/"
   import os
-  files = [x for x in os.listdir(groundPath) if x.startswith(language+"_infer")]
+  files = [x for x in os.listdir(groundPath) if x.startswith(args.language+"_infer")]
   print(files)
   assert len(files) > 0
   with open(groundPath+files[0], "r") as inFile:
@@ -579,7 +598,7 @@ def linearizeTree2String(tree, sent):
 sentCount = 0
 
 print("Collecting counts from training corpus")
-for sentence in CorpusIterator_V(language,"train").iterator():
+for sentence in CorpusIterator_V(args.language,"train").iterator():
    sentCount += 1
    ordered = orderSentence(sentence,  sentCount % 50 == 0)
 
@@ -601,7 +620,6 @@ for sentence in CorpusIterator_V(language,"train").iterator():
    addCounts(ordered)
 
 
-OOV_THRESHOLD_TRAINING = 2
 
 print(terminals)
 print(wordCounts)
@@ -611,7 +629,7 @@ for preterminal in terminals:
   assert "_OOV_" not in terminals[preterminal]
   terminals[preterminal]["_OOV_"] = 0
   for word in list(terminals[preterminal]):
-    if wordCounts[word] < OOV_THRESHOLD_TRAINING:
+    if wordCounts[word] < args.OOV_THRESHOLD_TRAINING:
       terminals[preterminal]["_OOV_"] += terminals[preterminal][word]
       wordCounts["_OOV_"] += terminals[preterminal][word]
       wordCounts[word] -= terminals[preterminal][word]
@@ -749,45 +767,46 @@ print(itos_setOfNonterminals)
 matrixLeft = torch.cuda.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the LEFT edge
 #matrixRight = torch.cuda.FloatTensor([[0 for _ in itos_setOfNonterminals] for _ in itos_setOfNonterminals]) # traces the RIGHT edge
 
-OOV_THRESHOLD = 3
-OOV_COUNT= 0
-OTHER_WORDS_SMOOTHING = 0.0001
 
 preterminalsSet = set(terminals) # terminals is a dict
 print(preterminalsSet)
-relevantWordCount = 1+len([x for x in wordCounts if wordCounts[x] >= OOV_THRESHOLD_TRAINING])
+relevantWordCount = 1+len([x for x in wordCounts if wordCounts[x] >= args.OOV_THRESHOLD_TRAINING])
 
 for parent in binary_rules:
-   smoothing = OOV_COUNT + OTHER_WORDS_SMOOTHING*relevantWordCount if parent in preterminalsSet else 0
    for (left, right), ruleCount in binary_rules[parent].items():
+      smoothing = OOV_COUNT + OTHER_WORDS_SMOOTHING*relevantWordCount if parent in preterminalsSet else 0
       ruleProb = exp(log(ruleCount) - log(nonAndPreterminals[parent]+ smoothing))
       matrixLeft[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[left]] -= ruleProb
       #matrixRight[stoi_setOfNonterminals[parent]][stoi_setOfNonterminals[right]] -= ruleProb
       assert ruleProb > 0, ruleCount
 
+
+
 nonAndPreterminals_numeric = {}
 for nonterminal in nonAndPreterminals:
    nonAndPreterminals_numeric[stoi_setOfNonterminals[nonterminal]] = nonAndPreterminals[nonterminal]
 
+
+
 binary_rules_matrix = torch.cuda.FloatTensor([[[0 for _ in range(len(itos_setOfNonterminals))]  for _ in range(len(itos_setOfNonterminals))] for _ in range(len(itos_setOfNonterminals))])
+
 
 binary_rules_numeric = {}
 for parent in binary_rules:
    parenti = stoi_setOfNonterminals[parent]
    binary_rules_numeric[parenti] = {}
 #   print(len(binary_rules[parent]))
-   smoothing = OOV_COUNT + OTHER_WORDS_SMOOTHING*relevantWordCount if parent in preterminalsSet else 0
-
    for (left, right), ruleCount in binary_rules[parent].items():
        lefti = stoi_setOfNonterminals[left]
        righti = stoi_setOfNonterminals[right]
        binary_rules_numeric[parenti][(lefti, righti)] = ruleCount
+       smoothing = OOV_COUNT + OTHER_WORDS_SMOOTHING*relevantWordCount if parent in preterminalsSet else 0
        binary_rules_matrix[parenti][lefti][righti] = exp(log(ruleCount) - log(nonAndPreterminals_numeric[parenti] + smoothing))
    totalProbabilityMass = binary_rules_matrix[parenti].sum()
    print("BINARY RULES", parent, totalProbabilityMass)
    assert float(totalProbabilityMass) <= 1.01
 
-assert float((matrixLeft + binary_rules_matrix.sum(dim=2)).abs().max()) < 1e-7
+assert float((matrixLeft + binary_rules_matrix.sum(dim=2)).abs().max()) < 1e-5, (float((matrixLeft + binary_rules_matrix.sum(dim=2)).abs().max()))
 
 #print(len(binary_rules_numeric))
 #quit()
@@ -809,15 +828,13 @@ def plus(x,y):
       return None
    return x+y
 
-MAX_BOUNDARY = 4
+
 # It seems greater MAX_BOUNDARY values result in NAs. Maybe have to stabilise by batch?
-surprisalTableSums = [0 for _ in range(MAX_BOUNDARY)]
-surprisalTableCounts = [0 for _ in range(MAX_BOUNDARY)]
+surprisalTableSums = [0 for _ in range(args.MAX_BOUNDARY)]
+surprisalTableCounts = [0 for _ in range(args.MAX_BOUNDARY)]
 
 
-LEFT_CONTEXT = 5
 
-BATCHSIZE = 2 #3000 #200
 
 sentCount = 0
 def iterator_dense(corpus):
@@ -830,35 +847,34 @@ def iterator_dense(corpus):
      linearized0 = []
      linearizeTree2String(ordered, linearized0)
      chunk += linearized0 + ["_eos_"]
-     while len(chunk) > MAX_BOUNDARY:
-        yield chunk[:MAX_BOUNDARY]
+     while len(chunk) > args.MAX_BOUNDARY:
+        yield chunk[:args.MAX_BOUNDARY]
         chunk = chunk[1:]
 
 
 def runOnCorpus():
-  global BATCHSIZE
   global chart
-  chart = [[torch.cuda.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(BATCHSIZE)]) for _ in range(MAX_BOUNDARY)] for _ in range(MAX_BOUNDARY)]
+  chart = [[torch.cuda.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(args.BATCHSIZE)]) for _ in range(args.MAX_BOUNDARY)] for _ in range(args.MAX_BOUNDARY)]
 
-  iterator = iterator_dense(CorpusIterator_V(language,"dev").iterator())
+  iterator = iterator_dense(CorpusIterator_V(args.language,"dev").iterator())
   chunk = []
-  surprisals = [0 for _ in range(MAX_BOUNDARY)]
+  surprisals = [0 for _ in range(args.MAX_BOUNDARY)]
   while True:
      linearized = []
      try:
-       for _ in range(BATCHSIZE):
+       for _ in range(args.BATCHSIZE):
           linearized.append(next(iterator))
      except StopIteration:
        if len(linearized) == 0:
           break
-       BATCHSIZE = len(linearized) 
-       chart = [[torch.cuda.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(BATCHSIZE)]) for _ in range(MAX_BOUNDARY)] for _ in range(MAX_BOUNDARY)]
+       args.BATCHSIZE = len(linearized) 
+       chart = [[torch.cuda.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(args.BATCHSIZE)]) for _ in range(args.MAX_BOUNDARY)] for _ in range(args.MAX_BOUNDARY)]
 
-     print(sentCount, [surprisals[i+1] - surprisals[i] for i in range(MAX_BOUNDARY-1)]) # [surprisalTableSums[0]/surprisalTableCounts[-1]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[-1] for i in range(MAX_BOUNDARY-1)]) 
+     print(sentCount, [surprisals[i+1] - surprisals[i] for i in range(args.MAX_BOUNDARY-1)]) # [surprisalTableSums[0]/surprisalTableCounts[-1]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[-1] for i in range(MAX_BOUNDARY-1)]) 
 
      computeSurprisals(linearized)
-     surprisals = [surprisalTableSums[i]/(surprisalTableCounts[i]+1e-9) for i in range(MAX_BOUNDARY)]
-     print(sentCount, [surprisals[i+1] - surprisals[i] for i in range(MAX_BOUNDARY-1)]) # [surprisalTableSums[0]/surprisalTableCounts[-1]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[-1] for i in range(MAX_BOUNDARY-1)]) 
+     surprisals = [surprisalTableSums[i]/(surprisalTableCounts[i]+1e-9) for i in range(args.MAX_BOUNDARY)]
+     print(sentCount, [surprisals[i+1] - surprisals[i] for i in range(args.MAX_BOUNDARY-1)]) # [surprisalTableSums[0]/surprisalTableCounts[-1]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[-1] for i in range(MAX_BOUNDARY-1)]) 
 
 
 
@@ -883,6 +899,7 @@ print("Constructing lexical probabilities")
 lexicalProbabilities_matrix = torch.FloatTensor([[float("-inf") for _ in itos] for _ in stoi_setOfNonterminals])
 
 
+assert len(set(terminals).intersection(set(binary_rules))) == 0, (set(terminals).intersection(set(binary_rules)))
 
 for preterminal in terminals:
 #  lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]][stoi["_OOV_"]] = (log(OOV_COUNT) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + OTHER_WORDS_SMOOTHING*len(wordCounts)))
@@ -920,27 +937,26 @@ lexicalProbabilities_matrix = lexicalProbabilities_matrix.cuda().t()
 # TODO why are there some -inf's?
 
 def computeSurprisals(linearized):
-      assert len(linearized[0]) == MAX_BOUNDARY
-      assert len(linearized) == BATCHSIZE
+      assert len(linearized[0]) == args.MAX_BOUNDARY
+      assert len(linearized) == args.BATCHSIZE
 
       # Presumably unnecessary
       for x in chart:     
           for y in x:
                y.fill_(float("-Inf"))
 
-      for length in range(1, MAX_BOUNDARY+1): # the NUMBER of words spanned. start+length is the first word OUTSIDE the constituent
-         for start in range(MAX_BOUNDARY): # the index of the first word taking part in the thing
-            if start+length-1 >= MAX_BOUNDARY:
+      for length in range(1, args.MAX_BOUNDARY+1): # the NUMBER of words spanned. start+length is the first word OUTSIDE the constituent
+         for start in range(args.MAX_BOUNDARY): # the index of the first word taking part in the thing
+            if start+length-1 >= args.MAX_BOUNDARY:
                continue
             if length == 1: 
                if start < LEFT_CONTEXT:
-                 print("Left Context")
                  for preterminal in terminals:
                     chart[start][start][:,stoi_setOfNonterminals[preterminal]].fill_(0)
                else:
-                 lexical_tensor = torch.LongTensor([0 for _ in range(BATCHSIZE)])
+                 lexical_tensor = torch.LongTensor([0 for _ in range(args.BATCHSIZE)])
              
-                 for batch in range(BATCHSIZE): 
+                 for batch in range(args.BATCHSIZE): 
                     if wordCounts.get(linearized[batch][start],0) < OOV_THRESHOLD: # OOV
                        lexical_tensor[batch] = stoi["_OOV_"]
                     else:
@@ -948,10 +964,9 @@ def computeSurprisals(linearized):
                  lexical_tensor = lexical_tensor.cuda()
                  chart[start][start] = torch.nn.functional.embedding(input=lexical_tensor, weight=lexicalProbabilities_matrix)
                  assert start == start+length-1
-               print("CHART", start, start, chart[start][start])
             else:
                 entries = []
-                for start2 in range(start+1, MAX_BOUNDARY):
+                for start2 in range(start+1, args.MAX_BOUNDARY):
                   left = chart[start][start2-1]
                   right = chart[start2][start+length-1]
                   maxLeft = torch.max(left) #, dim=1, keepdim=True)[0]
@@ -959,17 +974,16 @@ def computeSurprisals(linearized):
                   if float(maxLeft) == float("-inf") or float(maxRight) == float("-inf"): # everything will be 0
                      continue
                   resultLeft = torch.tensordot(torch.exp(left-maxLeft), binary_rules_matrix, dims=([1], [1]))
-                  resultTotal = torch.bmm(resultLeft, torch.exp(right-maxRight).view(BATCHSIZE, -1, 1)).squeeze(2)
+                  resultTotal = torch.bmm(resultLeft, torch.exp(right-maxRight).view(args.BATCHSIZE, -1, 1)).squeeze(2)
                   resultTotal = torch.nn.functional.relu(resultTotal) # because some values end up being slightly negative in result
                   resultTotalLog = torch.log(resultTotal)+(maxLeft+maxRight)
                   entries.append(resultTotalLog)
                 chart[start][start+length-1] = logSumExpList(entries)
-                print("CHART", start, start+length-1, chart[start][start+length-1])
       #############################
       # Now consider different endpoints
       valuesPerBoundary = [0]
-      for BOUNDARY in range(1, MAX_BOUNDARY+1):
-         chartFromStart = [torch.cuda.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(BATCHSIZE)]) for _ in range(BOUNDARY)]
+      for BOUNDARY in range(1, args.MAX_BOUNDARY+1):
+         chartFromStart = [torch.cuda.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(args.BATCHSIZE)]) for _ in range(BOUNDARY)]
 
          if True:      
              right = chart[BOUNDARY-1][BOUNDARY-1]
@@ -988,9 +1002,8 @@ def computeSurprisals(linearized):
                   if float(maxLeft) == float("-inf") or float(maxRight) == float("-inf"): # everything will be 0
                      continue
                   resultLeft = torch.tensordot(torch.exp(left-maxLeft), binary_rules_matrix, dims=([1], [1]))
-                  resultTotal = torch.bmm(resultLeft, torch.exp(right-maxRight).view(BATCHSIZE, -1, 1)).squeeze(2)
+                  resultTotal = torch.bmm(resultLeft, torch.exp(right-maxRight).view(args.BATCHSIZE, -1, 1)).squeeze(2)
                   result = torch.tensordot(resultTotal, invertedLeft, dims=([1], [1]))
-                  print("Potentially offending negative values", result.min())
                   result = torch.nn.functional.relu(result) # because some values end up being slightly negative in result
                   resultLog = (torch.log(result) + (maxLeft+maxRight))
                   entries.append(resultLog)
@@ -998,10 +1011,10 @@ def computeSurprisals(linearized):
          prefixProb = float(chartFromStart[0][:,stoi_setOfNonterminals["_SENTENCES_"]].sum()) #log(sum([exp(float(x[0])) if x[0] is not None else 0 for x in chartFromStart[0]])) # log P(S|root) -- the full mass comprising all possible trees (including spurious ambiguities arising from the PCFG conversion)
 
          surprisalTableSums[BOUNDARY-1] += prefixProb
-         surprisalTableCounts[BOUNDARY-1] += BATCHSIZE
+         surprisalTableCounts[BOUNDARY-1] += args.BATCHSIZE
          valuesPerBoundary.append(prefixProb)
-         print(BOUNDARY, prefixProb/BATCHSIZE, linearized[0])
-         assert prefixProb/BATCHSIZE - 0.01 < valuesPerBoundary[-2]/BATCHSIZE, ("bug or numerical problem?", (prefixProb/BATCHSIZE, valuesPerBoundary[-2]/BATCHSIZE))
+         print(BOUNDARY, prefixProb/args.BATCHSIZE, linearized[0])
+         assert prefixProb/args.BATCHSIZE - 0.01 < valuesPerBoundary[-2]/args.BATCHSIZE, ("bug or numerical problem?", (prefixProb/args.BATCHSIZE, valuesPerBoundary[-2]/args.BATCHSIZE))
 print("Reading data")
 
 runOnCorpus() 
