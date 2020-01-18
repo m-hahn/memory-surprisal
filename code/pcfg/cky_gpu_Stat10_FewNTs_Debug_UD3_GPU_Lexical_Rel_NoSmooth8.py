@@ -1,6 +1,6 @@
 #############################################################
-# cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth7.py
-# Even better modeling surprisal!
+# cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth8.py
+# Based on cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth7.py
 #############################################################
 
 
@@ -39,7 +39,7 @@ parser.add_argument('--OOV_THRESHOLD', type=int, default = 3)
 OOV_COUNT= 0
 parser.add_argument('--BATCHSIZE', type=int, default=3000)
 parser.add_argument('--OTHER_WORDS_SMOOTHING', type=float, default=0.0001)
-
+parser.add_argument('--MERGE_ACROSS_RELATIONS_THRESHOLD', type=int, default=5) # 5 doesn't hurt performance on Welsh, 10 does
 
 args = parser.parse_args()
 
@@ -160,10 +160,10 @@ def recursivelyLinearize(sentence, position, result, gradients_from_the_left_sum
    
    head = line["word"]
    if vocab[head] < args.VOCAB_FOR_RELATION_THRESHOLD or random() < 0.2:
-      head = "_"
+      head = "#"
 
  
-   inner = {"word" : line["word"], "category" :line["posUni"]+"_P_"+head, "children" : None, "line" : line, "coarse_dep" : line["coarse_dep"]}
+   inner = {"word" : line["word"], "category" :line["posUni"]+"_P_"+head+"_"+"NONE", "children" : None, "line" : line, "coarse_dep" : line["coarse_dep"]}
    while rightChildren:
       sibling = rightChildren.pop(0)
  #     print(sibling)
@@ -521,6 +521,9 @@ terminalsTotal = {}
 
 wordCounts = {}
 
+nonterminalsCounts = {}
+preterminalsCounts = {}
+
 def addCounts(tree):
    assert tree["category"] in leftCornerCounts, tree["category"]
    if tree["children"] is None:
@@ -532,6 +535,7 @@ def addCounts(tree):
           terminals[nonterminal][terminal] = 0
       terminals[nonterminal][terminal] += 1
       wordCounts[terminal] = wordCounts.get(terminal,0)+1
+      preterminalsCounts[nonterminal] = preterminalsCounts.get(nonterminal, 0)+1
    else:
       for child in tree["children"]:
          addCounts(child)
@@ -545,13 +549,13 @@ def addCounts(tree):
          if childCats not in binary_rules[nonterminal]:
             binary_rules[nonterminal][childCats] = 0
          binary_rules[nonterminal][childCats] += 1
-
+         nonterminalsCounts[nonterminal] = nonterminalsCounts.get(nonterminal, 1) + 1
 
 roots = {}
 rootsTotal = 0
 
 
-inStackDistribution = {}
+#inStackDistribution = {}
 
 leftCornerCounts = {}
 leftCornerCountsTotal = {}
@@ -572,7 +576,7 @@ def updateInStackDistribution(tree, stack):
       assert len(stack) > 0, tree
 #      print(stack)
       assert len(stack[-1][1]) > 0, stack
-      inStackDistribution[stack] = inStackDistribution.get(stack, 0) + 1
+      #inStackDistribution[stack] = inStackDistribution.get(stack, 0) + 1
       updateLeftCorner(tree["category"], tree["category"])
       assert tree["category"] in leftCornerCounts
       return tree["category"]
@@ -621,7 +625,83 @@ for sentence in CorpusIterator_V(args.language,"train").iterator():
    updateLeftCorner("root", leftCorner)
    addCounts(ordered)
 
+# then apply some conversion to binary_rules and to nonterminalsCounts and to roots
+def conductMerging(fro, to):
+   print("MERGE", fro, to)
+   # to roots
+   #print(roots)
+   total = 0
+   for x in fro:
+      if x in roots:
+         total+=roots[x]
+         del roots[x]
+   if total > 0:
+      roots[to] = total
 
+   # to nonterminalsCounts
+   total=sum([nonterminalsCounts[x] for x in fro])
+   nonterminalsCounts[to] = total
+   for x in fro:
+      del nonterminalsCounts[x]
+
+   # to binary_rules
+   # 1. on the parent side
+   overall = {}
+   for x in fro:
+     if x in binary_rules:
+#       print(binary_rules.get(x, {}))     
+       for y in binary_rules[x]:
+         overall[y] = overall.get(y, 0) + binary_rules[x][y]
+     del binary_rules[x]
+ #  print(overall)
+   binary_rules[to] = overall
+   
+   # 2. on the left child side
+   fro = set(fro)
+   for parent in binary_rules:
+      for left, right in list(binary_rules[parent]):
+         if left in fro:
+            binary_rules[parent][(to, right)] = binary_rules[parent].get((to, right),0) + binary_rules[parent][(left, right)]
+            del binary_rules[parent][(left, right)]
+
+   for parent in binary_rules:
+      for left, right in list(binary_rules[parent]):
+         if right in fro:
+            binary_rules[parent][(left, to)] = binary_rules[parent].get((left, to),0) + binary_rules[parent][(left, right)]
+            del binary_rules[parent][(left, right)]
+
+print(nonterminalsCounts)
+
+assert set(nonterminalsCounts).isdisjoint(set(preterminalsCounts))
+
+for MERGE in range(100):
+   nonAndPreTerminalsCounts = dict(list(nonterminalsCounts.items()) + list(preterminalsCounts.items()))
+   
+   # could merge across different relations, or could merge across different head words, or across different POS
+   splitRes = [(x.split("_"), x) for x in list(nonAndPreTerminalsCounts)]
+  # print(splitRes)
+   
+   #print(len(splitRes))
+   
+   coordinatesAllButRelation = set([tuple(x[0][:3]) for x in splitRes])
+ #  print(coordinatesAllButRelation)
+   for coordinates in coordinatesAllButRelation:
+      nonterminals = [x+(nonAndPreTerminalsCounts[x[1]],) for x in splitRes if tuple(x[0][:3]) == coordinates]
+      rare = [x for x in nonterminals if x[2] < args.MERGE_ACROSS_RELATIONS_THRESHOLD]
+      if len(rare) > 1:
+        merged = "_".join(coordinates + (".".join([x[0][3] for x in rare]),))
+#        print(coordinates, rare, merged)
+        conductMerging([x[1] for x in rare], merged)
+        break
+   assert set(roots).issubset(set(binary_rules))
+   assert set(nonterminalsCounts) == set(binary_rules)
+   assert set(preterminalsCounts) == set(terminals)
+   print("Non- and Pre-Terminals", len(splitRes), MERGE)
+
+print("Non- and Pre-Terminals", len(splitRes))
+
+# then apply some conversion to binary_rules and to nonterminalsCounts and to roots
+#quit()
 
 print(terminals)
 print(wordCounts)
@@ -689,7 +769,7 @@ wordCounts["_eos_"] = 1000000
 
 # merge symbols
 
-inStackDistribution = sorted(list(inStackDistribution.items()), key=lambda x:x[1])
+#inStackDistribution = sorted(list(inStackDistribution.items()), key=lambda x:x[1])
 #print(inStackDistribution)
 #print(len(inStackDistribution))
 #print(inStackDistribution[-1])
@@ -697,7 +777,7 @@ inStackDistribution = sorted(list(inStackDistribution.items()), key=lambda x:x[1
 #quit()
 
 
-inStackDistributionSum = sum([x[1] for x in inStackDistribution])
+#inStackDistributionSum = sum([x[1] for x in inStackDistribution])
 
 nonAndPreterminals = {}
 
@@ -758,6 +838,8 @@ def logSumExp(x,y):
    resultInner = torch.exp(x-(constantX+constantY)) + torch.exp(y-(constantX+constantY))
    result = (constantX + constantY) + torch.log(resultInner)
    return result
+
+assert len(set(terminals).intersection(set(binary_rules))) == 0, (set(terminals).intersection(set(binary_rules)))
 
 
 itos_setOfNonterminals = sorted(list(set(list(binary_rules) + list(terminals))))
