@@ -11,6 +11,19 @@
 
 # ~/python-py37-mhahn cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth8.py --language=English_2.4 --model=RANDOM_BY_TYPE --MAX_BOUNDARY=10 --VOCAB_FOR_RELATION_THRESHOLD=500 --MERGE_ACROSS_RELATIONS_THRESHOLD=400 --BATCHSIZE=1000
 
+# ??? To get consistent unigram estimates, seems like LEFT_CONTEXT=10 works better in Polish than 5 ???
+# ??? ~/python-py37-mhahn cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth8.py --language=Polish_2.4 --model=REAL --MAX_BOUNDARY=10 --VOCAB_FOR_RELATION_THRESHOLD=500 --MERGE_ACROSS_RELATIONS_THRESHOLD=400 --BATCHSIZE=1000 --LEFT_CONTEXT=10 --MAX_BOUNDARY=15
+# PROBLEM Possibly still have problem with inconsistent unigram estimates. Would be weird, since the distribution over preterminals shouldn't change (assuming LEFT_CONTEXT is large enough), and the word | preterminal distribution doesn't depend on the ordering
+
+
+
+
+###########################
+# Seem to be good parameter settings:
+# ~/python-py37-mhahn cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth8.py --language=English_2.4 --model=GROUND --MAX_BOUNDARY=10 --VOCAB_FOR_RELATION_THRESHOLD=500 --MERGE_ACROSS_RELATIONS_THRESHOLD=400 --BATCHSIZE=1000
+# ~/python-py37-mhahn cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth8.py --language=Polish_2.4 --model=GROUND --MAX_BOUNDARY=10 --VOCAB_FOR_RELATION_THRESHOLD=500 --MERGE_ACROSS_RELATIONS_THRESHOLD=800 --BATCHSIZE=1000 --LEFT_CONTEXT=10 --MAX_BOUNDARY=15 --REPLACE_WORD_WITH_PLACEHOLDER=0.0
+##################3
+
 # could marginalize out all the words that don't occur
 
 # Based on cky4d5.py
@@ -41,12 +54,13 @@ parser.add_argument('--model', type=str)
 parser.add_argument('--OOV_THRESHOLD_TRAINING', type=int, default=4)
 parser.add_argument('--VOCAB_FOR_RELATION_THRESHOLD', type=int, default=30)
 parser.add_argument('--MAX_BOUNDARY', type=int, default=10)
-LEFT_CONTEXT = 5
+parser.add_argument('--LEFT_CONTEXT', type=int, default=5)
 parser.add_argument('--OOV_THRESHOLD', type=int, default = 3)
 OOV_COUNT= 0
 parser.add_argument('--BATCHSIZE', type=int, default=3000)
 parser.add_argument('--OTHER_WORDS_SMOOTHING', type=float, default=0.0001)
 parser.add_argument('--MERGE_ACROSS_RELATIONS_THRESHOLD', type=int, default=5) # 5 doesn't hurt performance on Welsh, 10 does
+parser.add_argument('--REPLACE_WORD_WITH_PLACEHOLDER', type=float, default=0.2)
 
 args = parser.parse_args()
 
@@ -166,7 +180,7 @@ def recursivelyLinearize(sentence, position, result, gradients_from_the_left_sum
          rightChildren.append(recursivelyLinearize(sentence, child, result, allGradients))
    
    head = line["word"]
-   if vocab[head] < args.VOCAB_FOR_RELATION_THRESHOLD or random() < 0.2:
+   if vocab[head] < args.VOCAB_FOR_RELATION_THRESHOLD or random() < args.REPLACE_WORD_WITH_PLACEHOLDER:
       head = "#"
 
  
@@ -443,6 +457,8 @@ elif args.model == "GROUND":
   groundPath = "/u/scr/mhahn/deps/manual_output_ground_coarse/"
   import os
   files = [x for x in os.listdir(groundPath) if x.startswith(args.language+"_infer")]
+  if len(files) == 0:
+     files = [x for x in os.listdir(groundPath) if x.startswith(args.language[:args.language.rfind("_")]+"_infer")]
   print(files)
   assert len(files) > 0
   with open(groundPath+files[0], "r") as inFile:
@@ -462,6 +478,9 @@ elif args.model == "GROUND":
          dhByDependency[dependency] = dhHere
          distByDependency[dependency] = distHere
   for key in range(len(itos_deps)):
+     if itos_deps[key][1].split(":")[0] not in dhByDependency:
+       print("WARNING 474 ", key, itos_deps[key])
+       continue
      dhWeights[key] = dhByDependency[itos_deps[key][1].split(":")[0]]
      distanceWeights[key] = distByDependency[itos_deps[key][1].split(":")[0]]
   originalCounter = "NA"
@@ -1015,7 +1034,7 @@ for preterminal in terminals:
     lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]][stoi[word]] = (log(count) - log(nonAndPreterminals[preterminal]+ OOV_COUNT + args.OTHER_WORDS_SMOOTHING*len(stoi)))
 #  print(itos[:10])
  # print(lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]].exp())
-  print("TERMINAL EXPANSION", preterminal, lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]].exp().sum())
+  print("TERMINAL EXPANSION", preterminal, lexicalProbabilities_matrix[stoi_setOfNonterminals[preterminal]].exp().sum() if False else "--")
 
 print("This should be all 2s in those entries that can be preterminals, and 1s in those entries that can not be preterminals")
 print(lexicalProbabilities_matrix.exp().sum(dim=1).cuda() + binary_rules_matrix.sum(dim=1).sum(dim=1))
@@ -1049,7 +1068,7 @@ def computeSurprisals(linearized):
             if start+length-1 >= args.MAX_BOUNDARY:
                continue
             if length == 1: 
-               if start < LEFT_CONTEXT:
+               if start < args.LEFT_CONTEXT:
                  for preterminal in terminals:
                     chart[start][start][:,stoi_setOfNonterminals[preterminal]].fill_(0)
                else:
