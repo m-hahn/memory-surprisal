@@ -7,6 +7,10 @@
 # Good for Cantonese:
 #~/python-py37-mhahn cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth8.py --language=Cantonese-Adap_2.4 --model=REAL --MAX_BOUNDARY=10 --VOCAB_FOR_RELATION_THRESHOLD=10 --MERGE_ACROSS_RELATIONS_THRESHOLD=20
 
+# ~/python-py37-mhahn cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth8.py --language=English_2.4 --model=REAL --MAX_BOUNDARY=10 --VOCAB_FOR_RELATION_THRESHOLD=500 --MERGE_ACROSS_RELATIONS_THRESHOLD=100 --BATCHSIZE=1000
+
+# ~/python-py37-mhahn cky_gpu_Stat10_FewNTs_Debug_UD3_GPU_Lexical_Rel_NoSmooth8.py --language=English_2.4 --model=RANDOM_BY_TYPE --MAX_BOUNDARY=10 --VOCAB_FOR_RELATION_THRESHOLD=500 --MERGE_ACROSS_RELATIONS_THRESHOLD=400 --BATCHSIZE=1000
+
 # could marginalize out all the words that don't occur
 
 # Based on cky4d5.py
@@ -691,6 +695,8 @@ for MERGE in range(10000):
  #  print(coordinatesAllButRelation)
    for coordinates in coordinatesAllButRelation:
       nonterminals = [x+(nonAndPreTerminalsCounts[x[1]],) for x in splitRes if tuple(x[0][:3]) == coordinates]
+      if len(nonterminals) == 1:
+        continue
       rare = [x for x in nonterminals if x[2] < args.MERGE_ACROSS_RELATIONS_THRESHOLD]
       if len(rare) > 1:
         merged = "_".join(coordinates + (".".join([x[0][3] for x in rare]),))
@@ -698,6 +704,8 @@ for MERGE in range(10000):
         conductMerging([x[1] for x in rare], merged)
         hasDoneMergingStep = True
         break
+#      else:
+ #       print("Not reduced", nonterminals)
    assert set(roots).issubset(set(binary_rules).union(set(terminals))), set(roots).difference(set(binary_rules))
    assert set(nonterminalsCounts) == set(binary_rules)
    assert set(preterminalsCounts) == set(terminals)
