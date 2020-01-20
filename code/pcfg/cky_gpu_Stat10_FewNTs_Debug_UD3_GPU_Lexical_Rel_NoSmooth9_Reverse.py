@@ -186,14 +186,16 @@ def recursivelyLinearize(sentence, position, result, gradients_from_the_left_sum
 
  
    inner = {"word" : line["word"], "category" :line["posUni"]+"_P_"+head+"_"+"NONE", "children" : None, "line" : line, "coarse_dep" : line["coarse_dep"]}
-   while rightChildren:
-      sibling = rightChildren.pop(0)
- #     print(sibling)
-      inner = {"category" : line["posUni"]+"_N_"+head+"_"+sibling["coarse_dep"], "children" : [inner, sibling], "line" : line, "coarse_dep" : line["coarse_dep"]}
+
    while leftChildren:
       sibling = leftChildren.pop(-1)
 #      print(sibling)
       inner = {"category" : line["posUni"]+"_N_"+head+"_"+sibling["coarse_dep"], "children" : [sibling, inner], "line" : line, "coarse_dep" : line["coarse_dep"]}
+
+   while rightChildren:
+      sibling = rightChildren.pop(0)
+ #     print(sibling)
+      inner = {"category" : line["posUni"]+"_N_"+head+"_"+sibling["coarse_dep"], "children" : [inner, sibling], "line" : line, "coarse_dep" : line["coarse_dep"]}
    return inner
 
 import numpy.random

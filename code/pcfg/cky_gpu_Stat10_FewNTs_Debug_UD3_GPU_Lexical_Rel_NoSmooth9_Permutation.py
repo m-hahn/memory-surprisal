@@ -52,14 +52,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--language', type=str)
 parser.add_argument('--model', type=str)
 parser.add_argument('--OOV_THRESHOLD_TRAINING', type=int, default=4) # fixed
-parser.add_argument('--VOCAB_FOR_RELATION_THRESHOLD', type=int, default=30) # variable
-parser.add_argument('--MAX_BOUNDARY', type=int, default=10) # ?
-parser.add_argument('--LEFT_CONTEXT', type=int, default=5) # ?
+parser.add_argument('--VOCAB_FOR_RELATION_THRESHOLD', type=int, default=100) # variable
+parser.add_argument('--MAX_BOUNDARY', type=int, default=15) # ?
+parser.add_argument('--LEFT_CONTEXT', type=int, default=0) # ?
 parser.add_argument('--OOV_THRESHOLD', type=int, default = 3) # fixed
 OOV_COUNT= 0
 parser.add_argument('--BATCHSIZE', type=int, default=1000) # maybe 1000 is safer?
 parser.add_argument('--OTHER_WORDS_SMOOTHING', type=float, default=0.0001) # variable
-parser.add_argument('--MERGE_ACROSS_RELATIONS_THRESHOLD', type=int, default=5) # variable # 5 doesn't hurt performance on Welsh, 10 does
+parser.add_argument('--MERGE_ACROSS_RELATIONS_THRESHOLD', type=int, default=100) # variable # 5 doesn't hurt performance on Welsh, 10 does
 parser.add_argument('--REPLACE_WORD_WITH_PLACEHOLDER', type=float, default=0.2) # variable
 parser.add_argument("--myID", type=int, default=random.randint(0,10000000))
 
@@ -1006,7 +1006,65 @@ def runOnCorpus():
 
      print(sentCount, [surprisals[i+1] - surprisals[i] for i in range(args.MAX_BOUNDARY-1)]) # [surprisalTableSums[0]/surprisalTableCounts[-1]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[-1] for i in range(MAX_BOUNDARY-1)]) 
 
-     computeSurprisals(linearized)
+     x0 = computeSurprisals(linearized, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+     x1 = computeSurprisals(linearized, [1, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+     x2 = computeSurprisals(linearized, [1, 1, 0, 0, 0, 0, 0, 0, 0, 0])
+     x3 = computeSurprisals(linearized, [1, 1, 1, 0, 0, 0, 0, 0, 0, 0])
+     x4 = computeSurprisals(linearized, [1, 1, 1, 1, 0, 0, 0, 0, 0, 0])
+     x5 = computeSurprisals(linearized, [1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
+     x6 = computeSurprisals(linearized, [1, 1, 1, 1, 1, 1, 0, 0, 0, 0])
+     x7 = computeSurprisals(linearized, [1, 1, 1, 1, 1, 1, 1, 0, 0, 0])
+     x8 = computeSurprisals(linearized, [1, 1, 1, 1, 1, 1, 1, 1, 0, 0])
+     print("ORDINARY ORDER", x1-x0, x2-x1, x3-x2, x4-x3, x5-x4, x6-x5, x7-x6, x8-x7) #, x6A1234-x3A124, x5A12346-x6A1234, x8A123456-x5A12346, x7A123468-x8A123456)
+
+     y0 = computeSurprisals(linearized, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+     y1 = computeSurprisals(linearized, [0, 1, 0, 0, 0, 0, 0, 0, 0, 0])
+     y2 = computeSurprisals(linearized, [1, 1, 0, 0, 0, 0, 0, 0, 0, 0])
+     y3 = computeSurprisals(linearized, [1, 1, 0, 1, 0, 0, 0, 0, 0, 0])
+     y4 = computeSurprisals(linearized, [1, 1, 1, 1, 0, 0, 0, 0, 0, 0])
+     y5 = computeSurprisals(linearized, [1, 1, 1, 1, 0, 1, 0, 0, 0, 0])
+     y6 = computeSurprisals(linearized, [1, 1, 1, 1, 1, 1, 0, 0, 0, 0])
+     y7 = computeSurprisals(linearized, [1, 1, 1, 1, 1, 1, 0, 1, 0, 0])
+     y8 = computeSurprisals(linearized, [1, 1, 1, 1, 1, 1, 1, 1, 0, 0])
+
+     print("SCRAMBLED ORDER1", y1-y0, y2-y1, y3-y2, y4-y3, y5-y4, y6-y5, y7-y6, y8-y7) #, y6A1234-y3A124, y5A12346-y6A1234, y8A123456-y5A12346, y7A123468-y8A123456)
+
+     z0 = computeSurprisals(linearized, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+     z1 = computeSurprisals(linearized, [1, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+     z2 = computeSurprisals(linearized, [1, 0, 1, 0, 0, 0, 0, 0, 0, 0])
+     z3 = computeSurprisals(linearized, [1, 1, 1, 0, 0, 0, 0, 0, 0, 0])
+     z4 = computeSurprisals(linearized, [1, 1, 1, 0, 1, 0, 0, 0, 0, 0])
+     z5 = computeSurprisals(linearized, [1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
+     z6 = computeSurprisals(linearized, [1, 1, 1, 1, 1, 0, 1, 0, 0, 0])
+     z7 = computeSurprisals(linearized, [1, 1, 1, 1, 1, 1, 1, 0, 0, 0])
+     z8 = computeSurprisals(linearized, [1, 1, 1, 1, 1, 1, 1, 0, 1, 0])
+
+     print("SCRAMBLED ORDER2", z1-z0, z2-z1, z3-z2, z4-z3, z5-z4, z6-z5, z7-z6, z8-z7) #, z6A1234-z3A124, z5A12346-z6A1234, z8A123456-z5A12346, z7A123468-z8A123456)
+     
+     a1 = x1-x0
+     a2 = x2-x1
+     a3 = x3-x2
+     a4 = x4-x3
+     a5 = x5-x4
+     a6 = x6-x5
+     a7 = x7-x6
+     a8 = x8-x7
+     print(a1, a2, a3, a4, a5, a6, a7, a8)
+     b1 = 0.5*((y1-y0) + (z1-z0))
+     b2 = 0.5*((y2-y1) + (z2-z1))
+     b3 = 0.5*((y3-y2) + (z3-z2))
+     b4 = 0.5*((y4-y3) + (z4-z3))
+     b5 = 0.5*((y5-y4) + (z5-z4))
+     b6 = 0.5*((y6-y5) + (z6-z5))
+     b7 = 0.5*((y7-y6) + (z7-z6))
+     b8 = 0.5*((y8-y7) + (z8-z7))
+     print(b1, b2, b3, b4, b5, b6, b7, b8)
+     print("I_t")
+     print(a2-a1, a3-a2, a4-a3, a5-a4, a6-a5, a7-a6, a8-a7)
+     print(b2-b1, b3-b2, b4-b3, b5-b4, b6-b5, b7-b6, b8-b7)
+
+     assert False
+
      surprisals = [surprisalTableSums[i]/(surprisalTableCounts[i]+1e-9) for i in range(args.MAX_BOUNDARY)]
      print(sentCount, [surprisals[i+1] - surprisals[i] for i in range(args.MAX_BOUNDARY-1)]) # [surprisalTableSums[0]/surprisalTableCounts[-1]] + [(surprisalTableSums[i+1]-surprisalTableSums[i])/surprisalTableCounts[-1] for i in range(MAX_BOUNDARY-1)]) 
   return surprisals
@@ -1070,9 +1128,13 @@ lexicalProbabilities_matrix = lexicalProbabilities_matrix.cuda().t()
 #print(lexicalProbabilities_matrix) # (nonterminals, words)
 # TODO why are there some -inf's?
 
-def computeSurprisals(linearized):
+def computeSurprisals(linearized, mask):
+#      mask = mask[:]
+      mask = [0 for _ in range(5)] + mask
+
       assert len(linearized[0]) == args.MAX_BOUNDARY
       assert len(linearized) == args.BATCHSIZE
+      assert len(mask) == args.MAX_BOUNDARY
 
       # Presumably unnecessary
       for x in chart:     
@@ -1084,9 +1146,12 @@ def computeSurprisals(linearized):
             if start+length-1 >= args.MAX_BOUNDARY:
                continue
             if length == 1: 
-               if start < args.LEFT_CONTEXT:
+               if mask[start] == 0:
                  for preterminal in terminals:
-                    chart[start][start][:,stoi_setOfNonterminals[preterminal]].fill_(0)
+                    if preterminal == "_EOS_" and False:
+                       chart[start][start][:,stoi_setOfNonterminals[preterminal]].fill_(float("-inf"))
+                    else:
+                       chart[start][start][:,stoi_setOfNonterminals[preterminal]].fill_(0)
                else:
                  lexical_tensor = torch.LongTensor([0 for _ in range(args.BATCHSIZE)])
              
@@ -1147,14 +1212,19 @@ def computeSurprisals(linearized):
          surprisalTableSums[BOUNDARY-1] += prefixProb
          surprisalTableCounts[BOUNDARY-1] += args.BATCHSIZE
          valuesPerBoundary.append(prefixProb)
-         print(BOUNDARY, prefixProb/args.BATCHSIZE, linearized[0])
+         if False:
+           print(BOUNDARY, prefixProb/args.BATCHSIZE, linearized[0])
          assert prefixProb/args.BATCHSIZE - 0.01 < valuesPerBoundary[-2]/args.BATCHSIZE, ("bug or numerical problem?", (prefixProb/args.BATCHSIZE, valuesPerBoundary[-2]/args.BATCHSIZE))
+      print(mask)
+      print("RESULT", float(chartFromStart[0][:,stoi_setOfNonterminals["_SENTENCES_"]].sum())/args.BATCHSIZE)
+      return float(chartFromStart[0][:,stoi_setOfNonterminals["_SENTENCES_"]].sum())/args.BATCHSIZE
 print("Reading data")
 
 print("Number of pre- and non-terminals", len(binary_rules)+len(terminals))
 
 surprisals = runOnCorpus() 
 
+assert False
 
 TARGET_DIR = "/u/scr/mhahn/deps/memory-need-pcfg/"
 
