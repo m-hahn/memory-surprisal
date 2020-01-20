@@ -23,7 +23,7 @@ parser.add_argument('--language', type=str)
 parser.add_argument('--MODEL_TYPE', type=str, default="RANDOM_BY_TYPE")
 parser.add_argument('--noiseVariance', type=float, default=0.0025) 
 parser.add_argument('--priorKnowledge', type=str, default=None) # variable
-parser.add_argument('--limit', type=int, default=100) # ?
+parser.add_argument('--limit', type=int, default=15) # ?
 args = parser.parse_args()
 
 if args.priorKnowledge is not None:

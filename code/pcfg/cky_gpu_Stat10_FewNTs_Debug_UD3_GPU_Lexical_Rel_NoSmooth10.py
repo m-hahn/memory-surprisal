@@ -67,7 +67,7 @@ args = parser.parse_args()
 
 
 
-assert args.model in ["REAL", "RANDOM_BY_TYPE", "GROUND"]
+assert args.model in ["REAL_REAL", "RANDOM_BY_TYPE", "GROUND"]
 
 posUni = set() #[ "ADJ", "ADP", "ADV", "AUX", "CONJ", "DET", "INTJ", "NOUN", "NUM", "PART", "PRON", "PROPN", "PUNCT", "SCONJ", "SYM", "VERB", "X"] 
 
@@ -185,15 +185,16 @@ def recursivelyLinearize(sentence, position, result, gradients_from_the_left_sum
       head = "#"
 
  
-   inner = {"word" : line["word"], "category" :line["posUni"]+"_P_"+head+"_"+"NONE", "children" : None, "line" : line, "coarse_dep" : line["coarse_dep"]}
+   dependencyForLexical = line["coarse_dep"] if head == "#" else "any"
+   inner = {"word" : line["word"], "category" :line["posUni"]+"_P_"+head+"_"+"NONE"+"_"+dependencyForLexical, "children" : None, "line" : line, "coarse_dep" : line["coarse_dep"]}
    while rightChildren:
       sibling = rightChildren.pop(0)
  #     print(sibling)
-      inner = {"category" : line["posUni"]+"_N_"+head+"_"+sibling["coarse_dep"], "children" : [inner, sibling], "line" : line, "coarse_dep" : line["coarse_dep"]}
+      inner = {"category" : line["posUni"]+"_N_"+head+"_"+sibling["coarse_dep"]+"_"+line["coarse_dep"], "children" : [inner, sibling], "line" : line, "coarse_dep" : line["coarse_dep"]}
    while leftChildren:
       sibling = leftChildren.pop(-1)
 #      print(sibling)
-      inner = {"category" : line["posUni"]+"_N_"+head+"_"+sibling["coarse_dep"], "children" : [sibling, inner], "line" : line, "coarse_dep" : line["coarse_dep"]}
+      inner = {"category" : line["posUni"]+"_N_"+head+"_"+sibling["coarse_dep"]+"_"+line["coarse_dep"], "children" : [sibling, inner], "line" : line, "coarse_dep" : line["coarse_dep"]}
    return inner
 
 import numpy.random
@@ -665,24 +666,26 @@ def conductMerging(fro, to):
    if total > 0:
       roots[to] = total
 
+   assert to.split("_")[1] in ["N", "P"]
    # to nonterminalsCounts
-   total=sum([nonterminalsCounts[x] for x in fro])
-   nonterminalsCounts[to] = total
-   for x in fro:
-      del nonterminalsCounts[x]
+   if to.split("_")[1] == "N":
+      total=sum([nonterminalsCounts[x] for x in fro])
+      nonterminalsCounts[to] = total
+      for x in fro:
+         del nonterminalsCounts[x]
 
-   # to binary_rules
-   # 1. on the parent side
-   overall = {}
-   for x in fro:
-     if x in binary_rules:
-#       print(binary_rules.get(x, {}))     
-       for y in binary_rules[x]:
-         overall[y] = overall.get(y, 0) + binary_rules[x][y]
-     del binary_rules[x]
- #  print(overall)
-   binary_rules[to] = overall
-   
+      # to binary_rules
+      # 1. on the parent side
+      overall = {}
+      for x in fro:
+        if x in binary_rules:
+   #       print(binary_rules.get(x, {}))     
+          for y in binary_rules[x]:
+            overall[y] = overall.get(y, 0) + binary_rules[x][y]
+        del binary_rules[x]
+    #  print(overall)
+      binary_rules[to] = overall
+      
    # 2. on the left child side
    fro = set(fro)
    for parent in binary_rules:
@@ -697,55 +700,76 @@ def conductMerging(fro, to):
             binary_rules[parent][(left, to)] = binary_rules[parent].get((left, to),0) + binary_rules[parent][(left, right)]
             del binary_rules[parent][(left, right)]
 
-print(nonterminalsCounts)
+   # to terminals
+   if to.split("_")[1] == "P":
+      newCounts = {}
+      for x in fro:
+         for y in list(terminals[x]):
+            newCounts[y] = newCounts.get(y,0) + terminals[x][y]
+ #        print(x, terminals[x])
+         del terminals[x]
+#      print(newCounts)
+      terminals[to] = newCounts
+
+      # also to preterminalsCounts
+      newCount = 0
+      for x in fro:
+         newCount += preterminalsCounts[x]
+         del preterminalsCounts[x]
+      preterminalsCounts[to] = newCount
+ #print(nonterminalsCounts)
 
 assert set(nonterminalsCounts).isdisjoint(set(preterminalsCounts))
 
-finishedCoordinates = set()
-
-for MERGE in range(20000):
-   hasDoneMergingStep = False
-   nonAndPreTerminalsCounts = dict(list(nonterminalsCounts.items()) + list(preterminalsCounts.items()))
+for coordinate_i in [3,4]:
+   finishedCoordinates = set()
    
-   # could merge across different relations, or could merge across different head words, or across different POS
-   splitRes = [(x.split("_"), x) for x in list(nonAndPreTerminalsCounts)]
-  # print(splitRes)
-   
-   #print(len(splitRes))
- 
-   splitResByCoordinates = {}
-   for x in splitRes:
-     coord = tuple(x[0][:3])
-     if coord not in splitResByCoordinates:
-       splitResByCoordinates[coord] = []
-     splitResByCoordinates[coord].append(x)
-  
-   coordinatesAllButRelation = set([tuple(x[0][:3]) for x in splitRes])
- #  print(coordinatesAllButRelation)
-   for coordinates in coordinatesAllButRelation:
-      if coordinates in finishedCoordinates:
-         continue
-      nonterminals = [x+(nonAndPreTerminalsCounts[x[1]],) for x in splitResByCoordinates[coordinates]]
-      if len(nonterminals) == 1:
-        continue
-      rare = [x for x in nonterminals if x[2] < args.MERGE_ACROSS_RELATIONS_THRESHOLD]
-      if len(rare) > 1:
-        merged = "_".join(coordinates + (".".join([x[0][3] for x in rare]),))
-#        print(coordinates, rare, merged)
-        conductMerging([x[1] for x in rare], merged)
-        hasDoneMergingStep = True
-        break
-#      else:
- #       print("Not reduced", nonterminals)
-      finishedCoordinates.add(coordinates)
-   assert set(roots).issubset(set(binary_rules).union(set(terminals))), set(roots).difference(set(binary_rules))
-   assert set(nonterminalsCounts) == set(binary_rules)
-   assert set(preterminalsCounts) == set(terminals)
-   print("Non- and Pre-Terminals", len(splitRes), MERGE)
-   if not hasDoneMergingStep:
-      break
+   for MERGE in range(10000):
+      hasDoneMergingStep = False
+      nonAndPreTerminalsCounts = dict(list(nonterminalsCounts.items()) + list(preterminalsCounts.items()))
+      
+      # could merge across different relations, or could merge across different head words, or across different POS
+      splitRes = [(x.split("_"), x) for x in list(nonAndPreTerminalsCounts)]
+     # print(splitRes)
+      
+      #print(len(splitRes))
+    
+      splitResByCoordinates = {}
+      for x in splitRes:
+        coord = tuple(x[0][:coordinate_i] + x[0][(coordinate_i+1):])
+        if coord not in splitResByCoordinates:
+          splitResByCoordinates[coord] = []
+        splitResByCoordinates[coord].append(x)
+     
+      coordinatesAllButRelation = set([tuple(x[0][:coordinate_i] + x[0][(coordinate_i+1):]) for x in splitRes])
+    #  print(coordinatesAllButRelation)
+      for coordinates in coordinatesAllButRelation:
+         if coordinates in finishedCoordinates:
+            continue
+         nonterminals = [x+(nonAndPreTerminalsCounts[x[1]],) for x in splitResByCoordinates[coordinates]]
+         if len(nonterminals) == 1:
+           continue
+         rare = [x for x in nonterminals if x[2] < args.MERGE_ACROSS_RELATIONS_THRESHOLD]
+         if len(rare) > 1:
+           merged = "_".join(coordinates + (".".join([x[0][(coordinate_i)] for x in rare]),))
+   #        print(coordinates, rare, merged)
+           conductMerging([x[1] for x in rare], merged)
+           hasDoneMergingStep = True
+           break
+   #      else:
+    #       print("Not reduced", nonterminals)
+         finishedCoordinates.add(coordinates)
+      assert set(roots).issubset(set(binary_rules).union(set(terminals))), set(roots).difference(set(binary_rules))
+      assert set(nonterminalsCounts) == set(binary_rules)
+      assert set(preterminalsCounts) == set(terminals)
+      print("Non- and Pre-Terminals", len(splitRes), MERGE)
+      if not hasDoneMergingStep:
+         break
 
 print("Non- and Pre-Terminals", len(splitRes))
+
+assert set(preterminalsCounts) == set(terminals)
+
 
 assert len(splitRes) < 700, len(splitRes)
 
@@ -1155,6 +1179,8 @@ print("Number of pre- and non-terminals", len(binary_rules)+len(terminals))
 
 surprisals = runOnCorpus() 
 
+
+assert False
 
 TARGET_DIR = "/u/scr/mhahn/deps/memory-need-pcfg/"
 
