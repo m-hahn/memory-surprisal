@@ -9,7 +9,7 @@ parser.add_argument("--base_directory", dest="base_directory", type=str)
 parser.add_argument("--suffix", dest="suffix", type=str, default="")
 
 args=parser.parse_args()
-print(args)
+#print(args)
 
 assert args.base_directory in ["word-level", "ngrams"]
 #assert args.suffix == {"word-level" : "_onlyWordForms_boundedVocab", "ngrams" : ""}[args.base_directory]
@@ -112,13 +112,17 @@ for real in ["REAL_REAL", "GROUND"]:
     
     comparison = interpolatedByTypes["RANDOM_BY_TYPE"] < median.unsqueeze(0)
     comparisonReverse = interpolatedByTypes["RANDOM_BY_TYPE"] > median.unsqueeze(0)
+    comparisonEqual = interpolatedByTypes["RANDOM_BY_TYPE"] == median.unsqueeze(0)
 
     comparisonMean = comparison.float().sum(dim=0)
     comparisonReverseMean = comparisonReverse.float().sum(dim=0)
-
+    comparisonEqualMean = comparisonEqual.float().sum(dim=0)
+#    print(comparisonMean)
+ #   print(comparisonReverseMean)
+  #  print(comparisonEqualMean)
     for i in range(39):
-       p1 = (scipy.stats.binom_test(x=comparisonMean[i], n=comparison.size()[0], alternative="greater"))
-       print "\t".join(map(str,[language, real, i, float(xPoints[i]), float(comparisonMean[i]/comparison.size()[0]), p1]))
+       p1 = (scipy.stats.binom_test(x=comparisonMean[i] + 0.5*comparisonEqualMean[i], n=comparison.size()[0], alternative="greater"))
+       print "\t".join(map(str,[language, real, i, float(xPoints[i]), float((comparisonMean[i] + 0.5*comparisonEqualMean[i]))/comparison.size()[0], p1]))
 
 
 
