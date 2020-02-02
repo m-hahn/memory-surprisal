@@ -4,10 +4,10 @@ library(ggplot2)
 
 # Plots CIs for the quantile
 
-fullData_ConfidenceLowerBound = read.csv("../../../results/tradeoff/listener-curve-binomial-confidence-bound-quantile-noAssumption-Ngrams.tsv", sep="\t") #%>% filter(Type != "GROUND")
-fullData_ConfidenceLowerBound_05 = read.csv("../../../results/tradeoff/listener-curve-binomial-confidence-bound-quantile-noAssumption-Ngrams-05.tsv", sep="\t") #%>% filter(Type != "GROUND")
+fullData_ConfidenceLowerBound = read.csv("../../../../results/tradeoff/listener-curve-binomial-confidence-bound-quantile-noAssumption-Ngrams.tsv", sep="\t") #%>% filter(Type != "GROUND")
+fullData_ConfidenceLowerBound_05 = read.csv("../../../../results/tradeoff/listener-curve-binomial-confidence-bound-quantile-noAssumption-Ngrams-05.tsv", sep="\t") #%>% filter(Type != "GROUND")
 
-fullData_BinomialTest = read.csv("../../../results/tradeoff/listener-curve-binomial-test-ngrams.tsv", sep="\t") #%>% filter(Type != "GROUND")
+fullData_BinomialTest = read.csv("../../../../results/tradeoff/listener-curve-binomial-test-ngrams.tsv", sep="\t") #%>% filter(Type != "GROUND")
 
 memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
     data = fullData_ConfidenceLowerBound %>% filter(Language == language)
@@ -32,7 +32,7 @@ memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
     return(plot)
 }
 
-languages = read.csv("../../corpusSizes.tsv", sep="\t")
+languages = read.csv("../../../corpusSizes.tsv", sep="\t")
 languages = languages$Language
 
 for(language in languages) {

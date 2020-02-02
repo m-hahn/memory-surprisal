@@ -1,13 +1,13 @@
 
 # Plots medians with confidence intervals
 
-fullData = read.csv("../../../results/tradeoff/ngrams/listener-curve-ci-median.tsv", sep="\t")
+fullData = read.csv("../../../../results/tradeoff/ngrams/listener-curve-ci-median.tsv", sep="\t")
 
 memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
     library(tidyr)
     library(dplyr)
     library(ggplot2)
-    dataL = read.csv(paste("../../../results/raw/ngrams/",language,"_ngrams_decay_after_tuning.tsv", sep=""), sep="\t")
+    dataL = read.csv(paste("../../../../results/raw/ngrams/",language,"_ngrams_decay_after_tuning.tsv", sep=""), sep="\t")
     UnigramCE = mean(dataL$UnigramCE)
     data = fullData %>% filter(Language == language)
     plot = ggplot(data, aes(x=Memory, y=UnigramCE-MedianEmpirical, fill=Type, color=Type)) + geom_line(size=2)+ theme_classic() + theme(legend.position="none") + geom_line(aes(x=Memory, y=UnigramCE-MedianLower), linetype="dashed") + geom_line(aes(x=Memory, y=UnigramCE-MedianUpper), linetype="dashed")
@@ -18,7 +18,7 @@ memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
 }
 
 
-languages = read.csv("../../corpusSizes.tsv", sep="\t")
+languages = read.csv("../../../corpusSizes.tsv", sep="\t")
 languages = languages$Language
 
 for(language in languages) {
