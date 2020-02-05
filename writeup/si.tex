@@ -73,7 +73,7 @@
 
 
 \begin{center}
-\includegraphics[width=0.5\textwidth]{../code/visualize_neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
+\includegraphics[width=0.5\textwidth]{../code/analysis/visualize_neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
 \captionof{figure}{Histogram}\label{fig:hist-real}
 \end{center}
 
@@ -173,10 +173,14 @@ We formalize a language as a stationary stochastic process $\dots w_{-2} w_{-1} 
 The symbols $w_i$ belong to a common set, representing the words of the language.\footnote{Could also be phonemes, sentences, ..., any other kind of unit.}
 We denote the listener's memory state at time $t$, after hearing $w_{<t} = ... w_{t-2} w_{t-1}$ by $m_t$.
 As described above, we assume
+\begin{equation}
+	m_t = M(m_{t-1}, w_{t-1})
+\end{equation}
+\footnote{Alternatively we could admit nondeterministic memory encodings, and require
 \begin{equation}\label{eq:listener-markov}
 	p(m_{t+1}| (w_{t'})_{t' \in \mathbb{Z}}, m_t)   = p(m_{t+1} | m_t, w_{t})
 \end{equation}
-that is, $m_{t+1}$ contains no information about the utterances beyond what is contained in $m_t$ and $w_{t}$.
+that is, $m_{t+1}$ contains no information about the utterances beyond what is contained in $m_t$ and $w_{t}$.}
 As a consequence, the listener has no knowledge of the speaker's state beyond the information provided in their prior communication.
 
 
@@ -189,49 +193,64 @@ By the assumption of stationarity, we can, for any positive integer $T$, rewrite
 \end{equation}
 
 
-We first show a lemma:
+%NOTE the proof could be made simpler by taking $m_t$ to be a deterministic function of $x_t$, $m_{t-1}$, rather than talking about conditional independence
+%
+%We first show a lemma:
+%
+%\begin{lemma}
+%For any positive integer $t$, the following inequality holds:
+%\begin{equation}
+%H[w_t | m_t] \geq H[w_t|w_{1 \dots t-1}, m_1]
+%\end{equation}
+%\end{lemma}
+%
+%\begin{proof}[Proof of the Lemma]
+Because $m_t$ is determined by $(w_{1 \dots t-1}, m_1)$:
+\begin{equation}
+	m_t = M(m_{t-1}, w_{t-1}) = M(M(m_{t-2}, w_{t-2}), w_{t-1}) = M(M(M(m_{t-3}, w_{t-3}), w_{t-2}), w_{t-1}) = \dots
+\end{equation}
+the Data Processing inequality entails the following inequality for every positive integer $t$:
+\begin{equation}
+	H[w_t | m_t] \geq H[w_t|w_{1 \dots t-1}, m_1]
+\end{equation}
 
-\begin{lemma}
-For any positive integer $t$, the following inequality holds:
-\begin{equation}
-H[w_t | m_t] \geq H[w_t|w_{1 \dots t-1}, m_1]
-\end{equation}
-\end{lemma}
-\begin{proof}[Proof of the Lemma]
-	By Bayes' Theorem
-\begin{align*}
-	p(w_t|m_0, m_1, w_{0\dots t-1}) &= \frac{p(m_1|m_0, w_{0\dots t})}{p(m_1|m_0, w_{0\dots t-1})} \cdot p(w_t|m_0, w_{0\dots t-1})
-\end{align*}
-By Equation~\ref{eq:listener-markov}, the quotient on the RHS is equal to $1$, so
-\begin{align*}
-p(w_t|m_0, m_1, w_{0\dots t-1}) = p(w_t|m_0, w_{0\dots t-1})
-\end{align*}
-So we have a Markov chain
-\begin{equation}
-(w_t) \rightarrow (m_0, w_{0 \dots t-1})   \rightarrow   (m_1, w_{1 \dots t-1})
-\end{equation}
-Thus, by the Data Processing Inequality,
-\begin{equation}
-H[w_t| w_{1 \dots t-1}, m_{1}] \geq H[w_t|w_{0 \dots t-1}, m_0]
-\end{equation}
-Finally, iteratively applying this inequality, we get:
-\begin{align*}
-H[w_t | m_t] \geq H[w_t| w_{t-1}, m_{t-1}] \geq H[w_t| w_{t-2, t-1}, m_{t-2}] \geq ... \geq H[w_t|w_{1 \dots t-1}, m_1]
-\end{align*}
-\end{proof}
+%\end{proof}
+
+%\begin{proof}[Proof of the Lemma]
+%	By Bayes' Theorem
+%\begin{align*}
+%	p(w_t|m_0, m_1, w_{0\dots t-1}) &= \frac{p(m_1|m_0, w_{0\dots t})}{p(m_1|m_0, w_{0\dots t-1})} \cdot p(w_t|m_0, w_{0\dots t-1})
+%\end{align*}
+%By Equation~\ref{eq:listener-markov}, the quotient on the RHS is equal to $1$, so
+%\begin{align*}
+%p(w_t|m_0, m_1, w_{0\dots t-1}) = p(w_t|m_0, w_{0\dots t-1})
+%\end{align*}
+%So we have a Markov chain
+%\begin{equation}
+%(w_t) \rightarrow (m_0, w_{0 \dots t-1})   \rightarrow   (m_1, w_{1 \dots t-1})
+%\end{equation}
+%Thus, by the Data Processing Inequality,
+%\begin{equation}
+%H[w_t| w_{1 \dots t-1}, m_{1}] \geq H[w_t|w_{0 \dots t-1}, m_0]
+%\end{equation}
+%Finally, iteratively applying this inequality, we get:
+%\begin{align*}
+%H[w_t | m_t] \geq H[w_t| w_{t-1}, m_{t-1}] \geq H[w_t| w_{t-2, t-1}, m_{t-2}] \geq ... \geq H[w_t|w_{1 \dots t-1}, m_1]
+%\end{align*}
+%\end{proof}
 Plugging this inequality into Equation~\ref{eq:byStation} above:
 \begin{align*}
 \operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]& \geq \frac{1}{T} \sum_{t=1}^T ( \operatorname{H}[w_t|w_{1\dots t-1}, m_1] - \operatorname{H}[w_t | w_{1\dots t-1}, w_{\leq 0}]  )    \\
 & = \frac{1}{T} \left(\operatorname{H}[w_{1\dots T} | m_1] - \operatorname{H}[w_{1\dots T} | w_{\leq 0}]\right)  \\
-& = \frac{1}{T} \left(I[w_{1\dots T}|w_{\leq 0}] - I[w_{1\dots T}|m_1]\right) 
+& = \frac{1}{T} \left(I[w_{1\dots T}, w_{\leq 0}] - I[w_{1\dots T}, m_1]\right) 
 \end{align*}
-The first term $I[w_{1\dots T}|w_{\leq 0}]$ can be rewritten in terms of $I_t$:
+The first term $I[w_{1\dots T}, w_{\leq 0}]$ can be rewritten in terms of $I_t$:
 \begin{align*}
-I[w_{1\dots T}|w_{\leq 0}] &= \sum_{i=1}^T \sum_{j=-1}^{-\infty} I[w_i, w_j | w_{j+1}...w_{i-1}] = \sum_{t=1}^T t I_t + T \sum_{t > T} I_t
+I[w_{1\dots T}, w_{\leq 0}] &= \sum_{i=1}^T \sum_{j=-1}^{-\infty} I[w_i, w_j | w_{j+1}...w_{i-1}] = \sum_{t=1}^T t I_t + T \sum_{t > T} I_t
 \end{align*}
 Therefore
 \begin{align*}
-\operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]& \geq \frac{1}{T} \left(\sum_{t=1}^T t I_t + T \sum_{t > T} I_t - I[w_{1\dots T}|m_1]\right) 
+\operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]& \geq \frac{1}{T} \left(\sum_{t=1}^T t I_t + T \sum_{t > T} I_t - I[w_{1\dots T}, m_1]\right) 
 \end{align*}
 $I[w_{1\dots T}|m_1]$ is at most $\operatorname{H}[m_1]$, which is at most $\sum_{t=1}^T t I_t$ by assumption. Thus, the expression above is bounded by
 \begin{align*}
@@ -263,17 +282,34 @@ This model has two bottlenecks:
 The working memory capacity, which we model as $H[m_t]$, and the amount of information that is added through retrieval, modeled as $H[r_t|m_t]$.
 
 
-%Bounding retrieval = bounding the precision and/or content of retrieved items. Explain more how this relates to McElree and ACT-R.
+Bounding retrieval = bounding the precision and/or content of retrieved items. Explain more how this relates to McElree and ACT-R.
 
+In ACT-R, each retrieval operation takes time. If each chunk has a bounded amount of information, then this corresponds to a bottleneck in $H[r_t|m_t]$
+
+
+Formally:
+
+$m_t = f(x_t, m_{t-1}, r_t)$
+
+$r_t = g(m_{t-1}, s_{t-1})$
+
+$s_t = h(m_{t-1}, s_{t-1})$
 
 \begin{thm}
-	Assume the average working memory $H[m_t]$ is bounded as $H[L_t] \leq \sum_{t=1}^T t I_t$, and the average amount of retrieval is bounded as $H[R_t] \leq \sum_{t=T+1}^S I_t$ (per word).
-	Then $H[w_t|m_t] \geq H[w_t|x_{<t}] + \sum_{t>S} I_t$.
+Assume the average working memory $H[m_t]$ is bounded as $H[L_t] \leq \sum_{t=1}^T t I_t$, and the average amount of retrieval is bounded as $H[R_t] \leq \sum_{t=T+1}^S I_t$ (per word).
+Then $H[w_t|m_t] \geq H[w_t|x_{<t}] + \sum_{t>S} I_t$.
 \end{thm}
 
 \begin{proof}
-The negative surprisal gap is
-$\leq \frac{1}{T}(I[X_1\dots X_T|(M_0, R_1, ..., R_T)] - \sum_{t=1}^T t I_t - T \sum_{t>T} I_t) \leq  \frac{1}{T}(T\cdot H[R_t] - T \sum_{t>T} I_t) = H[R_t] - \sum_{t>T} I_t$
+	As before using the Data Processing inequality:
+\begin{align*}
+	-(\operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]) \leq & \frac{1}{T}\left(I[X_1\dots X_T, (M_0, R_1, ..., R_T)] - I[X_1\dots X_T, X_{<1}]\right) \\
+= & \frac{1}{T}\left(I[X_1\dots X_T, (M_0, R_1, ..., R_T)] - \sum_{t=1}^T t I_t - T \sum_{t>T} I_t\right) \\
+	= & \frac{1}{T}\left(I[X_{1\dots T}, M_0] + I[X_{1\dots T}, R_1|M_0] + \dots + I[X_{1\dots T}, R_T|M_0, R_{1 \dots T-1}] - \sum_{t=1}^T t I_t - T \sum_{t>T} I_t\right) \\
+	\leq & \frac{1}{T}\left(H[M_0] + H[R_1] + \dots + H[R_{T-1}] - \sum_{t=1}^T t I_t - T \sum_{t>T} I_t\right) \\
+	\leq &  \frac{1}{T}(T\cdot H[R_t] - T \sum_{t>T} I_t) \\
+	= & H[R_t] - \sum_{t>T} I_t
+\end{align*}
 
 \end{proof}
 
@@ -291,6 +327,31 @@ has solution $T \approx \frac{\lambda_2}{\lambda_1}$.\footnote{Can do simple pro
 
 
 Consequence: As long as retrievals are more expensive than keeping the same amount in WM, locality is predicted.
+
+
+\subsection{Results for Language Production}
+
+Here we show results linking memory and locality in production.
+
+First, we consider a setting in which a speaker produces sentences with bounded memory, and analyze the deviation of the produced distribution from the actual distribution of the language.
+
+
+The first setting does not account for the fact that language is produced aiming for some communicative goal.
+We therefore now assume that the speaker has a communicative goal $G$ in mind.
+This goal $G$ stays constant during production process for a sentence, and we count how much memory is needed in addition to the goal $G$.
+We assume that there is a distribution of sentences expressing goals $G$:
+\begin{equation}
+	P(sentence|G)
+\end{equation}
+and assume that the speaker aims to match this distribution
+\begin{equation}
+\mathbb{E}_G[D_{KL}((language|G)||(produced|G))]
+\end{equation}
+We can analyze this model by adding conditioning w.r.t. $G$ throughout the analysis of the previous case.
+Specifically, we need $I_t^G := I[X_t, X_0|X_1, \dots, X_{t-1}, G]$.
+
+Take $I_t$ conditioned on $G$: only count statistical dependencies to the degree that they are not redundant with the goal
+
 
 
 
