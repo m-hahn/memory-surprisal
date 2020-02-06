@@ -799,4 +799,7 @@ while failedDevRuns < 5:
        if printHere:
           print "Epoch "+str(epochCount)+" "+str(counter)
 
+import subprocess
+
+subprocess.call(["/u/nlp/anaconda/ubuntu_16/envs/py27-mhahn/bin/python2.7", "optimizeGrammarForI1_6_EvaluateGrammar.py", "--language="+args.language, "--model="+args.language+"_"+__file__+"_model_"+str(myID)+".tsv"])
 

@@ -454,37 +454,10 @@ def doForwardPass(input_indices, wordStartIndices, surprisalTable=None, doDropou
           for j in range(1,len(input_indices[i])):
                source = input_indices[i][j-1]
                countsHere = counts[source]
-
-#               totalProb = 0
-#               for target in range(outVocabSize)+[-1]:
-#                    targetCount = countsHere[0].get(target, 0)
-#                    sumOfCounts = countsHere[1][0]
-#                    totalProb += (max(targetCount-args.delta, 0.0) + len(countsHere[0]) * (args.delta * unigramCounts[target])/totalUnigramCount)/sumOfCounts
-##                    print(max(targetCount-args.delta, 0.0), len(countsHere[0]), args.delta, unigramCounts[target], totalUnigramCount, sumOfCounts)
-#               print(totalProb)
-#               assert totalProb <= 1.00001, totalProb
-#
-#
-#               MinusOneCount = countsHere[0][-1]
-#               sumOfCounts = countsHere[1][0]
-#               MinusOneProb = (max(MinusOneCount-args.delta, 0.0) + len(countsHere[0]) * (args.delta * unigramCounts[-1])/totalUnigramCount)/sumOfCounts
-#               print(MinusOneProb, MinusOneProb/outVocabSize)
-
                target = input_indices[i][j]
-
-               #unigramLogProb = math.log(unigramCounts[target]) - math.log(totalUnigramCount)
-
                countsHere = counts[source]
-
                targetCount = countsHere[0].get(target, 0)
                sumOfCounts = countsHere[1][0]
-
-               #log_probability = math.log(targetCount) - math.log(sumOfCounts)
-
-               #print(log_probability, unigramLogProb)
-
-               # increment logit
-
                probKneserNey = (max(targetCount-args.delta, 0.0) + len(countsHere[0]) * (args.delta * unigramCounts[target])/totalUnigramCount)/sumOfCounts
 #               if probKneserNey > 1 or probKneserNey <= 0:
  #                  print("targetCount", targetCount)
@@ -500,8 +473,6 @@ def doForwardPass(input_indices, wordStartIndices, surprisalTable=None, doDropou
                if doDropout:
                  countsHere[0][target] += 1
                  countsHere[1][0] += 1
-
-               if doDropout:
                  unigramCounts[target] += 1
                  totalUnigramCount += 1
 
@@ -731,7 +702,7 @@ while failedDevRuns < 5:
 
 
           print "Saving"
-          if False:
+          if True:
             with open(TARGET_DIR+"/"+args.language+"_"+__file__+"_model_"+str(myID)+".tsv", "w") as outFile:
                print >> outFile, "\t".join(map(str,["FileName","DH_Weight","CoarseDependency","DistanceWeight"]))
                for i in range(len(itos_deps)):
@@ -793,4 +764,7 @@ while failedDevRuns < 5:
        if printHere:
           print "Epoch "+str(epochCount)+" "+str(counter)
 
+import subprocess
+
+subprocess.call(["/u/nlp/anaconda/ubuntu_16/envs/py27-mhahn/bin/python2.7", "optimizeGrammarForI1_6_EvaluateGrammar.py", "--language="+args.language, "--model="+args.language+"_"+__file__+"_model_"+str(myID)+".tsv"])
 
