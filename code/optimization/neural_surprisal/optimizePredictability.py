@@ -718,7 +718,7 @@ while True:
           # Saving grammar parameters to file
           print "Saving"
           save_path = "/u/scr/mhahn/deps/locality_optimized_neural/"
-          with open(save_path+"/manual_output_funchead_langmod_coarse_best/"+args.language+"_"+__file__+"_model_"+str(myID)+".tsv", "w") as outFile:
+          with open(save_path+"/manual_output_funchead_langmod_coarse_best_ud/"+args.language+"_"+__file__+"_model_"+str(myID)+".tsv", "w") as outFile:
              print >> outFile, "\t".join(map(str,["Counter", "DH_Weight","CoarseDependency","DistanceWeight"]))
              for i in range(len(itos_deps)):
                 key = itos_deps[i]
