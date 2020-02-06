@@ -1,17 +1,19 @@
 import os
 import random
-
 import sys
 
 header = ["index", "word", "lemma", "posUni", "posFine", "morph", "head", "dep", "_", "_"]
 
+SMALL_TREEBANKS = ["UD_Kazakh-KTB", "UD_Cantonese-HK", "UD_Naija-NSC", "UD_Buryat-BDT", "UD_Thai-PUD", "UD_Breton-KEB", "UD_Faroese-OFT", "UD_Amharic-ATT", "UD_Kurmanji-MG", "UD_Upper_Sorbian-UFAL", "UD_Bambara-CRB", "UD_Erzya-JR"]
+SUBSTITUTE_TEST_FOR_DEV = ["UD_North_Sami", "UD_Irish", "UD_Buryat-BDT", "UD_Armenian-ArmTDP"]
+SUBSTITUTE_DEV_FOR_TRAIN = ["UD_Armenian-ArmTDP"]
 
 def readUDCorpus(language, partition):
       basePaths = ["/u/scr/corpora/Universal_Dependencies/Universal_Dependencies_2.2/ud-treebanks-v2.2/", "/u/scr/corpora/Universal_Dependencies/Universal_Dependencies_2.1/ud-treebanks-v2.1/", "/u/scr/corpora/Universal_Dependencies/Universal_Dependencies_2.3/ud-treebanks-v2.3/"]
       files = []
       while len(files) == 0:
         if len(basePaths) == 0:
-           print "No files found"
+           print >> sys.stderr, "No files found"
            raise IOError
         basePath = basePaths[0]
         del basePaths[0]
@@ -19,12 +21,16 @@ def readUDCorpus(language, partition):
         files = filter(lambda x:x.startswith("UD_"+language.replace("-Adap", "")), files)
       data = []
       for name in files:
+
+        # Skip Sign Language Treebanks
         if "Sign" in name:
-           print "Skipping "+name
+           print >> sys.stderr, "Skipping "+name
            continue
         assert ("Sign" not in name)
+
+        # Skip Non-Native Treebanks
         if "Chinese-CFL" in name:
-           print "Skipping "+name
+           print >> sys.stderr, "Skipping "+name
            continue
         suffix = name[len("UD_"+language):]
         if name == "UD_French-FTB":
@@ -33,18 +39,21 @@ def readUDCorpus(language, partition):
             subDirectory =basePath+"/"+name
         subDirFiles = os.listdir(subDirectory)
         partitionHere = partition
-        if (name in ["UD_North_Sami", "UD_Irish", "UD_Buryat-BDT", "UD_Armenian-ArmTDP"]) and partition == "dev" and (not language.endswith("-Adap")):
-            print "Substituted test for dev partition"
+
+        # Special procedures for small corpora
+        if (name in SUBSTITUTE_TEST_FOR_DEV) and partition == "dev" and (not language.endswith("-Adap")):
+            print >> sys.stderr, "Substituted test for dev partition"
             partitionHere = "test"
         elif language.endswith("-Adap"):
-          if (name in ["UD_Kazakh-KTB", "UD_Cantonese-HK", "UD_Naija-NSC", "UD_Buryat-BDT", "UD_Thai-PUD", "UD_Breton-KEB", "UD_Faroese-OFT", "UD_Amharic-ATT", "UD_Kurmanji-MG", "UD_Upper_Sorbian-UFAL", "UD_Bambara-CRB", "UD_Erzya-JR"]):
+          if (name in SMALL_TREEBANKS):
              partitionHere = "test"
-          elif name == "UD_Armenian-ArmTDP":
+          elif name in SUBSTITUTE_DEV_FOR_TRAIN:
              partitionHere  = ("train" if partition == "dev" else "test")
             
+        # Collect corpus files
         candidates = filter(lambda x:"-ud-"+partitionHere+"." in x and x.endswith(".conllu"), subDirFiles)
         if len(candidates) == 0:
-           print "Did not find "+partitionHere+" file in "+subDirectory
+           print >> sys.stderr, "Did not find "+partitionHere+" file in "+subDirectory
            continue
         if len(candidates) == 2:
            candidates = filter(lambda x:"merged" in x, candidates)
@@ -54,7 +63,7 @@ def readUDCorpus(language, partition):
            with open(dataPath, "r") as inFile:
               newData = inFile.read().strip().split("\n\n")
               assert len(newData) > 1
-              if language.endswith("-Adap")  and (name in ["UD_Kazakh-KTB", "UD_Cantonese-HK", "UD_Naija-NSC", "UD_Buryat-BDT",  "UD_Thai-PUD", "UD_Breton-KEB", "UD_Faroese-OFT", "UD_Amharic-ATT", "UD_Kurmanji-MG", "UD_Upper_Sorbian-UFAL", "UD_Bambara-CRB", "UD_Erzya-JR"]): # "UD_Armenian-ArmTDP",
+              if language.endswith("-Adap")  and (name in SMALL_TREEBANKS): # "UD_Armenian-ArmTDP",
                   random.Random(4).shuffle(newData)
                   devLength = 100
                   if partition == "dev":
@@ -65,7 +74,7 @@ def readUDCorpus(language, partition):
                        assert False
               data = data + newData
         except IOError:
-           print "Did not find "+dataPath
+           print >> sys.stderr, "Did not find "+dataPath
 
       assert len(data) > 0, (language, partition, files)
 
@@ -82,13 +91,7 @@ class CorpusIterator():
       assert self.splitWords == (language == "BKTreebank_Vietnamese")
 
       self.storeMorph = storeMorph
-      if language.startswith("ISWOC_"):
-          import accessISWOCData
-          data = accessISWOCData.readISWOCCorpus(language.replace("ISWOC_",""), partition)
-      elif language.startswith("TOROT_"):
-          import accessTOROTData
-          data = accessTOROTData.readTOROTCorpus(language.replace("TOROT_",""), partition)
-      elif language == "BKTreebank_Vietnamese":
+      if language == "BKTreebank_Vietnamese":
           import accessBKTreebank
           data = accessBKTreebank.readBKTreebank(partition)
       elif language == "TuebaJS":
@@ -99,11 +102,7 @@ class CorpusIterator():
          import accessChineseDependencyTreebank
          data = accessChineseDependencyTreebank.readChineseDependencyTreebank(partition)
          assert len(data) > 0, (language, partition)
-      elif language == "PTB":
-         import accessPTB
-         data = accessPTB.readDependencyPTB(partition)
-         assert len(data) > 0, (language, partition)
-       
+        
       else:
           data = readUDCorpus(language, partition)
       if shuffleData:
@@ -138,10 +137,6 @@ class CorpusIterator():
            if self.language == "Thai-Adap":
               assert sentence[i]["lemma"] == "_"
               sentence[i]["lemma"] = sentence[i]["word"]
-           if "ISWOC" in self.language or "TOROT" in self.language:
-              if sentence[i]["head"] == 0:
-                  sentence[i]["dep"] = "root"
-
            if self.splitLemmas:
               sentence[i]["lemmas"] = sentence[i]["lemma"].split("+")
 
