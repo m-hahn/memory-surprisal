@@ -247,9 +247,9 @@ Plugging this inequality into Equation~\ref{eq:byStation} above:
 & = \frac{1}{T} \left(I[w_{1\dots T}, w_{\leq 0}] - I[w_{1\dots T}, m_1]\right) 
 \end{align}
 The first term $I[w_{1\dots T}, w_{\leq 0}]$ can be rewritten in terms of $I_t$:
-\begin{align*}
+\begin{align}\label{eq:i-expanded}
 I[w_{1\dots T}, w_{\leq 0}] &= \sum_{i=1}^T \sum_{j=-1}^{-\infty} I[w_i, w_j | w_{j+1}...w_{i-1}] = \sum_{t=1}^T t I_t + T \sum_{t > T} I_t
-\end{align*}
+\end{align}
 Therefore
 \begin{align*}
 \operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]& \geq \frac{1}{T} \left(\sum_{t=1}^T t I_t + T \sum_{t > T} I_t - I[w_{1\dots T}, m_1]\right) 
@@ -273,34 +273,34 @@ We extend our model of memory in incremental prediction to capture key aspects o
 
 The ACT-R model of \cite{lewis-activation-based-2005} assumes a small working memory consisting of \emph{buffers} and a \emph{control state}, which together hold a small and fixed number of individual \emph{chunks}.
 It also assumes a large short-term memory that contains an unbounded number of chunks.
-This large memory store is accessed via \emph{cue-based retrieval}: a query is constructed based on the current state of the buffers; a chunk that matches this query is then selected from the memory storage and placed into one of the buffers.
+This large memory store is accessed via \emph{cue-based retrieval}: a query is constructed based on the current state of the buffers and the control state; a chunk that matches this query is then selected from the memory storage and placed into one of the buffers.
 
 \paragraph{Formal Model}
-We extend our information-theoretic analysis by considering a model that maintains both a small working memory $m_t$ -- corresponding to the buffers -- and an unlimited short-term memory $s_t$.
+We extend our information-theoretic analysis by considering a model that maintains both a small working memory $m_t$ -- corresponding to the buffers and the control state -- and an unlimited short-term memory $s_t$.
 Predictions are made based on working memory $m_t$, incurring surprisal $H[w_t|m_t]$.
 When processing a word $x_t$, there is some amount of communication between $m_t$ and $s_t$, corresponding to retrieval operations.
 We model this using a variable $r_t$ representing the information that is retrieved from $s_t$.
-Formally, the memory state is determined not just by the input $x_t$ and the previous memory state $m_{t-1}$, but also by the retrieved information:
+In our formalization, $r_t$ reflects the totality of all retrieval operations that are made during the processing of $x_{t-1}$; they happen after $x_{t-1}$ has been observed but before $x_t$ has.
+
+The working memory state is determined not just by the input $x_t$ and the previous working memory state $m_{t-1}$, but also by the retrieved information:
 \begin{equation}
 	m_t = f(x_t, m_{t-1}, r_t) 
 \end{equation}
-The retrieval operation is jointly determined by working memory and short-term memory:
+The retrieval operation is jointly determined by working memory, short-term memory, and the previous word:
 \begin{equation}\label{eq:rt}
-	r_t = g(m_{t-1}, s_{t-1}) 
+	r_t = g(x_{t-1}, m_{t-1}, s_{t-1}) 
 \end{equation}
-Finally, the short-term memory can incorporate information from the last word and the working memory:
+Finally, the short-term memory can incorporate any -- possibly all -- information from the last word and the working memory:
 \begin{equation}
 	s_t = h(x_{t-1}, m_{t-1}, s_{t-1}) 
 \end{equation}
+While $s_t$ is unconstrained, there are constraints on the capacity of working memory $\operatorname{H}[m_t]$ and the amount of retrieved information $\operatorname{H}[r_t]$.
+Placing a bound on $\operatorname{H}[m_t]$ reflects the fact that the buffers can only hold a small and fixed number of chunks \citep{lewis-activation-based-2005}.
+
 
 \paragraph{Cost of Retrieval}
-%In the ACT-R model of \cite{lewis-activation-based-2005}, the working memory corresponds to the \emph{buffers}, which together hold a small and fixed number of individual chunks.
-%The short-term memory contains an unbounded number of chunks.
-In ACT-R, each retrieval operation is initiated through a query constructed based on the current state of the buffers; it returns a chunk from short-term memory that is then placed into a buffer.
-In our formalization, $r_t$ reflects the totality of all retrieval operations that are made during the processing of $x_{t-1}$; they happen after $x_{t-1}$ has been observed but before $x_t$ has.
-Equation~\ref{eq:rt} reflects that these retrieved chunks are determined by working memory and short-term memory.
-
-
+%In ACT-R, each retrieval operation is initiated through a query constructed based on the current state of the buffers; it returns a chunk from short-term memory that is then placed into a buffer.
+%Equation~\ref{eq:rt} reflects that these retrieved chunks are determined by working memory and short-term memory.
 In the model of \cite{lewis-activation-based-2005}, the time it takes to process a word is determined primarily by the time spent retrieving chunks, which is determined by the number of retrieval operations and the time it takes to complete each retrieval operation.
 If the information content of each chunk is bounded, then a bound on $H[r_t]$ corresponds to a bound on the number of retrieval operations.
 
@@ -313,7 +313,7 @@ The ACT-R model of \cite{lewis-activation-based-2005} does not have an explicit 
 Instead, surprisal effects are interpreted as arising because, in less constraining contexts, the parser is more likely to make decisions that then turn out to be incorrect, leading to additional correcting steps.
 %We see this as an algorithmic-level implementation of the justification for surprisal theory provided by \citet{levy2008expectation}:
 We view this as an algorithmic-level implementation of a surprisal cost $H[x_t|m_{t-1}]$:
-If the word $x_t$ is unexpected given the current state of the working memory -- i.e., buffers and control states -- then their current state must provide insufficient information to constrain the actual syntactic state of the sentence, meaning that the parsing steps made to integrate $x_t$ will include more backtracking and correction steps.
+If the word $x_t$ is unexpected given the current state of the working memory -- i.e., buffers and control states -- then their current state must provide insufficient information to constrain the actual syntactic state of the sentence, meaning that the parsing steps made to integrate $x_t$ are likely to include more backtracking and correction steps.
 Thus, we argue that cue-based retrieval models predict that the surprisal $- \log P(x_t|m_{t-1})$ will be part of the cost of processing word $x_t$.
 
 
@@ -328,29 +328,49 @@ Thus, we argue that cue-based retrieval models predict that the surprisal $- \lo
 We now show an extension of our theoretical result in the setting of the retrieval-based model described above.
 
 \begin{thm}
-	Assume the average working memory $\operatorname{H}[m_t]$ is bounded as $\operatorname{H}[L_t] \leq \sum_{t=1}^T t I_t$, and the average amount of retrieved information is bounded as $\operatorname{H}[R_t] \leq \sum_{t=T+1}^S I_t$ (per word).
-	Then $\operatorname{H}[w_t|m_t] \geq \operatorname{H}[w_t|x_{<t}] + \sum_{t>S} I_t$.
+Let $0 < S \leq T$ be positive integers such that the average working memory cost $\operatorname{H}[m_t]$ is bounded as
+	\begin{equation}
+		\operatorname{H}[m_t] \leq \sum_{t=1}^T t I_t
+	\end{equation}
+	and the average amount of retrieved information is bounded as
+	\begin{equation}
+		\operatorname{H}[r_t] \leq \sum_{t=T+1}^S I_t
+	\end{equation} %(per word).
+	Then the surprisal cost is lower-bounded as
+	\begin{equation}
+		\operatorname{H}[w_t|m_t] \geq \operatorname{H}[w_t|x_{<t}] + \sum_{t>S} I_t
+	\end{equation}
 \end{thm}
 
 \begin{proof}
 The proof is a generalization of the proof above.
-	As in (\ref{eq:plugged}), the Data Processing Inequality entails:
+	For any positive integer $t$, $m_t$ is determined by $w_{1\dots t}, m_0, r_0, \dots, r_t$.
+	Therefore, the Data Processing Inequality entails:
+	\begin{equation}
+		\operatorname{H}[w_t|m_t] \geq \operatorname{H}[w_t|w_{1\dots t}, m_0, r_0, \dots, r_t]
+	\end{equation}
+	As in~(\ref{eq:plugged}), this leads to
+\begin{align}
+\operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]& \geq \frac{1}{T} \sum_{t=1}^T ( \operatorname{H}[w_t|w_{1\dots t}, m_0, r_0, \dots, r_t] - \operatorname{H}[w_t | w_{1\dots t-1}, w_{\leq 0}]  )    \\
+& \geq \frac{1}{T} \left(\operatorname{H}[w_{1\dots T} | m_0, r_0, \dots, r_T] - \operatorname{H}[w_{1\dots T} | w_{\leq 0}]\right)  \\
+	& = \frac{1}{T} \left(I[w_{1\dots T}, w_{\leq 0}] - I[w_{1\dots T}, (m_0, r_0, \dots, r_T)]\right) 
+\end{align}
+	Now, using the calculation from (\ref{eq:i-expanded}), this can be rewritten as:
 	\begin{align*}
-	-(\operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]) \leq & \frac{1}{T}\left(I[X_1\dots X_T, (M_0, R_1, ..., R_T)] - I[X_1\dots X_T, X_{<1}]\right) \\
+\operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]= & \frac{1}{T}\left(\sum_{t=1}^T t I_t + T \sum_{t>T} I_t - I[X_1\dots X_T, (M_0, R_1, ..., R_T)]\right) \\
+		= & \frac{1}{T}\left(\sum_{t=1}^T t I_t + T \sum_{t>T} I_t - I[X_{1\dots T}, M_0] - \sum_{t=1}^T I[X_{1\dots T}, R_t|M_0, r_{1\dots t-1}]\right) \\
 	\end{align*}
-	Now, using the same calculation as above, this can be rewritten as:
-	\begin{align*}
-= & \frac{1}{T}\left(I[X_1\dots X_T, (M_0, R_1, ..., R_T)] - \sum_{t=1}^T t I_t - T \sum_{t>T} I_t\right) \\
-	= & \frac{1}{T}\left(I[X_{1\dots T}, M_0] + I[X_{1\dots T}, R_1|M_0] + \dots + I[X_{1\dots T}, R_T|M_0, R_{1 \dots T-1}] - \sum_{t=1}^T t I_t - T \sum_{t>T} I_t\right) \\
-	\end{align*}
-	Applying the assumptions about the information contained in working memory and retrievals, we bound this as follows:
-	\begin{align*}
-	\leq & \frac{1}{T}\left(H[M_0] + H[R_1] + \dots + H[R_{T-1}] - \sum_{t=1}^T t I_t - T \sum_{t>T} I_t\right) \\
-	\leq &  \frac{1}{T}(T\cdot H[R_t] - T \sum_{t>T} I_t) \\
-	= & H[R_t] - \sum_{t>T} I_t \\
-		\leq & \sum_{t=T+1}^S I_t - \sum_{t>T} I_t \\
-		= & - \sum_{t>S} I_t
-\end{align*}
+	Due to the inequalities $I[X_{1\dots T}, M_0] \leq \operatorname{H}[M_0]$ and $\operatorname{I}[X_{1\dots T}, R_t|M_0, r_{1\dots t-1}] \leq \operatorname{H}[R_t]$, this can be bounded as
+	\begin{align}
+\operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]		\geq & \frac{1}{T}\left(\sum_{t=1}^T t I_t  + T \sum_{t>T} I_t-H[M_0] - \sum_{t=1}^T H[R_t]\right) \\
+	\end{align}
+	Finally, this reduces as
+	\begin{align}
+	\operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]		\geq &  \frac{1}{T}(T \sum_{t>T} I_t - T\cdot H[R_t]) \\
+	= & \sum_{t>T} I_t- H[R_t]  \\
+		\geq & \sum_{t>T} I_t - \sum_{t=T+1}^S I_t \\
+		= &  \sum_{t>S} I_t
+\end{align}
 
 \end{proof}
 
@@ -360,14 +380,14 @@ For this, we formalize the problem of finding an optimal memory strategy as a mu
 \begin{equation}
 	\lambda_1 H[m_t] + \lambda_2 H[r_t]
 \end{equation}
-to achieve a given surprisal level.
-What is the optimal division of labor between keeping information in working memory and recovering them through retrieval?
+to achieve a given surprisal level, for some setting of $\lambda_1, \lambda_2 > 0$ describing the relative cost of storage and retrieval.
+What is the optimal division of labor between keeping information in working memory and recovering it through retrieval?
 The problem
 \begin{equation}\label{eq:multi-obj-t}
 	\min_{T} \lambda_1 \sum_{t=1}^T t I_t + \lambda_2 \sum_{t=T+1}^S I_t
 \end{equation}
 has solution $T \approx \frac{\lambda_2}{\lambda_1}$. %\footnote{Can do simple proof using the continuous-$T$-version.}
-This means that, as long as retrievals are more expensive than keeping the same amount of information in working memory (i.e., $\lambda_2 > \lambda_1$), the optimal strategy stores information from recent words in working memory.
+This means that, as long as retrievals are more expensive than keeping the same amount of information in working memory (i.e., $\lambda_2 > \lambda_1$), the optimal strategy stores information from the last $T > 1$ words in working memory.
 Due to the factor $t$ inside $\sum_{t=1}^T t I_t$, the bound~(\ref{eq:multi-obj-t}) will be reduced when $I_t$ decays faster, i.e., there is strong information locality.
 
 The assumption that retrieving information is more difficult than storing it is reasonable for cue-based retrieval models, as retrieval suffers from similarity-based interference effects due to the unstructured nature of the storage~\citep{lewis-activation-based-2005}.
@@ -376,6 +396,7 @@ Given the nature of representations assumed in models~\citep{lewis-activation-ba
 
 %If $\frac{\lambda_2}{\lambda_1} \rightarrow \infty$ (retrievals get more expensive), recover previous model.
 %If $\frac{\lambda_2}{\lambda_1} \rightarrow 0$ (retrievals get cheaper), locality effect gets weaker, and disappears in the limit\footnote{(Of course, even in this limit, there might be additional factors that may still favor locality in a specific implementation of memory -- e.g., in ACT-R, decay and interference are less problematic if there is locality.)}
+
 
 
 
@@ -405,7 +426,42 @@ Take $I_t$ conditioned on $G$: only count statistical dependencies to the degree
 
 \section{Example where window model is not optimal}
 
+Here we provide an example of a stochastic process where a window-based memory encoding is not optimal, but the bound provided by our theorem still holds.
 
+Let $k$ be some positive integer.
+Consider a process
+$x_{t+1} = (v_{t+1}, w_{t+1}, y_{t+1}, z_{t+1})$
+where
+\begin{enumerate}
+	\item The first two components consist of fresh random bits. Formally, $v_{t+1}$ is an independent draw from $Bernoulli(0.5)$, independent from all preceding observations $x_{\leq t}$.
+		Second, let $w_{t+1}$ consist of $2k$ many such independent random bits (so that $H[w_{t+1}] = 2k$)
+	\item The third component \emph{deterministically} copies the first bit from $2k$ steps earlier. Formally, $y_{t+1}$ is equal to the first component of $x_{t-2k+1}$
+	\item The fourth component \emph{stochastically} copies the second part (consisting of $2k$ random bits) from one step earlier. Formally, each component $z_{t+1}^{(i)}$ is determined as follows: First take a sample $u_{t+1}^{(i)}$ from $Bernoulli(\frac{1}{4k})$, independent from all preceding observations.
+		If $u_{z+1}^{(i)}=1$, set $z_{t+1}^{(i)}$ to be equal to the second component of $w_{t}^{(i)}$.
+		Otherwise, let $z_{t+1}^{(i)}$ be a fresh draw from $Bernoulli(0.5)$.
+\end{enumerate}
+
+Predicting observations optimally requires taking into account observations from the $2k$ last time steps.
+
+We show that, when approximately predicting with low memory capacities, a window-based approach does \emph{not} in general achieve an optimal memory-surprisal tradeoff.
+
+Consider a model that predicts $x_{t+1}$ from only the last observation $x_t$, i.e., uses a window of length one.
+The only relevant piece of information in this past observation is $w_t$, which stochastically influences $z_{t+1}$.
+Storing this costs $2k$ bit of memory as $w_t$ consists of $2k$ draws from $Bernoulli(0.5)$.
+How much does it reduce the surprisal of $x_{t+1}$?
+Due to the stochastic nature of $z_{t+1}$, it reduces the surprisal only by about $I[x_{t+1}, w_t] = I[z_{t+1}, w_t] < 2k \cdot \frac{1}{2k} = 1$, i.e., surprisal reduction is strictly less than one bit.
+\footnote{We can evaluate $I[z_{t+1}, w_t]$ as follows. Set $l = k/4$. Write $z, w$ for any of the $2k$ components of $z_{t+1}, w_t$, respectively. First, calculate $p(z = 1|w=1) = 1/l + (1-1/l) \frac{1}{2} = 1/(2l) + 1/2 = \frac{1+l}{2l}$ and $p(z = 0|w=1) = (1-1/l) \frac{1}{2} = 1/2 - 1/2l = \frac{l-1}{2l}$.
+Then $I[Z, W] = D_{KL}(p(z|w=1)||p(z)) = \frac{1+l}{2l} \log \frac{\frac{1+l}{2l}}{1/2} + \frac{l-1}{2l} \log \frac{\frac{l-1}{2l}}{1/2}  = \frac{1+l}{2l} \log \frac{1+l}{l} + \frac{l-1}{2l} \log \frac{l-1}{l}  \leq \frac{1+l}{l} \log \frac{1+l}{l} =  (1+1/l) \log (1+1/l)  \leq  (1+1/l) (1/l) = 1/l + 1/l^2 < 2/l = \frac{1}{2k}.$
+%Then $H[Z|w=1] = - \frac{1+k}{2k} \log \frac{1+k}{2k} - \frac{k-1}{2k} \log \frac{k-1}{2k}  = - (1/2 + 1/2k) \log \frac{1+k}{2k} - (1/2 - 1/2k) \log \frac{k-1}{2k}$ %= - \frac{1+k}{2k} \log (1+k) - \frac{k-1}{2k} \log (k-1) + \log 2k = - \frac{1+k}{2k} \log (1+k) - \frac{k-1}{2k} \log (k-1) + \log 2k$.
+}
+
+We show that there is an alternative model that strictly improves on this window-based model:
+Consider a memory encoding model that encodes each of $v_{t-2k+1}, \dots, v_{t}$, which costs $2k$ bits of memory -- as the window-based model did.
+Since $y_{t+1} = v_{t-2k+1}$, this model achieves a surprisal reduction of $H[v_{t-2k+1}] = 1$ bit, strictly more than the window-based model.
+
+
+This result does not contradict our theorem because the theorem only provides \emph{bounds} across models, which are not necessarily achieved by a given window-based model.
+In fact, for the process described here, no memory encoding function $M$ can exactly achieve the theoretical bound described by the theorem.
 
 \section{Corpus Size per Language}
 
