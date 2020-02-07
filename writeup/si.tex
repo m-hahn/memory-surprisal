@@ -268,12 +268,38 @@ Rearranging shows that the listener's surprisal is at least $\operatorname{H}[w_
 
 Here we show that our information-theoretic analysis is compatible with models placing the main bottleneck in the difficulty of retrieval.
 We describe an information-theoretic formalization of a model that has both a limited WM and an unlimited STM.
-
 We consider a model that maintains both a small working memory $m_t$ and an unlimited short-term memory $s_t$.
-
 Predictions are made based on working memory $m_t$, incurring surprisal $H[w_t|m_t]$.
 In each time step, there is some amount of communication between $m_t$ and $s_t$, corresponding to retrieval operations.
 We model this using a variable $r_t$ representing the information that is retrieved from $s_t$.
+Formally, the memory state is determined not just by the input $x_t$ and the previous memory state $m_{t-1}$, but also by the retrieved information:
+\begin{equation}
+	m_t = f(x_t, m_{t-1}, r_t) 
+\end{equation}
+The retrieval operation is jointly determined by working memory and short-term memory:
+\begin{equation}\label{eq:rt}
+	r_t = g(m_{t-1}, s_{t-1}) 
+\end{equation}
+Finally, the short-term memory can incorporate information from the last word and the working memory:
+\begin{equation}
+	s_t = h(x_{t-1}, m_{t-1}, s_{t-1}) 
+\end{equation}
+
+In the model of \cite{lewis-activation-based-2005}, the working memory corresponds to the \emph{buffers}, which together hold a small and fixed number of individual chunks.
+The short-term memory contains an unbounded number of chunks.
+
+In ACT-R, each retrieval operation is initiated through a query constructed based on the current state of the buffers; it returns a chunk from short-term memory that is then placed into a buffer.
+In our formalization, $r_t$ reflects the totality of all retrieval operations that are made during the processing of $x_{t-1}$; they happen after $x_{t-1}$ has been observed but before $x_t$ has.
+Equation~\ref{eq:rt} reflects that these retrieved chunks are determined by working memory and short-term memory.
+
+In ACT-R, the time it takes to process a word is determined primarily by the time spent retrieving chunks, which is determined by the number of retrieval operations and the time it takes to complete each retrieval operation.
+A retrieval operation takes longer if more chunks are similar to the retrieval cue.
+
+If the information content of each chunk is bounded, then a bound on $H[r_t]$ corresponds to a bound on the number of retrieval operations.
+
+The ACT-R model of \cite{lewis-activation-based-2005} does not have an explicit surprisal cost.
+Instead, surprisal effects are interpreted as arising because, in less constraining contexts, the parser is more likely to 
+
 
 This is instantiated by ACT-R.
 We can explicitly explain how this covers the McElree ideas and the Lewis and Vasishth ACT-R model.
@@ -289,11 +315,6 @@ In ACT-R, each retrieval operation takes time. If each chunk has a bounded amoun
 
 Formally:
 
-$m_t = f(x_t, m_{t-1}, r_t)$
-
-$r_t = g(m_{t-1}, s_{t-1})$
-
-$s_t = h(m_{t-1}, s_{t-1})$
 
 \begin{thm}
 Assume the average working memory $H[m_t]$ is bounded as $H[L_t] \leq \sum_{t=1}^T t I_t$, and the average amount of retrieval is bounded as $H[R_t] \leq \sum_{t=T+1}^S I_t$ (per word).
@@ -353,6 +374,7 @@ Specifically, we need $I_t^G := I[X_t, X_0|X_1, \dots, X_{t-1}, G]$.
 Take $I_t$ conditioned on $G$: only count statistical dependencies to the degree that they are not redundant with the goal
 
 
+\section{Example where window model is not optimal}
 
 
 
