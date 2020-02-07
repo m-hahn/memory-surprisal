@@ -84,7 +84,7 @@ sample_loss = None
 
 bounds = []
 bounds.append(['--entropy_weight', float, 0.0, 0.0001, 0.001, 0.01])
-bounds.append(['--lr_policy', float, 0.000002,0.000005, 0.00001, 0.00002, 0.00003, 0.00005, 0.0001, 0.0002, 0.001]) #default=0.001, dest="lr_policy")
+bounds.append(['--lr_policy', float, 0.000001, 0.000002,0.000005, 0.00001, 0.00002, 0.00003, 0.00005, 0.0001, 0.0002, 0.001]) #default=0.001, dest="lr_policy")
 bounds.append(['--momentum_policy', float, 0.0, 0.7, 0.8, 0.9])
 bounds.append(['--lr_baseline', float, 0.1, 0.5, 1.0, 2.0])
 bounds.append(['--dropout_prob', float] + [x/20.0 for x in range(10)])
@@ -176,7 +176,7 @@ def extractArguments(x):
 import os
 import subprocess
 
-version = "optimizeGrammarForI1_4.py"
+version = "optimizeGrammarForI1_3_Adap.py"
 
 DIRPATH = "/u/scr/mhahn/deps/locality_optimized_i1/"
 

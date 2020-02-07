@@ -33,13 +33,11 @@ parser.add_argument('--dropout_prob', type=float, default=0.5, dest="dropout_pro
 parser.add_argument('--lr', type=float, default=0.1, dest="lr")
 parser.add_argument('--batchSize', type=int, default=1, dest="batchSize")
 parser.add_argument('--dropout_rate', type=float, default=1, dest="dropout_rate")
-parser.add_argument('--emb_dim', type=int, default=10, dest="emb_dim")
+parser.add_argument('--emb_dim', type=int, default=100, dest="emb_dim")
 parser.add_argument('--input_dropoutRate', type=float, default=0.0, dest="input_dropoutRate")
 parser.add_argument('--replaceWordsProbability', type=float, default=0.0, dest="replaceWordsProbability")
 parser.add_argument('--prescribedID', type=int, default=random.randint(0,10000000000), dest="prescribedID")
-parser.add_argument('--epsilon', type=float, default=0.1)
 
-parser.add_argument('--stopAfterFailures', type=int, default=5)
 
 args = parser.parse_args()
 
@@ -48,7 +46,6 @@ args = parser.parse_args()
 
 
 
-assert args.lr_policy < 1.0
 assert args.momentum_policy < 1.0
 assert args.entropy_weight >= 0
 
@@ -92,6 +89,10 @@ def makeCoarse(x):
       return x[:x.index(":")]
    return x
 
+
+import hashlib
+
+
 def initializeOrderTable():
    orderTable = {}
    keys = set()
@@ -101,7 +102,8 @@ def initializeOrderTable():
    depsVocab = set()
    for partition in ["train", "dev"]:
      for sentence in CorpusIterator(args.language,partition).iterator():
-      for line in sentence:
+      sentHash = hashlib.sha224(" ".join([x["word"] for x in sentence])).hexdigest()
+      for sentNum, line in enumerate(sentence):
           vocab[line["word"]] = vocab.get(line["word"], 0) + 1
           line["coarse_dep"] = makeCoarse(line["dep"])
           depsVocab.add(line["coarse_dep"])
@@ -114,7 +116,7 @@ def initializeOrderTable():
           posHead = sentence[line["head"]-1]["posUni"]
           dep = line["coarse_dep"]
           direction = "HD" if line["head"] < line["index"] else "DH"
-          key = dep
+          key = sentHash+"_"+str(sentNum)
           keyWithDir = (dep, direction)
           orderTable[keyWithDir] = orderTable.get(keyWithDir, 0) + 1
           keys.add(key)
@@ -186,6 +188,7 @@ def orderChildrenRelative(sentence, remainingChildren):
               relationIndices = torch.LongTensor([stoi_deps[sentence[x-1]["dependency_key"]] for x in remainingChildren])
    #           print(relationIndices)
               logits = torch.index_select(distanceWeights, 0, relationIndices)
+#              print(logits)
 #              logits = torch.cat([distanceWeights[stoi_deps[sentence[x-1]["dependency_key"]]].view(1) for x in remainingChildren])
               softmax = softmax_layer(logits.view(1,-1)).view(-1)
 #              print(softmax)
@@ -205,25 +208,32 @@ def orderSentence(sentence, dhLogits, printThings):
    logits = [None]*len(sentence)
    logProbabilityGradient = 0
 
-   for line in sentence:
-       line["coarse_dep"] = makeCoarse(line["dep"])
-       line["excluded"] = (line["coarse_dep"] == "root" or line["coarse_dep"].startswith("punct"))
-   dependencyKeys = torch.LongTensor([0 if line["excluded"] else stoi_deps[line["coarse_dep"]] for line in sentence])
+   sentHash = hashlib.sha224(" ".join([x["word"] for x in sentence])).hexdigest()
+
+   for j, line in enumerate(sentence):
+      key = sentHash+"_"+str(j)
+      line["dependency_key"] = key
+
+      line["coarse_dep"] = makeCoarse(line["dep"])
+      line["excluded"] = (line["coarse_dep"] == "root" or line["coarse_dep"].startswith("punct"))
+   dependencyKeys = torch.LongTensor([0 if line["excluded"] else stoi_deps[line["dependency_key"]] for line in sentence])
    dhLogitsHere = torch.index_select(dhWeights, 0, dependencyKeys)
    dhProbabilities = torch.nn.functional.sigmoid(dhLogitsHere).data.numpy().tolist()
+
    for j, line in enumerate(sentence):
+      key = line["dependency_key"]     
       if line["coarse_dep"] == "root":
           root = line["index"]
           continue
       if line["coarse_dep"].startswith("punct"): # assumes that punctuation does not have non-punctuation dependents!
          continue
-      key = line["coarse_dep"]
-      line["dependency_key"] = key
       dhLogit = dhWeights[stoi_deps[key]]
       probability = dhProbabilities[j] #1/(1 + torch.exp(-dhLogit))
       dhSampled = (random() < probability)
       direction = "DH" if dhSampled else "HD"
       line["direction"] = direction
+#      print(dhWeights[stoi_deps[key]], distanceWeights[stoi_deps[key]])
+
       if printThings: 
          print "\t".join(map(str,["ORD", line["index"], (line["word"]+"           ")[:10], ("".join(list(key)) + "         ")[:22], line["head"], dhSampled, direction, (str(probability)+"      ")[:8], str(1/(1+exp(-dhLogits[key])))[:8], (str(distanceWeights[stoi_deps[key]].data.numpy())+"    ")[:8] , str(originalDistanceWeights[key])[:8]    ]  ))
 
@@ -300,11 +310,6 @@ for i, key in enumerate(itos_deps):
 
 words = list(vocab.iteritems())
 words = sorted(words, key = lambda x:x[1], reverse=True)
-
-
-#targetWord+3+len(itos_pos_uni)
-
-
 itos = map(lambda x:x[0], words)
 stoi = dict(zip(itos, range(len(itos))))
 
@@ -320,6 +325,7 @@ print >> sys.stderr, ("VOCAB_SIZE", vocab_size)
 
 
 
+
 baseline = torch.nn.Embedding(num_embeddings = len(itos_pos_uni)+vocab_size+3, embedding_dim=1).cuda()
 word_pos_morph_embeddings = torch.nn.Embedding(num_embeddings = len(itos_pos_uni)+vocab_size+3, embedding_dim=args.emb_dim).cuda()
 print posUni
@@ -327,14 +333,6 @@ print posUni
 print "VOCABULARY "+str(vocab_size+3)
 outVocabSize = len(itos_pos_uni)+vocab_size+3
 #quit()
-
-# counts per target
-# current state of the denominator sum WITHOUT the decay terms
-# the sum of all the decay terms
-counts = [({}, [args.epsilon*outVocabSize], [0.0]) for _ in range(outVocabSize)]
-
-unigramCounts = [1 for _ in range(outVocabSize)]
-totalUnigramCount = outVocabSize
 
 
 itos_total = ["EOS", "EOW", "SOS"] + itos_pos_uni + itos[:vocab_size]
@@ -433,11 +431,6 @@ lossModuleTest = nn.CrossEntropyLoss(size_average=False, reduce=False, reduction
 
 baselineAverageLoss = 1.0
 
-
-def logSumExp(a,b,c):
-   m = max(a,max(b,c))
-   return math.log(math.exp(a-m) + math.exp(b-m) + math.exp(c-m)) + m
-
 def doForwardPass(input_indices, wordStartIndices, surprisalTable=None, doDropout=True, batchSizeHere=1, relevant_logprob_sum=None):
 #       print("forward")
        global counter
@@ -450,9 +443,9 @@ def doForwardPass(input_indices, wordStartIndices, surprisalTable=None, doDropou
        if doDropout:
           for c in components:
              c.zero_grad()
-          for p in  [dhWeights, distanceWeights]:
-             if p.grad is not None:
-                p.grad.data = p.grad.data.mul(args.momentum_policy)
+       for p in  [dhWeights, distanceWeights]:
+          if p.grad is not None:
+             p.grad.data = p.grad.data.mul(args.momentum_policy)
 
        hidden = None #(Variable(torch.FloatTensor().new(2, batchSize, 128).zero_()), Variable(torch.FloatTensor().new(2, batchSize, 128).zero_()))
        loss = 0
@@ -471,49 +464,10 @@ def doForwardPass(input_indices, wordStartIndices, surprisalTable=None, doDropou
        sequenceLength = (map(len, input_indices))
        wordNum = sum(sequenceLength) - len(input_indices) # subtract 1 per batch
        sequenceLength = max(sequenceLength)
-       print(input_indices)
-
-
-       for i in range(batchSizeHere):
-          for j in range(1,len(input_indices[i])):
-               source = input_indices[i][j-1]
-               target = input_indices[i][j]
-
-               unigramLogProb = math.log(unigramCounts[target]) - math.log(totalUnigramCount)
-               unigramCounts[target] += 1
-
-               countsHere = counts[source]
-               if target not in countsHere[0]:
-                 countsHere[0][target] = 0
-
-               targetCount = countsHere[0][target]+args.epsilon
-               sumOfCounts = countsHere[1][0]
-               decayTerms = countsHere[2][0]
-
-               print("COEF", targetCount, sumOfCounts, outVocabSize*decayTerms)
-               assert sumOfCounts > 0
-               log_probability = math.log(targetCount) - math.log(sumOfCounts - outVocabSize*decayTerms)
-
-               print(log_probability, unigramLogProb)
-
-               # increment logit
-               countsHere[0][target] += args.lr/(targetCount - decayTerms)
-               countsHere[1][0] += args.lr/(targetCount - decayTerms)
-               countsHere[2][0] += args.lr/(sumOfCounts - outVocabSize*decayTerms)
-
-
-               
-
-               # record decay
-#               countsHere[2][0] += math.exp(log_probability)
-                  
-
        for i in range(batchSizeHere):
           input_indices[i] = input_indices[i][:]
           while len(input_indices[i]) < sequenceLength:
              input_indices[i].append(2)
-
-       
 
        inputTensor = Variable(torch.LongTensor(input_indices).transpose(0,1).contiguous()).cuda() # so it will be sequence_length x batchSizeHere
        inputTensorIn = inputTensor[:-1].view(1, -1)
@@ -534,8 +488,6 @@ def doForwardPass(input_indices, wordStartIndices, surprisalTable=None, doDropou
 
        assert word_logits.size()[-1] == outVocabSize
 
-
-       
 #       output = output.view((sequenceLength-1)*batchSizeHere, outVocabSize)
 
 
@@ -548,16 +500,21 @@ def doForwardPass(input_indices, wordStartIndices, surprisalTable=None, doDropou
 
        reward = (lossesWord).detach()
        baseline_predictions =  baseline(inputTensorOut)
-       baseline_shifted = baseline_predictions
+       #print(inputTensorOut.size(), baseline_predictions.size())
+       mask = (inputTensorOut != 2).float().unsqueeze(2)
+       baseline_shifted = mask * baseline_predictions
+#       print(baseline_shifted.size())
+       
        baselineLoss = torch.nn.functional.mse_loss(baseline_shifted.view(-1, batchSizeHere), reward.view(-1, batchSizeHere), size_average=False, reduce=False)
-
+#       print(baselineLoss)
        baselineAverageLoss = 0.99 * baselineAverageLoss + (1-0.99) * baselineLoss.cpu().data.mean().numpy()
        if printHere:
 #          print(baselineLoss)
           print(["Baseline loss", sqrt(baselineAverageLoss)])
+       
 
        rewardMinusBaseline = (reward.view(-1, batchSizeHere) - baseline_shifted.view(-1, batchSizeHere)).detach().cpu()
-
+ #      print(rewardMinusBaseline)
        if relevant_logprob_sum is not None:
          for j in range(batchSizeHere):
           policyGradientLoss += (rewardMinusBaseline[:,j].sum() * relevant_logprob_sum[j])
@@ -577,7 +534,7 @@ def doForwardPass(input_indices, wordStartIndices, surprisalTable=None, doDropou
        if printHere:
          print loss/wordNum
          print lossWords/wordNum
-         print ["CROSS ENTROPY LM", crossEntropy, exp(crossEntropy)]
+         print ["CROSS ENTROPY LM", crossEntropy]
          print baselineAverageLoss
        crossEntropy = 0.99 * crossEntropy + 0.01 * float(loss/wordNum)
        totalQuality = loss.data.cpu().numpy() # consists of lossesWord + lossesPOS
@@ -642,7 +599,7 @@ def  doBackwardPass(loss, baselineLoss, policy_related_loss):
 
 
 def computeDevLoss():
-   devBatchSize = 1
+   devBatchSize = 32
    global printHere
    devLoss = 0.0
    devWords = 0
@@ -656,17 +613,31 @@ def computeDevLoss():
      try:
         input_indices_list = []
         wordStartIndices_list = []
+        relevant_logprob_sum = []
+
+
+
+
         for _ in range(devBatchSize):
-           input_indices, wordStartIndices, _ = next(stream)
+           input_indices, wordStartIndices, logProbSum = next(stream)
            input_indices_list.append(input_indices)
            wordStartIndices_list.append(wordStartIndices)
+           relevant_logprob_sum.append(logProbSum)
+
      except StopIteration:
         devBatchSize = len(input_indices_list)
      if devBatchSize == 0:
        break
      devCounter += 1
      printHere = (devCounter % 100 == 0)
-     _, _, _, newLoss, newWords = doForwardPass(input_indices_list, wordStartIndices_list, surprisalTable = surprisalTable, doDropout=False, batchSizeHere=devBatchSize,relevant_logprob_sum=None )
+ #    with torch.no_grad(): 
+#         _, _, _, newLoss, newWords = doForwardPass(input_indices_list, wordStartIndices_list, surprisalTable = surprisalTable, doDropout=False, batchSizeHere=devBatchSize,relevant_logprob_sum=None )
+     _, baselineLoss, policy_related_loss, newLoss, newWords = doForwardPass(input_indices_list, wordStartIndices_list, batchSizeHere=devBatchSize, relevant_logprob_sum=relevant_logprob_sum)
+     if wordNumInPass > 0:
+       doBackwardPass(0, baselineLoss, policy_related_loss)
+     else:
+       print "No words, skipped backward"
+
      devLoss += newLoss
      devWords += newWords
      if printHere:
@@ -715,7 +686,7 @@ def createStream(corpus, training=True):
 DEV_PERIOD = 5000
 epochCount = 0
 corpusBase = CorpusIterator(args.language, storeMorph=True)
-while failedDevRuns < args.stopAfterFailures:
+while failedDevRuns < 15:
   epochCount += 1
   print >> sys.stderr, "Epoch "+str(epochCount)
   print "Starting new epoch, permuting corpus"
@@ -752,6 +723,11 @@ while failedDevRuns < args.stopAfterFailures:
 #              print >> outFile, " ".join(map(str,devSurprisalTable))
               print >> outFile, "PARAMETER_SEARCH" if DOING_PARAMETER_SEARCH else "RUNNING"
 
+
+          q= float(dhWeights[8])
+          assert q == q
+
+
           print "Saving"
           with open(TARGET_DIR+"/"+args.language+"_"+__file__+"_model_"+str(myID)+".tsv", "w") as outFile:
              print >> outFile, "\t".join(map(str,["FileName","DH_Weight","CoarseDependency","DistanceWeight"]))
@@ -785,7 +761,7 @@ while failedDevRuns < args.stopAfterFailures:
 
              #break
 
-  if failedDevRuns >= args.stopAfterFailures:
+  if failedDevRuns >= 15:
      break
   lasttime = time.time()
   while True:
@@ -814,7 +790,4 @@ while failedDevRuns < args.stopAfterFailures:
        if printHere:
           print "Epoch "+str(epochCount)+" "+str(counter)
 
-import subprocess
-
-subprocess.call(["/u/nlp/anaconda/ubuntu_16/envs/py27-mhahn/bin/python2.7", "optimizeGrammarForI1_6_EvaluateGrammar.py", "--language="+args.language, "--model="+args.language+"_"+__file__+"_model_"+str(myID)+".tsv"])
 

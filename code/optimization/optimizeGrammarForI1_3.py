@@ -38,6 +38,7 @@ parser.add_argument('--input_dropoutRate', type=float, default=0.0, dest="input_
 parser.add_argument('--replaceWordsProbability', type=float, default=0.0, dest="replaceWordsProbability")
 parser.add_argument('--prescribedID', type=int, default=random.randint(0,10000000000), dest="prescribedID")
 
+parser.add_argument('--stopAfterFailures', type=int, default=5)
 
 args = parser.parse_args()
 
@@ -661,7 +662,7 @@ def createStream(corpus, training=True):
 DEV_PERIOD = 5000
 epochCount = 0
 corpusBase = CorpusIterator(args.language, storeMorph=True)
-while failedDevRuns < 5:
+while failedDevRuns < args.stopAfterFailures:
   epochCount += 1
   print >> sys.stderr, "Epoch "+str(epochCount)
   print "Starting new epoch, permuting corpus"
@@ -736,7 +737,7 @@ while failedDevRuns < 5:
 
              #break
 
-  if failedDevRuns >= 5:
+  if failedDevRuns >= args.stopAfterFailures:
      break
   lasttime = time.time()
   while True:
