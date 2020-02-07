@@ -84,18 +84,12 @@ sample_loss = None
 
 bounds = []
 bounds.append(['--entropy_weight', float, 0.0, 0.0001, 0.001, 0.01])
-bounds.append(['--lr_policy', float, 0.000002,0.000005, 0.00001, 0.00002, 0.00003, 0.00005, 0.0001, 0.0002, 0.001]) #default=0.001, dest="lr_policy")
+bounds.append(['--lr_policy', float, 0.000001, 0.000002,0.000005, 0.00001, 0.00002, 0.00003, 0.00005, 0.0001, 0.0002, 0.0005, 0.001, 0.002]) #default=0.001, dest="lr_policy")
 bounds.append(['--momentum_policy', float, 0.0, 0.7, 0.8, 0.9])
-bounds.append(['--lr_baseline', float, 0.1, 0.5, 1.0, 2.0])
-bounds.append(['--dropout_prob', float] + [x/20.0 for x in range(10)])
-bounds.append(['--lr', float, 0.001, 0.005, 0.01, 0.05, 0.1, 0.2])
-bounds.append(['--batchSize', int, 1,2,4,8])
-bounds.append(['--dropout_rate', float] + [x/20.0 for x in range(10)])
-bounds.append(['--emb_dim', int, 150, 200, 300])
-#bounds.append(['--rnn_dim', int, 64, 128, 256])
-#bounds.append(['--rnn_layers', int, 1])
-bounds.append(['--input_dropoutRate', float]  + [x/20.0 for x in range(10)])
-bounds.append(['--replaceWordsProbability', float] + [x/20.0 for x in range(10)])
+bounds.append(['--lr_baseline', float, 0.002, 0.005, 0.01, 0.05, 0.1, 0.2])
+bounds.append(['--batchSize', int, 1])
+bounds.append(['--epsilon', float]  + [x/10.0 for x in range(1,11)])
+bounds.append(['--delta', float] + [x/10.0 for x in range(1,11)])
 bounds.append(['--stopAfterFailures', int] + [2, 5, 10, 15, 20, 50, 100])
 
 
@@ -176,7 +170,7 @@ def extractArguments(x):
 import os
 import subprocess
 
-version = "optimizeGrammarForI1_4.py"
+version = "optimizeGrammarForI1_9_Long.py"
 
 DIRPATH = "/u/scr/mhahn/deps/locality_optimized_i1/"
 

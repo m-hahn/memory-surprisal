@@ -96,6 +96,7 @@ bounds.append(['--emb_dim', int, 150, 200, 300])
 #bounds.append(['--rnn_layers', int, 1])
 bounds.append(['--input_dropoutRate', float]  + [x/20.0 for x in range(10)])
 bounds.append(['--replaceWordsProbability', float] + [x/20.0 for x in range(10)])
+bounds.append(['--stopAfterFailures', int] + [2, 5, 10, 15, 20, 50, 100])
 
 
 
