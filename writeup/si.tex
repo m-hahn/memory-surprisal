@@ -114,18 +114,20 @@ Given that we are interested in memory needs in the processing of \emph{individu
 
 
 \paragraph{Ingredient 2: Flow of Information}
-We now analyze memory from the perspective of the listener, who needs to maintain information about the past to predict the future.
-As the speaker's utterance unfolds, the listener maintains a memory state $m_t$.
-
+%We now analyze memory from the perspective of the listener, who needs to maintain information about the past to predict the future.
+%As the speaker's utterance unfolds, the listener maintains a memory state $m_t$.
 There are no assumptions about the memory architecture and the nature of its computations.
 We only make a basic assumption about the flow of information (Figure~\ref{fig:listener-markov}):
-At a given point in time, the listener's memory state $m_t$ is determined by the last word $w_t$, and the prior memory state $m_{t-1}$.
+At a given point in time, the listener's memory state $m_t$ is determined by the last word $w_t$, and the prior memory state $m_{t-1}$:
+\begin{equation}
+	m_t = M(m_{t-1}, w_t)
+\end{equation}
 As a consequence, $m_t$ contains no information about the process beyond what is contained in the last word observed $w_{t-1}$ and in the memory state before that word was observed $m_{t-1}$.
-This is formalized as a statement about conditional probabilities:
-	\begin{equation}\label{eq:listener-markov}
-		p(m_1| (w_{t})_{t \in \mathbb{Z}}, m_0)   = p(m_1 | m_0, w_1)
-	\end{equation}
-This says that $m_1$ contains no information about the utterances beyond what is contained in $m_0$ and $w_1$.	
+%This is formalized as a statement about conditional probabilities:
+%\begin{equation}\label{eq:listener-markov}
+%p(m_1| (w_{t})_{t \in \mathbb{Z}}, m_0)   = p(m_1 | m_0, w_1)
+%\end{equation}
+%This says that $m_1$ contains no information about the utterances beyond what is contained in $m_0$ and $w_1$.	
 As a consequence, the listener has no knowledge of the speaker's state beyond the information provided in their prior communication.
 This is a simplification, as the listener could obtain information about the speaker from other sources, such as their common environment (weather, ...).
 \mhahn{For the study of memory in sentence processing, this seems fair. Discuss this more.}
@@ -239,11 +241,11 @@ the Data Processing inequality entails the following inequality for every positi
 %\end{align*}
 %\end{proof}
 Plugging this inequality into Equation~\ref{eq:byStation} above:
-\begin{align*}
+\begin{align}\label{eq:plugged}
 \operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]& \geq \frac{1}{T} \sum_{t=1}^T ( \operatorname{H}[w_t|w_{1\dots t-1}, m_1] - \operatorname{H}[w_t | w_{1\dots t-1}, w_{\leq 0}]  )    \\
 & = \frac{1}{T} \left(\operatorname{H}[w_{1\dots T} | m_1] - \operatorname{H}[w_{1\dots T} | w_{\leq 0}]\right)  \\
 & = \frac{1}{T} \left(I[w_{1\dots T}, w_{\leq 0}] - I[w_{1\dots T}, m_1]\right) 
-\end{align*}
+\end{align}
 The first term $I[w_{1\dots T}, w_{\leq 0}]$ can be rewritten in terms of $I_t$:
 \begin{align*}
 I[w_{1\dots T}, w_{\leq 0}] &= \sum_{i=1}^T \sum_{j=-1}^{-\infty} I[w_i, w_j | w_{j+1}...w_{i-1}] = \sum_{t=1}^T t I_t + T \sum_{t > T} I_t
@@ -266,11 +268,17 @@ Rearranging shows that the listener's surprisal is at least $\operatorname{H}[w_
 
 \subsection{Locality in a model with Memory Retrieval}
 
-Here we show that our information-theoretic analysis is compatible with models placing the main bottleneck in the difficulty of retrieval.
-We describe an information-theoretic formalization of a model that has both a limited WM and an unlimited STM.
-We consider a model that maintains both a small working memory $m_t$ and an unlimited short-term memory $s_t$.
+Here we show that our information-theoretic analysis is compatible with models placing the main bottleneck in the difficulty of retrieval \citep{mcelree2000sentence,lewis-activation-based-2005,nicenboim2018models,vasishth2019computational}.
+We extend our model of memory in incremental prediction to capture key aspects of the models described by \citet{lewis-activation-based-2005,nicenboim2018models,vasishth2019computational}.
+
+The ACT-R model of \cite{lewis-activation-based-2005} assumes a small working memory consisting of \emph{buffers} and a \emph{control state}, which together hold a small and fixed number of individual \emph{chunks}.
+It also assumes a large short-term memory that contains an unbounded number of chunks.
+This large memory store is accessed via \emph{cue-based retrieval}: a query is constructed based on the current state of the buffers; a chunk that matches this query is then selected from the memory storage and placed into one of the buffers.
+
+\paragraph{Formal Model}
+We extend our information-theoretic analysis by considering a model that maintains both a small working memory $m_t$ -- corresponding to the buffers -- and an unlimited short-term memory $s_t$.
 Predictions are made based on working memory $m_t$, incurring surprisal $H[w_t|m_t]$.
-In each time step, there is some amount of communication between $m_t$ and $s_t$, corresponding to retrieval operations.
+When processing a word $x_t$, there is some amount of communication between $m_t$ and $s_t$, corresponding to retrieval operations.
 We model this using a variable $r_t$ representing the information that is retrieved from $s_t$.
 Formally, the memory state is determined not just by the input $x_t$ and the previous memory state $m_{t-1}$, but also by the retrieved information:
 \begin{equation}
@@ -285,69 +293,90 @@ Finally, the short-term memory can incorporate information from the last word an
 	s_t = h(x_{t-1}, m_{t-1}, s_{t-1}) 
 \end{equation}
 
-In the model of \cite{lewis-activation-based-2005}, the working memory corresponds to the \emph{buffers}, which together hold a small and fixed number of individual chunks.
-The short-term memory contains an unbounded number of chunks.
-
+\paragraph{Cost of Retrieval}
+%In the ACT-R model of \cite{lewis-activation-based-2005}, the working memory corresponds to the \emph{buffers}, which together hold a small and fixed number of individual chunks.
+%The short-term memory contains an unbounded number of chunks.
 In ACT-R, each retrieval operation is initiated through a query constructed based on the current state of the buffers; it returns a chunk from short-term memory that is then placed into a buffer.
 In our formalization, $r_t$ reflects the totality of all retrieval operations that are made during the processing of $x_{t-1}$; they happen after $x_{t-1}$ has been observed but before $x_t$ has.
 Equation~\ref{eq:rt} reflects that these retrieved chunks are determined by working memory and short-term memory.
 
-In ACT-R, the time it takes to process a word is determined primarily by the time spent retrieving chunks, which is determined by the number of retrieval operations and the time it takes to complete each retrieval operation.
-A retrieval operation takes longer if more chunks are similar to the retrieval cue.
 
+In the model of \cite{lewis-activation-based-2005}, the time it takes to process a word is determined primarily by the time spent retrieving chunks, which is determined by the number of retrieval operations and the time it takes to complete each retrieval operation.
 If the information content of each chunk is bounded, then a bound on $H[r_t]$ corresponds to a bound on the number of retrieval operations.
 
+In the model of \cite{lewis-activation-based-2005}, a retrieval operation takes longer if more chunks are similar to the retrieval cue, whereas, in the direct-access model \citep{mcelree2000sentence,nicenboim2018models,vasishth2019computational}, retrieval operations take a constant amount of time.
+There is no direct counterpart to differences in retrieval times and similarity-based inhibition as in the activation-based model in our formalization.
+Our formalization thus more closely matches the direct-access model, though it might be possible to incorporate aspects of the activation-based model in our formalization.
+
+\paragraph{Role of Surprisal}
 The ACT-R model of \cite{lewis-activation-based-2005} does not have an explicit surprisal cost.
-Instead, surprisal effects are interpreted as arising because, in less constraining contexts, the parser is more likely to 
+Instead, surprisal effects are interpreted as arising because, in less constraining contexts, the parser is more likely to make decisions that then turn out to be incorrect, leading to additional correcting steps.
+%We see this as an algorithmic-level implementation of the justification for surprisal theory provided by \citet{levy2008expectation}:
+We view this as an algorithmic-level implementation of a surprisal cost $H[x_t|m_{t-1}]$:
+If the word $x_t$ is unexpected given the current state of the working memory -- i.e., buffers and control states -- then their current state must provide insufficient information to constrain the actual syntactic state of the sentence, meaning that the parsing steps made to integrate $x_t$ will include more backtracking and correction steps.
+Thus, we argue that cue-based retrieval models predict that the surprisal $- \log P(x_t|m_{t-1})$ will be part of the cost of processing word $x_t$.
 
 
-This is instantiated by ACT-R.
-We can explicitly explain how this covers the McElree ideas and the Lewis and Vasishth ACT-R model.
+%This is instantiated by ACT-R.
+%We can explicitly explain how this covers the McElree ideas and the Lewis and Vasishth ACT-R model.
+%This model has two bottlenecks:
+%The working memory capacity, which we model as $H[m_t]$, and the amount of information that is added through retrieval, modeled as $H[r_t|m_t]$.
+%Bounding retrieval = bounding the precision and/or content of retrieved items. Explain more how this relates to McElree and ACT-R.
+%In ACT-R, each retrieval operation takes time. If each chunk has a bounded amount of information, then this corresponds to a bottleneck in $H[r_t|m_t]$
 
-This model has two bottlenecks:
-The working memory capacity, which we model as $H[m_t]$, and the amount of information that is added through retrieval, modeled as $H[r_t|m_t]$.
-
-
-Bounding retrieval = bounding the precision and/or content of retrieved items. Explain more how this relates to McElree and ACT-R.
-
-In ACT-R, each retrieval operation takes time. If each chunk has a bounded amount of information, then this corresponds to a bottleneck in $H[r_t|m_t]$
-
-
-Formally:
-
+\paragraph{Theoretical Result}
+We now show an extension of our theoretical result in the setting of the retrieval-based model described above.
 
 \begin{thm}
-Assume the average working memory $H[m_t]$ is bounded as $H[L_t] \leq \sum_{t=1}^T t I_t$, and the average amount of retrieval is bounded as $H[R_t] \leq \sum_{t=T+1}^S I_t$ (per word).
-Then $H[w_t|m_t] \geq H[w_t|x_{<t}] + \sum_{t>S} I_t$.
+	Assume the average working memory $\operatorname{H}[m_t]$ is bounded as $\operatorname{H}[L_t] \leq \sum_{t=1}^T t I_t$, and the average amount of retrieved information is bounded as $\operatorname{H}[R_t] \leq \sum_{t=T+1}^S I_t$ (per word).
+	Then $\operatorname{H}[w_t|m_t] \geq \operatorname{H}[w_t|x_{<t}] + \sum_{t>S} I_t$.
 \end{thm}
 
 \begin{proof}
-	As before using the Data Processing inequality:
-\begin{align*}
+The proof is a generalization of the proof above.
+	As in (\ref{eq:plugged}), the Data Processing Inequality entails:
+	\begin{align*}
 	-(\operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]) \leq & \frac{1}{T}\left(I[X_1\dots X_T, (M_0, R_1, ..., R_T)] - I[X_1\dots X_T, X_{<1}]\right) \\
+	\end{align*}
+	Now, using the same calculation as above, this can be rewritten as:
+	\begin{align*}
 = & \frac{1}{T}\left(I[X_1\dots X_T, (M_0, R_1, ..., R_T)] - \sum_{t=1}^T t I_t - T \sum_{t>T} I_t\right) \\
 	= & \frac{1}{T}\left(I[X_{1\dots T}, M_0] + I[X_{1\dots T}, R_1|M_0] + \dots + I[X_{1\dots T}, R_T|M_0, R_{1 \dots T-1}] - \sum_{t=1}^T t I_t - T \sum_{t>T} I_t\right) \\
+	\end{align*}
+	Applying the assumptions about the information contained in working memory and retrievals, we bound this as follows:
+	\begin{align*}
 	\leq & \frac{1}{T}\left(H[M_0] + H[R_1] + \dots + H[R_{T-1}] - \sum_{t=1}^T t I_t - T \sum_{t>T} I_t\right) \\
 	\leq &  \frac{1}{T}(T\cdot H[R_t] - T \sum_{t>T} I_t) \\
-	= & H[R_t] - \sum_{t>T} I_t
+	= & H[R_t] - \sum_{t>T} I_t \\
+		\leq & \sum_{t=T+1}^S I_t - \sum_{t>T} I_t \\
+		= & - \sum_{t>S} I_t
 \end{align*}
 
 \end{proof}
 
+\paragraph{Information Locality}
+We now show that this result predicts information locality provided that retrieving information is more expensive than keeping the same amount of information in working memory.
+For this, we formalize the problem of finding an optimal memory strategy as a multi-objective optimization, aiming to minimize
+\begin{equation}
+	\lambda_1 H[m_t] + \lambda_2 H[r_t]
+\end{equation}
+to achieve a given surprisal level.
+What is the optimal division of labor between keeping information in working memory and recovering them through retrieval?
+The problem
+\begin{equation}\label{eq:multi-obj-t}
+	\min_{T} \lambda_1 \sum_{t=1}^T t I_t + \lambda_2 \sum_{t=T+1}^S I_t
+\end{equation}
+has solution $T \approx \frac{\lambda_2}{\lambda_1}$. %\footnote{Can do simple proof using the continuous-$T$-version.}
+This means that, as long as retrievals are more expensive than keeping the same amount of information in working memory (i.e., $\lambda_2 > \lambda_1$), the optimal strategy stores information from recent words in working memory.
+Due to the factor $t$ inside $\sum_{t=1}^T t I_t$, the bound~(\ref{eq:multi-obj-t}) will be reduced when $I_t$ decays faster, i.e., there is strong information locality.
 
+The assumption that retrieving information is more difficult than storing it is reasonable for cue-based retrieval models, as retrieval suffers from similarity-based interference effects due to the unstructured nature of the storage~\citep{lewis-activation-based-2005}.
+A model that maintains no information in its working memory, i.e. $H[m_t]=0$, would correspond to a cue-based retrieval model that stores nothing in its buffers and control states, and relies entirely on retrieval to access past information.
+Given the nature of representations assumed in models~\citep{lewis-activation-based-2005}, such a model would seem to be severely restricted in its ability to parse language.
 
-We can also think of this as a multi-objective optimization, aiming to minimize $\lambda_1 WM + \lambda_2 Retrieval$ to achieve a given surprisal level.
+%If $\frac{\lambda_2}{\lambda_1} \rightarrow \infty$ (retrievals get more expensive), recover previous model.
+%If $\frac{\lambda_2}{\lambda_1} \rightarrow 0$ (retrievals get cheaper), locality effect gets weaker, and disappears in the limit\footnote{(Of course, even in this limit, there might be additional factors that may still favor locality in a specific implementation of memory -- e.g., in ACT-R, decay and interference are less problematic if there is locality.)}
 
-If $\frac{\lambda_2}{\lambda_1} \rightarrow \infty$ (retrievals get more expensive), recover previous model.
-
-If $\frac{\lambda_2}{\lambda_1} \rightarrow 0$ (retrievals get cheaper), locality effect gets weaker, and disappears in the limit\footnote{(Of course, even in this limit, there might be additional factors that may still favor locality in a specific implementation of memory -- e.g., in ACT-R, decay and interference are less problematic if there is locality.)}
-
-Objective
-$$\min_{T} \lambda_1 \sum_{t=1}^T t I_t + \lambda_2 \sum_{t=T+1}^S I_t$$
-has solution $T \approx \frac{\lambda_2}{\lambda_1}$.\footnote{Can do simple proof using the continuous-$T$-version.}
-
-
-Consequence: As long as retrievals are more expensive than keeping the same amount in WM, locality is predicted.
 
 
 \subsection{Results for Language Production}
@@ -448,31 +477,13 @@ Take $I_t$ conditioned on $G$: only count statistical dependencies to the degree
 
 
 \begin{center}
-\begin{tabular}{ccccccccccccccclll}
+\begin{longtable}{ccccccccccccccclll}
 \input{tables/slice-hists_REAL_0.tex}
-\end{tabular}
-	\captionof{figure}{Histograms: Surprisal, at maximum memory.}\label{tab:slice-hists-real}
-\end{center}
-
-\begin{center}
-\begin{tabular}{ccccccccccccccclll}
 \input{tables/slice-hists_REAL_1.tex}
-\end{tabular}
-	\captionof{figure}{Medians (cont.)}
-\end{center}
-
-\begin{center}
-\begin{tabular}{ccccccccccccccclll}
 \input{tables/slice-hists_REAL_2.tex}
-\end{tabular}
-	\captionof{figure}{Medians (cont.)}
-\end{center}
-
-\begin{center}
-\begin{tabular}{ccccccccccccccclll}
 \input{tables/slice-hists_REAL_3.tex}
-\end{tabular}
-	\captionof{figure}{Medians (cont.)}
+\end{longtable}
+	\captionof{figure}{Histograms: Surprisal, at maximum memory.}\label{tab:slice-hists-real}
 \end{center}
 
 
@@ -530,63 +541,29 @@ Take $I_t$ conditioned on $G$: only count statistical dependencies to the degree
 \subsection{Medians (Experiment 3)}
 
 \begin{center}
-\begin{tabular}{ccccccccccccccclll}
+\begin{longtable}{ccccccccccccccclll}
 \input{tables/medians_0.tex}
-\end{tabular}
+\input{tables/medians_1.tex}
+\input{tables/medians_2.tex}
+\input{tables/medians_3.tex}
+\end{longtable}
 	\captionof{figure}{Experiment 3. Medians: For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians, dashed lines indicate 95 $\%$ confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians}
 \end{center}
 
-\begin{center}
-\begin{tabular}{ccccccccccccccclll}
-\input{tables/medians_1.tex}
-\end{tabular}
-	\captionof{figure}{Medians (cont.)}
-\end{center}
-
-\begin{center}
-\begin{tabular}{ccccccccccccccclll}
-\input{tables/medians_2.tex}
-\end{tabular}
-	\captionof{figure}{Medians (cont.)}
-\end{center}
-
-\begin{center}
-\begin{tabular}{ccccccccccccccclll}
-\input{tables/medians_3.tex}
-\end{tabular}
-	\captionof{figure}{Medians (cont.)}
-\end{center}
 
 
 
 
 \begin{center}
-\begin{tabular}{ccccccccccccccccll}
+\begin{longtable}{ccccccccccccccccll}
 \input{tables/medianDiff_0.tex}
-\end{tabular}
+\input{tables/medianDiff_1.tex}
+\input{tables/medianDiff_2.tex}
+\input{tables/medianDiff_3.tex}
+\end{longtable}
 	\captionof{figure}{Median Differences between Real and Baseline: For each memory budget, we provide the difference in median surprisal between real languages and random baselines; for real orders (blue) and maximum likelihood grammars (red). Lower values indicate lower surprisal compared to baselines. Solid lines indicate sample means. Dashed lines indicate 95 $\%$ confidence intervals.}\label{tab:median_diffs}
 \end{center}
 
-\begin{center}
-\begin{tabular}{ccccccccccccccccll}
-\input{tables/medianDiff_1.tex}
-\end{tabular}
-	\captionof{figure}{Median Differences (Part 2)}
-\end{center}
-
-\begin{center}
-\begin{tabular}{ccccccccccccccccll}
-\input{tables/medianDiff_2.tex}
-\end{tabular}
-	\captionof{figure}{Median Differences (Part 3)}
-\end{center}
-
-\begin{center}
-\begin{tabular}{ccccccccccccccccll}
-\input{tables/medianDiff_3.tex}
-\end{tabular}
-	\captionof{figure}{Median Differences (Part 4)}
-\end{center}
 
 
 
@@ -594,25 +571,14 @@ Take $I_t$ conditioned on $G$: only count statistical dependencies to the degree
 
 
 \begin{center}
-\begin{tabular}{cccccccccccccccccc}
+\begin{longtable}{cccccccccccccccccc}
 \input{tables/quantiles_noAssumption_0.tex}
-\end{tabular}
+\input{tables/quantiles_noAssumption_1.tex}
+\input{tables/quantiles_noAssumption_2.tex}
+\end{longtable}
 	\captionof{figure}{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
 \end{center}
 
-\begin{center}
-\begin{tabular}{cccccccccccccccccc}
-\input{tables/quantiles_noAssumption_1.tex}
-\end{tabular}
-	\captionof{figure}{Quantiles (part 2)}
-\end{center}
-
-\begin{center}
-\begin{tabular}{cccccccccccccccccc}
-\input{tables/quantiles_noAssumption_2.tex}
-\end{tabular}
-	\captionof{figure}{Quantiles (part 3)}
-\end{center}
 
 
 

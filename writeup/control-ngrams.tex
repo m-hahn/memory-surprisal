@@ -1,65 +1,7 @@
-\begin{table}[!htbp]
-\begin{tabular}{ccccccccccccccclll}
-\input{tables/medians_ngrams_0.tex}
-\end{tabular}
-	\caption{Medians (estimated using n-gram models): For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians for ngrams, dashed lines indicate 95 \% confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians_ngrams}
-\end{table}
 
-\begin{table}[!htbp]
-\begin{tabular}{ccccccccccccccclll}
-\input{tables/medians_ngrams_1.tex}
-\end{tabular}
-	\caption{Medians (cont.)}
-\end{table}
-
-\begin{table}[!htbp]
-\begin{tabular}{ccccccccccccccclll}
-\input{tables/medians_ngrams_2.tex}
-\end{tabular}
-	\caption{Medians (cont.)}
-\end{table}
-
-\begin{table}[!htbp]
-\begin{tabular}{ccccccccccccccclll}
-\input{tables/medians_ngrams_3.tex}
-\end{tabular}
-	\caption{Medians (cont.)}
-\end{table}
-
-
-
-
-
-% ../../writeup/tables/quantiles_REAL_NGRAMS_0.tex
-
-\begin{table}[!htbp]
-\begin{tabular}{cccccccccccccccccc}
-\input{tables/quantiles_REAL_NGRAMS_0.tex}
-\end{tabular}
-	\caption{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
-\end{table}
-
-\begin{table}[!htbp]
-\begin{tabular}{cccccccccccccccccc}
-\input{tables/quantiles_REAL_NGRAMS_1.tex}
-\end{tabular}
-	\caption{Quantiles (part 2)}
-\end{table}
-
-\begin{table}[!htbp]
-\begin{tabular}{cccccccccccccccccc}
-\input{tables/quantiles_REAL_NGRAMS_2.tex}
-\end{tabular}
-	\caption{Quantiles (part 3)}
-\end{table}
-%bounds.append(["alpha", float, 0.95, 1.0]) # + [x/20.0 for x in range(15, 21)])
-%bounds.append(["gamma", int, 1, 2, 3, 4, 5, 8, 10, 15, 20, 25, 30]) # , 200, 300
-%bounds.append(["delta", int, 0.1, 0.2, 0.5, 1.0 , 2.0, 3.0, 4.0, 5.0, 8.0, 10.0]) #, 1024]) #, 1024]) # 64, 128,
-%bounds.append(["cutoff", int, 2,3,4,5,6,7,8,9,10]) #,7,8,9,10]) #, 1024]) #, 1024]) # 64, 128,
-%
-
+\subsection{Method}
 We use a version of Kneser-Ney Smoothing.
-For a sequence $w_1\dots w_k$, $N(w_{1\dots k})$ is the number of times $w_{1\dots k}$ occurs in the training set.
+For a sequence $w_1\dots w_k$, let $N(w_{1\dots k})$ be the number of times $w_{1\dots k}$ occurs in the training set.
 The unigram probabilities are estimated as
 \begin{equation}
 	p_1(w_t) :=   \frac{N(w_t) + \delta}{|Train| + |V| \cdot \delta}
@@ -68,15 +10,62 @@ where $\delta \in \mathbb{R}_+$ is a hyperparameter.
 Here $|Train|$ is the number of tokens in the training set, $|V|$ is the number of types occurring in train or held-out data.
 Higher-order probabilities $p_t(w_t|w_{0 \dots t-1})$ are estimated recursively as follows.
 Let $\gamma > 0$ be a hyperparameter.
-If $N(w_{0 \dots t-1}) < \gamma$, set $p_t(w_t|w_{0 \dots t-1}) := p_{t-1}(w_t|w_{1\dots t-1})$.
-Otherwise, we interpolate between $n$-th order and lower-order estimates:
+If $N(w_{0 \dots t-1}) < \gamma$, set
+\begin{equation}
+	p_t(w_t|w_{0 \dots t-1}) := p_{t-1}(w_t|w_{1\dots t-1})
+\end{equation}
+Otherwise, we interpolate between $t$-th order and lower-order estimates:
 \begin{equation}
 	p_t(w_t|w_{0 \dots t-1}) :=  \frac{\operatorname{max}(N(w_{0\dots t}) - \alpha, 0.0) + \alpha \cdot \#\{w : N(w_{0 \dots t-1}w) > 0\} \cdot p_{t-1}(w_t|w_{1\dots t-1})}{N(w_{0\dots t-1})}
 \end{equation}
 where $\alpha \in [0,1]$ is also a hyperparameter.
+(CITE) show that this definition results in a well-defined probability distribution, i.e., $\sum_{w \in V} p_t(w|w_{0 \dots t-1}) = 1$.
+
+%Note that this definition guarantees $\sum_{w \in V} p_t(w|w_{0 \dots t-1}) = 1$, because
+%
+%$\sum_{w \in V} \operatorname{max}(N(w_{0\dots t-1}w) - \alpha, 0.0) + \alpha \cdot \#\{w' : N(w_{0 \dots t-1}w') > 0\} \cdot p_{t-1}(w|w_{1\dots t-1})$
+%
+%$\sum_{w \in V : N(w_{0\dots t-1} w) > 0} (N(w_{0\dots t}) - \alpha) + \alpha \cdot \sum_{w \in V} \#\{w' : N(w_{0 \dots t-1}w') > 0\} \cdot p_{t-1}(w|w_{1\dots t-1})$
+%
+%$\sum_{w \in V : N(w_{0\dots t-1} w) > 0} (N(w_{0\dots t}) - \alpha) + \alpha \cdot \#\{w' : N(w_{0 \dots t-1}w') > 0\}$
+%
+%$\sum_{w \in V} : N(w_{0\dots t-1} w) = N(w_{0\dots t-1})$
+
 
 Hyperparameters $\alpha, \gamma, \delta$ are tuned with the same strategy as for the neural network models.
 
 
+\subsection{Results}
 
+
+
+\begin{center}
+\begin{longtable}{ccccccccccccccclll}
+\input{tables/medians_ngrams_0.tex}
+\input{tables/medians_ngrams_1.tex}
+\input{tables/medians_ngrams_2.tex}
+\input{tables/medians_ngrams_3.tex}
+\end{longtable}
+	\captionof{figure}{Medians (estimated using n-gram models): For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians for ngrams, dashed lines indicate 95 \% confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians_ngrams}
+\end{center}
+
+
+
+
+% ../../writeup/tables/quantiles_REAL_NGRAMS_0.tex
+
+\begin{center}
+\begin{longtable}{cccccccccccccccccc}
+\input{tables/quantiles_REAL_NGRAMS_0.tex}
+\input{tables/quantiles_REAL_NGRAMS_1.tex}
+\input{tables/quantiles_REAL_NGRAMS_2.tex}
+\end{longtable}
+	\captionof{figure}{Quantiles: At a given memory budget, what percentage of the baselines results in higher listener surprisal than the real language? Solid curves represent sample means, dashed lines represent 95 \% confidence bounds; dotted lines represent 99.9 \% confidence bounds. At five evenly spaced memory levels, we provide a p-value for the null hypothesis that the actual population mean is $0.5$ or less. Confidence bounds and p-values are obtained using an exact nonparametric method (see text).}\label{tab:quantiles}
+\end{center}
+
+%bounds.append(["alpha", float, 0.95, 1.0]) # + [x/20.0 for x in range(15, 21)])
+%bounds.append(["gamma", int, 1, 2, 3, 4, 5, 8, 10, 15, 20, 25, 30]) # , 200, 300
+%bounds.append(["delta", int, 0.1, 0.2, 0.5, 1.0 , 2.0, 3.0, 4.0, 5.0, 8.0, 10.0]) #, 1024]) #, 1024]) # 64, 128,
+%bounds.append(["cutoff", int, 2,3,4,5,6,7,8,9,10]) #,7,8,9,10]) #, 1024]) #, 1024]) # 64, 128,
+%
 
