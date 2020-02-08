@@ -28,8 +28,8 @@ while len(languages) > 0:
      with open(relevantPath+name, "r") as inFile:
        for line in inFile:
            line = line.split("\t")
-           if line[5] == "obj":
-             dhWeight = float(line[4])
+           if line[2] == "obj":
+             dhWeight = float(line[1])
              if dhWeight < 0:
                 negCount += 1
              elif dhWeight > 0:

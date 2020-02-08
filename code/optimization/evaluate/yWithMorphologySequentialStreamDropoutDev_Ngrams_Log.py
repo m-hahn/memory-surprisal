@@ -462,7 +462,7 @@ for k in range(0,args.cutoff):
    devSurprisalTable.append(surprisal)
    print("Surprisal", surprisal, len(itos))
 
-outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model+".txt"
+outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model.split("/")[-1]+".txt"
 print(outpath)
 with open(outpath, "w") as outFile:
          print >> outFile, " ".join(sys.argv)
