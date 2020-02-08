@@ -16,6 +16,9 @@ corrP = c()
 for(file in list.files(PATH)) {
    if(grepl(paste("#", language), paste("#", file))) {
      data = read.csv(paste(PATH, "/", file, sep=""), sep="\t")
+     signObj = sign(data[data$CoarseDependency == "obj",]$DH_Weight)
+     data$signObj = signObj
+     data$signRel = sign(data$DH_Weight)
      data_b = merge(data, data_ground, by=c("CoarseDependency"))
      if(data_b$DistanceWeight[1] != "NaN") {
 
@@ -38,4 +41,7 @@ values = merge(resu, values, by=c("Model"), all=TRUE)
 data_mean = merge(data_total %>% group_by(CoarseDependency) %>% summarise(DistanceWeight = median(DistanceWeight)), data_ground %>% select(CoarseDependency, Distance_Mean_NoPunct), by=c("CoarseDependency"))
 cat(paste(cor(data_mean$DistanceWeight, data_mean$Distance_Mean_NoPunct), "\n"))
 data_mean = data_mean[order(data_mean$DistanceWeight),]
+
+data_total %>% filter(CoarseDependency == "xcomp") %>% summarise(cor = mean(signRel == signObj, na.rm=TRUE))
+data_total %>% filter(CoarseDependency == "nsubj") %>% summarise(cor = mean(signRel == signObj, na.rm=TRUE))
 

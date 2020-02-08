@@ -1,6 +1,6 @@
 library(dplyr)
 library(tidyr)
-language = "German"
+language = "Chinese"
 for(file in list.files("~/scr/CODE/memory-surprisal/results/manual_output_ground_coarse/")) {
    if(grepl(language, file)) {
       result = file
@@ -114,6 +114,6 @@ if(!is.null(data_n)) {
 }
 summary(lm(Distance_Mean_NoPunct ~ DistanceWeight_b + DistanceWeight_d, data=data))
 
-
+cor.test(data$DistanceWeight_b, data$Distance_Mean_NoPunct, method="spearman")
 
 
