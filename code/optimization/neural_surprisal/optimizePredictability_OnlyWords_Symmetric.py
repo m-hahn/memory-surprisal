@@ -277,7 +277,7 @@ print itos_deps
 relevantPath = "/u/scr/mhahn/deps/locality_optimized_neural/"
 
 import os
-files = [x for x in os.listdir(relevantPath) if x.startswith(args.language+"_")]
+files = [x for x in os.listdir(relevantPath) if x.startswith(args.language+"_") and __file__ in x]
 posCount = 0
 negCount = 0
 for name in files:
