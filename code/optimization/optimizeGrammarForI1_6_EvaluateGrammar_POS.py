@@ -692,9 +692,8 @@ if True:
 newDevLoss, _ = computeDevLoss()
 devLosses.append(newDevLoss)
 
-#assert False
 
 print "New dev loss "+str(newDevLoss)+". previous was: "+str(lastDevLoss)
 
-with open("/u/scr/mhahn/deps/locality_optimized_i1/report_"+__file__+"_"+args.model, "w") as outFile:
+with open("/u/scr/mhahn/deps/locality_optimized_i1/REPORTS/report_"+__file__+"_"+args.model, "w") as outFile:
    print >> outFile, newDevLoss
