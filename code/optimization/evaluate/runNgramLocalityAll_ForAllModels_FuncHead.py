@@ -8,18 +8,18 @@ language = sys.argv[1]
 models = []
 #DLM
 import glob
-
-dlm = glob.glob("/u/scr/mhahn/deps/locality_optimized_dlm/manual_output_funchead_coarse_depl/"+language+"_optimizeDependencyLength.py_model_*.tsv")
-i1  = [x for x in glob.glob("/u/scr/mhahn/deps/locality_optimized_i1/"+language+"_optimizeGrammarForI1_*.py_model_*.tsv") if "POS" not in x and "FuncHead" not in x]
-neural = glob.glob("/u/scr/mhahn/deps/locality_optimized_neural/manual_output_funchead_langmod_coarse_best_ud/"+language+"_optimizePredictability_OnlyWords.py_model_*.tsv")
-ground = glob.glob("/u/scr/mhahn/CODE/memory-surprisal/results/manual_output_ground_coarse/"+language+"_inferWeightsCrossVariationalAllCorpora_NoPunct_NEWPYTORCH_Coarse.py_model_*.tsv")
-models = ["REAL_REAL", "GROUND"] + dlm + i1 + neural  # + ground
+dlm = glob.glob("/u/scr/mhahn/deps/manual_output_funchead_coarse_depl/"+language+"_readDataDistCrossLGPUDepLengthMomentumEntropyUnbiasedBaseline_OrderBugFixed_NoPunct_NEWPYTORCH_AllCorpPerLang_BoundIterations_FuncHead_CoarseOnly.py_model_*.tsv")
+i1  = [x for x in glob.glob("/u/scr/mhahn/deps/locality_optimized_i1/"+language+"_optimizeGrammarForI1_*.py_model_*.tsv") if "POS" not in x and "FuncHead" in x]
+neural = glob.glob("/u/scr/mhahn/deps/manual_output_funchead_langmod_coarse_best/"+language+"_readDataDistCrossGPUFreeAllTwoEqual_NoClip_ByCoarseOnly_FixObj_OnlyLangmod_Replication_Best.py_model_*.tsv")
+efficiency = glob.glob("/u/scr/mhahn/deps/manual_output_funchead_two_coarse_lambda09_best_large/"+language+"_readDataDist*.tsv")
+#ground = glob.glob("/u/scr/mhahn/deps/results/manual_output_ground_coarse/"+language+"_inferWeightsCrossVariationalAllCorpora_NoPunct_NEWPYTORCH_Coarse.py_model_*.tsv")
+models = ["REAL_REAL", "GROUND"] + dlm + i1 + neural + efficiency  # + ground
 print(models)
 #quit()
 
 
 
-version = "yWithMorphologySequentialStreamDropoutDev_Ngrams_Log.py"
+version = "yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_FuncHead.py"
 argumentNames = ["alpha", "gamma", "delta", "cutoff"]
 
 
@@ -31,7 +31,7 @@ existing = set(os.listdir(TARGET_DIR))
 
 for model in models:
 
-    if "estimates-"+language+"_"+version+"_model_"+model.split("/")[-1]+".txt" in existing:
+    if "estimates-"+language+"_"+version+"_model_"+model.split("/")[-1][-100:]+".txt" in existing or "estimates-"+language+"_"+version+"_model_"+model.split("/")[-1]+".txt" in existing:
       print("EXISTING")
       continue
     filenames = ([x for x in os.listdir(BASE_DIR) if x.startswith("search-"+language+"_yWithMo") and len(open(BASE_DIR+x, "r").read().split("\n"))>=30])

@@ -1,6 +1,6 @@
 library(dplyr)
 library(tidyr)
-language = "Chinese"
+language = "Basque"
 for(file in list.files("~/scr/CODE/memory-surprisal/results/manual_output_ground_coarse/")) {
    if(grepl(language, file)) {
       result = file

@@ -6,19 +6,19 @@ language = sys.argv[1]
 
 PATH = "/u/scr/mhahn/deps/locality_optimized_i1/it_estimates/"
 
-files = [x for x in os.listdir(PATH) if x.startswith("estimates-"+language+"_yWith") and "FuncHead" not in x]
+files = [x for x in os.listdir(PATH) if x.startswith("estimates-"+language+"_yWith") and "FuncHead" in x]
 
 print(files)
 results = []
 for name in files:
-   prefix = "estimates-"+language+"_yWithMorphologySequentialStreamDropoutDev_Ngrams_Log.py_model_"
+   prefix = "estimates-"+language+"_yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_FuncHead.py_model_"
    if name.startswith(prefix):
       model = name[len(prefix):-4]
       with open(PATH+name, "r") as inFile:
         data = inFile.read()
       results.append((model, [float(x) for x in data.split("\n")[2].split(" ")]))
 results = sorted(results, key=lambda x:x[1][1], reverse=True)
-with open("output/"+language+".tsv", "w") as outFile:
+with open("output/funchead_"+language+".tsv", "w") as outFile:
  print >> outFile, "\t".join(["Model", "BiSurp", "Surp"])
  for r in results:
    print(r)
