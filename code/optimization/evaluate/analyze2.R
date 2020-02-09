@@ -14,7 +14,7 @@ data_total = data.frame()
 files = c()
 corrP = c()
 for(file in list.files(PATH)) {
-   if(grepl(paste("#", language), paste("#", file)) & !grepl("FuncHead", file) & grepl("POS", file)) {
+   if(grepl(paste("#", language), paste("#", file)) & !grepl("FuncHead", file) & !grepl("POS", file)) {
      data = read.csv(paste(PATH, "/", file, sep=""), sep="\t")
      data_b = merge(data, data_ground, by=c("CoarseDependency"))
      if(data_b$DistanceWeight[1] != "NaN") {
