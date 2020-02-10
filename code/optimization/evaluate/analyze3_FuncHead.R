@@ -1,6 +1,6 @@
 library(dplyr)
 library(tidyr)
-language = "Basque"
+language = "Vietnamese"
 for(file in list.files("~/scr/deps/manual_output_funchead_ground_coarse/")) {
    if(grepl(language, file) & grepl("FuncHead", file)) {
       result = file
