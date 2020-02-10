@@ -14,7 +14,7 @@ else:
 import random
 import subprocess
 
-relevantPath = "/u/scr/mhahn/deps/locality_optimized_dlm/manual_output_funchead_coarse_depl/"
+relevantPath = "/u/scr/mhahn/deps/locality_optimized_dlm/manual_output_funchead_fine_depl/"
 
 while len(languages) > 0:
    script = 'optimizeDependencyLength_POS.py'

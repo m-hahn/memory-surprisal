@@ -131,7 +131,7 @@ def orderChildrenRelative(sentence, remainingChildren, reverseSoftmax):
        logits = [(x, distanceWeights[stoi_deps[sentence[x-1]["dependency_key"]]]) for x in remainingChildren]
        logits = sorted(logits, key=lambda x:x[1], reverse=(not reverseSoftmax))
        if len(logits)> 1:
-         print(reverseSoftmax, logits)
+#         print(reverseSoftmax, logits)
          global mistaken 
          global correct
          for i in range(len(logits)):
@@ -333,7 +333,7 @@ def createStreamContinuous(corpus):
     sentCount = 0
     for sentence in corpus:
        sentCount += 1
-       if sentCount % 10 == 0:
+       if sentCount % 100 == 0:
          print ["DEV SENTENCES", sentCount]
 
        ordered, _ = orderSentence(sentence, dhLogits, sentCount % 500 == 0)
@@ -412,6 +412,10 @@ newProbability = [None for _ in idev]
 
 
 print(correct/(mistaken+correct+0.0))
+
+with open("/u/scr/mhahn/deps/locality_optimized_i1/ORDERING_EVAL/ORDER_"+args.model.split("/")[-1], "w") as outFile:
+   print >> outFile, (correct/(mistaken+correct+0.0))
+
 
 assert False
 

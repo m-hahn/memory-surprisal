@@ -417,6 +417,10 @@ newProbability = [None for _ in idev]
 
 print(correct/(mistaken+correct+0.0))
 
+with open("/u/scr/mhahn/deps/locality_optimized_i1/ORDERING_EVAL/ORDER_"+args.model.split("/")[-1], "w") as outFile:
+   print >> outFile, (correct/(mistaken+correct+0.0))
+
+
 assert False
 
 devSurprisalTable = []

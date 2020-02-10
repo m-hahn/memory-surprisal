@@ -13,7 +13,7 @@ i1  = [x for x in glob.glob("/u/scr/mhahn/deps/locality_optimized_i1/"+language+
 neural = glob.glob("/u/scr/mhahn/deps/manual_output_funchead_langmod_coarse_best/"+language+"_readDataDistCrossGPUFreeAllTwoEqual_NoClip_ByCoarseOnly_FixObj_OnlyLangmod_Replication_Best.py_model_*.tsv")
 efficiency = glob.glob("/u/scr/mhahn/deps/manual_output_funchead_two_coarse_lambda09_best_large/"+language+"_readDataDist*.tsv")
 #ground = glob.glob("/u/scr/mhahn/deps/results/manual_output_ground_coarse/"+language+"_inferWeightsCrossVariationalAllCorpora_NoPunct_NEWPYTORCH_Coarse.py_model_*.tsv")
-models = ["REAL_REAL", "GROUND"] + dlm + i1 + neural + efficiency  # + ground
+models = ["REAL_REAL", "GROUND"] + dlm + i1 + neural #+ efficiency
 print(models)
 #quit()
 
