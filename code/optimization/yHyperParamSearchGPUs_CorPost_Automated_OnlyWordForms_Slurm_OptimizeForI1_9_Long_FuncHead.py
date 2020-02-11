@@ -170,7 +170,7 @@ def extractArguments(x):
 import os
 import subprocess
 
-version = "optimizeGrammarForI1_9_Long.py"
+version = "optimizeGrammarForI1_9_Long_FuncHead.py"
 
 DIRPATH = "/u/scr/mhahn/deps/locality_optimized_i1/"
 
@@ -178,7 +178,7 @@ def getResult(i):
 #   return theirXPs[i][0]
    if runningProcesses[i].poll() is not None:
      try:
-      with open(DIRPATH+"/REPORTS/report_optimizeGrammarForI1_6_EvaluateGrammar.py_"+language+"_"+version+"_model_"+str(theirIDs[i])+".tsv", "r") as inFile:
+      with open(DIRPATH+"/REPORTS/report_optimizeGrammarForI1_6_EvaluateGrammar_FuncHead.py_"+language+"_"+version+"_model_"+str(theirIDs[i])+".tsv", "r") as inFile:
          loss = min(map(float, next(inFile).strip().split(" ")))
          return loss
      except IOError:

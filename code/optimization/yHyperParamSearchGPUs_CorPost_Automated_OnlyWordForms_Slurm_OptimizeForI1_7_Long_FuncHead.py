@@ -100,6 +100,7 @@ bounds.append(['--stopAfterFailures', int] + [2, 5, 10, 15, 20, 50, 100])
 values = [x[2:] for x in bounds]
 names = [x[0] for x in bounds]
 
+
 import random
 
 def sample():
@@ -107,8 +108,8 @@ def sample():
      result = [random.choice(values[i]) for i in range(len(bounds))]
 #     if result[names.index("lstm_dim")] == 1024 and result[names.index("layers")] == 3:
 #        continue
-#     if result[names.index("batch_size")] < 32:
- #       continue
+     if result[names.index("--stopAfterFailures")] < 20:
+        continue
      return result
 
 def represent(x):
