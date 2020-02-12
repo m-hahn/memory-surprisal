@@ -1,6 +1,6 @@
 library(dplyr)
 library(tidyr)
-language = "Italian"
+language = "Indonesian"
 for(file in list.files("~/scr/CODE/memory-surprisal/results/manual_output_ground_coarse/")) {
    if(grepl(language, file)) {
       result = file
@@ -9,23 +9,20 @@ for(file in list.files("~/scr/CODE/memory-surprisal/results/manual_output_ground
 }
 data_ground = read.csv(paste("~/scr/CODE/memory-surprisal/results/manual_output_ground_coarse/", result, sep=""), sep="\t")
 data_ground = data_ground %>% rename(CoarseDependency = Dependency)
-PATH = "/u/scr/mhahn/deps/locality_optimized_i1"
+PATH = "/u/scr/mhahn/deps/manual_output_funchead_langmod_coarse_best/"
 data_total = data.frame()
 files = c()
 corrP = c()
 for(file in list.files(PATH)) {
-   if(grepl(paste("#", language), paste("#", file)) & !grepl("Old", file) & !grepl("FuncHead", file) & !grepl("POS", file)& grepl("I1_9", file)) {
+   if(grepl(paste("#", language), paste("#", file))) {
      data = read.csv(paste(PATH, "/", file, sep=""), sep="\t")
      data_b = merge(data, data_ground, by=c("CoarseDependency"))
-     if(data_b$DistanceWeight[1] != "NaN") {
-
      pValue = cor.test(data_b$DistanceWeight, data_b$Distance_Mean_NoPunct)$p.value
      cat(file, " ", pValue, "\n")
      data$Model = file
      data_total = rbind(data_total, data)
      files = c(files, file)
      corrP = c(corrP, pValue)
-     }
    }
 }
 values = data.frame(Model=files, corrP=corrP)

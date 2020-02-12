@@ -131,15 +131,18 @@ def orderChildrenRelative(sentence, remainingChildren, reverseSoftmax):
        logits = [(x, distanceWeights[stoi_deps[sentence[x-1]["dependency_key"]]]) for x in remainingChildren]
        logits = sorted(logits, key=lambda x:x[1], reverse=(not reverseSoftmax))
        if len(logits)> 1:
-#         print(reverseSoftmax, logits)
+       #  print(reverseSoftmax, logits)
          global mistaken 
          global correct
          for i in range(len(logits)):
            for j in range(i):
+            if logits[i][1] == logits[i][1]: # accounting for possible NAs
               if (logits[i][0] > logits[j][0]): # != reverseSoftmax:
                 correct += 1
-              else:
+              else: #if (logits[i][0] < logits[j][0]):
                 mistaken += 1
+            else:
+               mistaken += 1
        childrenLinearized = map(lambda x:x[0], logits)
        return childrenLinearized           
 
