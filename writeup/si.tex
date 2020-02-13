@@ -71,22 +71,23 @@
 
 
 
-
-\begin{center}
-\includegraphics[width=0.5\textwidth]{../code/analysis/visualize_neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
-\captionof{figure}{Histogram}\label{fig:hist-real}
-\end{center}
-
-
+%
+%\begin{center}
+%\includegraphics[width=0.5\textwidth]{../code/analysis/visualize_neural/figures/full-REAL-listener-surprisal-memory-HIST_z_byMem_onlyWordForms_boundedVocab.pdf}
+%\captionof{figure}{Histogram}\label{fig:hist-real}
+%\end{center}
+%
+%
 
 
 \section{Formal Analysis and Proofs}
 
-In this section, we prove the theorem described above.
+In this section, we prove Theorem 1.
 
 \subsection{Mathematical Assumptions}
 
 We first make explicit how we formalize language processing for proving the theorem.
+
 
 \paragraph{Ingredient 1: Language as a Stationary Stochastic Process}
 We represent language as a stochastic process of words $\dots w_{-2} w_{-1} w_0 w_{1} w_{2} \dots$, extending indefinitely both into the past and into the future.
@@ -98,39 +99,40 @@ The assumption of infinite length is for mathematical convenience and does not a
 As we restrict our attention to the processing of individual sentences, which have finite length, we will actually not make use of long-range and infinite contexts.
 
 We make the assumption that this process is \emph{stationary}.
-Formally, this means that the conditional distribution $P(w_t|w_{<t})$ does not depend on $t$, it only depends on the actual sequence $w_{<t}$.
+Formally, this means that the conditional distribution $P(w_t|w_{<t})$ does not depend on $t$, it only depends on the (semi-infinite) context sequence $w_{<t}$.
 Informally, this says that the process has no `internal clock', and that the statistical rules of the language do not change at the timescale we are interested in.
 In reality, the statistical rules of language do change: They change as language changes over generations, and they also change between different situations -- e.g., depending on the interlocutor at a given point in time.
 Given that we are interested in memory needs in the processing of \emph{individual sentences}, at a timescale of seconds or minutes, stationarity seems to be a reasonable assumption to make.
 
 
+%
+%
+%
+%\begin{figure}
+%\includegraphics[width=0.45\textwidth]{figures/markov-condition.png}
+%	\caption{Illustration of (\ref{eq:listener-markov}). As the utterance unfolds, the listener maintains a memory state. After receiving word $w_t$, the listener computes their new memory state $m_t$ based on the previous memory state $m_{t-1}$ and the new word $w_t$.}\label{fig:listener-markov}
+%\end{figure}
+%
 
-
-
-\begin{figure}
-\includegraphics[width=0.45\textwidth]{figures/markov-condition.png}
-	\caption{Illustration of (\ref{eq:listener-markov}). As the utterance unfolds, the listener maintains a memory state. After receiving word $w_t$, the listener computes their new memory state $m_t$ based on the previous memory state $m_{t-1}$ and the new word $w_t$.}\label{fig:listener-markov}
-\end{figure}
-
-
-\paragraph{Ingredient 2: Flow of Information}
+\paragraph{Ingredient 2: Postulates about Processing}
+The second ingredient consists of the three postulates described in the main paper.
 %We now analyze memory from the perspective of the listener, who needs to maintain information about the past to predict the future.
 %As the speaker's utterance unfolds, the listener maintains a memory state $m_t$.
-There are no assumptions about the memory architecture and the nature of its computations.
-We only make a basic assumption about the flow of information (Figure~\ref{fig:listener-markov}):
-At a given point in time, the listener's memory state $m_t$ is determined by the last word $w_t$, and the prior memory state $m_{t-1}$:
-\begin{equation}
-	m_t = M(m_{t-1}, w_t)
-\end{equation}
-As a consequence, $m_t$ contains no information about the process beyond what is contained in the last word observed $w_{t-1}$ and in the memory state before that word was observed $m_{t-1}$.
-%This is formalized as a statement about conditional probabilities:
-%\begin{equation}\label{eq:listener-markov}
-%p(m_1| (w_{t})_{t \in \mathbb{Z}}, m_0)   = p(m_1 | m_0, w_1)
+There are no further assumptions about the memory architecture and the nature of its computations.
+%We only make a basic assumption about the flow of information (Figure~\ref{fig:listener-markov}):
+%At a given point in time, the listener's memory state $m_t$ is determined by the last word $w_t$, and the prior memory state $m_{t-1}$:
+%\begin{equation}
+%	m_t = M(m_{t-1}, w_t)
 %\end{equation}
-%This says that $m_1$ contains no information about the utterances beyond what is contained in $m_0$ and $w_1$.	
-As a consequence, the listener has no knowledge of the speaker's state beyond the information provided in their prior communication.
-This is a simplification, as the listener could obtain information about the speaker from other sources, such as their common environment (weather, ...).
-\mhahn{For the study of memory in sentence processing, this seems fair. Discuss this more.}
+%As a consequence, $m_t$ contains no information about the process beyond what is contained in the last word observed $w_{t-1}$ and in the memory state before that word was observed $m_{t-1}$.
+%%This is formalized as a statement about conditional probabilities:
+%%\begin{equation}\label{eq:listener-markov}
+%%p(m_1| (w_{t})_{t \in \mathbb{Z}}, m_0)   = p(m_1 | m_0, w_1)
+%%\end{equation}
+%%This says that $m_1$ contains no information about the utterances beyond what is contained in $m_0$ and $w_1$.	
+%As a consequence, the listener has no knowledge of the speaker's state beyond the information provided in their prior communication.
+%This is a simplification, as the listener could obtain information about the speaker from other sources, such as their common environment (weather, ...).
+%\mhahn{For the study of memory in sentence processing, this seems fair. Discuss this more.}
 
 %
 %First, we assume that the listener's internal state cannot depend on the future beyond its dependency on the past.
@@ -171,30 +173,29 @@ Then this listener will incur surprisal at least
 
 
 
-We formalize a language as a stationary stochastic process $\dots w_{-2} w_{-1} w_0 w_{1} w_{2} \dots$, extending indefinitely both into the past and into the future.
-The symbols $w_i$ belong to a common set, representing the words of the language.\footnote{Could also be phonemes, sentences, ..., any other kind of unit.}
-We denote the listener's memory state at time $t$, after hearing $w_{<t} = ... w_{t-2} w_{t-1}$ by $m_t$.
-As described above, we assume
-\begin{equation}
-	m_t = M(m_{t-1}, w_{t-1})
-\end{equation}
-\footnote{Alternatively we could admit nondeterministic memory encodings, and require
-\begin{equation}\label{eq:listener-markov}
-	p(m_{t+1}| (w_{t'})_{t' \in \mathbb{Z}}, m_t)   = p(m_{t+1} | m_t, w_{t})
-\end{equation}
-that is, $m_{t+1}$ contains no information about the utterances beyond what is contained in $m_t$ and $w_{t}$.}
-As a consequence, the listener has no knowledge of the speaker's state beyond the information provided in their prior communication.
+%We formalize a language as a stationary stochastic process $\dots w_{-2} w_{-1} w_0 w_{1} w_{2} \dots$, extending indefinitely both into the past and into the future.
+%The symbols $w_i$ belong to a common set, representing the words of the language.\footnote{Could also be phonemes, sentences, ..., any other kind of unit.}
+%We denote the listener's memory state at time $t$, after hearing $w_{<t} = ... w_{t-2} w_{t-1}$ by $m_t$.
+%As described above, we assume
+%\begin{equation}
+%	m_t = M(m_{t-1}, w_{t-1})
+%\end{equation}
+%\footnote{Alternatively we could admit nondeterministic memory encodings, and require
+%\begin{equation}\label{eq:listener-markov}
+%	p(m_{t+1}| (w_{t'})_{t' \in \mathbb{Z}}, m_t)   = p(m_{t+1} | m_t, w_{t})
+%\end{equation}
+%that is, $m_{t+1}$ contains no information about the utterances beyond what is contained in $m_t$ and $w_{t}$.}
+%As a consequence, the listener has no knowledge of the speaker's state beyond the information provided in their prior communication.
 
 
-The average number of bits required to encode this state is $\operatorname{H}[m_t]$, which by assumption is at most $\sum_{t=1}^T t I_t$.
-As the listener's predictions are made on the basis of her memory state, her average surprisal is at least $\operatorname{H}[w_t | m_t]$.
-The difference between the listener's surprisal and optimal surprisal is thus at least $\operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]$.
+%The average number of bits required to encode this state is $\operatorname{H}[m_t]$, which by assumption is at most $\sum_{t=1}^T t I_t$.
+%As the listener's predictions are made on the basis of her memory state, her average surprisal is at least $\operatorname{H}[w_t | m_t]$.
+\begin{proof}
+The difference between the listener's surprisal and optimal surprisal is $\operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]$.\footnote{A listener whose predictions are not optimal given $m_t$ can only incur even higher surprisal.}
 By the assumption of stationarity, we can, for any positive integer $T$, rewrite this expression as
 \begin{equation}\label{eq:byStation}
 \operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}] =  \frac{1}{T} \sum_{t'=1}^{T} \left(\operatorname{H}[w_{t'} | m_{t'}] - \operatorname{H}[w_{t'} | w_{<t'}]\right) 
 \end{equation}
-
-
 %NOTE the proof could be made simpler by taking $m_t$ to be a deterministic function of $x_t$, $m_{t-1}$, rather than talking about conditional independence
 %
 %We first show a lemma:
@@ -212,8 +213,10 @@ Because $m_t$ is determined by $(w_{1 \dots t-1}, m_1)$:
 	m_t = M(m_{t-1}, w_{t-1}) = M(M(m_{t-2}, w_{t-2}), w_{t-1}) = M(M(M(m_{t-3}, w_{t-3}), w_{t-2}), w_{t-1}) = \dots
 \end{equation}
 the Data Processing inequality entails the following inequality for every positive integer $t$:
-
-	Plugging this inequality into Equation~\ref{eq:byStation} above:
+\begin{align}\label{eq:plugged}
+\operatorname{H}[w_t | m_t]& \geq \operatorname{H}[w_t|w_{1\dots t-1}, m_1]
+\end{align}
+Plugging this inequality into Equation~\ref{eq:byStation} above:
 \begin{align}\label{eq:plugged}
 \operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]& \geq \frac{1}{T} \sum_{t=1}^T ( \operatorname{H}[w_t|w_{1\dots t-1}, m_1] - \operatorname{H}[w_t | w_{1\dots t-1}, w_{\leq 0}]  )    \\
 & = \frac{1}{T} \left(\operatorname{H}[w_{1\dots T} | m_1] - \operatorname{H}[w_{1\dots T} | w_{\leq 0}]\right)  \\
@@ -233,7 +236,7 @@ $I[w_{1\dots T}|m_1]$ is at most $\operatorname{H}[m_1]$, which is at most $\sum
 &= \sum_{t > T} I_t
 \end{align*}
 Rearranging shows that the listener's surprisal is at least $\operatorname{H}[w_t|m_t] \geq \operatorname{H}[w_t | w_{<t}] + \sum_{t > T} I_t$, as claimed.
-%\end{proof}
+\end{proof}
 
 
 %Justifylinear interpolation: The curve is convex, which is shown by `time-sharing': Use one code $\lambda$ fraction of times, and the other code $1-\lambda$ fraction of times.
@@ -242,7 +245,10 @@ Rearranging shows that the listener's surprisal is at least $\operatorname{H}[w_
 
 \subsection{For nondeterministic encoding functions}
 
-We relax condition (X) to
+We have been assuming that $m_t$ is a deterministic function of $x_t$ and $m_{t-1}$.
+Here, we show that this assumption can be relaxed to stochastic encoding functions.
+
+We relax condition (X) to the following requirement, for all values of $m_1, (w_{t})_{t \in \mathbb{Z}}, m_0$:
 \begin{equation}\label{eq:listener-markov-nondeterministic}
 p(m_1| (w_{t})_{t \in \mathbb{Z}}, m_0)   = p(m_1 | m_0, w_1)
 \end{equation}
@@ -253,16 +259,15 @@ The one place in the proof where (X) plays a role is the proof of the inequality
 	H[w_t | m_t] \geq H[w_t|w_{1 \dots t-1}, m_1]
 \end{equation}
 
-We show that this inequality still holds under the relaxed condition (X):
+We show that this inequality still holds under the relaxed condition (\ref{eq:listener-markov-nondeterministic}):
 \begin{proof}
 	By Bayes' Theorem
 \begin{align*}
-	p(w_t|m_0, m_1, w_{0\dots t-1}) &= \frac{p(m_1|m_0, w_{0\dots t})}{p(m_1|m_0, w_{0\dots t-1})} \cdot p(w_t|m_0, w_{0\dots t-1})
+	p(w_t|m_0, m_1, w_{0\dots t-1}) &= \frac{p(m_1|m_0, w_{0\dots t})}{p(m_1|m_0, w_{0\dots t-1})} \cdot p(w_t|m_0, w_{0\dots t-1}) \\
+ &= \frac{p(m_1|m_0, w_{0})}{p(m_1|m_0, w_{0})} \cdot p(w_t|m_0, w_{0\dots t-1}) \\
+ &= p(w_t|m_0, w_{0\dots t-1}) \\
 \end{align*}
-By Equation~\ref{eq:listener-markov}, the quotient on the RHS is equal to $1$, so
-\begin{align*}
-p(w_t|m_0, m_1, w_{0\dots t-1}) = p(w_t|m_0, w_{0\dots t-1})
-\end{align*}
+	where the second equation follows from (\ref{eq:listener-markov-nondeterministic}).
 So we have a Markov chain
 \begin{equation}
 (w_t) \rightarrow (m_0, w_{0 \dots t-1})   \rightarrow   (m_1, w_{1 \dots t-1})
@@ -271,7 +276,7 @@ Thus, by the Data Processing Inequality,
 \begin{equation}
 H[w_t| w_{1 \dots t-1}, m_{1}] \geq H[w_t|w_{0 \dots t-1}, m_0]
 \end{equation}
-Finally, iteratively applying this inequality, we get:
+Finally, iteratively applying this reasoning, we conclude:
 \begin{align*}
 H[w_t | m_t] \geq H[w_t| w_{t-1}, m_{t-1}] \geq H[w_t| w_{t-2, t-1}, m_{t-2}] \geq ... \geq H[w_t|w_{1 \dots t-1}, m_1]
 \end{align*}
