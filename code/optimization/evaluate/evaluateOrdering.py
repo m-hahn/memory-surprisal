@@ -122,13 +122,27 @@ import numpy.random
 softmax_layer = torch.nn.Softmax()
 logsoftmax = torch.nn.LogSoftmax()
 
-
+mistaken = 0
+correct = 0
 
 def orderChildrenRelative(sentence, remainingChildren, reverseSoftmax):
        if args.model == "REAL":
           return remainingChildren
        logits = [(x, distanceWeights[stoi_deps[sentence[x-1]["dependency_key"]]]) for x in remainingChildren]
        logits = sorted(logits, key=lambda x:x[1], reverse=(not reverseSoftmax))
+       if len(logits)> 1:
+       #  print(reverseSoftmax, logits)
+         global mistaken 
+         global correct
+         for i in range(len(logits)):
+           for j in range(i):
+            if logits[i][1] == logits[i][1]: # accounting for possible NAs
+              if (logits[i][0] > logits[j][0]): # != reverseSoftmax:
+                correct += 1
+              else: #if (logits[i][0] < logits[j][0]):
+                mistaken += 1
+            else:
+               mistaken += 1
        childrenLinearized = map(lambda x:x[0], logits)
        return childrenLinearized           
 
@@ -155,9 +169,10 @@ def orderSentence(sentence, dhLogits, printThings):
       key = (sentence[line["head"]-1]["posUni"], line["dep"], line["posUni"])
       line["dependency_key"] = key
       dhLogit = dhWeights[stoi_deps[key]]
-      if args.model == "REAL":
+      if True or args.model == "REAL":
          dhSampled = (line["head"] > line["index"])
       else:
+         assert False
          dhSampled = (dhLogit > 0) 
      
       direction = "DH" if dhSampled else "HD"
@@ -321,7 +336,7 @@ def createStreamContinuous(corpus):
     sentCount = 0
     for sentence in corpus:
        sentCount += 1
-       if sentCount % 10 == 0:
+       if sentCount % 100 == 0:
          print ["DEV SENTENCES", sentCount]
 
        ordered, _ = orderSentence(sentence, dhLogits, sentCount % 500 == 0)
@@ -398,6 +413,15 @@ def getStartEnd(k):
 lastProbability = [None for _ in idev]
 newProbability = [None for _ in idev]
 
+
+print(correct/(mistaken+correct+0.0))
+
+with open("/u/scr/mhahn/deps/locality_optimized_i1/ORDERING_EVAL/ORDER_"+args.model.split("/")[-1], "w") as outFile:
+   print >> outFile, (correct/(mistaken+correct+0.0))
+
+
+assert False
+
 devSurprisalTable = []
 for k in range(0,args.cutoff):
    print(k)
@@ -461,6 +485,8 @@ for k in range(0,args.cutoff):
        surprisal = 1000
    devSurprisalTable.append(surprisal)
    print("Surprisal", surprisal, len(itos))
+
+assert False
 
 outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+args.model.split("/")[-1]+".txt"
 print(outpath)

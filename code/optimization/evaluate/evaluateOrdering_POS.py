@@ -27,7 +27,7 @@ assert args.delta >= 0
 assert args.gamma >= 1
 
 
-
+assert "REAL" not in args.model
 
 
 myID = args.idForProcess
@@ -68,23 +68,19 @@ def initializeOrderTable():
    distanceCounts = {}
    depsVocab = set()
    for partition in ["train", "dev"]:
-     for sentence in CorpusIterator(args.language,partition, storeMorph=True).iterator():
+     for sentence in CorpusIterator(args.language,partition).iterator():
       for line in sentence:
           vocab[line["word"]] = vocab.get(line["word"], 0) + 1
-          vocab_lemmas[line["lemma"]] = vocab_lemmas.get(line["lemma"], 0) + 1
-
-          depsVocab.add(line["dep"])
+          line["fine_dep"] = line["dep"]
+          depsVocab.add(line["fine_dep"])
           posFine.add(line["posFine"])
           posUni.add(line["posUni"])
   
-          for morph in line["morph"]:
-              morphKeyValuePairs.add(morph)
-          if line["dep"] == "root":
+          if line["fine_dep"] == "root":
              continue
-
           posHere = line["posUni"]
           posHead = sentence[line["head"]-1]["posUni"]
-          dep = line["dep"]
+          dep = line["fine_dep"]
           direction = "HD" if line["head"] < line["index"] else "DH"
           key = (posHead, dep, posHere)
           keyWithDir = (posHead, dep, posHere, direction)
@@ -106,6 +102,7 @@ import torch
 from torch.autograd import Variable
 
 
+# "linearization_logprobability"
 def recursivelyLinearize(sentence, position, result):
    line = sentence[position-1]
 
@@ -122,13 +119,22 @@ import numpy.random
 softmax_layer = torch.nn.Softmax()
 logsoftmax = torch.nn.LogSoftmax()
 
-
+mistaken = 0
+correct = 0
 
 def orderChildrenRelative(sentence, remainingChildren, reverseSoftmax):
-       if args.model == "REAL":
-          return remainingChildren
        logits = [(x, distanceWeights[stoi_deps[sentence[x-1]["dependency_key"]]]) for x in remainingChildren]
        logits = sorted(logits, key=lambda x:x[1], reverse=(not reverseSoftmax))
+       if len(logits)> 1:
+#         print(reverseSoftmax, logits)
+         global mistaken 
+         global correct
+         for i in range(len(logits)):
+           for j in range(i):
+              if (logits[i][0] > logits[j][0]): # != reverseSoftmax:
+                correct += 1
+              else:
+                mistaken += 1
        childrenLinearized = map(lambda x:x[0], logits)
        return childrenLinearized           
 
@@ -139,34 +145,30 @@ def orderSentence(sentence, dhLogits, printThings):
    root = None
    logits = [None]*len(sentence)
    logProbabilityGradient = 0
-   if args.model == "REAL_REAL":
-       # Collect tokens to be removed (i.e., punctuation)
-      eliminated = []
    for line in sentence:
-      if line["dep"] == "root":
+      line["fine_dep"] = line["dep"]
+      if line["fine_dep"] == "root":
           root = line["index"]
           continue
       # Exclude Punctuation
-      if line["dep"].startswith("punct"):
-         if args.model == "REAL_REAL":
-            eliminated.append(line)
+      if line["fine_dep"].startswith("punct"):
          continue
       # Determine ordering relative to head
-      key = (sentence[line["head"]-1]["posUni"], line["dep"], line["posUni"])
+      key = (sentence[line["head"]-1]["posUni"], line["fine_dep"], line["posUni"])
       line["dependency_key"] = key
       dhLogit = dhWeights[stoi_deps[key]]
-      if args.model == "REAL":
+      if True or args.model == "REAL":
          dhSampled = (line["head"] > line["index"])
       else:
+         assert False
          dhSampled = (dhLogit > 0) 
      
       direction = "DH" if dhSampled else "HD"
       if printThings: 
-         print "\t".join(map(str,["ORD", line["index"], ("->".join(list(key)) + "         ")[:22], line["head"], dhLogit, dhSampled, direction]))
+         print "\t".join(map(str,["ORD", line["index"], (line["word"]+"           ")[:10], (".".join(list(key)) + "         ")[:22], line["head"], dhSampled, direction, str(1/(1+exp(-dhLogits[key])))[:8], (str(distanceWeights[stoi_deps[key]])+"    ")[:8] , str(originalDistanceWeights[key])[:8]    ]  ))
 
       headIndex = line["head"]-1
       sentence[headIndex]["children_"+direction] = (sentence[headIndex].get("children_"+direction, []) + [line["index"]])
-
 
    if args.model != "REAL_REAL":
       for line in sentence:
@@ -176,19 +178,6 @@ def orderSentence(sentence, dhLogits, printThings):
          if "children_HD" in line:
             childrenLinearized = orderChildrenRelative(sentence, line["children_HD"][:], True)
             line["children_HD"] = childrenLinearized
-   if args.model == "REAL_REAL":
-       while len(eliminated) > 0:
-          line = eliminated[0]
-          del eliminated[0]
-          if "removed" in line:
-             continue
-          line["removed"] = True
-          if "children_DH" in line:
-            assert 0 not in line["children_DH"]
-            eliminated = eliminated + [sentence[x-1] for x in line["children_DH"]]
-          if "children_HD" in line:
-            assert 0 not in line["children_HD"]
-            eliminated = eliminated + [sentence[x-1] for x in line["children_HD"]]
 
    
    linearized = []
@@ -212,7 +201,8 @@ stoi_pos_uni = dict(zip(posUni, range(len(posUni))))
 itos_pure_deps = sorted(list(depsVocab)) 
 stoi_pure_deps = dict(zip(itos_pure_deps, range(len(itos_pure_deps))))
    
-itos_deps = sorted(vocab_deps)
+
+itos_deps = sorted(vocab_deps, key=lambda x:x[1])
 stoi_deps = dict(zip(itos_deps, range(len(itos_deps))))
 
 dhWeights = [0.0] * len(itos_deps)
@@ -226,14 +216,12 @@ if args.model == "REAL" or args.model == "REAL_REAL":
 elif args.model == "RANDOM_BY_TYPE":
   dhByType = {}
   distByType = {}
-  for dep in itos_pure_deps:
-    dhByType[dep.split(":")[0]] = random() - 0.5
-    distByType[dep.split(":")[0]] = random()
   for key in range(len(itos_deps)):
-     dhWeights[key] = dhByType[itos_deps[key][1].split(":")[0]]
-     distanceWeights[key] = distByType[itos_deps[key][1].split(":")[0]]
+     dhWeights[key] = random() - 0.5
+     distanceWeights[key] = random()
   originalCounter = "NA"
 elif args.model == "GROUND":
+  assert False
   groundPath = "/u/scr/mhahn/deps/manual_output_ground_coarse/"
   import os
   files = [x for x in os.listdir(groundPath) if x.startswith(args.language+"_infer")]
@@ -254,26 +242,36 @@ elif args.model == "GROUND":
          dhByDependency[dependency] = dhHere
          distByDependency[dependency] = distHere
   for key in range(len(itos_deps)):
-     dhWeights[key] = dhByDependency[itos_deps[key][1].split(":")[0]]
-     distanceWeights[key] = distByDependency[itos_deps[key][1].split(":")[0]]
+     dhWeights[key] = dhByDependency[itos_deps[key]]
+     distanceWeights[key] = distByDependency[itos_deps[key]]
   originalCounter = "NA"
 else:
-  with open(args.model, "r") as inFile:
+#  with open("/u/scr/mhahn/deps/locality_optimized_i1/Chinese_optimizeGrammarForI1_3.py_model_675523898.tsv", "r") as inFile:
+  assert "POS" in args.model
+  with open("/u/scr/mhahn/deps/locality_optimized_i1/"+args.model, "r") as inFile:
+
      headerGrammar = next(inFile).strip().split("\t")
      print(headerGrammar)
      dhByDependency = {}
      distByDependency = {}
      for line in inFile:
          line = line.strip().split("\t")
+
+
+
+
          dependency = line[headerGrammar.index("CoarseDependency")]
+         head = line[headerGrammar.index("HeadPOS")]
+         dependent = line[headerGrammar.index("DependentPOS")]
          dhHere = float(line[headerGrammar.index("DH_Weight")])
          distHere = float(line[headerGrammar.index("DistanceWeight")])
          print(dependency, dhHere, distHere)
-         dhByDependency[dependency] = dhHere
-         distByDependency[dependency] = distHere
+         key = (head, dependency, dependent)
+         dhByDependency[key] = dhHere
+         distByDependency[key] = distHere
   for key in range(len(itos_deps)):
-     dhWeights[key] = dhByDependency[itos_deps[key][1].split(":")[0]]
-     distanceWeights[key] = distByDependency[itos_deps[key][1].split(":")[0]]
+     dhWeights[key] = dhByDependency[itos_deps[key]]
+     distanceWeights[key] = distByDependency[itos_deps[key]]
   originalCounter = "NA"
 
 
@@ -398,6 +396,11 @@ def getStartEnd(k):
 lastProbability = [None for _ in idev]
 newProbability = [None for _ in idev]
 
+
+print(correct/(mistaken+correct+0.0))
+
+assert False
+
 devSurprisalTable = []
 for k in range(0,args.cutoff):
    print(k)
@@ -461,6 +464,8 @@ for k in range(0,args.cutoff):
        surprisal = 1000
    devSurprisalTable.append(surprisal)
    print("Surprisal", surprisal, len(itos))
+
+assert False
 
 outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+args.model.split("/")[-1]+".txt"
 print(outpath)

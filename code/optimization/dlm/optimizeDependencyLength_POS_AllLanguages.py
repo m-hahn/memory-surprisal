@@ -14,10 +14,10 @@ else:
 import random
 import subprocess
 
-relevantPath = "/u/scr/mhahn/deps/locality_optimized_dlm/manual_output_funchead_coarse_depl/"
+relevantPath = "/u/scr/mhahn/deps/locality_optimized_dlm/manual_output_funchead_fine_depl/"
 
 while len(languages) > 0:
-   script = 'optimizeDependencyLength.py'
+   script = 'optimizeDependencyLength_POS.py'
 
    language = random.choice(languages)
    import os
@@ -28,8 +28,8 @@ while len(languages) > 0:
      with open(relevantPath+name, "r") as inFile:
        for line in inFile:
            line = line.split("\t")
-           if line[2] == "obj":
-             dhWeight = float(line[1])
+           if line[1] == "obj":
+             dhWeight = float(line[0])
              if dhWeight < 0:
                 negCount += 1
              elif dhWeight > 0:

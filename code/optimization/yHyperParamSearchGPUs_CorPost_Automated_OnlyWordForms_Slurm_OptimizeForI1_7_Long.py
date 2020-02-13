@@ -177,9 +177,13 @@ DIRPATH = "/u/scr/mhahn/deps/locality_optimized_i1/"
 def getResult(i):
 #   return theirXPs[i][0]
    if runningProcesses[i].poll() is not None:
-      with open(DIRPATH+"/report_optimizeGrammarForI1_6_EvaluateGrammar.py_"+language+"_"+version+"_model_"+str(theirIDs[i])+".tsv", "r") as inFile:
+     try:
+      with open(DIRPATH+"/REPORTS/report_optimizeGrammarForI1_6_EvaluateGrammar.py_"+language+"_"+version+"_model_"+str(theirIDs[i])+".tsv", "r") as inFile:
          loss = min(map(float, next(inFile).strip().split(" ")))
          return loss
+     except IOError:
+         print("Could not open file")
+         return 10
    else:
       return None 
 

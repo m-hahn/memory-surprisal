@@ -92,18 +92,18 @@ def initializeOrderTable():
      for sentence in CorpusIterator(args.language,partition).iterator():
       for line in sentence:
           vocab[line["word"]] = vocab.get(line["word"], 0) + 1
-          line["coarse_dep"] = makeCoarse(line["dep"])
-          depsVocab.add(line["coarse_dep"])
+          line["fine_dep"] = line["dep"]
+          depsVocab.add(line["fine_dep"])
           posFine.add(line["posFine"])
           posUni.add(line["posUni"])
   
-          if line["coarse_dep"] == "root":
+          if line["fine_dep"] == "root":
              continue
           posHere = line["posUni"]
           posHead = sentence[line["head"]-1]["posUni"]
-          dep = line["coarse_dep"]
+          dep = line["fine_dep"]
           direction = "HD" if line["head"] < line["index"] else "DH"
-          key = dep
+          key = (posHead, dep, posHere)
           keyWithDir = (dep, direction)
           orderTable[keyWithDir] = orderTable.get(keyWithDir, 0) + 1
           keys.add(key)
@@ -135,7 +135,7 @@ def recursivelyLinearize(sentence, position, result, gradients_from_the_left_sum
    if "linearization_logprobability" in line:
       allGradients += line["linearization_logprobability"] # the linearization of this element relative to its siblings affects everything starting at the start of the constituent, but nothing to the left of it
    else:
-      assert line["coarse_dep"] == "root"
+      assert line["fine_dep"] == "root"
 
 
    # there are the gradients of its children
@@ -196,18 +196,18 @@ def orderSentence(sentence, dhLogits, printThings):
    logProbabilityGradient = 0
 
    for line in sentence:
-       line["coarse_dep"] = makeCoarse(line["dep"])
-       line["excluded"] = (line["coarse_dep"] == "root" or line["coarse_dep"].startswith("punct"))
-   dependencyKeys = torch.LongTensor([0 if line["excluded"] else stoi_deps[line["coarse_dep"]] for line in sentence])
+       line["fine_dep"] = line["dep"]
+       line["excluded"] = (line["fine_dep"] == "root" or line["fine_dep"].startswith("punct"))
+   dependencyKeys = torch.LongTensor([0 if line["excluded"] else stoi_deps[(sentence[line["head"]-1]["posUni"], line["fine_dep"], line["posUni"]) if line["fine_dep"] != "root" else stoi_deps["root"]] for line in sentence])
    dhLogitsHere = torch.index_select(dhWeights, 0, dependencyKeys)
    dhProbabilities = torch.nn.functional.sigmoid(dhLogitsHere).data.numpy().tolist()
    for j, line in enumerate(sentence):
-      if line["coarse_dep"] == "root":
+      if line["fine_dep"] == "root":
           root = line["index"]
           continue
-      if line["coarse_dep"].startswith("punct"): # assumes that punctuation does not have non-punctuation dependents!
+      if line["fine_dep"].startswith("punct"): # assumes that punctuation does not have non-punctuation dependents!
          continue
-      key = line["coarse_dep"]
+      key = (sentence[line["head"]-1]["posUni"], line["fine_dep"], line["posUni"]) if line["fine_dep"] != "root" else stoi_deps["root"]
       line["dependency_key"] = key
       dhLogit = dhWeights[stoi_deps[key]]
       probability = dhProbabilities[j] #1/(1 + torch.exp(-dhLogit))
@@ -215,7 +215,7 @@ def orderSentence(sentence, dhLogits, printThings):
       direction = "DH" if dhSampled else "HD"
       line["direction"] = direction
       if printThings: 
-         print "\t".join(map(str,["ORD", line["index"], (line["word"]+"           ")[:10], ("".join(list(key)) + "         ")[:22], line["head"], dhSampled, direction, (str(probability)+"      ")[:8], str(1/(1+exp(-dhLogits[key])))[:8], (str(distanceWeights[stoi_deps[key]].data.numpy())+"    ")[:8] , str(originalDistanceWeights[key])[:8]    ]  ))
+         print "\t".join(map(str,["ORD", line["index"], (line["word"]+"           ")[:10], (".".join(list(key)) + "         ")[:22], line["head"], dhSampled, direction, (str(probability)+"      ")[:8], str(1/(1+exp(-dhLogits[key])))[:8], (str(distanceWeights[stoi_deps[key]].data.numpy())+"    ")[:8] , str(originalDistanceWeights[key])[:8]    ]  ))
 
       headIndex = line["head"]-1
       sentence[headIndex]["children_"+direction] = (sentence[headIndex].get("children_"+direction, []) + [line["index"]])
@@ -266,7 +266,7 @@ itos_pure_deps = sorted(list(depsVocab))
 stoi_pure_deps = dict(zip(itos_pure_deps, range(len(itos_pure_deps))))
    
 
-itos_deps = sorted(vocab_deps)
+itos_deps = sorted(vocab_deps, key=lambda x:x[1])
 stoi_deps = dict(zip(itos_deps, range(len(itos_deps))))
 
 print itos_deps
@@ -293,6 +293,7 @@ if args.model == "RANDOM_MODEL":
      distanceWeights[key] = random()
   originalCounter = "NA"
 elif args.model == "RANDOM_BY_TYPE":
+  assert False
   dhByType = {}
   distByType = {}
   for dep in itos_pure_deps:
@@ -303,6 +304,7 @@ elif args.model == "RANDOM_BY_TYPE":
      distanceWeights[key] = distByType[itos_deps[key].split(":")[0]]
   originalCounter = "NA"
 elif args.model == "GROUND":
+  assert False
   groundPath = "/u/scr/mhahn/deps/manual_output_ground_coarse/"
   import os
   files = [x for x in os.listdir(groundPath) if x.startswith(args.language+"_infer")]
@@ -327,11 +329,12 @@ elif args.model == "GROUND":
          dhByDependency[dependency] = dhHere
          distByDependency[dependency] = distHere
   for key in range(len(itos_deps)):
-     dhWeights[key] = dhByDependency[itos_deps[key].split(":")[0]]
-     distanceWeights[key] = distByDependency[itos_deps[key].split(":")[0]]
+     dhWeights[key] = dhByDependency[itos_deps[key]]
+     distanceWeights[key] = distByDependency[itos_deps[key]]
   originalCounter = "NA"
 else:
 #  with open("/u/scr/mhahn/deps/locality_optimized_i1/Chinese_optimizeGrammarForI1_3.py_model_675523898.tsv", "r") as inFile:
+  assert "POS" in args.model
   with open("/u/scr/mhahn/deps/locality_optimized_i1/"+args.model, "r") as inFile:
 
      headerGrammar = next(inFile).strip().split("\t")
@@ -340,15 +343,22 @@ else:
      distByDependency = {}
      for line in inFile:
          line = line.strip().split("\t")
+
+
+
+
          dependency = line[headerGrammar.index("CoarseDependency")]
+         head = line[headerGrammar.index("HeadPOS")]
+         dependent = line[headerGrammar.index("DependentPOS")]
          dhHere = float(line[headerGrammar.index("DH_Weight")])
          distHere = float(line[headerGrammar.index("DistanceWeight")])
          print(dependency, dhHere, distHere)
-         dhByDependency[dependency] = dhHere
-         distByDependency[dependency] = distHere
+         key = (head, dependency, dependent)
+         dhByDependency[key] = dhHere
+         distByDependency[key] = distHere
   for key in range(len(itos_deps)):
-     dhWeights[key] = dhByDependency[itos_deps[key].split(":")[0]]
-     distanceWeights[key] = distByDependency[itos_deps[key].split(":")[0]]
+     dhWeights[key] = dhByDependency[itos_deps[key]]
+     distanceWeights[key] = distByDependency[itos_deps[key]]
   originalCounter = "NA"
 
 

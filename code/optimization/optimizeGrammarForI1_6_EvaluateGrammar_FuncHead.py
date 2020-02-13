@@ -71,7 +71,7 @@ import os
 
 header = ["index", "word", "lemma", "posUni", "posFine", "morph", "head", "dep", "_", "_"]
 
-from corpusIterator import CorpusIterator
+from corpusIterator_FuncHead import CorpusIteratorFuncHead as CorpusIterator
 
 originalDistanceWeights = {}
 

@@ -107,8 +107,8 @@ def sample():
      result = [random.choice(values[i]) for i in range(len(bounds))]
 #     if result[names.index("lstm_dim")] == 1024 and result[names.index("layers")] == 3:
 #        continue
-     if result[names.index("--stopAfterFailures")] < 20:
-        continue
+#     if result[names.index("batch_size")] < 32:
+ #       continue
      return result
 
 def represent(x):
@@ -170,7 +170,7 @@ def extractArguments(x):
 import os
 import subprocess
 
-version = "optimizeGrammarForI1_9_Long.py"
+version = "optimizeGrammarForI1_7_Long_POS.py"
 
 DIRPATH = "/u/scr/mhahn/deps/locality_optimized_i1/"
 
@@ -178,7 +178,7 @@ def getResult(i):
 #   return theirXPs[i][0]
    if runningProcesses[i].poll() is not None:
      try:
-      with open(DIRPATH+"/REPORTS/report_optimizeGrammarForI1_6_EvaluateGrammar.py_"+language+"_"+version+"_model_"+str(theirIDs[i])+".tsv", "r") as inFile:
+      with open(DIRPATH+"/REPORTS/report_optimizeGrammarForI1_6_EvaluateGrammar_POS.py_"+language+"_"+version+"_model_"+str(theirIDs[i])+".tsv", "r") as inFile:
          loss = min(map(float, next(inFile).strip().split(" ")))
          return loss
      except IOError:

@@ -14,10 +14,10 @@ else:
 import random
 import subprocess
 
-relevantPath = "/u/scr/mhahn/deps/locality_optimized_dlm/manual_output_funchead_coarse_depl/"
+relevantPath = "/u/scr/mhahn/deps/locality_optimized_dlm/manual_output_funchead_coarse_depl_quasiF/"
 
 while len(languages) > 0:
-   script = 'optimizeDependencyLength.py'
+   script = 'optimizeDependencyLength_QuasiF.py'
 
    language = random.choice(languages)
    import os

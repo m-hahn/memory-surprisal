@@ -68,23 +68,19 @@ def initializeOrderTable():
    distanceCounts = {}
    depsVocab = set()
    for partition in ["train", "dev"]:
-     for sentence in CorpusIterator(args.language,partition, storeMorph=True).iterator():
+     for sentence in CorpusIterator(args.language,partition).iterator():
       for line in sentence:
           vocab[line["word"]] = vocab.get(line["word"], 0) + 1
-          vocab_lemmas[line["lemma"]] = vocab_lemmas.get(line["lemma"], 0) + 1
-
-          depsVocab.add(line["dep"])
+          line["fine_dep"] = line["dep"]
+          depsVocab.add(line["fine_dep"])
           posFine.add(line["posFine"])
           posUni.add(line["posUni"])
   
-          for morph in line["morph"]:
-              morphKeyValuePairs.add(morph)
-          if line["dep"] == "root":
+          if line["fine_dep"] == "root":
              continue
-
           posHere = line["posUni"]
           posHead = sentence[line["head"]-1]["posUni"]
-          dep = line["dep"]
+          dep = line["fine_dep"]
           direction = "HD" if line["head"] < line["index"] else "DH"
           key = (posHead, dep, posHere)
           keyWithDir = (posHead, dep, posHere, direction)
@@ -143,16 +139,17 @@ def orderSentence(sentence, dhLogits, printThings):
        # Collect tokens to be removed (i.e., punctuation)
       eliminated = []
    for line in sentence:
-      if line["dep"] == "root":
+      line["fine_dep"] = line["dep"]
+      if line["fine_dep"] == "root":
           root = line["index"]
           continue
       # Exclude Punctuation
-      if line["dep"].startswith("punct"):
+      if line["fine_dep"].startswith("punct"):
          if args.model == "REAL_REAL":
             eliminated.append(line)
          continue
       # Determine ordering relative to head
-      key = (sentence[line["head"]-1]["posUni"], line["dep"], line["posUni"])
+      key = (sentence[line["head"]-1]["posUni"], line["fine_dep"], line["posUni"])
       line["dependency_key"] = key
       dhLogit = dhWeights[stoi_deps[key]]
       if args.model == "REAL":
@@ -162,7 +159,7 @@ def orderSentence(sentence, dhLogits, printThings):
      
       direction = "DH" if dhSampled else "HD"
       if printThings: 
-         print "\t".join(map(str,["ORD", line["index"], ("->".join(list(key)) + "         ")[:22], line["head"], dhLogit, dhSampled, direction]))
+         print "\t".join(map(str,["ORD", line["index"], (line["word"]+"           ")[:10], (".".join(list(key)) + "         ")[:22], line["head"], dhSampled, direction, str(1/(1+exp(-dhLogits[key])))[:8], (str(distanceWeights[stoi_deps[key]])+"    ")[:8] , str(originalDistanceWeights[key])[:8]    ]  ))
 
       headIndex = line["head"]-1
       sentence[headIndex]["children_"+direction] = (sentence[headIndex].get("children_"+direction, []) + [line["index"]])
@@ -212,7 +209,8 @@ stoi_pos_uni = dict(zip(posUni, range(len(posUni))))
 itos_pure_deps = sorted(list(depsVocab)) 
 stoi_pure_deps = dict(zip(itos_pure_deps, range(len(itos_pure_deps))))
    
-itos_deps = sorted(vocab_deps)
+
+itos_deps = sorted(vocab_deps, key=lambda x:x[1])
 stoi_deps = dict(zip(itos_deps, range(len(itos_deps))))
 
 dhWeights = [0.0] * len(itos_deps)
@@ -226,14 +224,12 @@ if args.model == "REAL" or args.model == "REAL_REAL":
 elif args.model == "RANDOM_BY_TYPE":
   dhByType = {}
   distByType = {}
-  for dep in itos_pure_deps:
-    dhByType[dep.split(":")[0]] = random() - 0.5
-    distByType[dep.split(":")[0]] = random()
   for key in range(len(itos_deps)):
-     dhWeights[key] = dhByType[itos_deps[key][1].split(":")[0]]
-     distanceWeights[key] = distByType[itos_deps[key][1].split(":")[0]]
+     dhWeights[key] = random() - 0.5
+     distanceWeights[key] = random()
   originalCounter = "NA"
 elif args.model == "GROUND":
+  assert False
   groundPath = "/u/scr/mhahn/deps/manual_output_ground_coarse/"
   import os
   files = [x for x in os.listdir(groundPath) if x.startswith(args.language+"_infer")]
@@ -254,11 +250,14 @@ elif args.model == "GROUND":
          dhByDependency[dependency] = dhHere
          distByDependency[dependency] = distHere
   for key in range(len(itos_deps)):
-     dhWeights[key] = dhByDependency[itos_deps[key][1].split(":")[0]]
-     distanceWeights[key] = distByDependency[itos_deps[key][1].split(":")[0]]
+     dhWeights[key] = dhByDependency[itos_deps[key]]
+     distanceWeights[key] = distByDependency[itos_deps[key]]
   originalCounter = "NA"
 else:
-  with open(args.model, "r") as inFile:
+#  with open("/u/scr/mhahn/deps/locality_optimized_i1/Chinese_optimizeGrammarForI1_3.py_model_675523898.tsv", "r") as inFile:
+  assert "POS" in args.model
+  with open("/u/scr/mhahn/deps/locality_optimized_i1/"+args.model, "r") as inFile:
+
      headerGrammar = next(inFile).strip().split("\t")
      print(headerGrammar)
      dhByDependency = {}
@@ -266,14 +265,17 @@ else:
      for line in inFile:
          line = line.strip().split("\t")
          dependency = line[headerGrammar.index("CoarseDependency")]
+         head = line[headerGrammar.index("HeadPOS")]
+         dependent = line[headerGrammar.index("DependentPOS")]
          dhHere = float(line[headerGrammar.index("DH_Weight")])
          distHere = float(line[headerGrammar.index("DistanceWeight")])
          print(dependency, dhHere, distHere)
-         dhByDependency[dependency] = dhHere
-         distByDependency[dependency] = distHere
+         key = (head, dependency, dependent)
+         dhByDependency[key] = dhHere
+         distByDependency[key] = distHere
   for key in range(len(itos_deps)):
-     dhWeights[key] = dhByDependency[itos_deps[key][1].split(":")[0]]
-     distanceWeights[key] = distByDependency[itos_deps[key][1].split(":")[0]]
+     dhWeights[key] = dhByDependency[itos_deps[key]]
+     distanceWeights[key] = distByDependency[itos_deps[key]]
   originalCounter = "NA"
 
 

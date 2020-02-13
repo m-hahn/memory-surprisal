@@ -100,6 +100,7 @@ bounds.append(['--stopAfterFailures', int] + [2, 5, 10, 15, 20, 50, 100])
 values = [x[2:] for x in bounds]
 names = [x[0] for x in bounds]
 
+
 import random
 
 def sample():
@@ -170,7 +171,7 @@ def extractArguments(x):
 import os
 import subprocess
 
-version = "optimizeGrammarForI1_9_Long.py"
+version = "optimizeGrammarForI1_7_Long_FuncHead.py"
 
 DIRPATH = "/u/scr/mhahn/deps/locality_optimized_i1/"
 
@@ -178,7 +179,7 @@ def getResult(i):
 #   return theirXPs[i][0]
    if runningProcesses[i].poll() is not None:
      try:
-      with open(DIRPATH+"/REPORTS/report_optimizeGrammarForI1_6_EvaluateGrammar.py_"+language+"_"+version+"_model_"+str(theirIDs[i])+".tsv", "r") as inFile:
+      with open(DIRPATH+"/REPORTS/report_optimizeGrammarForI1_6_EvaluateGrammar_FuncHead.py_"+language+"_"+version+"_model_"+str(theirIDs[i])+".tsv", "r") as inFile:
          loss = min(map(float, next(inFile).strip().split(" ")))
          return loss
      except IOError:

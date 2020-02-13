@@ -52,7 +52,7 @@ from random import random, shuffle, randint
 
 header = ["index", "word", "lemma", "posUni", "posFine", "morph", "head", "dep", "_", "_"]
 
-from corpusIterator import CorpusIterator
+from corpusIterator_FuncHead import CorpusIteratorFuncHead as CorpusIterator
 
 originalDistanceWeights = {}
 
@@ -234,7 +234,7 @@ elif args.model == "RANDOM_BY_TYPE":
      distanceWeights[key] = distByType[itos_deps[key][1].split(":")[0]]
   originalCounter = "NA"
 elif args.model == "GROUND":
-  groundPath = "/u/scr/mhahn/deps/manual_output_ground_coarse/"
+  groundPath = "/u/scr/mhahn/deps/manual_output_funchead_ground_coarse/"
   import os
   files = [x for x in os.listdir(groundPath) if x.startswith(args.language+"_infer")]
   print(files)
@@ -265,7 +265,7 @@ else:
      distByDependency = {}
      for line in inFile:
          line = line.strip().split("\t")
-         dependency = line[headerGrammar.index("CoarseDependency")]
+         dependency = line[headerGrammar.index("CoarseDependency")] if "CoarseDependency" in headerGrammar else line[headerGrammar.index("Dependency")]
          dhHere = float(line[headerGrammar.index("DH_Weight")])
          distHere = float(line[headerGrammar.index("DistanceWeight")])
          print(dependency, dhHere, distHere)
@@ -462,7 +462,8 @@ for k in range(0,args.cutoff):
    devSurprisalTable.append(surprisal)
    print("Surprisal", surprisal, len(itos))
 
-outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+args.model.split("/")[-1]+".txt"
+FILENAME = "estimates-"+args.language+"_"+__file__+"_model_"+args.model.split("/")[-1][-100:]+".txt"
+outpath = TARGET_DIR+"/"+FILENAME
 print(outpath)
 with open(outpath, "w") as outFile:
          print >> outFile, " ".join(sys.argv)

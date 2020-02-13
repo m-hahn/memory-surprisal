@@ -1,4 +1,6 @@
-# Deterministically evaluates grammar.
+# optimizeGrammarForI1_9.py
+# Uses Kneser-Ney bigram model, but creates a new model in each epoch.
+# Makes ordering deterministic in evaluation
 
 
 # optimizeGrammarForI1.py
@@ -28,11 +30,15 @@ parser = argparse.ArgumentParser()
 
 
 parser.add_argument('--language', type=str, dest="language")
+parser.add_argument('--entropy_weight', type=float, default=0.001, dest="entropy_weight")
+parser.add_argument('--lr_policy', type=float, default=0.00001, dest="lr_policy")
+parser.add_argument('--momentum_policy', type=float, default=0.9, dest="momentum_policy")
+parser.add_argument('--lr_baseline', type=float, default=0.01, dest="lr_baseline")
 parser.add_argument('--batchSize', type=int, default=1, dest="batchSize")
 parser.add_argument('--prescribedID', type=int, default=random.randint(0,10000000000), dest="prescribedID")
-parser.add_argument('--epsilon', type=float, default=0.1)
-parser.add_argument('--delta', type=float, default=0.5)
-parser.add_argument('--model', type=str)
+parser.add_argument('--epsilon', type=float, default=1.0)
+parser.add_argument('--delta', type=float, default=1.0)
+parser.add_argument('--stopAfterFailures', type=int, default=5)
 
 args = parser.parse_args()
 
@@ -41,9 +47,13 @@ args = parser.parse_args()
 
 
 
+assert args.lr_policy < 1.0
+assert args.momentum_policy < 1.0
+assert args.entropy_weight >= 0
 
 maxNumberOfUpdates = int(sys.argv[20]) if len(sys.argv) > 20 else 20000
 
+model = "REINFORCE"
 
 
 
@@ -71,7 +81,7 @@ import os
 
 header = ["index", "word", "lemma", "posUni", "posFine", "morph", "head", "dep", "_", "_"]
 
-from corpusIterator import CorpusIterator
+from corpusIterator_FuncHead import CorpusIteratorFuncHead as CorpusIterator
 
 originalDistanceWeights = {}
 
@@ -159,7 +169,7 @@ logsoftmaxLabels =  torch.nn.LogSoftmax(dim=2)
 
 
 
-def orderChildrenRelative(sentence, remainingChildren):
+def orderChildrenRelative(sentence, remainingChildren, training):
        childrenLinearized = []
        # quick optimization
 #       if len(remainingChildren) == 1:
@@ -179,7 +189,10 @@ def orderChildrenRelative(sentence, remainingChildren):
               softmax = softmax_layer(logits.view(1,-1)).view(-1)
 #              print(softmax)
 #              print(softmax)
-              selected = numpy.argmax(softmax.data.numpy())
+              if training:
+                 selected = numpy.random.choice(range(0, len(remainingChildren)), p=softmax.data.numpy())
+              else:
+                 selected = numpy.argmax(softmax.data.numpy())
               log_probability = torch.log(softmax[selected])
            assert "linearization_logprobability" not in sentence[remainingChildren[selected]-1]
            sentence[remainingChildren[selected]-1]["linearization_logprobability"] = log_probability
@@ -190,7 +203,7 @@ def orderChildrenRelative(sentence, remainingChildren):
 
 
 
-def orderSentence(sentence, dhLogits, printThings):
+def orderSentence(sentence, dhLogits, printThings, training):
    root = None
    logits = [None]*len(sentence)
    logProbabilityGradient = 0
@@ -211,7 +224,7 @@ def orderSentence(sentence, dhLogits, printThings):
       line["dependency_key"] = key
       dhLogit = dhWeights[stoi_deps[key]]
       probability = dhProbabilities[j] #1/(1 + torch.exp(-dhLogit))
-      dhSampled = (probability > 0.5)
+      dhSampled = (random() < probability) if training else (probability > 0.5)
       direction = "DH" if dhSampled else "HD"
       line["direction"] = direction
       if printThings: 
@@ -224,10 +237,10 @@ def orderSentence(sentence, dhLogits, printThings):
 
    for line in sentence:
       if "children_DH" in line:
-         childrenLinearized = orderChildrenRelative(sentence, line["children_DH"][:])
+         childrenLinearized = orderChildrenRelative(sentence, line["children_DH"][:], training)
          line["children_DH"] = childrenLinearized
       if "children_HD" in line:
-         childrenLinearized = orderChildrenRelative(sentence, line["children_HD"][:])[::-1]
+         childrenLinearized = orderChildrenRelative(sentence, line["children_HD"][:], training)[::-1]
          line["children_HD"] = childrenLinearized
 
    
@@ -287,71 +300,6 @@ for i, key in enumerate(itos_deps):
    distanceWeights.data[i] = originalDistanceWeights[key]
 
 
-if args.model == "RANDOM_MODEL":
-  for key in range(len(itos_deps)):
-     dhWeights[key] = random() - 0.5
-     distanceWeights[key] = random()
-  originalCounter = "NA"
-elif args.model == "RANDOM_BY_TYPE":
-  dhByType = {}
-  distByType = {}
-  for dep in itos_pure_deps:
-    dhByType[dep.split(":")[0]] = random() - 0.5
-    distByType[dep.split(":")[0]] = random()
-  for key in range(len(itos_deps)):
-     dhWeights[key] = dhByType[itos_deps[key].split(":")[0]]
-     distanceWeights[key] = distByType[itos_deps[key].split(":")[0]]
-  originalCounter = "NA"
-elif args.model == "GROUND":
-  groundPath = "/u/scr/mhahn/deps/manual_output_ground_coarse/"
-  import os
-  files = [x for x in os.listdir(groundPath) if x.startswith(args.language+"_infer")]
-  print(files)
-  assert len(files) > 0
-  with open(groundPath+files[0], "r") as inFile:
-     headerGrammar = next(inFile).strip().split("\t")
-     print(headerGrammar)
-     dhByDependency = {}
-     distByDependency = {}
-     for line in inFile:
-         line = line.strip().split("\t")
-         assert int(line[headerGrammar.index("Counter")]) >= 1000000
-#         if line[headerGrammar.index("Language")] == language:
-#           print(line)
-         dependency = line[headerGrammar.index("Dependency")]
-         dhHere = float(line[headerGrammar.index("DH_Mean_NoPunct")])
-         distHere = float(line[headerGrammar.index("Distance_Mean_NoPunct")])
-  #       if dhHere < 0:
-   #        distHere = -distHere
-         print(dependency, dhHere, distHere)
-         dhByDependency[dependency] = dhHere
-         distByDependency[dependency] = distHere
-  for key in range(len(itos_deps)):
-     dhWeights[key] = dhByDependency[itos_deps[key].split(":")[0]]
-     distanceWeights[key] = distByDependency[itos_deps[key].split(":")[0]]
-  originalCounter = "NA"
-else:
-#  with open("/u/scr/mhahn/deps/locality_optimized_i1/Chinese_optimizeGrammarForI1_3.py_model_675523898.tsv", "r") as inFile:
-  with open("/u/scr/mhahn/deps/locality_optimized_i1/"+args.model, "r") as inFile:
-
-     headerGrammar = next(inFile).strip().split("\t")
-     print(headerGrammar)
-     dhByDependency = {}
-     distByDependency = {}
-     for line in inFile:
-         line = line.strip().split("\t")
-         dependency = line[headerGrammar.index("CoarseDependency")]
-         dhHere = float(line[headerGrammar.index("DH_Weight")])
-         distHere = float(line[headerGrammar.index("DistanceWeight")])
-         print(dependency, dhHere, distHere)
-         dhByDependency[dependency] = dhHere
-         distByDependency[dependency] = distHere
-  for key in range(len(itos_deps)):
-     dhWeights[key] = dhByDependency[itos_deps[key].split(":")[0]]
-     distanceWeights[key] = distByDependency[itos_deps[key].split(":")[0]]
-  originalCounter = "NA"
-
-
 
 words = list(vocab.iteritems())
 words = sorted(words, key = lambda x:x[1], reverse=True)
@@ -383,8 +331,16 @@ outVocabSize = len(itos_pos_uni)+vocab_size+3
 # the sum of all the decay terms
 counts = [({-1 : 1}, [1]) for _ in range(outVocabSize)] # args.epsilon*outVocabSize
 
-unigramCounts = [args.epsilon for _ in range(outVocabSize)] + [args.epsilon]
-totalUnigramCount = args.epsilon*(outVocabSize+1)
+unigramCounts = [args.epsilon for _ in range(outVocabSize)]
+totalUnigramCount = args.epsilon*outVocabSize
+
+
+counts_Last = [({-1 : 1}, [1]) for _ in range(outVocabSize)] # args.epsilon*outVocabSize
+
+unigramCounts_Last = [args.epsilon for _ in range(outVocabSize)]
+totalUnigramCount_Last = args.epsilon*outVocabSize
+
+
 
 
 itos_total = ["EOS", "EOW", "SOS"] + itos_pos_uni + itos[:vocab_size]
@@ -504,37 +460,47 @@ def doForwardPass(input_indices, wordStartIndices, surprisalTable=None, doDropou
 #       print(input_indices)
 
        global totalUnigramCount
+       global totalUnigramCount_Last
+
        lossesWord = torch.zeros(sequenceLength-1, batchSizeHere)
        mask = torch.zeros(sequenceLength-1, batchSizeHere)
        for i in range(batchSizeHere):
           for j in range(1,len(input_indices[i])):
                source = input_indices[i][j-1]
-               countsHere = counts[source]
+               if doDropout:
+                  countsHere = counts[source]
+               else:
+                  countsHere = counts_Last[source]
 
                target = input_indices[i][j]
-
-
-               countsHere = counts[source]
-
                targetCount = countsHere[0].get(target, 0)
                sumOfCounts = countsHere[1][0]
+               if doDropout:
+                   probKneserNey = (max(targetCount-args.delta, 0.0) + len(countsHere[0]) * (args.delta * unigramCounts[target])/totalUnigramCount)/sumOfCounts
+               else:
+                   probKneserNey = (max(targetCount-args.delta, 0.0) + len(countsHere[0]) * (args.delta * unigramCounts_Last[target])/totalUnigramCount_Last)/sumOfCounts
 
-
-               probKneserNey = (max(targetCount-args.delta, 0.0) + len(countsHere[0]) * (args.delta * unigramCounts[target])/totalUnigramCount)/sumOfCounts
                assert 0.0 < probKneserNey, probKneserNey
                assert probKneserNey < 1.0, probKneserNey
 
-               # TRAINING
-               if doDropout and target not in countsHere[0]:
-                 countsHere[0][target] = 0
-
                if doDropout:
+                 if target not in countsHere[0]:
+                   countsHere[0][target] = 0
                  countsHere[0][target] += 1
                  countsHere[1][0] += 1
-
-               if doDropout:
                  unigramCounts[target] += 1
                  totalUnigramCount += 1
+
+
+                 countsHere = counts_Last[source]
+                 if target not in countsHere[0]:
+                   countsHere[0][target] = 0
+                 countsHere[0][target] += 1
+                 countsHere[1][0] += 1
+                 unigramCounts_Last[target] += 1
+                 totalUnigramCount_Last += 1
+
+
 
                lossesWord[j-1][i] = -math.log(probKneserNey)
                mask[j-1][i] = 1
@@ -550,8 +516,34 @@ def doForwardPass(input_indices, wordStartIndices, surprisalTable=None, doDropou
 
        loss = lossesWord.sum()
 
+       reward = (lossesWord).detach()
+#       print(lossesWord.size(), mask.size(), inputTensorOut.size(), (baseline(inputTensorOut)).size())
+       baseline_predictions =  mask * baseline(inputTensorOut)
+#       print(zip(list(lossesWord.flatten()), list(baseline_predictions.flatten())))
 
-          
+       baseline_shifted = baseline_predictions
+       baselineLoss = torch.nn.functional.mse_loss(baseline_shifted.view(-1, batchSizeHere), reward.view(-1, batchSizeHere), size_average=False, reduce=False)
+       # TODO simply mask out those places that are padded
+       baselineAverageLoss = 0.99 * baselineAverageLoss + (1-0.99) * float(baselineLoss.cpu().data.mean().numpy())
+       if printHere:
+#          print(baselineLoss)
+          print(["Baseline loss", sqrt(baselineAverageLoss)])
+          assert baselineAverageLoss == baselineAverageLoss
+
+       rewardMinusBaseline = (reward.view(-1, batchSizeHere) - baseline_shifted.view(-1, batchSizeHere)).detach().cpu()
+
+       if relevant_logprob_sum is not None:
+         for j in range(batchSizeHere):
+          policyGradientLoss += (rewardMinusBaseline[:,j].sum() * relevant_logprob_sum[j])
+
+#       lossWords = lossesWord.sum()
+#       loss += lossWords
+
+
+
+
+
+           
        if wordNum == 0:
          print input_words
          print batchOrdered
@@ -566,9 +558,60 @@ def doForwardPass(input_indices, wordStartIndices, surprisalTable=None, doDropou
        numberOfWords = wordNum
 #       print(doDropout, float(loss/wordNum))
 
-       return (loss/batchSizeHere, baselineLoss/batchSizeHere, None, totalQuality, numberOfWords)
+       policy_related_loss =  policyGradientLoss # lives on CPU
+       return (loss/batchSizeHere, baselineLoss/batchSizeHere, policy_related_loss/batchSizeHere, totalQuality, numberOfWords)
 
 
+def  doBackwardPass(loss, baselineLoss, policy_related_loss):
+       if printHere:
+         print "BACKWARD 1"
+       policy_related_loss = policy_related_loss
+
+       global dhWeights
+       probabilities = torch.sigmoid(dhWeights)
+       neg_entropy = torch.sum( probabilities * torch.log(probabilities) + (1-probabilities) * torch.log(1-probabilities))
+       policy_related_loss += args.entropy_weight * neg_entropy # lives on CPU
+
+
+       policy_related_loss.backward()
+       if printHere:
+         print "BACKWARD 2"
+
+       totalLoss =  baselineLoss.sum()
+       totalLoss.backward() # lives on GPU
+
+
+
+       if printHere:
+         print args 
+         print "BACKWARD 3 "+__file__+" "+args.language+" "+str(myID)+" "+str(counter)+" "+str(lastDevLoss)+" "+str(failedDevRuns)+"  "+(" ".join(map(str,["ENTROPY", args.entropy_weight, "LR_POLICY", args.lr_policy, "MOMENTUM", args.momentum_policy])))
+         print "dev losses LM"
+         print devLosses
+         print crossEntropy
+         global lasttime
+         global averageTime
+         averageTime = 0.99 * averageTime + (1-0.99) * (time.time() - lasttime)
+         print ["TIME", averageTime]
+         lasttime = time.time()
+       counterHere = 0
+
+
+       for param in parameters_cached:
+         counterHere += 1
+         if param.grad is None:
+           assert False
+         param.data.sub_(args.lr_baseline * param.grad.data)
+
+       if epochCount > 1:
+          for param in parameters_policy_cached:
+            counterHere += 1
+            if counter < 200 and (param is distanceWeights or param is dhWeights): # allow baseline to warum up
+                continue
+            if param.grad is None:
+              print counterHere
+              print "WARNING: None gradient"
+              continue
+            param.data.sub_(args.lr_policy * param.grad.data)
 
 
 
@@ -620,7 +663,7 @@ def createStream(corpus, training=True):
        sentCount += 1
  #      if sentCount % 100 == 0:
 #          print("\t".join([str(sentCount), "Sentences"]))
-       ordered, _, relevant_logprob_sum = orderSentence(sentence, dhLogits, printHere)
+       ordered, _, relevant_logprob_sum = orderSentence(sentence, dhLogits, printHere, training)
        for line in ordered+["EOS"]:
           wordStartIndices.append(len(input_indices))
           if line == "EOS":
@@ -643,7 +686,7 @@ def createStream(corpus, training=True):
 DEV_PERIOD = 5000
 epochCount = 0
 corpusBase = CorpusIterator(args.language, storeMorph=True)
-if True:
+while failedDevRuns < args.stopAfterFailures:
   epochCount += 1
   print >> sys.stderr, "Epoch "+str(epochCount)
   print "Starting new epoch, permuting corpus"
@@ -653,8 +696,84 @@ if True:
   stream = createStream(corpus)
 
 
+  if counter > 5:
+#       if counter % DEV_PERIOD == 0:
+          newDevLoss, _ = computeDevLoss()
+#             devLosses.append(
+          devLosses.append(newDevLoss)
 
+
+#          newDevLoss = devLosses[-1]-1
+ #         print("DON'T STOP don't stop")
+
+
+
+          print "New dev loss "+str(newDevLoss)+". previous was: "+str(lastDevLoss)
+          if newDevLoss > 20 or len(devLosses) > 99:
+              print "Abort, training too slow?"
+              devLosses.append(newDevLoss+0.001)
+
+#          if lastDevLoss is None or newDevLoss < lastDevLoss:
+              #devSurprisalTable = devSurprisalTableHere
+          DOING_PARAMETER_SEARCH = True
+          TARGET_DIR = "/u/scr/mhahn/deps/locality_optimized_i1/"
+          with open(TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+model+".txt", "w") as outFile:
+              print >> outFile, " ".join(sys.argv)
+              print >> outFile, " ".join(map(str,devLosses))
+#              print >> outFile, " ".join(map(str,devSurprisalTable))
+              print >> outFile, "PARAMETER_SEARCH" if DOING_PARAMETER_SEARCH else "RUNNING"
+
+
+          q= float(dhWeights[8])
+          assert q == q
+
+
+          print "Saving"
+          if True:
+            with open(TARGET_DIR+"/"+args.language+"_"+__file__+"_model_"+str(myID)+".tsv", "w") as outFile:
+               print >> outFile, "\t".join(map(str,["FileName","DH_Weight","CoarseDependency","DistanceWeight"]))
+               for i in range(len(itos_deps)):
+                  key = itos_deps[i]
+                  dhWeight = dhWeights[i].data.numpy()
+                  distanceWeight = distanceWeights[i].data.numpy()
+                  dependency = key
+                  print >> outFile, "\t".join(map(str,[myID, dhWeight, dependency, distanceWeight]))
+
+
+
+
+          if newDevLoss > 20 or len(devLosses) > 100:
+              print "Abort, training too slow?"
+              failedDevRuns = 1
+              break
+
+
+          if lastDevLoss is None or newDevLoss < lastDevLoss:
+             lastDevLoss = newDevLoss
+             failedDevRuns = 0
+          else:
+             failedDevRuns += 1
+             print "Skip saving, hoping for better model"
+             print devLosses
+             print "Epoch "+str(epochCount)+" "+str(counter)
+#             print zip(range(1,horizon+1), devSurprisalTable)
+#             print devSurprisalTable
+
+
+             #break
+
+  if failedDevRuns >= args.stopAfterFailures:
+     break
   lasttime = time.time()
+
+  print("REINITIALIZE COUNTS")
+  counts_Last = [({-1 : 1}, [1]) for _ in range(outVocabSize)] # args.epsilon*outVocabSize
+
+  unigramCounts_Last = [args.epsilon for _ in range(outVocabSize)]
+  totalUnigramCount_Last = args.epsilon*outVocabSize
+
+
+
   while True:
        counter += 1
        printHere = (counter % 100 == 0)
@@ -673,17 +792,15 @@ if True:
           devBatchSize = len(input_indices_list)
        if devBatchSize == 0:
          break
-       loss, baselineLoss, _, _, wordNumInPass = doForwardPass(input_indices_list, wordStartIndices_list, batchSizeHere=devBatchSize, relevant_logprob_sum=relevant_logprob_sum)
+       loss, baselineLoss, policy_related_loss, _, wordNumInPass = doForwardPass(input_indices_list, wordStartIndices_list, batchSizeHere=devBatchSize, relevant_logprob_sum=relevant_logprob_sum)
+       if wordNumInPass > 0:
+         doBackwardPass(loss, baselineLoss, policy_related_loss)
+       else:
+         print "No words, skipped backward"
        if printHere:
           print "Epoch "+str(epochCount)+" "+str(counter)
 
+import subprocess
 
+subprocess.call(["/u/nlp/anaconda/ubuntu_16/envs/py27-mhahn/bin/python2.7", "optimizeGrammarForI1_6_EvaluateGrammar_FuncHead.py", "--language="+args.language, "--model="+args.language+"_"+__file__+"_model_"+str(myID)+".tsv"])
 
-newDevLoss, _ = computeDevLoss()
-devLosses.append(newDevLoss)
-
-
-print "New dev loss "+str(newDevLoss)+". previous was: "+str(lastDevLoss)
-
-with open("/u/scr/mhahn/deps/locality_optimized_i1/REPORTS/report_"+__file__+"_"+args.model, "w") as outFile:
-   print >> outFile, newDevLoss
