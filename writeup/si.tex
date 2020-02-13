@@ -212,35 +212,8 @@ Because $m_t$ is determined by $(w_{1 \dots t-1}, m_1)$:
 	m_t = M(m_{t-1}, w_{t-1}) = M(M(m_{t-2}, w_{t-2}), w_{t-1}) = M(M(M(m_{t-3}, w_{t-3}), w_{t-2}), w_{t-1}) = \dots
 \end{equation}
 the Data Processing inequality entails the following inequality for every positive integer $t$:
-\begin{equation}
-	H[w_t | m_t] \geq H[w_t|w_{1 \dots t-1}, m_1]
-\end{equation}
 
-%\end{proof}
-
-%\begin{proof}[Proof of the Lemma]
-%	By Bayes' Theorem
-%\begin{align*}
-%	p(w_t|m_0, m_1, w_{0\dots t-1}) &= \frac{p(m_1|m_0, w_{0\dots t})}{p(m_1|m_0, w_{0\dots t-1})} \cdot p(w_t|m_0, w_{0\dots t-1})
-%\end{align*}
-%By Equation~\ref{eq:listener-markov}, the quotient on the RHS is equal to $1$, so
-%\begin{align*}
-%p(w_t|m_0, m_1, w_{0\dots t-1}) = p(w_t|m_0, w_{0\dots t-1})
-%\end{align*}
-%So we have a Markov chain
-%\begin{equation}
-%(w_t) \rightarrow (m_0, w_{0 \dots t-1})   \rightarrow   (m_1, w_{1 \dots t-1})
-%\end{equation}
-%Thus, by the Data Processing Inequality,
-%\begin{equation}
-%H[w_t| w_{1 \dots t-1}, m_{1}] \geq H[w_t|w_{0 \dots t-1}, m_0]
-%\end{equation}
-%Finally, iteratively applying this inequality, we get:
-%\begin{align*}
-%H[w_t | m_t] \geq H[w_t| w_{t-1}, m_{t-1}] \geq H[w_t| w_{t-2, t-1}, m_{t-2}] \geq ... \geq H[w_t|w_{1 \dots t-1}, m_1]
-%\end{align*}
-%\end{proof}
-Plugging this inequality into Equation~\ref{eq:byStation} above:
+	Plugging this inequality into Equation~\ref{eq:byStation} above:
 \begin{align}\label{eq:plugged}
 \operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]& \geq \frac{1}{T} \sum_{t=1}^T ( \operatorname{H}[w_t|w_{1\dots t-1}, m_1] - \operatorname{H}[w_t | w_{1\dots t-1}, w_{\leq 0}]  )    \\
 & = \frac{1}{T} \left(\operatorname{H}[w_{1\dots T} | m_1] - \operatorname{H}[w_{1\dots T} | w_{\leq 0}]\right)  \\
@@ -263,7 +236,46 @@ Rearranging shows that the listener's surprisal is at least $\operatorname{H}[w_
 %\end{proof}
 
 
-%Justify linear interpolation: The curve is convex, which is shown by `time-sharing': Use one code $\lambda$ fraction of times, and the other code $1-\lambda$ fraction of times.
+%Justifylinear interpolation: The curve is convex, which is shown by `time-sharing': Use one code $\lambda$ fraction of times, and the other code $1-\lambda$ fraction of times.
+
+
+
+\subsection{For nondeterministic encoding functions}
+
+We relax condition (X) to
+\begin{equation}\label{eq:listener-markov-nondeterministic}
+p(m_1| (w_{t})_{t \in \mathbb{Z}}, m_0)   = p(m_1 | m_0, w_1)
+\end{equation}
+This says that $m_1$ contains no information about the utterances beyond what is contained in $m_0$ and $w_1$.	
+
+The one place in the proof where (X) plays a role is the proof of the inequality:
+\begin{equation}
+	H[w_t | m_t] \geq H[w_t|w_{1 \dots t-1}, m_1]
+\end{equation}
+
+We show that this inequality still holds under the relaxed condition (X):
+\begin{proof}
+	By Bayes' Theorem
+\begin{align*}
+	p(w_t|m_0, m_1, w_{0\dots t-1}) &= \frac{p(m_1|m_0, w_{0\dots t})}{p(m_1|m_0, w_{0\dots t-1})} \cdot p(w_t|m_0, w_{0\dots t-1})
+\end{align*}
+By Equation~\ref{eq:listener-markov}, the quotient on the RHS is equal to $1$, so
+\begin{align*}
+p(w_t|m_0, m_1, w_{0\dots t-1}) = p(w_t|m_0, w_{0\dots t-1})
+\end{align*}
+So we have a Markov chain
+\begin{equation}
+(w_t) \rightarrow (m_0, w_{0 \dots t-1})   \rightarrow   (m_1, w_{1 \dots t-1})
+\end{equation}
+Thus, by the Data Processing Inequality,
+\begin{equation}
+H[w_t| w_{1 \dots t-1}, m_{1}] \geq H[w_t|w_{0 \dots t-1}, m_0]
+\end{equation}
+Finally, iteratively applying this inequality, we get:
+\begin{align*}
+H[w_t | m_t] \geq H[w_t| w_{t-1}, m_{t-1}] \geq H[w_t| w_{t-2, t-1}, m_{t-2}] \geq ... \geq H[w_t|w_{1 \dots t-1}, m_1]
+\end{align*}
+\end{proof}
 
 
 \subsection{Locality in a model with Memory Retrieval}
@@ -403,10 +415,58 @@ Given the nature of representations assumed in models~\citep{lewis-activation-ba
 \subsection{Results for Language Production}
 
 Here we show results linking memory and locality in production.
+We show that results similar to our main theorem hold for the tradeoff between a speaker's memory and the accuracy with which they match the distribution of the language.
 
+
+
+\paragraph{Speaker aims to match language distribution}
 First, we consider a setting in which a speaker produces sentences with bounded memory, and analyze the deviation of the produced distribution from the actual distribution of the language.
 
+We consider a speaker who maintains memory representations and incrementally produces based on these representations:
+\begin{equation}
+	p_{speaker}(x_t|X_{<t}) = p(x_t|m_t) \\
+\end{equation}
+We show a tradeoff between the memory capacity $\operatorname{H}[m_t]$ and the KL-divergence between the actual language statistics and the speaker's production distribution:
+\begin{equation}
+D_{KL}(P_{language}||P_{produced})  := \E_{X_{<t}} \sum_{x_t} p(x_t|X_{<t}) \log \frac{p(x_t|X_{<t})}{p_{speaker}(x_t|X_{<t})} \\
+\end{equation}
+\begin{thm}
+If a speaker maintains memory
+	\begin{equation}
+		\operatorname{H}[m_t] \leq \sum_{i=1}^T tI_t
+	\end{equation}
+	then 
+\begin{equation}
+	D_{KL}(P_{language}||P_{produced}) \geq \sum_{t=T+1}^\infty I_t
+\end{equation}
+\end{thm}
 
+While this bound only considers the production of a single word, it immediately entails a bound on the production accuracy for sequences:
+\begin{equation}
+	D_{KL}(P_{language}(X_1\dots X_t|X_{\leq 0})||P_{produced}(X_1\dots X_t|X_{\leq 0}))  = t \cdot D_{KL}(P_{language}(X_1|X_{\leq 0})||P_{produced}(X_1|X_{\leq 0}))
+\end{equation}
+
+
+
+\begin{proof}
+First note
+\begin{align}
+D_{KL}(P_{language}||P_{produced}) & = \E_{X_{<t}} \sum_{x_t} p(x_t|X_{<t}) \log \frac{p(x_t|X_{<t})}{p_{speaker}(x_t|X_{<t})} \\
+& = \E_{X_{<t}} \sum_{x_t} p(x_t|X_{<t}) \log \frac{p(x_t|X_{<t})}{p(x_t|M(X_{<t}))} \\
+& = \E_{X_{<t}} \sum_{x_t} p(x_t|X_{<t}) \log p(x_t|X_{<t}) - \E_{X_{<t}} \sum_{x_t} p(x_t|X_{<t}) \log p(x_t|M(X_{<t})) \\
+	& = \E_{X_{<t}} \sum_{x_t} p(x_t|X_{<t}) \log p(x_t|X_{<t}) + S_M(x_t|X_{<t})
+\end{align}
+In the last line, the first term is a constant independent of $M$.
+
+Then the proof for the listener case transfers to this setting.
+\end{proof}
+
+TODO limitations of this as a model of production
+
+
+
+
+\paragraph{Speaker aims to match, conditional on goal}
 The first setting does not account for the fact that language is produced aiming for some communicative goal.
 We therefore now assume that the speaker has a communicative goal $G$ in mind.
 This goal $G$ stays constant during production process for a sentence, and we count how much memory is needed in addition to the goal $G$.
@@ -419,9 +479,56 @@ and assume that the speaker aims to match this distribution
 \mathbb{E}_G[D_{KL}((language|G)||(produced|G))]
 \end{equation}
 We can analyze this model by adding conditioning w.r.t. $G$ throughout the analysis of the previous case.
-Specifically, we need $I_t^G := I[X_t, X_0|X_1, \dots, X_{t-1}, G]$.
+Specifically, we need
+\begin{equation}
+I_t^G := I[X_t, X_0|X_1, \dots, X_{t-1}, G]
+\end{equation}
 
 Take $I_t$ conditioned on $G$: only count statistical dependencies to the degree that they are not redundant with the goal
+
+
+\begin{thm}
+If a speaker maintains memory
+	\begin{equation}
+		\operatorname{H}[m_t] \leq \sum_{i=1}^T tI_t^G
+	\end{equation}
+	then 
+\begin{equation}
+\E_G	D_{KL}(P_{language}(\cdot|G)||P_{produced}(\cdot|G)) \geq \sum_{t=T+1}^\infty I_t^G
+\end{equation}
+\end{thm}
+
+\begin{proof}
+This is entirely analogous to the previous proof.
+\end{proof}
+
+
+are there conditions under which this is close to $I_t$?
+
+\paragraph{Pragmatic Speaker}
+
+would need an assumption on the density of goals in the space of sequences.
+
+
+Note 
+\begin{equation}
+	D_{KL}(P_{language}(x_{1\dots t})||P_{produced}(x_{1\dots t}))  := \sum_{x_{1\dots t}} p(x_t|X_{1\dots t}) \log \frac{p(x_t|X_{1\dots t})}{p_{speaker}(x_t|X_{1\dots t})} \geq t D_KL(x_t||...)
+\end{equation}
+
+$H[G|Produced] - H[G|Language]$
+
+
+
+\section{Proof of Left-Right Invariance}
+
+Here we show that the bound provided by our theorem is invariant under reversal of the process.
+That is: Given a process $(X_t)_{t \in \mathbb{Z}}$, we define its reverse process $(Y_t)_{t \in \mathbb{Z}}$ by $Y_t := X_t$.
+We claim that the theorem provides the same bounds for the memory-surprisal tradeoff curves.
+To prove this, we note:
+\begin{equation}
+	I[X_t, X_0|X_{1\dots t-1}] = I[Y_{-t}, Y_0|Y_{1-t\dots -1}] = I[Y_0, Y_t|Y_{1\dots t-1}] = I[Y_t, Y_0|Y_{1\dots t-1}]
+\end{equation}
+The first step follows from the definition of $Y$. The second step follows from the fact that $X_t$, and thus also $Y_t$, is stationary, and thus adding $t$ to each index in the expression does not change the resulting value. The third step uses the fact that mutual information is symmetric.
 
 
 \section{Example where window model is not optimal}
@@ -649,7 +756,6 @@ In fact, for the process described here, no memory encoding function $M$ can exa
 
 
 
-
 %-- English, Korean, Russian
 %-- UD$\_$Polish-LFG (released in 2.2, not included in original experiment) (13,744 sentences)
 %-- character-level Russian
@@ -672,6 +778,19 @@ In fact, for the process described here, no memory encoding function $M$ can exa
 %
 %-- Chinese treebank \citep{xue-chinese-2013}
 
+
+
+\section{Optimization}
+We cannot optimize for AUC, because we cannot construct an unbiased gradient estimator
+$AUC \propto \sum_{t} (\sum_{s \leq t} I_s) tI_t = \sum_{s \leq t}  tI_t I_s$
+
+
+Softmax gradient update corresponds to adding $\alpha$ to the target logit and removing $\alpha$ from all other logits.
+Equivalently, add a certain dynamic amount to the logcount of the target and the total logcount.
+
+
+
+Counting corresponds to adding $1$ to the target probability. 
 
 
 \bibliographystyle{apalike}
