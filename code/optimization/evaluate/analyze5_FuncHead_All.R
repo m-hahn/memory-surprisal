@@ -1,3 +1,4 @@
+options("width"=200)
 library(dplyr)
 library(tidyr)
 

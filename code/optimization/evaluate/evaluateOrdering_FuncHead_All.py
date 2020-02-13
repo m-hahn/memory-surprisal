@@ -75,6 +75,9 @@ for r in results:
    if r[2] < 100:
       surpsByScript[r[0][len(language)+1:(r[0].index("_model_"))]].append(r[2])
 print("------------")
-for s, t in valuesByScript.items():
-   u = surpsByScript[s]
-   print(s, sum(t)/len(t), sum(u)/(len(u)+0.00000001))
+print("/u/scr/mhahn/deps/locality_optimized_i1/PER_LANGUAGE_MEANS/"+language+"_"+"FuncHead.txt")
+with open("/u/scr/mhahn/deps/locality_optimized_i1/PER_LANGUAGE_MEANS/"+language+"_"+"FuncHead.txt", "w") as outFile:
+  for s, t in valuesByScript.items():
+     u = surpsByScript[s]
+     print(s, sum(t)/len(t), sum(u)/(len(u)+0.00000001))
+     print >> outFile, "\t".join([str(x) for x in (s, sum(t)/len(t), sum(u)/(len(u)+0.00000001))])

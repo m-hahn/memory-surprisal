@@ -34,7 +34,7 @@ from collections import defaultdict
 valuesByScript = defaultdict(list)
 surpsByScript = defaultdict(list)
 
-results = sorted(results, key=lambda x:x[1])
+results = sorted(results, key=lambda x:-x[2])
 for r in results:
    print(r)
    if r[1] in [0, 1]:
