@@ -109,6 +109,9 @@ def descendTree(tree, vocab, posFine, depsVocab):
            continue
         vocab[word] = vocab.get(word, 0) + 1
     #    print(child)
+
+countsByPartition = {}
+
 def initializeOrderTable():
    orderTable = {}
    keys = set()
@@ -117,10 +120,17 @@ def initializeOrderTable():
    distanceCounts = {}
    depsVocab = set()
    for partition in ["train", "dev"]:
-     for sentence in CorpusIterator_V(args.language,partition, storeMorph=True).iterator():
+     countsByPartition[partition] = {}
+     sentCount = 0
+     for sentence in CorpusIterator_V(args.language,partition, storeMorph=True, shuffleDataSeed=4).iterator():
+      sentCount += 1
+      if sentCount > 100 and partition == "dev":
+        break
       for line in sentence:
           vocab[line["word"]] = vocab.get(line["word"], 0) + 1
           vocab_lemmas[line["lemma"]] = vocab_lemmas.get(line["lemma"], 0) + 1
+          
+          countsByPartition[partition][line["word"]] = countsByPartition[partition].get(line["word"], 0) + 1
 
           depsVocab.add(line["dep"])
           posFine.add(line["posFine"])
@@ -181,7 +191,7 @@ def recursivelyLinearize(sentence, position, result, gradients_from_the_left_sum
          rightChildren.append(recursivelyLinearize(sentence, child, result, allGradients))
    
    head = line["word"]
-   if vocab[head] < args.VOCAB_FOR_RELATION_THRESHOLD or random() < args.REPLACE_WORD_WITH_PLACEHOLDER:
+   if vocab[head] < args.VOCAB_FOR_RELATION_THRESHOLD or random() < args.REPLACE_WORD_WITH_PLACEHOLDER or countsByPartition["dev"].get(head, 0) < 1: #sometimes there is a KeyError here!!!
       head = "#"
 
  
@@ -392,6 +402,9 @@ def orderSentence(sentence, printThings):
 
 dhLogits, vocab, vocab_deps, depsVocab = initializeOrderTable()
 #print morphKeyValuePairs
+#quit()
+
+print(countsByPartition["dev"])
 #quit()
 
 morphKeyValuePairs = list(morphKeyValuePairs)
@@ -631,7 +644,7 @@ def linearizeTree2String(tree, sent):
 sentCount = 0
 
 print("Collecting counts from training corpus")
-for sentence in CorpusIterator_V(args.language,"train").iterator():
+for sentence in CorpusIterator_V(args.language,"train", shuffleDataSeed=4).iterator():
    sentCount += 1
    ordered = orderSentence(sentence,  sentCount % 400 == 0)
 
@@ -654,8 +667,6 @@ for sentence in CorpusIterator_V(args.language,"train").iterator():
 
 # then apply some conversion to binary_rules and to nonterminalsCounts and to roots
 def conductMerging(fro, to):
-   for x in fro:
-     assert x in nonterminalsCounts
    print("MERGE", fro, to)
    # to roots
    #print(roots)
@@ -762,7 +773,7 @@ for preterminal in terminals:
   assert "_OOV_" not in terminals[preterminal]
   terminals[preterminal]["_OOV_"] = 0
   for word in list(terminals[preterminal]):
-    if wordCounts[word] < args.OOV_THRESHOLD_TRAINING:
+    if wordCounts[word] < args.OOV_THRESHOLD_TRAINING or countsByPartition["dev"].get(word,0) < 1:
       terminals[preterminal]["_OOV_"] += terminals[preterminal][word]
       wordCounts["_OOV_"] += terminals[preterminal][word]
       wordCounts[word] -= terminals[preterminal][word]
@@ -992,7 +1003,7 @@ def runOnCorpus():
   global chart
   chart = [[torch.cuda.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(args.BATCHSIZE)]) for _ in range(args.MAX_BOUNDARY)] for _ in range(args.MAX_BOUNDARY)]
 
-  iterator = iterator_dense(CorpusIterator_V(args.language,"dev").iterator())
+  iterator = iterator_dense(CorpusIterator_V(args.language,"dev", shuffleDataSeed=4).iterator())
   chunk = []
   surprisals = [0 for _ in range(args.MAX_BOUNDARY)]
   while True:
