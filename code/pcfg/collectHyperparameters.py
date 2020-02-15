@@ -28,13 +28,21 @@ with open("hyperparameters.tsv", "w") as outFile:
             results = inFile.read().strip().split("\n")
          if len(results) < 15:
            continue
+         for i in range(len(results)):
+            results[i] = results[i].split("\t")
+            vals = [float(x) for x in results[i][1][1:-1].split(", ")]
+            vals = sum(vals)/len(vals)
+            print(vals)
+            results[i][1] = vals
+         results = sorted(results, key=lambda x:x[1])
          result = results[0]
-         searchResults.append(result.split("\t"))
+         searchResults.append(result)
+         
      if len(searchResults) == 0:
        print("Incomplete", language)
        print(searches)
        continue
      searchResults = sorted(searchResults, key=lambda x:float(x[0]))
-     print("\t".join([str(x) for x in ([language , searchResults[0][0]] + [t(x) for t, x in zip(types, searchResults[0][2:])])]), file=outFile)
+     print("\t".join([str(x) for x in ([language , searchResults[0][1]] + [t(x) for t, x in zip(types, searchResults[0][2:])])]), file=outFile)
 
 
