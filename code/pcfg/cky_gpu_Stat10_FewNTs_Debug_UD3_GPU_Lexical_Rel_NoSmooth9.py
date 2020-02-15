@@ -62,6 +62,7 @@ parser.add_argument('--OTHER_WORDS_SMOOTHING', type=float, default=0.0001) # var
 parser.add_argument('--MERGE_ACROSS_RELATIONS_THRESHOLD', type=int, default=5) # variable # 5 doesn't hurt performance on Welsh, 10 does
 parser.add_argument('--REPLACE_WORD_WITH_PLACEHOLDER', type=float, default=0.2) # variable
 parser.add_argument("--myID", type=int, default=random.randint(0,10000000))
+parser.add_argument("--saveOptimized", type=bool, default=False)
 
 args = parser.parse_args()
 
@@ -1159,6 +1160,8 @@ surprisals = runOnCorpus()
 
 
 TARGET_DIR = "/u/scr/mhahn/deps/memory-need-pcfg/"
+if args.saveOptimized:
+   TARGET_DIR += "optimized/"
 
 outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(args.myID)+"_"+args.model+".txt"
 print(outpath)

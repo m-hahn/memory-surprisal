@@ -13,7 +13,7 @@ bounds.append(['MERGE_ACROSS_RELATIONS_THRESHOLD', int, 10, 20, 50, 100, 400, 80
 bounds.append(['REPLACE_WORD_WITH_PLACEHOLDER', float, 0.0, 0.2, 0.4]) 
 
 names = [x[0] for x in bounds]
-
+types = [x[1] for x in bounds]
 
 with open("hyperparameters.tsv", "w") as outFile:
   print("\t".join(["Language", "EstimatedSurprisal"] + names), file=outFile)
@@ -25,9 +25,16 @@ with open("hyperparameters.tsv", "w") as outFile:
      searchResults = []
      for resu in searches:
          with open(resu, "r") as inFile:
-            result = next(inFile).strip()
-            searchResults.append(result.split("\t"))
+            results = inFile.read().strip().split("\n")
+         if len(results) < 15:
+           continue
+         result = results[0]
+         searchResults.append(result.split("\t"))
+     if len(searchResults) == 0:
+       print("Incomplete", language)
+       print(searches)
+       continue
      searchResults = sorted(searchResults, key=lambda x:float(x[0]))
-     print("\t".join([str(x) for x in ([language , searchResults[0][0]] + [float(x) for x in searchResults[0][2:]])]), file=outFile)
+     print("\t".join([str(x) for x in ([language , searchResults[0][0]] + [t(x) for t, x in zip(types, searchResults[0][2:])])]), file=outFile)
 
 
