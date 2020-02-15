@@ -9,10 +9,10 @@ models = []
 #DLM
 import glob
 
-dlm = glob.glob("/u/scr/mhahn/deps/locality_optimized_dlm/manual_output_funchead_coarse_depl/"+language+"_optimizeDependencyLength.py_model_*.tsv")
+dlm = glob.glob("/u/scr/mhahn/deps/locality_optimized_dlm/manual_output_funchead_coarse_depl_quasiF/"+language+"_optimizeDependencyLength_QuasiF.py_model_*.tsv")
 i1  = [x for x in glob.glob("/u/scr/mhahn/deps/locality_optimized_i1/"+language+"_optimizeGrammarForI1_*.py_model_*.tsv") if "POS" not in x and "FuncHead" not in x]
-neural = glob.glob("/u/scr/mhahn/deps/locality_optimized_neural/manual_output_funchead_langmod_coarse_best_ud/"+language+"_optimizePredictability_OnlyWords.py_model_*.tsv")
-ground = glob.glob("/u/scr/mhahn/CODE/memory-surprisal/results/manual_output_ground_coarse/"+language+"_inferWeightsCrossVariationalAllCorpora_NoPunct_NEWPYTORCH_Coarse.py_model_*.tsv")
+neural = glob.glob("/u/scr/mhahn/deps/locality_optimized_neural/manual_output_funchead_langmod_coarse_best_ud/"+language+"_optimizePredictability.py_model_*.tsv") # _OnlyWords
+#ground = glob.glob("/u/scr/mhahn/CODE/memory-surprisal/results/manual_output_ground_coarse/"+language+"_inferWeightsCrossVariationalAllCorpora_NoPunct_NEWPYTORCH_Coarse.py_model_*.tsv")
 models = ["REAL_REAL", "GROUND"] + dlm + i1 + neural  # + ground
 print(models)
 #quit()

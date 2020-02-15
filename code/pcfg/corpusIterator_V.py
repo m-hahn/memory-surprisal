@@ -38,7 +38,7 @@ def readUDCorpus(language, partition):
             subDirectory =basePath+"/"+name
         subDirFiles = os.listdir(subDirectory)
         partitionHere = partition
-        if (name in ["UD_North_Sami", "UD_Irish", "UD_Buryat-BDT", "UD_Armenian-ArmTDP"]) and partition == "dev" and (not language.endswith("-Adap")):
+        if (name in ["UD_North_Sami", "UD_North_Sami-Giella", "UD_Irish", "UD_Buryat-BDT", "UD_Armenian-ArmTDP"]) and partition == "dev" and (not language.endswith("-Adap")):
             print("Substituted test for dev partition", file=sys.stderr)
             partitionHere = "test"
         elif language.endswith("-Adap"):

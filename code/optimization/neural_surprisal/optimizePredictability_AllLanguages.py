@@ -1,7 +1,7 @@
 import os
 import sys
 
-languages = ["Chinese", "English", "Japanese"]
+from ud_languages import languages
 #languages = ["Hindi", "Swedish", "German", "Urdu", "English", "Spanish", "Chinese", "Slovenian", "Estonian", "Norwegian", "Serbian", "Croatian", "Finnish", "Portuguese", "Catalan", "Russian", "Arabic", "Czech", "Japanese", "French", "Latvian", "Basque", "Danish", "Dutch", "Ukrainian", "Hebrew", "Hungarian", "Persian", "Bulgarian", "Romanian", "Indonesian", "Greek", "Turkish", "Slovak", "Belarusian", "Galician", "Italian", "Lithuanian", "Polish", "Vietnamese", "Korean", "Tamil", "Irish", "Marathi", "Afrikaans", "Telugu" , "Coptic", "Gothic",  "Latin", "Ancient_Greek", "Old_Church_Slavonic"]
 
 import random
@@ -23,7 +23,7 @@ with open("commands-lambda1-langmod.csv", "r") as inFile:
 
 #print(byLanguage)
 #quit()
-relevantPath = "/u/scr/mhahn/deps/locality_optimized_neural/"
+relevantPath = "/u/scr/mhahn/deps/locality_optimized_neural/manual_output_funchead_langmod_coarse_best_ud/"
 
 while len(languages) > 0:
    script = "optimizePredictability.py"

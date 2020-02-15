@@ -274,7 +274,7 @@ stoi_deps = dict(zip(itos_deps, range(len(itos_deps))))
 print itos_deps
 
 
-relevantPath = "/u/scr/mhahn/deps/locality_optimized_neural/"
+relevantPath = "/u/scr/mhahn/deps/locality_optimized_neural/manual_output_funchead_langmod_coarse_best_ud/"
 
 import os
 files = [x for x in os.listdir(relevantPath) if x.startswith(args.language+"_")]
