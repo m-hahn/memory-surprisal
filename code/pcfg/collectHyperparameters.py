@@ -32,7 +32,7 @@ with open("hyperparameters.tsv", "w") as outFile:
             results[i] = results[i].split("\t")
             vals = [float(x) for x in results[i][1][1:-1].split(", ")]
             vals = sum(vals)/len(vals)
-            print(vals)
+         #   print(vals)
             results[i][1] = vals
          results = sorted(results, key=lambda x:x[1])
          result = results[0]
