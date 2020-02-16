@@ -10,6 +10,8 @@ random.shuffle(data)
 
 for row in data:
    language = row[0]
+   if language in ["Arabic", "Japanese", "French"]: # skip those with _ words for now
+      continue
    for model in ["GROUND", "RANDOM_BY_TYPE"]:
       count = {"GROUND" : 1, "RANDOM_BY_TYPE" : 5}[model]
       while True:
