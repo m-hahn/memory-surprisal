@@ -118,7 +118,7 @@ def initializeOrderTable():
    distanceCounts = {}
    depsVocab = set()
    for partition in ["train", "dev"]:
-     for sentence in CorpusIterator_V(args.language,partition, storeMorph=True).iterator():
+     for sentence in CorpusIterator_V(args.language,partition, storeMorph=True, ignoreCorporaWithoutWords=True).iterator():
       for line in sentence:
           vocab[line["word"]] = vocab.get(line["word"], 0) + 1
           vocab_lemmas[line["lemma"]] = vocab_lemmas.get(line["lemma"], 0) + 1
@@ -632,7 +632,7 @@ def linearizeTree2String(tree, sent):
 sentCount = 0
 
 print("Collecting counts from training corpus")
-for sentence in CorpusIterator_V(args.language,"train").iterator():
+for sentence in CorpusIterator_V(args.language,"train", ignoreCorporaWithoutWords=True).iterator():
    sentCount += 1
    ordered = orderSentence(sentence,  sentCount % 400 == 0)
 
@@ -993,7 +993,7 @@ def runOnCorpus():
   global chart
   chart = [[torch.cuda.FloatTensor([[float("-Inf") for _ in itos_setOfNonterminals] for _ in range(args.BATCHSIZE)]) for _ in range(args.MAX_BOUNDARY)] for _ in range(args.MAX_BOUNDARY)]
 
-  iterator = iterator_dense(CorpusIterator_V(args.language,"dev").iterator())
+  iterator = iterator_dense(CorpusIterator_V(args.language,"dev", ignoreCorporaWithoutWords=True).iterator())
   chunk = []
   surprisals = [0 for _ in range(args.MAX_BOUNDARY)]
   while True:

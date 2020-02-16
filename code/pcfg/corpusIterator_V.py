@@ -7,7 +7,7 @@ import sys
 header = ["index", "word", "lemma", "posUni", "posFine", "morph", "head", "dep", "_", "_"]
 
 
-def readUDCorpus(language, partition):
+def readUDCorpus(language, partition, ignoreCorporaWithoutWords=False):
       l = language.split("_")
       language = "_".join(l[:-1])
       version = l[-1]
@@ -24,6 +24,9 @@ def readUDCorpus(language, partition):
         files = list(filter(lambda x:x.startswith("UD_"+language.replace("-Adap", "")), files))
       data = []
       for name in files:
+        if ignoreCorporaWithoutWords and language == "Japanese" and name in ["UD_Japanese-KTC", "UD_Japanese-BCCWJ"]:
+           print("Skipping corpus "+name, file=sys.stderr)
+           continue
         if "Sign" in name:
            print("Skipping "+name, file=sys.stderr)
            continue
@@ -79,7 +82,7 @@ def readUDCorpus(language, partition):
       return data
 
 class CorpusIterator_V():
-   def __init__(self, language, partition="train", storeMorph=False, splitLemmas=False, shuffleData=True, shuffleDataSeed=None, splitWords=False):
+   def __init__(self, language, partition="train", storeMorph=False, splitLemmas=False, shuffleData=True, shuffleDataSeed=None, splitWords=False, ignoreCorporaWithoutWords=False):
       print("LANGUAGE", language)
       if splitLemmas:
            assert language == "Korean"
@@ -105,7 +108,7 @@ class CorpusIterator_V():
          assert len(data) > 0, (language, partition)
         
       else:
-          data = readUDCorpus(language, partition)
+          data = readUDCorpus(language, partition, ignoreCorporaWithoutWords=ignoreCorporaWithoutWords)
       if shuffleData:
        if shuffleDataSeed is None:
          random.shuffle(data)
