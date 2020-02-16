@@ -91,7 +91,7 @@ with open(outpath1, "w") as outFile:
      if len(resultsPerType.get(typeOfResult, [])) == 0:
         continue
      print
-     print typeOfResult[:-1]
+     print typeOfResult
      for rand in resultsPerType.get(typeOfResult, []):
         print(rand) 
         rand["Type"] = typeOfResult
