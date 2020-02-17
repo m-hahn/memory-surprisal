@@ -365,7 +365,7 @@ devLosses = []
 
 
 
-def doForwardPass(input_indices, wordStartIndices, surprisalTable=None, doDropout=True, batchSizeHere=1):
+def doForwardPass(input_indices, wordStartIndices, surprisalTable=None, doDropout=True, batchSizeHere=1, annotations=None, surprisalTableByAnnotation=None, devCounterByAnnotation=None):
        global counter
        global crossEntropy
        global printHere
@@ -427,8 +427,17 @@ def doForwardPass(input_indices, wordStartIndices, surprisalTable=None, doDropou
                     assert input_indices[j][wordStartIndices[j][r+1]-1] != 2
                     if r == horizon-1:
                       assert wordStartIndices[j][r+1] == len(input_indices[j]) or input_indices[j][wordStartIndices[j][r+1]] == 2
-                    surprisalTable[r] += sum(lossesCPU[wordStartIndices[j][r]-1:wordStartIndices[j][r+1]-1,j]) #.data.cpu().numpy()[0]
-                   
+                    surprisalSum = sum(lossesCPU[wordStartIndices[j][r]-1:wordStartIndices[j][r+1]-1,j])
+                    surprisalTable[r] += surprisalSum #.data.cpu().numpy()[0]
+                    anno = annotations[j][wordStartIndices[j][r+1]-1][0]
+ #                   print(anno)
+                    if anno not in ["NOUN", "DET", "ADJ"]:
+                       anno = "OTHER"
+#                    print(anno)
+                    surprisalTableByAnnotation[anno][r] += surprisalSum
+                    devCounterByAnnotation[anno][r] += 1
+                  #    surprisalTableByAnnotation = {x : [z/devCounterByAnnotation[x] for z in y] for x, y in surprisalTableByAnnotation.iteritems()}
+ 
 
            wordNum = (len(wordStartIndices[0]) - 1)*batchSizeHere
            assert len(wordStartIndices[0]) == horizon+1, map(len, wordStartIndices)
@@ -505,6 +514,7 @@ def createStreamContinuous(corpus):
     global devLosses
 
     input_indices = [2] # Start of Segment
+    annotations = [("EOS",)]
     wordStartIndices = []
     sentCount = 0
     for sentence in corpus:
@@ -518,19 +528,25 @@ def createStreamContinuous(corpus):
           wordStartIndices.append(len(input_indices))
           if line == "EOS":
             input_indices.append(0)
+            annotations.append(("EOS",))
           else:
             targetWord = stoi[line["word"]]
             if targetWord >= vocab_size:
                input_indices.append(stoi_pos_uni[line["posUni"]]+3)
+               annotations.append((line["posUni"]+"_"+"OOV",))
             else:
                input_indices.append(targetWord+3+len(itos_pos_uni))
+               annotations.append((line["posUni"],))
           if len(wordStartIndices) == horizon:
-             yield input_indices, wordStartIndices+[len(input_indices)]
+             assert len(input_indices) == len(annotations)
+             yield input_indices, wordStartIndices+[len(input_indices)], annotations
              if DOING_PARAMETER_SEARCH:
                input_indices = [2] # Start of Segment (makes sure that first word can be predicted from this token)
+               annotations = [("EOS",)]
                wordStartIndices = []
              else:
                input_indices = [2]+input_indices[wordStartIndices[1]:] # Start of Segment (makes sure that first word can be predicted from this token)
+               annotations = [("EOS",)]+annotations[wordStartIndices[1]:] # Start of Segment (makes sure that first word can be predicted from this token)
                wordStartIndices = [x-wordStartIndices[1]+1 for x in wordStartIndices[1:]]
                assert wordStartIndices[0] == 1
 
@@ -547,30 +563,40 @@ def computeDevLoss():
    stream = createStreamContinuous(corpusDev)
 
    surprisalTable = [0 for _ in range(horizon)]
+   surprisalTableByAnnotation = {x : [0 for _ in range(horizon)] for x in ["NOUN", "ADJ", "DET", "OTHER"]}
+   devCounterByAnnotation = {x : [0 for _ in range(horizon)] for x in ["NOUN", "ADJ", "DET", "OTHER"]}
    devCounter = 0
    devCounterTimesBatchSize = 0
    while True:
      try:
         input_indices_list = []
         wordStartIndices_list = []
+        annotations_list = []
         for _ in range(devBatchSize):
-           input_indices, wordStartIndices = next(stream)
+           input_indices, wordStartIndices, annotations = next(stream)
            input_indices_list.append(input_indices)
            wordStartIndices_list.append(wordStartIndices)
+           annotations_list.append(annotations)
      except StopIteration:
         devBatchSize = len(input_indices_list)
      if devBatchSize == 0:
        break
      devCounter += 1
      printHere = (devCounter % 100 == 0)
-     _, _, _, newLoss, newWords = doForwardPass(input_indices_list, wordStartIndices_list, surprisalTable = surprisalTable, doDropout=False, batchSizeHere=devBatchSize)
+     _, _, _, newLoss, newWords = doForwardPass(input_indices_list, wordStartIndices_list, surprisalTable = surprisalTable, doDropout=False, batchSizeHere=devBatchSize, annotations=annotations_list, surprisalTableByAnnotation=surprisalTableByAnnotation, devCounterByAnnotation=devCounterByAnnotation)
      devLoss += newLoss
      devWords += newWords
      if printHere:
          print "Dev examples "+str(devCounter)
      devCounterTimesBatchSize += devBatchSize
    devSurprisalTableHere = [surp/(devCounterTimesBatchSize) for surp in surprisalTable]
-   return devLoss/devWords, devSurprisalTableHere
+
+#   print(devCounterByAnnotation)
+   surprisalTableByAnnotation = {x : [z/(u+1e-10) for z, u in zip(y, devCounterByAnnotation[x])] for x, y in surprisalTableByAnnotation.iteritems()}
+ #  quit()
+   return devLoss/devWords, devSurprisalTableHere, surprisalTableByAnnotation
+
+surprisalTableByAnnotation = None
 
 DEV_PERIOD = 5000
 epochCount = 0
@@ -585,7 +611,7 @@ while failedDevRuns == 0:
 
 
   if counter > 5:
-          newDevLoss, devSurprisalTableHere = computeDevLoss()
+          newDevLoss, devSurprisalTableHere, surprisalTableByAnnotation = computeDevLoss()
           devLosses.append(newDevLoss)
           print "New dev loss "+str(newDevLoss)+". previous was: "+str(lastDevLoss)
           if newDevLoss > 15 or len(devLosses) > 99:
@@ -617,7 +643,7 @@ while failedDevRuns == 0:
              print devLosses
              print "Epoch "+str(epochCount)+" "+str(counter)
              print zip(range(1,horizon+1), devSurprisalTable)
-
+             print surprisalTableByAnnotation
 
              break
 
@@ -642,4 +668,12 @@ while failedDevRuns == 0:
        if printHere:
           print "Epoch "+str(epochCount)+" "+str(counter)
           print zip(range(1,horizon+1), devSurprisalTable)
+          print surprisalTableByAnnotation
+
+for x in sorted(list(surprisalTableByAnnotation)):
+  print x
+  print "\t".join([str(round(y,4)) for y in surprisalTableByAnnotation[x]])
+
+
+
 
