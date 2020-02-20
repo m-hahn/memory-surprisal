@@ -8,7 +8,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--language", dest="language", type=str)
 parser.add_argument("--model", dest="model", type=str)
-parser.add_argument("--alpha", dest="alpha", type=float, default=1.0)
+parser.add_argument("--alpha", dest="alpha", type=float, default=0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
 parser.add_argument("--cutoff", dest="cutoff", type=int, default=10)
@@ -74,7 +74,7 @@ def initializeOrderTable():
    distanceSum = {}
    distanceCounts = {}
    depsVocab = set()
-   for partition in ["train", "dev"]:
+   for partition in ["train"]:
      for sentence in CorpusIterator(args.language,partition, storeMorph=True).iterator():
       for line in sentence:
           vocab[line["word"]] = vocab.get(line["word"], 0) + 1
@@ -377,13 +377,13 @@ def createStreamContinuous(corpus):
 
 
 
-corpusDev = CorpusIterator(args.language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
+corpusDev = CorpusIterator(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
 dev = list(createStreamContinuous(corpusDev))[::-1]
 
 
-corpusTrain = CorpusIterator(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
-train = list(createStreamContinuous(corpusTrain))[::-1]
-
+#corpusTrain = CorpusIterator(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
+#train = list(createStreamContinuous(corpusTrain))[::-1]
+train = dev
 
 idev = range(len(dev))
 itrain = range(len(train))
