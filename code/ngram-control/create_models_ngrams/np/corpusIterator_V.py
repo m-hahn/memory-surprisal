@@ -51,12 +51,17 @@ def readUDCorpus(language, partition, ignoreCorporaWithoutWords=False):
              partitionHere  = ("train" if partition == "dev" else "test")
             
         candidates = list(filter(lambda x:"-ud-"+partitionHere+"." in x and x.endswith(".conllu"), subDirFiles))
+#        print(candidates)
+        if name == "UD_German-HDT":
+           assert len(candidates) == 0
+           candidates = list(filter(lambda x:("-ud-"+partitionHere+"-a." in x or "-ud-"+partitionHere+"-b." in x) and x.endswith(".conllu"), subDirFiles))
+           assert len(candidates) == 2
         if len(candidates) == 0:
-           print("Did not find "+partitionHere+" file in "+subDirectory, file=sys.stderr)
            continue
-        if len(candidates) == 2:
+        if len(candidates) == 2 and name != "UD_German-HDT":
            candidates = list(filter(lambda x:"merged" in x, candidates))
-        assert len(candidates) == 1, candidates
+           assert len(candidates) == 1, candidates
+        assert len(candidates) >= 1, candidates
         try:
            dataPath = subDirectory+"/"+candidates[0]
            with open(dataPath, "r") as inFile:
