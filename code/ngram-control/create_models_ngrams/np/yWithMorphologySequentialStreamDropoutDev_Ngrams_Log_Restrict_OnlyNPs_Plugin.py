@@ -11,7 +11,7 @@ parser.add_argument("--model", dest="model", type=str)
 parser.add_argument("--alpha", dest="alpha", type=float, default=0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
-parser.add_argument("--cutoff", dest="cutoff", type=int, default=10)
+parser.add_argument("--cutoff", dest="cutoff", type=int, default=7)
 parser.add_argument("--idForProcess", dest="idForProcess", type=int, default=random.randint(0,10000000))
 import random
 
@@ -374,6 +374,9 @@ def createStreamContinuous(corpus):
             else:
                 timeSinceRelevant += 1
             yield (line["word"], min(MAX_DIST,timeSinceRelevant), line["posUni"])
+         for _ in range(args.cutoff):
+            yield ("PAD", MAX_DIST, "PAD")
+         yield ("SOS", MAX_DIST, "SOS")
 
 
 
@@ -451,8 +454,10 @@ for k in range(0,args.cutoff):
    startK2, endK2 = getStartEnd(k+1)
    cachedFollowingCounts = {}
    for j in range(len(idev)):
-#      if dev[j][1] == MAX_DIST:
- #        continue
+#      print(dev[j], dev[j][0] == "PAD")
+#      print(devW[idev[j]])
+      if devW[idev[j]][0] in ["PAD", "SOS"]:
+         continue
       start2, end2 = startK2[j], endK2[j]
       devPref = tuple(devW[idev[j]:idev[j]+k+1])
       if start2 > 0 and end2 < len(train):
@@ -490,7 +495,7 @@ for k in range(0,args.cutoff):
               if followingCount == 0:
                   newProbability[j] = lastProbability[j]
               else:
-          
+                  assert countNgram > 0
                   probability = log(max(countNgram - args.alpha, 0.0) + args.alpha * followingCount * exp(lastProbability[j])) -  log(countPrefix)
                   newProbability[j] = probability
          else:
@@ -498,11 +503,15 @@ for k in range(0,args.cutoff):
       elif k == 0:
               probability = log(countNgram + args.delta) - log(len(train) + args.delta * len(itos))
               newProbability[j] = probability
+   #           print(k, probability, devW[idev[j]], countNgram)
+#              assert abs(probability) > 1e-5, devW[idev[j]]
    lastProbability = newProbability 
    newProbability = [None for _ in idev]
-   assert all([x <=0 for x in lastProbability])
+   assert all([x is None or x <=0 for x in lastProbability])
    try:
+    #   print(lastProbability[:100])
        lastProbabilityFiltered = [x for x in lastProbability if x is not None]
+     #  print(lastProbabilityFiltered[:100])
        surprisal = - sum([x for x in lastProbabilityFiltered])/len(lastProbabilityFiltered)
    except ValueError:
        print("PROBLEM", file=sys.stderr)
