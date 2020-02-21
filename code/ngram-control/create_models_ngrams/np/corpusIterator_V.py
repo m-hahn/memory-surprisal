@@ -52,7 +52,7 @@ def readUDCorpus(language, partition, ignoreCorporaWithoutWords=False):
             
         candidates = list(filter(lambda x:"-ud-"+partitionHere+"." in x and x.endswith(".conllu"), subDirFiles))
 #        print(candidates)
-        if name == "UD_German-HDT":
+        if name == "UD_German-HDT" and partitionHere == "train":
            assert len(candidates) == 0
            candidates = list(filter(lambda x:("-ud-"+partitionHere+"-a." in x or "-ud-"+partitionHere+"-b." in x) and x.endswith(".conllu"), subDirFiles))
            assert len(candidates) == 2

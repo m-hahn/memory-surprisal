@@ -206,7 +206,8 @@ def orderSentence(sentence, dhLogits, printThings):
 #              elif args.model != "GROUND":
 #                assert False
               nounPhrases.append(dependents + [line])
-              print([x["word"] for x in nounPhrases[-1]])
+              if random() > 0.98:
+                 print([x["word"] for x in nounPhrases[-1]])
    return nounPhrases
 
 

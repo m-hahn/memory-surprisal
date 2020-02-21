@@ -1,3 +1,4 @@
+# based on yWithMorphologySequentialStreamDropoutDev_Ngrams_Log.py
 
 import random
 import sys
@@ -8,10 +9,10 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--language", dest="language", type=str)
 parser.add_argument("--model", dest="model", type=str)
-parser.add_argument("--alpha", dest="alpha", type=float, default=1.0)
+parser.add_argument("--alpha", dest="alpha", type=float, default=0.0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
-parser.add_argument("--cutoff", dest="cutoff", type=int, default=7)
+parser.add_argument("--cutoff", dest="cutoff", type=int, default=35)
 parser.add_argument("--idForProcess", dest="idForProcess", type=int, default=random.randint(0,10000000))
 import random
 
@@ -20,8 +21,6 @@ import random
 args=parser.parse_args()
 print(args)
 
-
-assert args.model.startswith("GROUND")
 
 assert args.alpha >= 0
 assert args.alpha <= 1
@@ -35,7 +34,7 @@ assert args.gamma >= 1
 myID = args.idForProcess
 
 
-TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-np/"
+TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams/"
 
 
 
@@ -47,25 +46,19 @@ posFine = set()
 
 
 
-import math
+
 from math import log, exp
-from random import random, shuffle, randint
+from random import random, shuffle, randint, Random
 
 header = ["index", "word", "lemma", "posUni", "posFine", "morph", "head", "dep", "_", "_"]
 
-from corpusIterator_V import CorpusIterator_V as CorpusIterator
+from corpusIterator import CorpusIterator
 
 originalDistanceWeights = {}
 
 morphKeyValuePairs = set()
 
 vocab_lemmas = {}
-
-def makeCoarse(x):
-   if ":" in x:
-      return x[:x.index(":")]
-   return x
-
 
 def initializeOrderTable():
    orderTable = {}
@@ -139,7 +132,6 @@ def orderChildrenRelative(sentence, remainingChildren, reverseSoftmax):
        childrenLinearized = map(lambda x:x[0], logits)
        return childrenLinearized           
 
-model_ = (args.model+"_").split("_")
 
 
 def orderSentence(sentence, dhLogits, printThings):
@@ -151,7 +143,6 @@ def orderSentence(sentence, dhLogits, printThings):
        # Collect tokens to be removed (i.e., punctuation)
       eliminated = []
    for line in sentence:
-      line["coarse_dep"] = makeCoarse(line["dep"])
       if line["dep"] == "root":
           root = line["index"]
           continue
@@ -164,51 +155,50 @@ def orderSentence(sentence, dhLogits, printThings):
       key = (sentence[line["head"]-1]["posUni"], line["dep"], line["posUni"])
       line["dependency_key"] = key
       dhLogit = dhWeights[stoi_deps[key]]
-      if True or args.model == "REAL":
+      if args.model == "REAL":
          dhSampled = (line["head"] > line["index"])
       else:
          dhSampled = (dhLogit > 0) 
      
       direction = "DH" if dhSampled else "HD"
       if printThings: 
-         print("\t".join(map(str,["ORD", line["word"], line["posUni"], line["index"], ("->".join(list(key)) + "         ")[:22], line["head"], dhLogit, dhSampled, direction])))
+         print "\t".join(map(str,["ORD", line["index"], ("->".join(list(key)) + "         ")[:22], line["head"], dhLogit, dhSampled, direction]))
 
       headIndex = line["head"]-1
       sentence[headIndex]["children_"+direction] = (sentence[headIndex].get("children_"+direction, []) + [line["index"]])
 
-   nounPhrases = []
-   for line in sentence:
-      if line["posUni"] == "NOUN":
-         childrenLeft = [sentence[i-1] for i in line.get("children_DH", [])]
-         childrenRight = [sentence[i-1] for i in line.get("children_HD", [])]
-         leftDependencies = [x["dep"] for x in childrenLeft]
-         if len(leftDependencies) == 0:
-            continue
-         if set(leftDependencies).issubset(set(["case", "det", "nummod", "amod"])):
-            leftLengths = [len(x.get("children_DH", []) + x.get("children_HD", [])) for x in childrenLeft]
-            if max(leftLengths+[0]) == 0:
-   #           print(leftDependencies, leftLengths)
-              dependents = [sentence[i-1] for i in line.get("children_DH", [])]
-              if model_[1] != "":
-                  positions = {{"A" : "amod", "N" : "nummod", "D" : "det"}[x] : model_[1].index(x) for x in "AND"}
-                  positions["case"] = -1
-#                  print(positions)
-                  dependents = sorted(dependents, key=lambda x:positions[x["coarse_dep"]])
-#                  quit()
-#              if args.model == "GROUND_AND":
-#                dependents = sorted(dependents, key=lambda x:{"case" : -1, "amod" : 0, "nummod" : 1, "det" : 2}[x["coarse_dep"]])
-#              elif args.model == "GROUND_NDA":
-#                dependents = sorted(dependents, key=lambda x:{"case" : -1, "amod" : 2, "nummod" : 0, "det" : 1}[x["coarse_dep"]])
-#              elif args.model == "GROUND_ADN":
-#                dependents = sorted(dependents, key=lambda x:{"case" : -1, "amod" : 0, "nummod" : 2, "det" : 1}[x["coarse_dep"]])
-#              elif args.model == "GROUND_DAN":
-#                dependents = sorted(dependents, key=lambda x:{"case" : -1, "amod" : 1, "nummod" : 2, "det" : 0}[x["coarse_dep"]])
-#              elif args.model != "GROUND":
-#                assert False
-              nounPhrases.append(dependents + [line])
-              if random() > 0.98:
-                 print([x["word"] for x in nounPhrases[-1]])
-   return nounPhrases
+
+   if args.model != "REAL_REAL":
+      for line in sentence:
+         if "children_DH" in line:
+            childrenLinearized = orderChildrenRelative(sentence, line["children_DH"][:], False)
+            line["children_DH"] = childrenLinearized
+         if "children_HD" in line:
+            childrenLinearized = orderChildrenRelative(sentence, line["children_HD"][:], True)
+            line["children_HD"] = childrenLinearized
+   if args.model == "REAL_REAL":
+       while len(eliminated) > 0:
+          line = eliminated[0]
+          del eliminated[0]
+          if "removed" in line:
+             continue
+          line["removed"] = True
+          if "children_DH" in line:
+            assert 0 not in line["children_DH"]
+            eliminated = eliminated + [sentence[x-1] for x in line["children_DH"]]
+          if "children_HD" in line:
+            assert 0 not in line["children_HD"]
+            eliminated = eliminated + [sentence[x-1] for x in line["children_HD"]]
+
+   
+   linearized = []
+   recursivelyLinearize(sentence, root, linearized)
+   if args.model == "REAL_REAL":
+      linearized = filter(lambda x:"removed" not in x, sentence)
+   if printThings or len(linearized) == 0:
+     print " ".join(map(lambda x:x["word"], sentence))
+     print " ".join(map(lambda x:x["word"], linearized))
+   return linearized, logits
 
 
 dhLogits, vocab, vocab_deps, depsVocab = initializeOrderTable()
@@ -231,90 +221,14 @@ distanceWeights = [0.0] * len(itos_deps)
 
 import os
 
-if args.model == "REAL" or args.model == "REAL_REAL":
-  originalCounter = "NA"
-elif args.model == "RANDOM_BY_TYPE":
-  dhByType = {}
-  distByType = {}
-  for dep in itos_pure_deps:
-    dhByType[dep.split(":")[0]] = random() - 0.5
-    distByType[dep.split(":")[0]] = random()
-  for key in range(len(itos_deps)):
-     dhWeights[key] = dhByType[itos_deps[key][1].split(":")[0]]
-     distanceWeights[key] = distByType[itos_deps[key][1].split(":")[0]]
-  originalCounter = "NA"
-elif args.model.startswith("GROUND"):
-  groundPath = "/u/scr/mhahn/deps/manual_output_ground_coarse/"
-  import os
-  files = [x for x in os.listdir(groundPath) if x.startswith(args.language[:args.language.rfind("_")]+"_infer")]
-  print(files)
-  assert len(files) > 0
-  with open(groundPath+files[0], "r") as inFile:
-     headerGrammar = next(inFile).strip().split("\t")
-     print(headerGrammar)
-     dhByDependency = {}
-     distByDependency = {}
-     for line in inFile:
-         line = line.strip().split("\t")
-         assert int(line[headerGrammar.index("Counter")]) >= 1000000
-         dependency = line[headerGrammar.index("Dependency")]
-         dhHere = float(line[headerGrammar.index("DH_Mean_NoPunct")])
-         distHere = float(line[headerGrammar.index("Distance_Mean_NoPunct")])
-         print(dependency, dhHere, distHere)
-         dhByDependency[dependency] = dhHere
-         distByDependency[dependency] = distHere
-  for key in range(len(itos_deps)):
-     if itos_deps[key][1].split(":")[0] not in dhByDependency:
-        continue
-     dhWeights[key] = dhByDependency[itos_deps[key][1].split(":")[0]]
-     distanceWeights[key] = distByDependency[itos_deps[key][1].split(":")[0]]
-  originalCounter = "NA"
-else:
-  assert False, args.model
-
-#
-#print zip(itos_deps,distanceWeights)
-#
-#print dhWeights[stoi_deps[("NOUN", "amod", "ADJ")]]
-#print dhWeights[stoi_deps[("NOUN", "nummod", "NUM")]]
-#print dhWeights[stoi_deps[("NOUN", "det", "DET")]]
+originalCounter = "NA"
 
 
-AMOD = distanceWeights[stoi_deps[("NOUN", "amod", "ADJ")]]
-NUMMOD = distanceWeights[stoi_deps[("NOUN", "nummod", "NUM")]]
-DET = distanceWeights[stoi_deps[("NOUN", "det", "DET")]]
 
-
-if args.model== "GROUND_AND":
-   for x in range(len(itos_deps)):
-      if itos_deps[x][1] == "amod":
-          distanceWeights[x] = DET
-      if itos_deps[x][1] == "det":
-          distanceWeights[x] = AMOD
-elif args.model== "GROUND_DAN":
-   for x in range(len(itos_deps)):
-      if itos_deps[x][1] == "amod":
-          distanceWeights[x] = NUMMOD
-      if itos_deps[x][1] == "nummod":
-          distanceWeights[x] = AMOD
-elif args.model== "GROUND_ADN":
-   for x in range(len(itos_deps)):
-      if itos_deps[x][1] == "amod":
-          distanceWeights[x] = DET
-      if itos_deps[x][1] == "det":
-          distanceWeights[x] = NUMMOD
-      if itos_deps[x][1] == "det":
-         distanceWeights[x] = AMOD
-  
-#print distanceWeights[stoi_deps[("NOUN", "amod", "ADJ")]]
-#print distanceWeights[stoi_deps[("NOUN", "nummod", "NUM")]]
-#print distanceWeights[stoi_deps[("NOUN", "det", "DET")]]
-#   
-
-words = list(vocab.items())
+words = list(vocab.iteritems())
 words = sorted(words, key = lambda x:x[1], reverse=True)
-itos = list(map(lambda x:x[0], words))
-stoi = dict(list(zip(itos, range(len(itos)))))
+itos = map(lambda x:x[0], words)
+stoi = dict(zip(itos, range(len(itos))))
 
 if len(itos) > 6:
    assert stoi[itos[5]] == 5
@@ -343,7 +257,6 @@ failedDevRuns = 0
 devLosses = [] 
 
 
-MAX_DIST = 5
 
 
 def createStreamContinuous(corpus):
@@ -353,51 +266,75 @@ def createStreamContinuous(corpus):
     input_indices = [2] # Start of Segment
     wordStartIndices = []
     sentCount = 0
+    words = []
     for sentence in corpus:
        sentCount += 1
        if sentCount % 10 == 0:
-         print(["DEV SENTENCES", sentCount])
+         print ["DEV SENTENCES", sentCount]
 
- #      dependencies = set([x["dep"] for x in sentence])
-#       if "amod" not in dependencies and "det" not in dependencies:
- #         continue
-       nounPhrases = orderSentence(sentence, dhLogits, sentCount % 500 == 0)
-      
-       timeSinceRelevant = MAX_DIST
-       for np in nounPhrases:
-         #print(np)
-         for line in np+["EOS"]:
-          if line == "EOS":
-            yield ("EOS", MAX_DIST, "EOS")
-          else:
-            if line["dep"] in ["amod", "det"]:
-                timeSinceRelevant = 0
-            else:
-                timeSinceRelevant += 1
-            yield (line["word"], min(MAX_DIST,timeSinceRelevant), line["posUni"])
-         for _ in range(args.cutoff):
-            yield ("PAD", MAX_DIST, "PAD")
-         yield ("SOS", MAX_DIST, "SOS")
+       for line in sentence:
+          words.append(line["word"])
+    shuffle(words)
+    for WORD in words: 
+      if args.model == "REAL_REAL":
+         WORD2 = WORD
+      elif args.model == "EVEN_ODD":
+        WORDA = WORD[::2]
+        WORDB = WORD[1::2]
+        WORD2 = WORDA+WORDB
+        assert len(WORD2) == len(WORD)
+      elif args.model == "SORTED": # not invertible
+        WORD2 = "".join(sorted(list(WORD)))
+      for x in WORD2:
+         yield x
+      for _ in range(args.cutoff+2):
+         yield "EOW"
 
 
 
 corpusDev = CorpusIterator(args.language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
-dev = list(createStreamContinuous(corpusDev))[::-1]
+
+words = []
+with open("/u/scr/corpora/ldc/1996/LDC96L14/english/epl/epl.cd", "r") as inFile:
+  for line in inFile:
+     line = line.strip().split("\\")
+     orth = line[1]
+     syll = line[5].replace("'", "").split("-")
+     print(orth, syll) #, line)
+
+     if args.model == "REAL_REAL":
+        WORD2 = "".join(syll)
+     elif args.model == "EVEN_ODD":
+       syllA = syll[::2]
+       syllB = syll[1::2]
+       WORD2 = "".join(syllB+syllA)
+     print(WORD2)
+     words.append(WORD2)
+#quit()
+
+Random(5).shuffle(words)
+words=words[:5000]
+
+dev = []
+for word in words:
+   for ch in word:
+     dev.append(ch)
+   for _ in range(args.cutoff+2):
+     dev.append("EOW")
+
+dev = dev[::-1]
+#dev = list(createStreamContinuous(corpusDev))[::-1]
 
 
-corpusTrain = CorpusIterator(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
-train = list(createStreamContinuous(corpusTrain))[::-1]
-
+#corpusTrain = CorpusIterator(args.language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
+#train = list(createStreamContinuous(corpusTrain))[::-1]
+train = dev
 
 idev = range(len(dev))
 itrain = range(len(train))
 
-devW = [x[0] for x in dev]
-trainW = [x[0] for x in train]
-
-
-idev = sorted(idev, key=lambda i:devW[i:i+20])
-itrain = sorted(itrain, key=lambda i:trainW[i:i+20])
+idev = sorted(idev, key=lambda i:dev[i:i+20])
+itrain = sorted(itrain, key=lambda i:train[i:i+20])
 
 print(idev)
 
@@ -406,6 +343,7 @@ itrainInv = [x[1] for x in sorted(zip(itrain, range(len(itrain))), key=lambda x:
 
 assert idev[idevInv[5]] == 5
 assert itrain[itrainInv[5]] == 5
+
 
 
 def getStartEnd(k):
@@ -418,9 +356,9 @@ def getStartEnd(k):
    l = 0
    l2 = 0
    for j in range(len(dev)):
-     prefix = tuple(devW[idev[j]:idev[j]+k])
+     prefix = tuple(dev[idev[j]:idev[j]+k])
      while l2 < len(train):
-        prefix2 = tuple(trainW[itrain[l2]:itrain[l2]+k])
+        prefix2 = tuple(train[itrain[l2]:itrain[l2]+k])
         if prefix <= prefix2:
              start[j] = l2
              break
@@ -428,7 +366,7 @@ def getStartEnd(k):
      if l2 == len(train):
         start[j] = l2
      while l < len(train):
-        prefix2 = tuple(trainW[itrain[l]:itrain[l]+k])
+        prefix2 = tuple(train[itrain[l]:itrain[l]+k])
         if prefix < prefix2:
              end[j] = l
              break
@@ -438,10 +376,10 @@ def getStartEnd(k):
      start2, end2 = start[j], end[j]
      assert start2 <= end2
      if start2 > 0 and end2 < len(train):
-       assert prefix > tuple(trainW[itrain[start2-1]:itrain[start2-1]+k]), (prefix, tuple(trainW[itrain[start2-1]:itrain[start2-1]+k]))
-       assert prefix <= tuple(trainW[itrain[start2]:itrain[start2]+k])
-       assert prefix >= tuple(trainW[itrain[end2-1]:itrain[end2-1]+k])
-       assert prefix < tuple(trainW[itrain[end2]:itrain[end2]+k])
+       assert prefix > tuple(train[itrain[start2-1]:itrain[start2-1]+k])
+       assert prefix <= tuple(train[itrain[start2]:itrain[start2]+k])
+       assert prefix >= tuple(train[itrain[end2-1]:itrain[end2-1]+k])
+       assert prefix < tuple(train[itrain[end2]:itrain[end2]+k])
    return start, end
 
 
@@ -455,17 +393,13 @@ for k in range(0,args.cutoff):
    startK2, endK2 = getStartEnd(k+1)
    cachedFollowingCounts = {}
    for j in range(len(idev)):
-#      print(dev[j], dev[j][0] == "PAD")
-#      print(devW[idev[j]])
-      if devW[idev[j]][0] in ["PAD", "SOS"]:
-         continue
       start2, end2 = startK2[j], endK2[j]
-      devPref = tuple(devW[idev[j]:idev[j]+k+1])
+      devPref = tuple(dev[idev[j]:idev[j]+k+1])
       if start2 > 0 and end2 < len(train):
-        assert devPref > tuple(trainW[itrain[start2-1]:itrain[start2-1]+k+1]), (devPref, tuple(trainW[itrain[start2-1]:itrain[start2-1]+k+1]))
-        assert devPref <= tuple(trainW[itrain[start2]:itrain[start2]+k+1]), (devPref, tuple(trainW[itrain[start2]:itrain[start2]+k+1]))
-        assert devPref >= tuple(trainW[itrain[end2-1]:itrain[end2-1]+k+1])
-        assert devPref < tuple(trainW[itrain[end2]:itrain[end2]+k+1])
+        assert devPref > tuple(train[itrain[start2-1]:itrain[start2-1]+k+1]), (devPref, tuple(train[itrain[start2-1]:itrain[start2-1]+k+1]))
+        assert devPref <= tuple(train[itrain[start2]:itrain[start2]+k+1]), (devPref, tuple(train[itrain[start2]:itrain[start2]+k+1]))
+        assert devPref >= tuple(train[itrain[end2-1]:itrain[end2-1]+k+1])
+        assert devPref < tuple(train[itrain[end2]:itrain[end2]+k+1])
 
       assert start2 <= end2
 
@@ -473,7 +407,7 @@ for k in range(0,args.cutoff):
       if k >= 1:
          if idev[j]+1 < len(idevInv):
            prefixIndex = idevInv[idev[j]+1]
-           assert devW[idev[prefixIndex]] == devW[idev[j]+1]
+           assert dev[idev[prefixIndex]] == dev[idev[j]+1]
    
            prefixStart, prefixEnd = startK[prefixIndex], endK[prefixIndex]
            countPrefix = prefixEnd-prefixStart
@@ -489,14 +423,14 @@ for k in range(0,args.cutoff):
               else:
                 for l in range(prefixStart, prefixEnd):
                   if k < itrain[l]+1:
-                     following.add(trainW[itrain[l]-1])
-                     assert devPref[1:] == tuple(trainW[itrain[l]-1:itrain[l]+k])[1:], (k, itrain[l], l, devPref , tuple(trainW[itrain[l]-1:itrain[l]+k]))
+                     following.add(train[itrain[l]-1])
+                     assert devPref[1:] == tuple(train[itrain[l]-1:itrain[l]+k])[1:], (k, itrain[l], l, devPref , tuple(train[itrain[l]-1:itrain[l]+k]))
                 followingCount = len(following)
                 cachedFollowingCounts[(prefixStart, prefixEnd)] = followingCount
               if followingCount == 0:
                   newProbability[j] = lastProbability[j]
               else:
-          
+                  assert countNgram > 0
                   probability = log(max(countNgram - args.alpha, 0.0) + args.alpha * followingCount * exp(lastProbability[j])) -  log(countPrefix)
                   newProbability[j] = probability
          else:
@@ -506,26 +440,25 @@ for k in range(0,args.cutoff):
               newProbability[j] = probability
    lastProbability = newProbability 
    newProbability = [None for _ in idev]
-   assert all([x is None or x <=0 for x in lastProbability])
+   assert all([x <=0 for x in lastProbability])
    try:
-       lastProbabilityFiltered = [x for x in lastProbability if x is not None]
-       surprisal = - sum([x for x in lastProbabilityFiltered])/len(lastProbabilityFiltered)
+       surprisal = - sum([x for x in lastProbability])/len(lastProbability)
    except ValueError:
-       print("PROBLEM", file=sys.stderr)
-       print(lastProbability, file=sys.stderr)
+       print >> sys.stderr, "PROBLEM"
+       print >> sys.stderr, lastProbability
        surprisal = 1000
    devSurprisalTable.append(surprisal)
    print("Surprisal", surprisal, len(itos))
 
 
-#assert False
+assert False
 
 outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model+".txt"
 print(outpath)
 with open(outpath, "w") as outFile:
-         print(str(args), file=outFile)
-         print(devSurprisalTable[-1], file=outFile)
-         print(" ".join(map(str,devSurprisalTable)), file=outFile)
+         print >> outFile, " ".join(sys.argv)
+         print >> outFile, devSurprisalTable[-1]
+         print >> outFile, " ".join(map(str,devSurprisalTable))
 
 
 
