@@ -1,4 +1,4 @@
-Language	Estimator	Model	Distance	Surprisal	Script	Part	It	SumIt	SumTIt
+Language	Estimator	Model	Distance	Surprisal	Script	It	SumIt	SumTIt
 Czech	Heldout	NDA	0	8.019155744703474	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py	2.0736671435622718	0	0
 Czech	Heldout	NDA	1	5.945488601141202	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py	-0.05190044155974416	2.0736671435622718	2.0736671435622718
 Czech	Heldout	NDA	2	5.997389042700946	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py	-0.1245112741597314	2.0217667020025276	1.9698662604427835

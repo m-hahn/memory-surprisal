@@ -18,7 +18,7 @@ def getCumSums(mis):
   return cumsumsIt, cumsumsTIt
 
 with open("results.tsv", "w") as outFile:
-  print("\t".join(["Language", "Estimator", "Model", "Distance", "Surprisal", "Script", "Part", "It", "SumIt", "SumTIt"]), file=outFile)
+  print("\t".join(["Language", "Estimator", "Model", "Distance", "Surprisal", "Script", "It", "SumIt", "SumTIt"]), file=outFile)
   for name in sorted(files):
     with open(PATH+name, "r") as inFile:
        next(inFile)
