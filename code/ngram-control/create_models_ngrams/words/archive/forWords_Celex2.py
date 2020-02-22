@@ -12,7 +12,7 @@ parser.add_argument("--model", dest="model", type=str)
 parser.add_argument("--alpha", dest="alpha", type=float, default=0.0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
-parser.add_argument("--cutoff", dest="cutoff", type=int, default=15)
+parser.add_argument("--cutoff", dest="cutoff", type=int, default=35)
 parser.add_argument("--idForProcess", dest="idForProcess", type=int, default=random.randint(0,10000000))
 import random
 
@@ -203,46 +203,6 @@ def orderSentence(sentence, dhLogits, printThings):
 
 #dhLogits, vocab, vocab_deps, depsVocab = initializeOrderTable()
 
-#
-#
-#posUni = list(posUni)
-#itos_pos_uni = posUni
-#stoi_pos_uni = dict(zip(posUni, range(len(posUni))))
-#
-#itos_pure_deps = sorted(list(depsVocab)) 
-#stoi_pure_deps = dict(zip(itos_pure_deps, range(len(itos_pure_deps))))
-#   
-#itos_deps = sorted(vocab_deps)
-#stoi_deps = dict(zip(itos_deps, range(len(itos_deps))))
-#
-#dhWeights = [0.0] * len(itos_deps)
-#distanceWeights = [0.0] * len(itos_deps)
-#
-#
-#import os
-#
-#originalCounter = "NA"
-#
-#
-#
-#words = list(vocab.iteritems())
-#words = sorted(words, key = lambda x:x[1], reverse=True)
-#itos = map(lambda x:x[0], words)
-#stoi = dict(zip(itos, range(len(itos))))
-#
-#if len(itos) > 6:
-#   assert stoi[itos[5]] == 5
-#
-#
-#
-#vocab_size = len(itos)
-#
-#
-#
-#
-#
-#
-#
 
 
 import torch.cuda
@@ -292,19 +252,9 @@ devLosses = []
 #
 
 
-#corpusDev = CorpusIterator(args.language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
-
-wordsSet = {}
 
 
-#with open("/juicier/scr120/scr/mhahn/CODE/EfficientWordForms/celex/out_freq__lemma_english_1_0_0_40.txt", "r") as inFile:
-#  header = next(inFile).strip().split("\t")
-#  header = dict(list(zip(header, range(len(header)))))
-#  print(header)
-#  for line in inFile:
-#     line = line.split("\t")
-#     WORD = line[header['word']]
-#     wordsSet = {WORD : line}
+
 
 prefix = args.language[0]
 
@@ -312,43 +262,36 @@ with open("/u/scr/corpora/ldc/1996/LDC96L14/"+args.language+"/"+prefix+"ml/"+pre
   for line in inFile:
      line = line.strip().split("\\")
      wordsSet[line[1]] = line[3]
-     
+
+
 words = []
-with open("/u/scr/corpora/ldc/1996/LDC96L14/"+args.language+"/"+prefix+"pl/"+prefix+"pl.cd", "r") as inFile:
+with open("/juicier/scr120/scr/mhahn/CODE/EfficientWordForms/celex/out_freq__lemma_dutch_1_0_0_40.txt", "r") as inFile:
+  header = next(inFile).strip().split("\t")
+  header = dict(list(zip(header, range(len(header)))))
+  print(header)
   for line in inFile:
-     line = line.strip().split("\\")
-     orth = line[1]
-     syll = line[5].replace("'", "").split("-")
-     phon = "".join(syll)
-     if wordsSet[orth] != "M":
-       continue
-     print(orth, syll, phon, wordsSet[orth]) #, line)
+     line = line.split("\t")
+     WORD = line[header['word']]
      if args.model == "REAL_REAL":
-        WORD2 = "".join(syll)
-     elif args.model == "RANDOM":
-       Random(myID).shuffle(syll)
-       WORD2 = "".join(syll)
-     else:
-       assert False
+        WORD2 = WORD
+     elif args.model == "EVEN_ODD":
+       WORDA = WORD[::2]
+       WORDB = WORD[1::2]
+       WORD2 = WORDA+WORDB
+       assert len(WORD2) == len(WORD)
+     elif args.model == "SORTED": # not invertible
+       WORD2 = "".join(sorted(list(WORD)))
      print(WORD2)
      words.append(WORD2)
-print(len(words))
 #quit()
 
-Random(5).shuffle(words)
-#words=words[:5000]
-
+shuffle(words)
 dev = []
 for word in words:
    for ch in word:
      dev.append(ch)
-   dev.append("EOS")
    for _ in range(args.cutoff+2):
-     dev.append("PAD")
-   dev.append("SOS")
-
-itos = list(set(dev))
-
+     dev.append("EOW")
 
 dev = dev[::-1]
 #dev = list(createStreamContinuous(corpusDev))[::-1]
@@ -421,9 +364,6 @@ for k in range(0,args.cutoff):
    startK2, endK2 = getStartEnd(k+1)
    cachedFollowingCounts = {}
    for j in range(len(idev)):
-#      print(dev[idev[j]])
-      if dev[idev[j]] in ["PAD", "SOS"]:
-         continue
       start2, end2 = startK2[j], endK2[j]
       devPref = tuple(dev[idev[j]:idev[j]+k+1])
       if start2 > 0 and end2 < len(train):
@@ -471,10 +411,9 @@ for k in range(0,args.cutoff):
               newProbability[j] = probability
    lastProbability = newProbability 
    newProbability = [None for _ in idev]
-   assert all([x is None or x <=0 for x in lastProbability])
+   assert all([x <=0 for x in lastProbability])
    try:
-       lastProbabilityFiltered = [x for x in lastProbability if x is not None]
-       surprisal = - sum([x for x in lastProbabilityFiltered])/len(lastProbabilityFiltered)
+       surprisal = - sum([x for x in lastProbability])/len(lastProbability)
    except ValueError:
        print >> sys.stderr, "PROBLEM"
        print >> sys.stderr, lastProbability
@@ -483,12 +422,12 @@ for k in range(0,args.cutoff):
    print("Surprisal", surprisal, len(itos))
 
 
-#assert False
+assert False
 
 outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model+".txt"
 print(outpath)
 with open(outpath, "w") as outFile:
-         print >> outFile, str(args)
+         print >> outFile, " ".join(sys.argv)
          print >> outFile, devSurprisalTable[-1]
          print >> outFile, " ".join(map(str,devSurprisalTable))
 

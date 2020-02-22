@@ -12,7 +12,7 @@ parser.add_argument("--model", dest="model", type=str)
 parser.add_argument("--alpha", dest="alpha", type=float, default=0.0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
-parser.add_argument("--cutoff", dest="cutoff", type=int, default=35)
+parser.add_argument("--cutoff", dest="cutoff", type=int, default=15)
 parser.add_argument("--idForProcess", dest="idForProcess", type=int, default=random.randint(0,10000000))
 import random
 
@@ -34,7 +34,7 @@ assert args.gamma >= 1
 myID = args.idForProcess
 
 
-TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams/"
+TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-phonotactics/"
 
 
 
@@ -48,7 +48,7 @@ posFine = set()
 
 
 from math import log, exp
-from random import random, shuffle, randint
+from random import random, shuffle, randint, Random
 
 header = ["index", "word", "lemma", "posUni", "posFine", "morph", "head", "dep", "_", "_"]
 
@@ -201,47 +201,7 @@ def orderSentence(sentence, dhLogits, printThings):
    return linearized, logits
 
 
-dhLogits, vocab, vocab_deps, depsVocab = initializeOrderTable()
-
-
-
-posUni = list(posUni)
-itos_pos_uni = posUni
-stoi_pos_uni = dict(zip(posUni, range(len(posUni))))
-
-itos_pure_deps = sorted(list(depsVocab)) 
-stoi_pure_deps = dict(zip(itos_pure_deps, range(len(itos_pure_deps))))
-   
-itos_deps = sorted(vocab_deps)
-stoi_deps = dict(zip(itos_deps, range(len(itos_deps))))
-
-dhWeights = [0.0] * len(itos_deps)
-distanceWeights = [0.0] * len(itos_deps)
-
-
-import os
-
-originalCounter = "NA"
-
-
-
-words = list(vocab.iteritems())
-words = sorted(words, key = lambda x:x[1], reverse=True)
-itos = map(lambda x:x[0], words)
-stoi = dict(zip(itos, range(len(itos))))
-
-if len(itos) > 6:
-   assert stoi[itos[5]] == 5
-
-
-
-vocab_size = len(itos)
-
-
-
-
-
-
+#dhLogits, vocab, vocab_deps, depsVocab = initializeOrderTable()
 
 
 
@@ -257,71 +217,82 @@ failedDevRuns = 0
 devLosses = [] 
 
 
+#
+#
+#def createStreamContinuous(corpus):
+#    global crossEntropy
+#    global devLosses
+#
+#    input_indices = [2] # Start of Segment
+#    wordStartIndices = []
+#    sentCount = 0
+#    words = []
+#    for sentence in corpus:
+#       sentCount += 1
+#       if sentCount % 10 == 0:
+#         print ["DEV SENTENCES", sentCount]
+#
+#       for line in sentence:
+#          words.append(line["word"])
+#    shuffle(words)
+#    for WORD in words: 
+#      if args.model == "REAL_REAL":
+#         WORD2 = WORD
+#      elif args.model == "EVEN_ODD":
+#        WORDA = WORD[::2]
+#        WORDB = WORD[1::2]
+#        WORD2 = WORDA+WORDB
+#        assert len(WORD2) == len(WORD)
+#      elif args.model == "SORTED": # not invertible
+#        WORD2 = "".join(sorted(list(WORD)))
+#      for x in WORD2:
+#         yield x
+#      for _ in range(args.cutoff+2):
+#         yield "EOW"
+#
 
 
-def createStreamContinuous(corpus):
-    global crossEntropy
-    global devLosses
-
-    input_indices = [2] # Start of Segment
-    wordStartIndices = []
-    sentCount = 0
-    words = []
-    for sentence in corpus:
-       sentCount += 1
-       if sentCount % 10 == 0:
-         print ["DEV SENTENCES", sentCount]
-
-       for line in sentence:
-          words.append(line["word"])
-    shuffle(words)
-    for WORD in words: 
-      if args.model == "REAL_REAL":
-         WORD2 = WORD
-      elif args.model == "EVEN_ODD":
-        WORDA = WORD[::2]
-        WORDB = WORD[1::2]
-        WORD2 = WORDA+WORDB
-        assert len(WORD2) == len(WORD)
-      elif args.model == "SORTED": # not invertible
-        WORD2 = "".join(sorted(list(WORD)))
-      for x in WORD2:
-         yield x
-      for _ in range(args.cutoff+2):
-         yield "EOW"
 
 
 
-corpusDev = CorpusIterator(args.language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
+
+prefix = args.language[0]
 
 words = []
-with open("/juicier/scr120/scr/mhahn/CODE/EfficientWordForms/celex/out_freq__lemma_dutch_1_0_0_40.txt", "r") as inFile:
-  header = next(inFile).strip().split("\t")
-  header = dict(list(zip(header, range(len(header)))))
-  print(header)
+
+with open("/u/scr/corpora/ldc/1996/LDC96L14/"+args.language+"/"+prefix+"ml/"+prefix+"ml.cd", "r") as inFile:
   for line in inFile:
-     line = line.split("\t")
-     WORD = line[header['word']]
+     line = line.strip().split("\\")
+     if line[3] != "M":
+        continue
+     WORD = line[1]
      if args.model == "REAL_REAL":
         WORD2 = WORD
-     elif args.model == "EVEN_ODD":
-       WORDA = WORD[::2]
-       WORDB = WORD[1::2]
-       WORD2 = WORDA+WORDB
-       assert len(WORD2) == len(WORD)
-     elif args.model == "SORTED": # not invertible
-       WORD2 = "".join(sorted(list(WORD)))
+     elif args.model == "RANDOM":
+       WORD2 = list(WORD)
+       Random(myID).shuffle(WORD2)
+       WORD2 = "".join(WORD2)
+     else:
+       assert False
      print(WORD2)
      words.append(WORD2)
+print(len(words))
 #quit()
 
-shuffle(words)
+Random(5).shuffle(words)
+#words=words[:5000]
+
 dev = []
 for word in words:
    for ch in word:
      dev.append(ch)
+   dev.append("EOS")
    for _ in range(args.cutoff+2):
-     dev.append("EOW")
+     dev.append("PAD")
+   dev.append("SOS")
+
+itos = list(set(dev))
+
 
 dev = dev[::-1]
 #dev = list(createStreamContinuous(corpusDev))[::-1]
@@ -394,6 +365,9 @@ for k in range(0,args.cutoff):
    startK2, endK2 = getStartEnd(k+1)
    cachedFollowingCounts = {}
    for j in range(len(idev)):
+#      print(dev[idev[j]])
+      if dev[idev[j]] in ["PAD", "SOS"]:
+         continue
       start2, end2 = startK2[j], endK2[j]
       devPref = tuple(dev[idev[j]:idev[j]+k+1])
       if start2 > 0 and end2 < len(train):
@@ -441,9 +415,10 @@ for k in range(0,args.cutoff):
               newProbability[j] = probability
    lastProbability = newProbability 
    newProbability = [None for _ in idev]
-   assert all([x <=0 for x in lastProbability])
+   assert all([x is None or x <=0 for x in lastProbability])
    try:
-       surprisal = - sum([x for x in lastProbability])/len(lastProbability)
+       lastProbabilityFiltered = [x for x in lastProbability if x is not None]
+       surprisal = - sum([x for x in lastProbabilityFiltered])/len(lastProbabilityFiltered)
    except ValueError:
        print >> sys.stderr, "PROBLEM"
        print >> sys.stderr, lastProbability
@@ -452,12 +427,12 @@ for k in range(0,args.cutoff):
    print("Surprisal", surprisal, len(itos))
 
 
-assert False
+#assert False
 
 outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model+".txt"
 print(outpath)
 with open(outpath, "w") as outFile:
-         print >> outFile, " ".join(sys.argv)
+         print >> outFile, str(args)
          print >> outFile, devSurprisalTable[-1]
          print >> outFile, " ".join(map(str,devSurprisalTable))
 
