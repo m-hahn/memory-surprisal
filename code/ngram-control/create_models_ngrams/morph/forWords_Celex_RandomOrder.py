@@ -159,7 +159,10 @@ def calculateTradeoffForWeights(weights):
     dev = []
     for verb in data:
        affixes = verb[1:]
-       affixes = sorted(affixes, key=lambda x:weights[x])
+       if args.model == "RANDOM":
+          affixes = sorted(affixes, key=lambda x:weights[x])
+       else:
+          assert args.model == "REAL"
        for ch in [verb[0]] + affixes:
          dev.append(ch)
        dev.append("EOS")
@@ -296,12 +299,12 @@ def calculateTradeoffForWeights(weights):
            lastProbabilityFiltered = [x for x in lastProbability if x is not None]
            surprisal = - sum([x for x in lastProbabilityFiltered])/len(lastProbabilityFiltered)
        except ValueError:
-    #       print >> sys.stderr, "PROBLEM"
-     #      print >> sys.stderr, lastProbability
+           print >> sys.stderr, "PROBLEM"
+           print >> sys.stderr, lastProbability
            surprisal = 1000
        devSurprisalTable.append(surprisal)
-     #  print("Surprisal", surprisal, len(itos))
-    #print(devSurprisalTable)
+       print("Surprisal", surprisal, len(itos))
+    print(devSurprisalTable)
     mis = [devSurprisalTable[i] - devSurprisalTable[i+1] for i in range(len(devSurprisalTable)-1)]
     tmis = [mis[x]*(x+1) for x in range(len(mis))]
     #print(mis)
@@ -309,14 +312,16 @@ def calculateTradeoffForWeights(weights):
     auc = 0
     memory = 0
     mi = 0
+    print(mis)
+    print(tmis)
     for i in range(len(mis)):
        mi += mis[i]
        memory += tmis[i]
        auc += mi * tmis[i]
-    #print("MaxMemory", memory)
+    print("MaxMemory", memory)
     assert 4>memory
     auc += mi * (4-memory)
-    #print("AUC", auc)
+    print("AUC", auc)
     return auc
     #assert False
     
@@ -329,29 +334,5 @@ def calculateTradeoffForWeights(weights):
     #
     #
    
-
-
-for iteration in range(200):
-  coordinate=None
-  while affixFrequency.get(coordinate, 0) < 10:
-     coordinate = choice(itos)
-  mostCorrect, mostCorrectValue = 0, None
-  for newValue in [-1] + [2*x+1 for x in range(len(itos))] + [weights[coordinate]]:
-     if random() < 0.8 and newValue != weights[coordinate]:
-        continue
-     print(newValue, mostCorrect, coordinate, affixFrequency[coordinate])
-     weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}
-     correctCount = calculateTradeoffForWeights(weights_)
-#     print(weights_)
-#     print(coordinate, newValue, iteration, correctCount)
-     if correctCount > mostCorrect:
-        mostCorrectValue = newValue
-        mostCorrect = correctCount
-  print(iteration, mostCorrect)
-  weights[coordinate] = mostCorrectValue
-  itos_ = sorted(itos, key=lambda x:weights[x])
-  weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
-  print(weights)
-
-
+calculateTradeoffForWeights(weights)
 
