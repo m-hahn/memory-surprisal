@@ -10,7 +10,7 @@ with open("resultsByWord.tsv", "w") as outFile:
     script = name[name.index("yWith"):name.index("_model")]
     plugin = ("Plugin" in name)
     name_ = name[10:].split("_")
-    language = name[0]
+    language = name_[0]
     model = name_[-1][:-4]
     with open(PATH+name, "r") as inFile:
        next(inFile)
