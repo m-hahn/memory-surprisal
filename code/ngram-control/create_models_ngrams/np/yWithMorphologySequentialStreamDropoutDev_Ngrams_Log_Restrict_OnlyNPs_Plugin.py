@@ -187,7 +187,6 @@ def orderSentence(sentence, dhLogits, printThings):
          if set(leftDependencies).issubset(set(["case", "det", "nummod", "amod"])):
             leftLengths = [len(x.get("children_DH", []) + x.get("children_HD", [])) for x in childrenLeft]
             if max(leftLengths+[0]) == 0:
-   #           print(leftDependencies, leftLengths)
               dependents = [sentence[i-1] for i in line.get("children_DH", [])]
               if model_[1] != "":
                   positions = {{"A" : "amod", "N" : "nummod", "D" : "det"}[x] : model_[1].index(x) for x in "AND"}
@@ -368,16 +367,16 @@ def createStreamContinuous(corpus):
          #print(np)
          for line in np+["EOS"]:
           if line == "EOS":
-            yield ("EOS", MAX_DIST, "EOS")
+            yield ("EOS", MAX_DIST, "EOS", "EOS")
           else:
             if line["dep"] in ["amod", "det"]:
                 timeSinceRelevant = 0
             else:
                 timeSinceRelevant += 1
-            yield (line["word"], min(MAX_DIST,timeSinceRelevant), line["posUni"])
-         for _ in range(args.cutoff):
-            yield ("PAD", MAX_DIST, "PAD")
-         yield ("SOS", MAX_DIST, "SOS")
+            yield (line["word"], min(MAX_DIST,timeSinceRelevant), line["posUni"], line["coarse_dep"])
+         for _ in range(args.cutoff+2):
+            yield ("PAD", MAX_DIST, "PAD", "PAD")
+         yield ("SOS", MAX_DIST, "SOS", "PAD")
 
 
 
@@ -449,15 +448,17 @@ lastProbability = [None for _ in idev]
 newProbability = [None for _ in idev]
 
 devSurprisalTable = []
+devSurprisalTables = {"amod" : ([]), "det" : ([]), "nummod" : ([]), "case" :([]), "NOUN" : ([]), "EOS" : ([])}
 for k in range(0,args.cutoff):
    print(k)
    startK, endK = getStartEnd(k) # Possible speed optimization: There is some redundant computation here, could be reused from the previous iteration. But the algorithm is very fast already.
    startK2, endK2 = getStartEnd(k+1)
    cachedFollowingCounts = {}
+   surprisalByPOS = {"amod" : ([0,0]), "det" : ([0,0]), "nummod" : ([0,0]), "case" :([0,0]), "NOUN" : ([0,0]), "EOS" : ([0,0])}
    for j in range(len(idev)):
 #      print(dev[j], dev[j][0] == "PAD")
 #      print(devW[idev[j]])
-      if devW[idev[j]][0] in ["PAD", "SOS"]:
+      if devW[idev[j]] in ["PAD", "SOS"]:
          continue
       start2, end2 = startK2[j], endK2[j]
       devPref = tuple(devW[idev[j]:idev[j]+k+1])
@@ -504,8 +505,22 @@ for k in range(0,args.cutoff):
       elif k == 0:
               probability = log(countNgram + args.delta) - log(len(train) + args.delta * len(itos))
               newProbability[j] = probability
+   #   print(newProbability[j], dev[idev[j]][2])
+      if dev[idev[j]][3] not in surprisalByPOS and dev[idev[j]][2] != "NOUN":
+         print(dev[idev[j]][3], dev[idev[j]][2])
+         relation = None
+      elif dev[idev[j]][3] not in surprisalByPOS:
+         relation = "NOUN"
+      else:
+         relation = dev[idev[j]][3]
+      if relation is not None:
+         surprisalByPOS[relation][0] += newProbability[j]
+         surprisalByPOS[relation][1] += 1
    #           print(k, probability, devW[idev[j]], countNgram)
 #              assert abs(probability) > 1e-5, devW[idev[j]]
+   for pos in surprisalByPOS:
+     devSurprisalTables[pos].append(surprisalByPOS[pos][0] / surprisalByPOS[pos][1])
+   print(devSurprisalTables)
    lastProbability = newProbability 
    newProbability = [None for _ in idev]
    assert all([x is None or x <=0 for x in lastProbability])
@@ -530,6 +545,7 @@ with open(outpath, "w") as outFile:
          print(str(args), file=outFile)
          print(devSurprisalTable[-1], file=outFile)
          print(" ".join(map(str,devSurprisalTable)), file=outFile)
-
+         for key in sorted(list(devSurprisalTables)):
+            print(" ".join([key] + list(map(str,devSurprisalTables[key]))), file=outFile)
 
 

@@ -1,295 +1,589 @@
-Language	Estimator	Model	Distance	Surprisal
-Czech	Heldout	DAN	0	2.8675568907725664
-Czech	Heldout	DAN	1	1.989069151485293
-Czech	Heldout	DAN	2	1.9897270138343945
-Czech	Heldout	DAN	3	2.008635930691269
-Czech	Heldout	DAN	4	2.0268203835630354
-Czech	Heldout	DAN	5	2.0385772474731514
-Czech	Heldout	DAN	6	2.0346850404585846
-Czech	Heldout	NDA	0	2.8675568907725664
-Czech	Heldout	NDA	1	1.9882359893153871
-Czech	Heldout	NDA	2	1.988912602098401
-Czech	Heldout	NDA	3	2.007792614558531
-Czech	Heldout	NDA	4	2.0259426093726276
-Czech	Heldout	NDA	5	2.0376633199144876
-Czech	Heldout	NDA	6	2.0337341960590383
-Czech	Heldout	ADN	0	2.8675568907725664
-Czech	Heldout	ADN	1	1.9924079458838482
-Czech	Heldout	ADN	2	1.992833565875555
-Czech	Heldout	ADN	3	2.0118692694897065
-Czech	Heldout	ADN	4	2.0302304867008334
-Czech	Heldout	ADN	5	2.0421739657037787
-Czech	Heldout	ADN	6	2.0384702882614634
-Czech	Heldout	DNA	0	2.8675568907725664
-Czech	Heldout	DNA	1	1.9882279218668846
-Czech	Heldout	DNA	2	1.988894878393524
-Czech	Heldout	DNA	3	2.007760456203327
-Czech	Heldout	DNA	4	2.0258959449503067
-Czech	Heldout	DNA	5	2.03760216385039
-Czech	Heldout	DNA	6	2.033658562321563
-Czech	Heldout	GROUND	0	2.8675568907725664
-Czech	Heldout	GROUND	1	1.9879465714977969
-Czech	Heldout	GROUND	2	1.9886835931781977
-Czech	Heldout	GROUND	3	2.007611176735646
-Czech	Heldout	GROUND	4	2.0258074782563287
-Czech	Heldout	GROUND	5	2.0375742605658735
-Czech	Heldout	GROUND	6	2.0336912023444373
-Czech	Heldout	AND	0	2.8675568907725664
-Czech	Heldout	AND	1	1.9923675417572186
-Czech	Heldout	AND	2	1.9927924985146712
-Czech	Heldout	AND	3	2.0118340032179973
-Czech	Heldout	AND	4	2.0302013855837755
-Czech	Heldout	AND	5	2.042150928368252
-Czech	Heldout	AND	6	2.0384531490512745
-Czech	Heldout	NAD	0	2.8675568907725664
-Czech	Heldout	NAD	1	1.991524013888368
-Czech	Heldout	NAD	2	1.9919647456375251
-Czech	Heldout	NAD	3	2.0109681903003502
-Czech	Heldout	NAD	4	2.0292915600640296
-Czech	Heldout	NAD	5	2.0411953920379884
-Czech	Heldout	NAD	6	2.037451195805845
-Czech	Plugin	NDA	0	2.8423153681975446
-Czech	Plugin	NDA	1	1.3203992894522023
-Czech	Plugin	NDA	2	1.2408815350019184
-Czech	Plugin	NDA	3	1.2225276742062545
-Czech	Plugin	NDA	4	1.2002302777415104
-Czech	Plugin	NDA	5	1.1702456118294287
-Czech	Plugin	NDA	6	1.1240728345323652
-Czech	Plugin	NAD	0	2.8423153681975446
-Czech	Plugin	NAD	1	1.3278266941201882
-Czech	Plugin	NAD	2	1.2408682435889558
-Czech	Plugin	NAD	3	1.2225259333509215
-Czech	Plugin	NAD	4	1.200228536885476
-Czech	Plugin	NAD	5	1.1702438709734024
-Czech	Plugin	NAD	6	1.1240710936763465
-Czech	Plugin	DNA	0	2.8423153681975446
-Czech	Plugin	DNA	1	1.3203032619941355
-Czech	Plugin	DNA	2	1.2408775703916526
-Czech	Plugin	DNA	3	1.2225251784981592
-Czech	Plugin	DNA	4	1.200227782033335
-Czech	Plugin	DNA	5	1.1702431161212892
-Czech	Plugin	DNA	6	1.124070338824339
-Czech	Plugin	DAN	0	2.8423153681975446
-Czech	Plugin	DAN	1	1.3214129183429022
-Czech	Plugin	DAN	2	1.2408684488011767
-Czech	Plugin	DAN	3	1.2225281487281447
-Czech	Plugin	DAN	4	1.2002307522633278
-Czech	Plugin	DAN	5	1.1702460863513153
-Czech	Plugin	DAN	6	1.1240733090542572
-Czech	Plugin	AND	0	2.8423153681975446
-Czech	Plugin	AND	1	1.3289287439210806
-Czech	Plugin	AND	2	1.2408851000348158
-Czech	Plugin	AND	3	1.2225275605162178
-Czech	Plugin	AND	4	1.2002301640514283
-Czech	Plugin	AND	5	1.1702454981394061
-Czech	Plugin	AND	6	1.1240727208423993
-Czech	Plugin	ADN	0	2.8423153681975446
-Czech	Plugin	ADN	1	1.3288546214737402
-Czech	Plugin	ADN	2	1.240881773404665
-Czech	Plugin	ADN	3	1.2225255478310288
-Czech	Plugin	ADN	4	1.2002281513662496
-Czech	Plugin	ADN	5	1.1702434854542474
-Czech	Plugin	ADN	6	1.1240707081572157
-Czech	Plugin	GROUND	0	2.8423153681975446
-Czech	Plugin	GROUND	1	1.320343482031011
-Czech	Plugin	GROUND	2	1.2408687167179548
-Czech	Plugin	GROUND	3	1.2225278755012148
-Czech	Plugin	GROUND	4	1.2002304790363307
-Czech	Plugin	GROUND	5	1.1702458131242814
-Czech	Plugin	GROUND	6	1.1240730358272266
-English	Heldout	GROUND	0	2.5487185479406214
-English	Heldout	GROUND	1	1.7618107110072054
-English	Heldout	GROUND	2	1.7706068606945495
-English	Heldout	GROUND	3	1.796397134404537
-English	Heldout	GROUND	4	1.8219209131301475
-English	Heldout	GROUND	5	1.8412879058011469
-English	Heldout	GROUND	6	1.8453623440284137
-English	Heldout	ADN	0	2.5487185479406214
-English	Heldout	ADN	1	1.7711918093705197
-English	Heldout	ADN	2	1.7746630956078284
-English	Heldout	ADN	3	1.8007139286068627
-English	Heldout	ADN	4	1.8267403113281568
-English	Heldout	ADN	5	1.8466916310216346
-English	Heldout	ADN	6	1.8513904370377863
-English	Heldout	NAD	0	2.5487185479406214
-English	Heldout	NAD	1	1.7721378491430353
-English	Heldout	NAD	2	1.7750832809390227
-English	Heldout	NAD	3	1.8009793948002488
-English	Heldout	NAD	4	1.8268761131012454
-English	Heldout	NAD	5	1.8466977131843243
-English	Heldout	NAD	6	1.8512670381117255
-English	Heldout	DAN	0	2.5487185479406214
-English	Heldout	DAN	1	1.761887367904194
-English	Heldout	DAN	2	1.770772034280668
-English	Heldout	DAN	3	1.7966657309780876
-English	Heldout	DAN	4	1.8222985853924745
-English	Heldout	DAN	5	1.8417763538584289
-English	Heldout	DAN	6	1.8459620128060146
-English	Heldout	AND	0	2.5487185479406214
-English	Heldout	AND	1	1.7724390180854401
-English	Heldout	AND	2	1.775561684110889
-English	Heldout	AND	3	1.801506651131042
-English	Heldout	AND	4	1.8274360129944123
-English	Heldout	AND	5	1.8472937590603482
-English	Heldout	AND	6	1.851900857171205
-English	Heldout	NDA	0	2.5487185479406214
-English	Heldout	NDA	1	1.7619945880549535
-English	Heldout	NDA	2	1.7705435921176091
-English	Heldout	NDA	3	1.7961838118600464
-English	Heldout	NDA	4	1.8216090008429027
-English	Heldout	NDA	5	1.8408871981388868
-English	Heldout	NDA	6	1.8448776931895616
-English	Heldout	DNA	0	2.5487185479406214
-English	Heldout	DNA	1	1.762599504051875
-English	Heldout	DNA	2	1.7713308590549524
-English	Heldout	DNA	3	1.7971840997919635
-English	Heldout	DNA	4	1.8227642141903915
-English	Heldout	DNA	5	1.8421877458098255
-English	Heldout	DNA	6	1.8463200844717276
-English	Plugin	DAN	0	2.5010814837532918
-English	Plugin	DAN	1	1.2029640621254098
-English	Plugin	DAN	2	1.0802487297345336
-English	Plugin	DAN	3	1.0525899095590183
-English	Plugin	DAN	4	1.0306459159751382
-English	Plugin	DAN	5	1.001253409850335
-English	Plugin	DAN	6	0.9559924873614664
-English	Plugin	GROUND	0	2.5010814837532918
-English	Plugin	GROUND	1	1.2025428932766067
-English	Plugin	GROUND	2	1.0802596238773876
-English	Plugin	GROUND	3	1.0525845704980659
-English	Plugin	GROUND	4	1.0306405769141693
-English	Plugin	GROUND	5	1.0012480707893683
-English	Plugin	GROUND	6	0.9559871483004727
-English	Plugin	DNA	0	2.5010814837532918
-English	Plugin	DNA	1	1.2028486450533489
-English	Plugin	DNA	2	1.0800846190185012
-English	Plugin	DNA	3	1.0525768899163899
-English	Plugin	DNA	4	1.0306328963324907
-English	Plugin	DNA	5	1.0012403902076994
-English	Plugin	DNA	6	0.9559794677188301
-English	Plugin	NAD	0	2.5010814837532918
-English	Plugin	NAD	1	1.2627810517743148
-English	Plugin	NAD	2	1.0799108733750418
-English	Plugin	NAD	3	1.052582812417793
-English	Plugin	NAD	4	1.030637415097332
-English	Plugin	NAD	5	1.0012449089725408
-English	Plugin	NAD	6	0.9559839864836123
-English	Plugin	AND	0	2.5010814837532918
-English	Plugin	AND	1	1.2633638288482536
-English	Plugin	AND	2	1.0797011590619683
-English	Plugin	AND	3	1.0525929525368838
-English	Plugin	AND	4	1.0306475552164416
-English	Plugin	AND	5	1.0012550490916408
-English	Plugin	AND	6	0.9559941266027214
-English	Plugin	NDA	0	2.5010814837532918
-English	Plugin	NDA	1	1.2046479226613347
-English	Plugin	NDA	2	1.0805803246520715
-English	Plugin	NDA	3	1.0525947904197597
-English	Plugin	NDA	4	1.0306507968358585
-English	Plugin	NDA	5	1.0012582907110859
-English	Plugin	NDA	6	0.9559973682222436
-English	Plugin	ADN	0	2.5010814837532918
-English	Plugin	ADN	1	1.261671837748264
-English	Plugin	ADN	2	1.080065878189469
-English	Plugin	ADN	3	1.05259452247135
-English	Plugin	ADN	4	1.0306491251509238
-English	Plugin	ADN	5	1.00125661902612
-English	Plugin	ADN	6	0.9559956965371998
-German	Heldout	DAN	0	2.703024756006253
-German	Heldout	DAN	1	1.8203361602341723
-German	Heldout	DAN	2	1.8167541124313067
-German	Heldout	DAN	3	1.8360704198513575
-German	Heldout	DAN	4	1.8554931906722676
-German	Heldout	DAN	5	1.8688415947550228
-German	Heldout	DAN	6	1.8668312336381325
-German	Heldout	NDA	0	2.703024756006253
-German	Heldout	NDA	1	1.8205140291263375
-German	Heldout	NDA	2	1.8168001333607338
-German	Heldout	NDA	3	1.8360533785416195
-German	Heldout	NDA	4	1.8554300456578445
-German	Heldout	NDA	5	1.8687338353080452
-German	Heldout	NDA	6	1.8666793934594688
-German	Heldout	NAD	0	2.703024756006253
-German	Heldout	NAD	1	1.8266919309224778
-German	Heldout	NAD	2	1.8182427235147136
-German	Heldout	NAD	3	1.8388022803759985
-German	Heldout	NAD	4	1.859712021975956
-German	Heldout	NAD	5	1.8745953372782238
-German	Heldout	NAD	6	1.8741351636256942
-German	Heldout	GROUND	0	2.703024756006253
-German	Heldout	GROUND	1	1.8200275748202146
-German	Heldout	GROUND	2	1.8163540007776808
-German	Heldout	GROUND	3	1.835595219928568
-German	Heldout	GROUND	4	1.8549445660375
-German	Heldout	GROUND	5	1.868219243868714
-German	Heldout	GROUND	6	1.8661347374660588
-German	Heldout	DNA	0	2.703024756006253
-German	Heldout	DNA	1	1.8204531904391286
-German	Heldout	DNA	2	1.8167791525493129
-German	Heldout	DNA	3	1.8360061792262548
-German	Heldout	DNA	4	1.8553327753692619
-German	Heldout	DNA	5	1.8685837946408792
-German	Heldout	DNA	6	1.8664761459831287
-German	Heldout	AND	0	2.703024756006253
-German	Heldout	AND	1	1.8268524696974648
-German	Heldout	AND	2	1.8185949609914454
-German	Heldout	AND	3	1.8392403555818473
-German	Heldout	AND	4	1.8602314489530034
-German	Heldout	AND	5	1.8751973906570076
-German	Heldout	AND	6	1.8748201721705893
-German	Heldout	ADN	0	2.703024756006253
-German	Heldout	ADN	1	1.8261916192569752
-German	Heldout	ADN	2	1.8179752251996153
-German	Heldout	ADN	3	1.838604449649027
-German	Heldout	ADN	4	1.8595659592734495
-German	Heldout	ADN	5	1.8744974008150521
-German	Heldout	ADN	6	1.8740839478098603
-German	Plugin	ADN	0	2.6737558011006533
-German	Plugin	ADN	1	1.3717522372311015
-German	Plugin	ADN	2	1.2035041646815547
-German	Plugin	ADN	3	1.1779108150246125
-German	Plugin	ADN	4	1.1559188291481106
-German	Plugin	ADN	5	1.1263984639859865
-German	Plugin	ADN	6	1.0809406539746542
-German	Plugin	GROUND	0	2.6737558011006533
-German	Plugin	GROUND	1	1.3149501030708166
-German	Plugin	GROUND	2	1.203214369087415
-German	Plugin	GROUND	3	1.177915366719603
-German	Plugin	GROUND	4	1.1559173343094085
-German	Plugin	GROUND	5	1.126396969148568
-German	Plugin	GROUND	6	1.0809391591369095
-German	Plugin	AND	0	2.6737558011006533
-German	Plugin	AND	1	1.3726820588202167
-German	Plugin	AND	2	1.2034088070891917
-German	Plugin	AND	3	1.1779087358127385
-German	Plugin	AND	4	1.1559183248322196
-German	Plugin	AND	5	1.1263979596699876
-German	Plugin	AND	6	1.080940149658676
-German	Plugin	DNA	0	2.6737558011006533
-German	Plugin	DNA	1	1.3147974245348746
-German	Plugin	DNA	2	1.2030233648852797
-German	Plugin	DNA	3	1.1779158291370115
-German	Plugin	DNA	4	1.155917174440535
-German	Plugin	DNA	5	1.1263968092781949
-German	Plugin	DNA	6	1.0809389992666343
-German	Plugin	DAN	0	2.6737558011006533
-German	Plugin	DAN	1	1.3146373336023833
-German	Plugin	DAN	2	1.203028873600922
-German	Plugin	DAN	3	1.1779153162571294
-German	Plugin	DAN	4	1.155917351956083
-German	Plugin	DAN	5	1.126396986793782
-German	Plugin	DAN	6	1.0809391767822478
-German	Plugin	NDA	0	2.6737558011006533
-German	Plugin	NDA	1	1.3158165494224152
-German	Plugin	NDA	2	1.2033139413051914
-German	Plugin	NDA	3	1.177916879259968
-German	Plugin	NDA	4	1.1559182245631034
-German	Plugin	NDA	5	1.1263978594008084
-German	Plugin	NDA	6	1.0809400493893442
-German	Plugin	NAD	0	2.6737558011006533
-German	Plugin	NAD	1	1.372568634460119
-German	Plugin	NAD	2	1.2035228605348627
-German	Plugin	NAD	3	1.177908947247153
-German	Plugin	NAD	4	1.1559185362666053
-German	Plugin	NAD	5	1.1263981711043372
-German	Plugin	NAD	6	1.0809403610930202
+Language	Estimator	Model	Distance	Surprisal	Script
+Czech	Heldout	NDA	0	8.019155744703474	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	NDA	1	5.945488601141202	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	NDA	2	5.997389042700946	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	NDA	3	6.121900316860677	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	NDA	4	6.259392919741125	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	NDA	5	6.40117958217601	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	NDA	6	6.544797729328031	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	NAD	0	8.019155744703474	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	NAD	1	5.956848521230811	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	NAD	2	6.007928908387648	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	NAD	3	6.1328595104079735	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	NAD	4	6.270942511262182	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	NAD	5	6.413353085925232	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	NAD	6	6.557601462470697	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	DAN	0	8.019155744703474	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	DAN	1	5.948409552574009	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	DAN	2	6.0002313178831415	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	DAN	3	6.124832117014693	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	DAN	4	6.262432317961264	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	DAN	5	6.404332207148744	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	DAN	6	6.548066163984364	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	ADN	0	8.019155744703474	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	ADN	1	5.9599331649577065	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	ADN	2	6.010965261529315	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	ADN	3	6.136011881541745	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	ADN	4	6.274228978209219	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	ADN	5	6.416779281111234	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	ADN	6	6.56117011240585	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	GROUND	0	8.019155744703474	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	GROUND	1	5.944507967667026	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	GROUND	2	5.996617526419817	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	GROUND	3	6.121294990189623	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	GROUND	4	6.258947426849279	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	GROUND	5	6.400892743046953	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	GROUND	6	6.544669476650304	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	AND	0	8.019155744703474	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	AND	1	5.959794545911899	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	AND	2	6.010814758500392	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	AND	3	6.135871835761672	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	AND	4	6.27410236295789	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	AND	5	6.416666577826197	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	AND	6	6.561071219224207	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	DNA	0	8.019155744703474	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	DNA	1	5.945482855471659	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	DNA	2	5.997362651598415	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	DNA	3	6.121836529775773	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	DNA	4	6.259288705568719	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	DNA	5	6.401034116696849	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	DNA	6	6.5446107343112105	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+Czech	Heldout	NAD	0	8.131571056885534	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	NAD	1	6.27636967321107	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	NAD	2	6.301945059008431	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	NAD	3	6.417025228005267	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	NAD	4	6.547150036497237	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	NAD	5	6.6821985528447945	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	NAD	6	6.81931719959306	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	DNA	0	8.131571056885534	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	DNA	1	6.2315858819807195	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	DNA	2	6.252560269931524	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	DNA	3	6.3574292891661095	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	DNA	4	6.476548398861361	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	DNA	5	6.600440862019687	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	DNA	6	6.726355451490826	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	AND	0	8.131571056885534	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	AND	1	6.285283501987647	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	AND	2	6.311274115934157	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	AND	3	6.427190368583025	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	AND	4	6.558207996683419	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	AND	5	6.694160673524738	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	AND	6	6.832189179751402	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	GROUND	0	8.131571056885534	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	GROUND	1	6.2292091762144794	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	GROUND	2	6.2502713426205085	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	GROUND	3	6.355164472205468	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	GROUND	4	6.474306129468067	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	GROUND	5	6.598223066085997	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	GROUND	6	6.724164071462542	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	ADN	0	8.131571056885534	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	ADN	1	6.285387584891221	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	ADN	2	6.311554733761738	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	ADN	3	6.427321592370112	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	ADN	4	6.55813840265863	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	ADN	5	6.693876967404591	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	ADN	6	6.831686176736314	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	DAN	0	8.131571056885534	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	DAN	1	6.240830342507386	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	DAN	2	6.262993712710763	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	DAN	3	6.36945511785728	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	DAN	4	6.490210784303711	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	DAN	5	6.615747580868862	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	DAN	6	6.743312734782853	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	NDA	0	8.131571056885534	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	NDA	1	6.231584532991823	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	NDA	2	6.252425420199191	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	NDA	3	6.357294194073108	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	NDA	4	6.476436658433144	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	NDA	5	6.600362745887755	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Heldout	NDA	6	6.726317162642695	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+Czech	Plugin	DNA	0	7.9421881687903175	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	DNA	1	3.6284364254793453	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	DNA	2	3.408587441038334	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	DNA	3	3.4066047350044113	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	DNA	4	3.4066013255253456	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	DNA	5	3.4066013255253456	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	DNA	6	3.4066013255253456	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	ADN	0	7.9421881687903175	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	ADN	1	3.657517276318338	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	ADN	2	3.4086001100263252	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	ADN	3	3.4066048928518518	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	ADN	4	3.4066014833727865	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	ADN	5	3.4066014833727865	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	ADN	6	3.4066014833727865	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	GROUND	0	7.9421881687903175	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	GROUND	1	3.6285745345711042	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	GROUND	2	3.408555385004534	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	GROUND	3	3.4066076809135972	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	GROUND	4	3.406604271434531	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	GROUND	5	3.406604271434531	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	GROUND	6	3.406604271434531	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	DAN	0	7.9421881687903175	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	DAN	1	3.632210952451645	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	DAN	2	3.4085516812162955	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	DAN	3	3.406605817379714	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	DAN	4	3.406602407900648	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	DAN	5	3.406602407900648	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	DAN	6	3.406602407900648	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	NAD	0	7.9421881687903175	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	NAD	1	3.654021659463949	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	NAD	2	3.40855279344826	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	NAD	3	3.406600093691416	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	NAD	4	3.4065966842123494	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	NAD	5	3.4065966842123494	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	NAD	6	3.4065966842123494	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	NDA	0	7.9421881687903175	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	NDA	1	3.6287629527980374	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	NDA	2	3.4085978383108113	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	NDA	3	3.4066058588509534	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	NDA	4	3.4066024493718876	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	NDA	5	3.4066024493718876	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	NDA	6	3.4066024493718876	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	AND	0	7.9421881687903175	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	AND	1	3.6577693418596327	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	AND	2	3.408605983144589	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	AND	3	3.4066014935406623	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	AND	4	3.406598084061596	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	AND	5	3.406598084061596	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Plugin	AND	6	3.406598084061596	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+Czech	Heldout	ADN	0	8.015629144058014	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	ADN	1	3.0910951752640794	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	ADN	2	2.579511319124621	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	ADN	3	2.5740432183442223	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	ADN	4	2.574033886865299	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	ADN	5	2.574033886865299	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	ADN	6	2.574033886865299	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	DNA	0	8.015629144058014	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	DNA	1	3.0206076022706743	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	DNA	2	2.5794751175309214	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	DNA	3	2.5740532275431676	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	DNA	4	2.5740438960642447	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	DNA	5	2.5740438960642447	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	DNA	6	2.5740438960642447	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	DAN	0	8.015629144058014	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	DAN	1	3.028629896889441	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	DAN	2	2.579369974170876	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	DAN	3	2.5740399102768934	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	DAN	4	2.5740305787979705	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	DAN	5	2.5740305787979705	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	DAN	6	2.5740305787979705	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	AND	0	8.015629144058014	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	AND	1	3.0915068892951463	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	AND	2	2.579541119046652	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	AND	3	2.5740521599755732	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	AND	4	2.5740428284966503	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	AND	5	2.5740428284966503	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	AND	6	2.5740428284966503	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	NAD	0	8.015629144058014	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	NAD	1	3.0829978255934063	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	NAD	2	2.579390842004924	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	NAD	3	2.5740442783977704	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	NAD	4	2.574034946918847	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	NAD	5	2.574034946918847	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	NAD	6	2.574034946918847	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	GROUND	0	8.015629144058014	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	GROUND	1	3.0211535445349815	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	GROUND	2	2.5793952911491345	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	GROUND	3	2.5740695221010945	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	GROUND	4	2.5740601906221716	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	GROUND	5	2.5740601906221716	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	GROUND	6	2.5740601906221716	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	NDA	0	8.015629144058014	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	NDA	1	3.0212488535401927	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	NDA	2	2.5794909198236375	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	NDA	3	2.5740439725357644	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	NDA	4	2.5740346410568415	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	NDA	5	2.5740346410568415	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+Czech	Heldout	NDA	6	2.5740346410568415	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	GROUND	0	6.591334652220787	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	GROUND	1	4.968861029102135	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	GROUND	2	5.043945712837913	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	GROUND	3	5.184430565716983	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	GROUND	4	5.3385766364700515	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	GROUND	5	5.49725128727287	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	GROUND	6	5.6578459297361245	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	NAD	0	6.591334652220787	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	NAD	1	5.0019147847681245	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	NAD	2	5.057717616283966	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	NAD	3	5.198472420330466	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	NAD	4	5.3537782606430335	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	NAD	5	5.51388541355503	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	NAD	6	5.676046933325989	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	AND	0	6.591334652220787	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	AND	1	5.002866223628739	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	AND	2	5.059231361480191	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	AND	3	5.2001383666929755	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	AND	4	5.355545811120391	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	AND	5	5.515766168439045	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	AND	6	5.678045939796031	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	NDA	0	6.591334652220787	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	NDA	1	4.9694339858084	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	NDA	2	5.043623929738495	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	NDA	3	5.183563505456733	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	NDA	4	5.337338126621601	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	NDA	5	5.495675144687713	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	NDA	6	5.655948681513478	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	DNA	0	6.591334652220787	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	DNA	1	4.9714620101229885	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	DNA	2	5.046182152277813	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	DNA	3	5.186783510283094	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	DNA	4	5.341034759059958	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	DNA	5	5.499818791920759	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	DNA	6	5.660528612401488	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	DAN	0	6.591334652220787	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	DAN	1	4.96915223828308	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	DAN	2	5.044439937767642	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	DAN	3	5.185183873227243	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	DAN	4	5.339615834215611	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	DAN	5	5.498584863714317	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	DAN	6	5.659476536785454	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	ADN	0	6.591334652220787	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	ADN	1	4.99874500619802	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	ADN	2	5.056330211922173	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	ADN	3	5.197612240008365	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	ADN	4	5.35335196140632	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	ADN	5	5.513888233283271	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	ADN	6	5.676475707903789	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+English	Heldout	GROUND	0	6.528901643199166	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	GROUND	1	4.917318076264746	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	GROUND	2	4.955407705772853	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	GROUND	3	5.064284050347434	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	GROUND	4	5.187053438525213	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	GROUND	5	5.314019021962232	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	GROUND	6	5.442768985407842	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	DAN	0	6.528901643199166	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	DAN	1	4.919561477988112	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	DAN	2	4.9588230930089825	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	DAN	3	5.069040573621613	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	DAN	4	5.193156565512776	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	DAN	5	5.321464300194553	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	DAN	6	5.4515524480380995	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	ADN	0	6.528901643199166	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	ADN	1	4.991937173453291	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	ADN	2	5.030975961783018	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	ADN	3	5.169672933396668	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	ADN	4	5.323405131974302	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	ADN	5	5.481380393528273	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	ADN	6	5.641069857683513	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	NDA	0	6.528901643199166	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	NDA	1	4.9191745622545895	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	NDA	2	4.957359188087096	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	NDA	3	5.066975002266628	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	NDA	4	5.190742960478791	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	NDA	5	5.318731366349342	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	NDA	6	5.4485177631698605	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	NAD	0	6.528901643199166	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	NAD	1	4.993589555277157	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	NAD	2	5.031253467228687	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	NAD	3	5.170391224737673	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	NAD	4	5.324786575256421	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	NAD	5	5.483420843449011	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	NAD	6	5.643762902430356	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	AND	0	6.528901643199166	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	AND	1	4.99750781669897	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	AND	2	5.036401621054092	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	AND	3	5.176288373858595	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	AND	4	5.3313480020483155	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	AND	5	5.490668411823211	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	AND	6	5.6517042453084825	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	DNA	0	6.528901643199166	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	DNA	1	4.919637274634779	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	DNA	2	4.956796526963414	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	DNA	3	5.065435284221595	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	DNA	4	5.1879206657662555	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	DNA	5	5.314603353969277	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Heldout	DNA	6	5.443080931542031	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+English	Plugin	NDA	0	6.442991337109721	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	NDA	1	3.10494832726577	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	NDA	2	2.7491108988432558	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	NDA	3	2.714773746128689	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	NDA	4	2.714488273679884	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	NDA	5	2.714488273679884	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	NDA	6	2.714488273679884	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	GROUND	0	6.442991337109721	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	GROUND	1	3.098104490675022	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	GROUND	2	2.7480336554961418	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	GROUND	3	2.7147697718442427	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	GROUND	4	2.7144842993954383	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	GROUND	5	2.7144842993954383	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	GROUND	6	2.7144842993954383	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	DNA	0	6.442991337109721	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	DNA	1	3.099096643550594	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	DNA	2	2.7475521417206656	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	DNA	3	2.7147907618109564	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	DNA	4	2.714505289362149	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	DNA	5	2.714505289362149	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	DNA	6	2.714505289362149	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	NAD	0	6.442991337109721	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	NAD	1	3.2936786998749876	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	NAD	2	2.7469781564011724	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	NAD	3	2.714800113409367	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	NAD	4	2.7145100833837614	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	NAD	5	2.7145100833837614	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	NAD	6	2.7145100833837614	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	DAN	0	6.442991337109721	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	DAN	1	3.0994691595340296	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	DAN	2	2.7480208164636135	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	DAN	3	2.714768882142269	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	DAN	4	2.7144834096934636	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	DAN	5	2.7144834096934636	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	DAN	6	2.7144834096934636	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	AND	0	6.442991337109721	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	AND	1	3.2955689404424757	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	AND	2	2.7462247844547494	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	AND	3	2.7147605530681425	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	AND	4	2.7144705230425368	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	AND	5	2.7144705230425368	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	AND	6	2.7144705230425368	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	ADN	0	6.442991337109721	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	ADN	1	3.290084636534252	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	ADN	2	2.7474969610752136	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	ADN	3	2.714821985482372	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	ADN	4	2.714531955456766	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	ADN	5	2.714531955456766	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Plugin	ADN	6	2.714531955456766	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+English	Heldout	DNA	0	6.351347271649109	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	DNA	1	2.778722446867782	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	DNA	2	2.2406513639586385	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	DNA	3	2.180776328417336	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	DNA	4	2.180253400562127	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	DNA	5	2.180253400562127	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	DNA	6	2.180253400562127	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	DAN	0	6.351347271649109	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	DAN	1	2.7790041959296357	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	DAN	2	2.2415135491056266	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	DAN	3	2.1807203700435913	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	DAN	4	2.180197442188382	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	DAN	5	2.180197442188382	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	DAN	6	2.180197442188382	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	AND	0	6.351347271649109	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	AND	1	3.0960649872771566	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	AND	2	2.2383122109682936	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	AND	3	2.1807129135139283	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	AND	4	2.1801816370987424	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	AND	5	2.1801816370987424	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	AND	6	2.1801816370987424	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	NDA	0	6.351347271649109	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	NDA	1	2.788987498148584	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	NDA	2	2.2434296102606766	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	NDA	3	2.180725051758587	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	NDA	4	2.1802021239033773	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	NDA	5	2.1802021239033773	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	NDA	6	2.1802021239033773	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	NAD	0	6.351347271649109	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	NAD	1	3.093854979806317	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	NAD	2	2.2397355326640205	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	NAD	3	2.180775217515857	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	NAD	4	2.180243941100671	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	NAD	5	2.180243941100671	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	NAD	6	2.180243941100671	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	GROUND	0	6.351347271649109	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	GROUND	1	2.7775129862371744	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	GROUND	2	2.2414590837048842	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	GROUND	3	2.1806863022374507	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	GROUND	4	2.180163374382242	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	GROUND	5	2.180163374382242	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	GROUND	6	2.180163374382242	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	ADN	0	6.351347271649109	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	ADN	1	3.089610262288512	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	ADN	2	2.2406711702842603	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	ADN	3	2.1807969734460633	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	ADN	4	2.1802656970308774	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	ADN	5	2.1802656970308774	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+English	Heldout	ADN	6	2.1802656970308774	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	GROUND	0	7.232057775470483	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	GROUND	1	5.224769284718069	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	GROUND	2	5.260359964850525	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	GROUND	3	5.381756690360323	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	GROUND	4	5.5183265060636	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	GROUND	5	5.659922033279949	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	GROUND	6	5.803592527256412	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	ADN	0	7.232057775470483	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	ADN	1	5.244170918769147	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	ADN	2	5.264652558242097	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	ADN	3	5.390613682625096	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	ADN	4	5.532493891483984	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	ADN	5	5.679548191743223	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	ADN	6	5.828725028683289	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	NAD	0	7.232057775470483	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	NAD	1	5.245823447779863	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	NAD	2	5.265529717142039	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	NAD	3	5.391256742904887	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	NAD	4	5.532962644212692	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	NAD	5	5.679854906919884	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	NAD	6	5.828874465434545	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	NDA	0	7.232057775470483	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	NDA	1	5.226375350696204	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	NDA	2	5.261824943897283	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	NDA	3	5.38325786301049	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	NDA	4	5.519913007065358	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	NDA	5	5.661599143944098	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	NDA	6	5.805363105143734	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	DAN	0	7.232057775470483	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	DAN	1	5.225826577058676	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	DAN	2	5.2617067192475915	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	DAN	3	5.383338713161298	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	DAN	4	5.5201406545754645	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	DAN	5	5.661969835628661	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	DAN	6	5.805875508357866	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	AND	0	7.232057775470483	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	AND	1	5.246379886196516	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	AND	2	5.266721171756455	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	AND	3	5.392731019625653	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	AND	4	5.534702825446557	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	AND	5	5.681864160954364	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	AND	6	5.831153478905085	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	DNA	0	7.232057775470483	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	DNA	1	5.226209834096871	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	DNA	2	5.261776783920869	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	DNA	3	5.38310888605152	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	DNA	4	5.519586970270874	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	DNA	5	5.661088023552443	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	DNA	6	5.804665823485059	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs.py
+German	Heldout	NDA	0	7.2059330429389	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	NDA	1	5.166478592760431	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	NDA	2	5.150163993696412	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	NDA	3	5.245090930949354	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	NDA	4	5.357208776723669	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	NDA	5	5.47477481844159	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	NDA	6	5.594646860686916	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	GROUND	0	7.2059330429389	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	GROUND	1	5.162232653025918	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	GROUND	2	5.146228166109733	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	GROUND	3	5.240523553324816	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	GROUND	4	5.3518866260151965	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	GROUND	5	5.468691290925839	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	GROUND	6	5.587799814787787	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	AND	0	7.2059330429389	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	AND	1	5.212154149390599	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	AND	2	5.190525479484139	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	AND	3	5.311562697305168	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	AND	4	5.449894583595365	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	AND	5	5.593315108434306	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	AND	6	5.738823539137514	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	DAN	0	7.2059330429389	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	DAN	1	5.163475730111484	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	DAN	2	5.14783103078425	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	DAN	3	5.242333206728489	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	DAN	4	5.35389984636592	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	DAN	5	5.470910605801156	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	DAN	6	5.590227467078228	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	DNA	0	7.2059330429389	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	DNA	1	5.164768189620131	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	DNA	2	5.149162363916986	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	DNA	3	5.243782554291784	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	DNA	4	5.355417327208199	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	DNA	5	5.472487581136851	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	DNA	6	5.591864192436853	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	NAD	0	7.2059330429389	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	NAD	1	5.213081293285774	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	NAD	2	5.190170855954248	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	NAD	3	5.310714465839896	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	NAD	4	5.44862168975609	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	NAD	5	5.59162494916856	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	NAD	6	5.736720590241921	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	ADN	0	7.2059330429389	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	ADN	1	5.209671057452682	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	ADN	2	5.187623755739812	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	ADN	3	5.308209503955391	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	ADN	4	5.446063856713186	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	ADN	5	5.589006171660798	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Heldout	ADN	6	5.734037313410024	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_2.py
+German	Plugin	ADN	0	7.108230728717734	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	ADN	1	3.6799409192474606	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	ADN	2	3.1759794372802155	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	ADN	3	3.149419976302688	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	ADN	4	3.149286060989743	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	ADN	5	3.149286060989743	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	ADN	6	3.149286060989743	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	DNA	0	7.108230728717734	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	DNA	1	3.4931979512154836	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	DNA	2	3.174414320351705	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	DNA	3	3.149441140084096	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	DNA	4	3.1492853590998364	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	DNA	5	3.1492853590998364	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	DNA	6	3.1492853590998364	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	NDA	0	7.108230728717734	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	NDA	1	3.4965395840243847	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	NDA	2	3.175367824077504	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	NDA	3	3.1494519492865543	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	NDA	4	3.149296168302296	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	NDA	5	3.149296168302296	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	NDA	6	3.149296168302296	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	NAD	0	7.108230728717734	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	NAD	1	3.6826177222039926	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	NAD	2	3.1760488146597683	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	NAD	3	3.149427704566354	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	NAD	4	3.1492989530092523	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	NAD	5	3.1492989530092523	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	NAD	6	3.1492989530092523	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	DAN	0	7.108230728717734	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	DAN	1	3.492673748679764	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	DAN	2	3.1744380749959733	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	DAN	3	3.1494437153543604	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	DAN	4	3.149290198032864	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	DAN	5	3.149290198032864	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	DAN	6	3.149290198032864	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	AND	0	7.108230728717734	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	AND	1	3.6829893875261943	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	AND	2	3.175683701490866	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	AND	3	3.1494281129504893	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	AND	4	3.149299361393388	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	AND	5	3.149299361393388	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	AND	6	3.149299361393388	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	GROUND	0	7.108230728717734	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	GROUND	1	3.493698353031882	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	GROUND	2	3.175034356461651	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	GROUND	3	3.1494422928274255	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	GROUND	4	3.149288552190984	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	GROUND	5	3.149288552190984	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Plugin	GROUND	6	3.149288552190984	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin.py
+German	Heldout	GROUND	0	7.047756886866848	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	GROUND	1	3.1369739120671456	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	GROUND	2	2.617511943300327	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	GROUND	3	2.5681167173685586	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	GROUND	4	2.567819463838374	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	GROUND	5	2.567819463838374	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	GROUND	6	2.567819463838374	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	AND	0	7.047756886866848	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	AND	1	3.4586351099343595	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	AND	2	2.6188448091968377	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	AND	3	2.568074700022851	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	AND	4	2.5678257622289817	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	AND	5	2.5678257622289817	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	AND	6	2.5678257622289817	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	DNA	0	7.047756886866848	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	DNA	1	3.1359760106393613	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	DNA	2	2.6163251232489606	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	DNA	3	2.568112473793418	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	DNA	4	2.5678112753036846	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	DNA	5	2.5678112753036846	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	DNA	6	2.5678112753036846	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	DAN	0	7.047756886866848	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	DAN	1	3.134722044651237	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	DAN	2	2.6163587387916345	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	DAN	3	2.568111806694834	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	DAN	4	2.567814984938304	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	DAN	5	2.567814984938304	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	DAN	6	2.567814984938304	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	NAD	0	7.047756886866848	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	NAD	1	3.45918279833671	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	NAD	2	2.619554569490899	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	NAD	3	2.5680744899922536	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	NAD	4	2.5678255521983853	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	NAD	5	2.5678255521983853	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	NAD	6	2.5678255521983853	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	NDA	0	7.047756886866848	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	NDA	1	3.142853903814332	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	NDA	2	2.6181371581984565	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	NDA	3	2.5681144885723315	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	NDA	4	2.5678132900825976	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	NDA	5	2.5678132900825976	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	NDA	6	2.5678132900825976	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	ADN	0	7.047756886866848	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	ADN	1	3.45427723381014	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	ADN	2	2.61944128674953	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	ADN	3	2.568092510737459	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	ADN	4	2.5678335889557022	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	ADN	5	2.5678335889557022	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py
+German	Heldout	ADN	6	2.5678335889557022	yWithMorphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_2.py

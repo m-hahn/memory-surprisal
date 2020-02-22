@@ -8,7 +8,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--language", dest="language", type=str)
 parser.add_argument("--model", dest="model", type=str)
-parser.add_argument("--alpha", dest="alpha", type=float, default=1.0)
+parser.add_argument("--alpha", dest="alpha", type=float, default=0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
 parser.add_argument("--cutoff", dest="cutoff", type=int, default=7)
@@ -74,7 +74,7 @@ def initializeOrderTable():
    distanceSum = {}
    distanceCounts = {}
    depsVocab = set()
-   for partition in ["train", "dev"]:
+   for partition in ["train"]:
      for sentence in CorpusIterator(args.language,partition, storeMorph=True).iterator():
       for line in sentence:
           vocab[line["word"]] = vocab.get(line["word"], 0) + 1
@@ -187,6 +187,8 @@ def orderSentence(sentence, dhLogits, printThings):
          if set(leftDependencies).issubset(set(["case", "det", "nummod", "amod"])):
             leftLengths = [len(x.get("children_DH", []) + x.get("children_HD", [])) for x in childrenLeft]
             if max(leftLengths+[0]) == 0:
+              if len(leftDependencies) == 1:
+               continue
               dependents = [sentence[i-1] for i in line.get("children_DH", [])]
               if model_[1] != "":
                   positions = {{"A" : "amod", "N" : "nummod", "D" : "det"}[x] : model_[1].index(x) for x in "AND"}
@@ -380,13 +382,13 @@ def createStreamContinuous(corpus):
 
 
 
-corpusDev = CorpusIterator(args.language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
+corpusDev = CorpusIterator(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
 dev = list(createStreamContinuous(corpusDev))[::-1]
 
 
-corpusTrain = CorpusIterator(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
-train = list(createStreamContinuous(corpusTrain))[::-1]
-
+#corpusTrain = CorpusIterator(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
+#train = list(createStreamContinuous(corpusTrain))[::-1]
+train = dev
 
 idev = range(len(dev))
 itrain = range(len(train))
@@ -460,6 +462,7 @@ for k in range(0,args.cutoff):
 #      print(devW[idev[j]])
       if devW[idev[j]] in ["PAD", "SOS"]:
          continue
+#      print(devW[idev[j]])
       start2, end2 = startK2[j], endK2[j]
       devPref = tuple(devW[idev[j]:idev[j]+k+1])
       if start2 > 0 and end2 < len(train):
@@ -497,7 +500,7 @@ for k in range(0,args.cutoff):
               if followingCount == 0:
                   newProbability[j] = lastProbability[j]
               else:
-          
+                  assert countNgram > 0
                   probability = log(max(countNgram - args.alpha, 0.0) + args.alpha * followingCount * exp(lastProbability[j])) -  log(countPrefix)
                   newProbability[j] = probability
          else:
@@ -525,7 +528,9 @@ for k in range(0,args.cutoff):
    newProbability = [None for _ in idev]
    assert all([x is None or x <=0 for x in lastProbability])
    try:
+    #   print(lastProbability[:100])
        lastProbabilityFiltered = [x for x in lastProbability if x is not None]
+     #  print(lastProbabilityFiltered[:100])
        surprisal = - sum([x for x in lastProbabilityFiltered])/len(lastProbabilityFiltered)
    except ValueError:
        print("PROBLEM", file=sys.stderr)

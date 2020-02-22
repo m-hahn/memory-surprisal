@@ -187,6 +187,9 @@ def orderSentence(sentence, dhLogits, printThings):
          if set(leftDependencies).issubset(set(["case", "det", "nummod", "amod"])):
             leftLengths = [len(x.get("children_DH", []) + x.get("children_HD", [])) for x in childrenLeft]
             if max(leftLengths+[0]) == 0:
+              if len(leftDependencies) == 1:
+               continue
+              #print(leftDependencies, leftLengths)
               dependents = [sentence[i-1] for i in line.get("children_DH", [])]
               if model_[1] != "":
                   positions = {{"A" : "amod", "N" : "nummod", "D" : "det"}[x] : model_[1].index(x) for x in "AND"}
