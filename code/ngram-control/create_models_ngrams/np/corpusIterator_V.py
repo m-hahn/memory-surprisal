@@ -7,7 +7,7 @@ import sys
 header = ["index", "word", "lemma", "posUni", "posFine", "morph", "head", "dep", "_", "_"]
 
 
-def readUDCorpus(language, partition, ignoreCorporaWithoutWords=False):
+def readUDCorpus(language, partition, ignoreCorporaWithoutWords=True):
       l = language.split("_")
       language = "_".join(l[:-1])
       version = l[-1]
@@ -87,7 +87,7 @@ def readUDCorpus(language, partition, ignoreCorporaWithoutWords=False):
       return data
 
 class CorpusIterator_V():
-   def __init__(self, language, partition="train", storeMorph=False, splitLemmas=False, shuffleData=True, shuffleDataSeed=None, splitWords=False, ignoreCorporaWithoutWords=False):
+   def __init__(self, language, partition="train", storeMorph=False, splitLemmas=False, shuffleData=True, shuffleDataSeed=None, splitWords=False, ignoreCorporaWithoutWords=True):
       print("LANGUAGE", language)
       if splitLemmas:
            assert language == "Korean"

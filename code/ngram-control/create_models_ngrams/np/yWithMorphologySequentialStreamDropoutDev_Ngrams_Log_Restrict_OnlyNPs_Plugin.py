@@ -525,9 +525,7 @@ for k in range(0,args.cutoff):
    newProbability = [None for _ in idev]
    assert all([x is None or x <=0 for x in lastProbability])
    try:
-    #   print(lastProbability[:100])
        lastProbabilityFiltered = [x for x in lastProbability if x is not None]
-     #  print(lastProbabilityFiltered[:100])
        surprisal = - sum([x for x in lastProbabilityFiltered])/len(lastProbabilityFiltered)
    except ValueError:
        print("PROBLEM", file=sys.stderr)
