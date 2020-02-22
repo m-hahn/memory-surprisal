@@ -12,7 +12,7 @@ with open("results.tsv", "w") as outFile:
        next(inFile)
        surprisals = [float(x) for x in next(inFile).strip().split(" ")]
     script = name[name.index("yWith"):name.index("_model")]
-    plugin = ("Plugin.py" in name)
+    plugin = ("Plugin" in name)
     name = name[10:].split("_")
     language = name[0]
     model = name[-1][:-4]
