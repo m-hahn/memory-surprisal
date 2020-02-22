@@ -114,6 +114,11 @@ import torch.nn.functional
 words = []
 
 
+affixFrequencies = {}
+for verbWithAff in data:
+  for affix in verbWithAff[1:]:
+    affixFrequencies[affix] = affixFrequencies.get(affix, 0)+1
+
 itos = set()
 for verbWithAff in data:
   for affix in verbWithAff[1:]:
@@ -164,7 +169,13 @@ for iteration in range(200):
   itos_ = sorted(itos, key=lambda x:weights[x])
   weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
   print(weights)
-
+  for x in itos_:
+     print("\t".join([str(y) for y in [x, weights[x], affixFrequencies[x]]]))
+with open("output/extracted_"+str(myID)+".tsv", "w") as outFile:
+  for x in itos_:
+  #   if affixFrequencies[x] < 10:
+   #    continue
+     print("\t".join([str(y) for y in [x, weights[x], affixFrequencies[x]]]), file=outFile)
 
 quit()
 

@@ -331,9 +331,9 @@ def calculateTradeoffForWeights(weights):
    
 
 
-for iteration in range(200):
-  coordinate=None
-  while affixFrequency.get(coordinate, 0) < 10:
+for iteration in range(1000):
+  coordinate=choice(itos)
+  while affixFrequency.get(coordinate, 0) < 10 and random() < 0.95:
      coordinate = choice(itos)
   mostCorrect, mostCorrectValue = 0, None
   for newValue in [-1] + [2*x+1 for x in range(len(itos))] + [weights[coordinate]]:
@@ -352,6 +352,11 @@ for iteration in range(200):
   itos_ = sorted(itos, key=lambda x:weights[x])
   weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
   print(weights)
+  for x in itos_:
+     if affixFrequency[x] < 10:
+       continue
+     print("\t".join([str(y) for y in [x, weights[x], affixFrequency[x]]]))
+  
 
 
 
