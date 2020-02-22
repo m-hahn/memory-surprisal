@@ -4,8 +4,21 @@ PATH = "/u/scr/mhahn/deps/memory-need-ngrams-np/"
 
 files = os.listdir(PATH)
 
+def getMIs(surprisals):
+   mis = []
+   for i in range(len(surprisals)-1):
+     mis.append(surprisals[i] - surprisals[i+1])
+   return mis
+
+def getCumSums(mis):
+  cumsumsIt, cumsumsTIt = [0], [0]
+  for i in range(len(surprisals)-1):
+    cumsumsIt.append(mis[i] + cumsumsIt[-1])
+    cumsumsTIt.append((i+1) * mis[i] + cumsumsTIt[-1])
+  return cumsumsIt, cumsumsTIt
+
 with open("resultsByWord.tsv", "w") as outFile:
-  print("\t".join(["Language", "Estimator", "Model", "Distance", "Surprisal", "Script", "Part"]), file=outFile)
+  print("\t".join(["Language", "Estimator", "Model", "Distance", "Surprisal", "Script", "Part", "It", "SumIt", "SumTIt"]), file=outFile)
   for name in sorted(files):
     script = name[name.index("yWith"):name.index("_model")]
     plugin = ("Plugin" in name)
@@ -22,6 +35,8 @@ with open("resultsByWord.tsv", "w") as outFile:
             continue
          print(language, plugin, model, surprisals, script)
          word = surprisals[0]
-         surprisals = surprisals[1:]
-         for i in range(len(surprisals)):
-            print("\t".join([str(x) for x in [language, "Plugin" if plugin else "Heldout", model, i, surprisals[i], script, word]]), file=outFile)
+         surprisals = [float(x) for x in surprisals[1:]]
+         mis = getMIs(surprisals)
+         cumsumsIt, cumsumsTIt = getCumSums(mis)
+         for i in range(len(surprisals)-1):
+            print("\t".join([str(x) for x in [language, "Plugin" if plugin else "Heldout", model, i, surprisals[i], script, word, mis[i], cumsumsIt[i], cumsumsTIt[i]]]), file=outFile)
