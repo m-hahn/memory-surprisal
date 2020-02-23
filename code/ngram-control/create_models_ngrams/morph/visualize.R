@@ -12,6 +12,12 @@ ggsave(plot, file="figures/Japanese-suffixes.pdf")
 plot = ggplot(curves %>% filter(Script == "forWords_Celex_RandomOrder_FormsWords.py_model"), aes(x=Memory, y=Surprisal, color=Model, group=ModelID)) + geom_line()
 ggsave(plot, file="figures/Japanese-suffixes-words.pdf")
 
+plot = ggplot(curves %>% filter(Script == "forWords_Celex_RandomOrder_All_FormsWordsGraphemes.py_model"), aes(x=Memory, y=Surprisal, color=Model, group=ModelID)) + geom_line()
+ggsave(plot, file="figures/Japanese-suffixes-all-graphemes.pdf")
+
+plot = ggplot(curves %>% filter(Script == "forWords_Celex_RandomOrder_All_Forms.py_model"), aes(x=Memory, y=Surprisal, color=Model, group=ModelID)) + geom_line()
+ggsave(plot, file="figures/Japanese-suffixes-all-graphemes.pdf")
+
 
 #ground = median(d2[d2$Type == "GROUND",]$AUC)
 #real = median(d2[d2$Type == "REAL_REAL",]$AUC)
