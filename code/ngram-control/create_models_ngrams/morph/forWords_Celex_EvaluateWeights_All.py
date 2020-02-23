@@ -91,8 +91,8 @@ for sentence in corpusTrain:
           break
        if line["posUni"] not in ["AUX", "SCONJ"]:
           break
-       if line["dep"] not in ["aux"]:
-          break
+#       if line["dep"] not in ["aux"]:
+ #         break
 print(counter)
 print(data)
 print(len(data))
@@ -134,47 +134,21 @@ itos_ = itos[::]
 shuffle(itos_)
 weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
 
-def getCorrectOrderCount(weights, coordinate, newValue):
+weights = {'できる': 0, 'いける': 2, 'える': 4, 'でした': 6, 'たー': 8, 'める': 10, 'う': 12, 'ある': 14, 'られる': 16, 'ようだ': 18, 'まいる': 20, 'くださる': 22, '済み': 24, 'いらっしゃる': 26, 'おる': 28, 'かね ': 30, '始める': 32, '下さる': 34, '過ぎる': 36, 'ざるをえる': 38, 'あう': 40, 'ざるを得る': 42, 'こと': 44, 'ける': 46, 'てる': 48, '合う': 50, 'べる': 52, 'せる': 54, 'ので': 56, '込む': 58, 'から': 60, 'らしい': 62, '出来る': 64, '参る': 66, 'たい': 68, '頂く': 70, 'みたいだ': 72, 'なさる': 74, 'が': 76, 'がちだ': 78, 'そうだ': 80, 'ない': 82, 'づらい': 84, 'ちゃう': 86, 'ま~す': 88, 'ゆく': 90, 'の': 92, 'べし': 94, 'やる': 96, 'ん': 98, 'おく': 100, 'だ': 102, 'だめ': 104, '出す': 106, 'もらえる': 108, 'なければ': 110, 'いただく': 112, 'かもしれる': 114, 'なる': 116, 'させる': 118, '回る': 120, 'す ': 122, 'れる': 124, 'し': 126, 'くれる': 128, 'きる': 130, 'にくい': 132, 'ば': 134, 'がたい': 136, 'すぎる': 138, 'ます': 140, 'いく': 142, '易い': 144, '続ける': 146, 'みる': 148, 'まい': 150, 'ため': 152, 'やすい': 154, 'ね': 156, 'よい': 158, 'ほしい': 160, 'かける': 162, '直す': 164, 'らす': 166, 'た': 168, 'いる': 170, '行く': 172, 'しまう': 174, 'もらう': 176, '来る': 178, 'て': 180}
+
+def getCorrectOrderCount(weights):
    correct = 0
    incorrect = 0
    for verb in data:
       for i in range(1, len(verb)):
          for j in range(1, i):
-             if verb[i] == coordinate:
-                 weightI = newValue
-             else:
-                weightI = weights[verb[i]]
-
-             if verb[j] == coordinate:
-                 weightJ = newValue
-             else:
-                weightJ = weights[verb[j]]
+             weightI = weights[verb[i]]
+             weightJ = weights[verb[j]]
              if weightI > weightJ:
                correct+=1
              else:
                incorrect+=1
    return correct/(correct+incorrect)
 
-for iteration in range(200):
-  coordinate = choice(itos)
-  mostCorrect, mostCorrectValue = 0, None
-  for newValue in [-1] + [2*x+1 for x in range(len(itos))]:
-     correctCount = getCorrectOrderCount(weights, coordinate, newValue)
-#     print(coordinate, newValue, iteration, correctCount)
-     if correctCount > mostCorrect:
-        mostCorrectValue = newValue
-        mostCorrect = correctCount
-  print(iteration, mostCorrect)
-  weights[coordinate] = mostCorrectValue
-  itos_ = sorted(itos, key=lambda x:weights[x])
-  weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
-  print(weights)
-  for x in itos_:
-     print("\t".join([str(y) for y in [x, weights[x], affixFrequencies[x]]]))
-with open("output/extracted_"+str(myID)+".tsv", "w") as outFile:
-  for x in itos_:
-  #   if affixFrequencies[x] < 10:
-   #    continue
-     print("\t".join([str(y) for y in [x, weights[x], affixFrequencies[x]]]), file=outFile)
-
+print(getCorrectOrderCount(weights))
 

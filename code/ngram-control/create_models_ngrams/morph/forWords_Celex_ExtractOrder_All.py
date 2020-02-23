@@ -91,8 +91,8 @@ for sentence in corpusTrain:
           break
        if line["posUni"] not in ["AUX", "SCONJ"]:
           break
-       if line["dep"] not in ["aux"]:
-          break
+#       if line["dep"] not in ["aux"]:
+ #         break
 print(counter)
 print(data)
 print(len(data))
@@ -171,7 +171,7 @@ for iteration in range(200):
   print(weights)
   for x in itos_:
      print("\t".join([str(y) for y in [x, weights[x], affixFrequencies[x]]]))
-with open("output/extracted_"+str(myID)+".tsv", "w") as outFile:
+with open("output/extracted_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
   for x in itos_:
   #   if affixFrequencies[x] < 10:
    #    continue

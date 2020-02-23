@@ -34,7 +34,7 @@ assert args.gamma >= 1
 myID = args.idForProcess
 
 
-TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-morphology/"
+TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/"
 
 
 
@@ -91,8 +91,8 @@ for sentence in corpusTrain:
           break
        if line["posUni"] not in ["AUX", "SCONJ"]:
           break
-       if line["dep"] not in ["aux"]:
-          break
+#       if line["dep"] not in ["aux"]:
+ #         break
 print(counter)
 print(data)
 print(len(data))
@@ -159,14 +159,7 @@ def calculateTradeoffForWeights(weights):
     dev = []
     for verb in data:
        affixes = verb[1:]
-       if args.model == "RANDOM":
-          affixes = sorted(affixes, key=lambda x:weights[x])
-       elif args.model == "REAL":
-          assert args.model == "REAL"
-       elif args.model == "SHUFFLE":
-          Random(myID).shuffle(affixes)
-       else:
-            assert False
+       affixes = sorted(affixes, key=lambda x:weights[x])
        for ch in [verb[0]] + affixes:
          dev.append(ch)
        dev.append("EOS")
@@ -303,12 +296,12 @@ def calculateTradeoffForWeights(weights):
            lastProbabilityFiltered = [x for x in lastProbability if x is not None]
            surprisal = - sum([x for x in lastProbabilityFiltered])/len(lastProbabilityFiltered)
        except ValueError:
-           print >> sys.stderr, "PROBLEM"
-           print >> sys.stderr, lastProbability
+    #       print >> sys.stderr, "PROBLEM"
+     #      print >> sys.stderr, lastProbability
            surprisal = 1000
        devSurprisalTable.append(surprisal)
-       print("Surprisal", surprisal, len(itos))
-    print(devSurprisalTable)
+     #  print("Surprisal", surprisal, len(itos))
+    #print(devSurprisalTable)
     mis = [devSurprisalTable[i] - devSurprisalTable[i+1] for i in range(len(devSurprisalTable)-1)]
     tmis = [mis[x]*(x+1) for x in range(len(mis))]
     #print(mis)
@@ -316,27 +309,59 @@ def calculateTradeoffForWeights(weights):
     auc = 0
     memory = 0
     mi = 0
-    print(mis)
-    print(tmis)
     for i in range(len(mis)):
        mi += mis[i]
        memory += tmis[i]
        auc += mi * tmis[i]
-    print("MaxMemory", memory)
-    assert 4>memory
-    auc += mi * (4-memory)
-    print("AUC", auc)
+    #print("MaxMemory", memory)
+    assert 5>memory
+    auc += mi * (5-memory)
+    #print("AUC", auc)
+    return auc
     #assert False
     
-    outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model+".txt"
-    print(outpath)
-    with open(outpath, "w") as outFile:
-       print(str(args), file=outFile)
-       print(" ".join(map(str,devSurprisalTable)), file=outFile)
-    
+    #outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model+".txt"
+    #print(outpath)
+    #with open(outpath, "w") as outFile:
+    #         print >> outFile, str(args)
+    #         print >> outFile, devSurprisalTable[-1]
+    #         print >> outFile, " ".join(map(str,devSurprisalTable))
     #
     #
-    return auc
    
-calculateTradeoffForWeights(weights)
+
+
+for iteration in range(1000):
+  coordinate=choice(itos)
+  while affixFrequency.get(coordinate, 0) < 10 and random() < 0.95:
+     coordinate = choice(itos)
+  mostCorrect, mostCorrectValue = 0, None
+  for newValue in [-1] + [2*x+1 for x in range(len(itos))] + [weights[coordinate]]:
+     if random() < 0.8 and newValue != weights[coordinate]:
+        continue
+     print(newValue, mostCorrect, coordinate, affixFrequency[coordinate])
+     weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}
+     correctCount = calculateTradeoffForWeights(weights_)
+#     print(weights_)
+#     print(coordinate, newValue, iteration, correctCount)
+     if correctCount > mostCorrect:
+        mostCorrectValue = newValue
+        mostCorrect = correctCount
+  print(iteration, mostCorrect)
+  weights[coordinate] = mostCorrectValue
+  itos_ = sorted(itos, key=lambda x:weights[x])
+  weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
+  print(weights)
+  assert 'する' in weights
+  for x in itos_:
+     if affixFrequency[x] < 10:
+       continue
+     print("\t".join([str(y) for y in [x, weights[x], affixFrequency[x]]]))
+  if (iteration - 1) % 50 == 0:
+     with open(TARGET_DIR+"/optimized_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
+        print(iteration, mostCorrect, file=outFile)
+        for key in itos_:
+           print(key, weights[key], file=outFile)
+
+
 

@@ -86,7 +86,7 @@ for sentence in corpusTrain:
               if (verb[j]["lemma"], verb[i]["lemma"]) in pairs:
                  print("======", (verb[i]["lemma"], verb[j]["lemma"]), [x["dep"] for x in verb], "".join([x["word"] for x in verb]))
           if len(verb) > 1:
-            data.append([x["lemma"] for x in verb])
+            data.append(verb)
           counter += 1
           break
        if line["posUni"] not in ["AUX", "SCONJ"]:
@@ -116,13 +116,15 @@ words = []
 affixFrequency = {}
 for verbWithAff in data:
   for affix in verbWithAff[1:]:
-    affixFrequency[affix] = affixFrequency.get(affix, 0)+1
+    affixLemma = affix["lemma"]
+    affixFrequency[affixLemma] = affixFrequency.get(affixLemma, 0)+1
 
 
 itos = set()
 for verbWithAff in data:
   for affix in verbWithAff[1:]:
-    itos.add(affix)
+    affixLemma = affix["lemma"]
+    itos.add(affixLemma)
 itos = sorted(list(itos))
 stoi = dict(list(zip(itos, range(len(itos)))))
 
@@ -134,33 +136,13 @@ itos_ = itos[::]
 shuffle(itos_)
 weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
 
-def getCorrectOrderCount(weights, coordinate, newValue):
-   correct = 0
-   incorrect = 0
-   for verb in data:
-      for i in range(1, len(verb)):
-         for j in range(1, i):
-             if verb[i] == coordinate:
-                 weightI = newValue
-             else:
-                weightI = weights[verb[i]]
-
-             if verb[j] == coordinate:
-                 weightJ = newValue
-             else:
-                weightJ = weights[verb[j]]
-             if weightI > weightJ:
-               correct+=1
-             else:
-               incorrect+=1
-   return correct/(correct+incorrect)
 
 def calculateTradeoffForWeights(weights):
     dev = []
     for verb in data:
        affixes = verb[1:]
        if args.model == "RANDOM":
-          affixes = sorted(affixes, key=lambda x:weights[x])
+          affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
        elif args.model == "REAL":
           assert args.model == "REAL"
        elif args.model == "SHUFFLE":
@@ -168,7 +150,7 @@ def calculateTradeoffForWeights(weights):
        else:
             assert False
        for ch in [verb[0]] + affixes:
-         dev.append(ch)
+         dev.append(ch["lemma"])
        dev.append("EOS")
        for _ in range(args.cutoff+2):
          dev.append("PAD")
