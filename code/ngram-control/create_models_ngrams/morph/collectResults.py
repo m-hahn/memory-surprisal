@@ -1,5 +1,6 @@
 PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology/"
 import os
+MAX_MEMORY = 8
 with open("output/curves.tsv", "w") as outFileCurves:
  print("Language", "Script", "ModelID", "Model", "Distance", "It", "Surprisal", "Memory", file=outFileCurves)
  with open("output/auc.tsv", "w") as outFileAUC:
@@ -25,8 +26,8 @@ with open("output/curves.tsv", "w") as outFileCurves:
            totalMemory += (i+1)*mis[i]
            print(language, script, modelID, model, i+1, mis[i], surprisals[i+1], totalMemory, file=outFileCurves)
            auc += (surprisals[0] - surprisals[i+1]) * (i+1)*mis[i]
-        assert totalMemory <= 5
-        auc += (5-totalMemory) * (surprisals[0] - surprisals[len(mis)])
-        print(language, script, modelID, model, 5 * (surprisals[0] - surprisals[len(mis)]) - auc + surprisals[len(mis)] * 5, file=outFileAUC)
+        assert totalMemory <= MAX_MEMORY
+        auc += (MAX_MEMORY-totalMemory) * (surprisals[0] - surprisals[len(mis)])
+        print(language, script, modelID, model, MAX_MEMORY * (surprisals[0] - surprisals[len(mis)]) - auc + surprisals[len(mis)] * MAX_MEMORY, file=outFileAUC)
   
   
