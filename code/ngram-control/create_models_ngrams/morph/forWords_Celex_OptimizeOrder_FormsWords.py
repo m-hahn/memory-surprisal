@@ -34,7 +34,7 @@ assert args.gamma >= 1
 myID = args.idForProcess
 
 
-TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-morphology/"
+TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/"
 
 
 
@@ -296,8 +296,8 @@ def calculateTradeoffForWeights(weights):
        memory += tmis[i]
        auc += mi * tmis[i]
     #print("MaxMemory", memory)
-    assert 4>memory
-    auc += mi * (4-memory)
+    assert 5>memory
+    auc += mi * (5-memory)
     #print("AUC", auc)
     return auc
     #assert False
@@ -338,7 +338,11 @@ for iteration in range(1000):
      if affixFrequency[x] < 10:
        continue
      print("\t".join([str(y) for y in [x, weights[x], affixFrequency[x]]]))
-  
+  if (iteration - 1) % 50 == 0:
+     with open(TARGET_DIR+"/optimized_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
+        print(iteration, mostCorrect, file=outFile)
+        for key in itos_:
+           print(key, weights[key], file=outFile)
 
 
 
