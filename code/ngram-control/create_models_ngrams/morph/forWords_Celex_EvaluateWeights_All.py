@@ -157,7 +157,14 @@ def getCorrectOrderCount(weights):
                correct+=1
              else:
                incorrect+=1
+               errorsFrequency[(verb[i], verb[j])] = errorsFrequency.get((verb[i], verb[j]),0)+1
+               print("ERROR", errorsFrequency[(verb[i], verb[j])] )
    return correct/(correct+incorrect)
+errorsFrequency = {}
+print("ERRORS FREQUENCY")
+accuracy = (getCorrectOrderCount(weights))
+print(sorted(list(errorsFrequency.items()), key=lambda x:x[1]))
+print(accuracy)
 
-print(getCorrectOrderCount(weights))
+
 
