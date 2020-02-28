@@ -157,6 +157,10 @@ if True:
          dhByDependency[dependency] = dhHere
          distByDependency[dependency] = distHere
   for key in range(len(itos_deps)):
+     if itos_deps[key].split(":")[0] not in dhByDependency:
+        dhByDependency[itos_deps[key].split(":")[0]] = 0.0
+        print("ERROR", itos_deps[key])
+        continue
      dhWeights[key] = dhByDependency[itos_deps[key].split(":")[0]]
      distanceWeights[key] = distByDependency[itos_deps[key].split(":")[0]]
   originalCounter = "NA"
@@ -454,7 +458,7 @@ print(weights)
 #quit()
 HEADWeight = weights["HEAD"]
 
-for iteration in range(1000):
+for iteration in range(20000):
   #assert weights["amod"] < weights["HEAD"]
   #assert weights["obj"] > weights["HEAD"]
   assert weights["HEAD"] == HEADWeight
@@ -483,6 +487,7 @@ for iteration in range(1000):
   if (iteration + 1) % 50 == 0:
      with open(TARGET_DIR+"/optimized_"+args.language+"_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
         print(iteration, mostCorrect, file=outFile)
+        print(str(args), fie=outFile)
         for key in itos_:
            print(key, weights[key], file=outFile)
 
