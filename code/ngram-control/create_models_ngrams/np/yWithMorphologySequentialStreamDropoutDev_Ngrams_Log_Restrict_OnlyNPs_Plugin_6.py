@@ -1,5 +1,3 @@
-# ...orphologySequentialStreamDropoutDev_Ngrams_Log_Restrict_OnlyNPs_Plugin_3_1.py
-# Control study using randomization of nouns
 
 import random
 import sys
@@ -24,7 +22,6 @@ print(args)
 
 
 assert args.model.startswith("GROUND")
-assert args.model == "GROUND_PERM"
 
 assert args.alpha >= 0
 assert args.alpha <= 1
@@ -192,14 +189,14 @@ def orderSentence(sentence, dhLogits, printThings):
             if max(leftLengths+[0]) == 0:
               if len(leftDependencies) == 1:
                continue
-              if "amod" not in leftDependencies or "det" not in leftDependencies:
+              if "nummod" not in leftDependencies:
                  continue
               dependents = [sentence[i-1] for i in line.get("children_DH", [])]
-#              if model_[1] != "":
-#                  positions = {{"A" : "amod", "N" : "nummod", "D" : "det"}[x] : model_[1].index(x) for x in "AND"}
-#                  positions["case"] = -1
-##                  print(positions)
-#                  dependents = sorted(dependents, key=lambda x:positions[x["coarse_dep"]])
+              if model_[1] != "":
+                  positions = {{"A" : "amod", "N" : "nummod", "D" : "det"}[x] : model_[1].index(x) for x in "AND"}
+                  positions["case"] = -1
+#                  print(positions)
+                  dependents = sorted(dependents, key=lambda x:positions[x["coarse_dep"]])
 #                  quit()
 #              if args.model == "GROUND_AND":
 #                dependents = sorted(dependents, key=lambda x:{"case" : -1, "amod" : 0, "nummod" : 1, "det" : 2}[x["coarse_dep"]])
@@ -212,7 +209,7 @@ def orderSentence(sentence, dhLogits, printThings):
 #              elif args.model != "GROUND":
 #                assert False
               nounPhrases.append(dependents + [line])
-              if random() > 0.98:
+              if random() > 0.5:
                  print([x["word"] for x in nounPhrases[-1]])
    return nounPhrases
 
@@ -359,8 +356,6 @@ def createStreamContinuous(corpus):
     input_indices = [2] # Start of Segment
     wordStartIndices = []
     sentCount = 0
-    nounPhrasesAll = []
-    nouns = []
     for sentence in corpus:
        sentCount += 1
        if sentCount % 10 == 0:
@@ -370,16 +365,11 @@ def createStreamContinuous(corpus):
 #       if "amod" not in dependencies and "det" not in dependencies:
  #         continue
        nounPhrases = orderSentence(sentence, dhLogits, sentCount % 500 == 0)
+      
+       timeSinceRelevant = MAX_DIST
        for np in nounPhrases:
-         nounPhrasesAll.append(np)
-         nouns.append(np[-1])
-
-    shuffle(nouns)
-    for np_num, np in enumerate(nounPhrasesAll):
-         timeSinceRelevant = MAX_DIST
          #print(np)
-         noun = nouns[np_num]
-         for line in np[:-1]+[noun, "EOS"]:
+         for line in np+["EOS"]:
           if line == "EOS":
             yield ("EOS", MAX_DIST, "EOS", "EOS")
           else:
