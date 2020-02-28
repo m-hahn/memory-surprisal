@@ -130,6 +130,36 @@ stoi_deps = dict(zip(itos_deps, range(len(itos_deps))))
 
 print(itos_deps)
 
+if True:
+  dhWeights = {}
+  distanceWeights = {}
+  groundPath = "/u/scr/mhahn/deps/manual_output_ground_coarse/"
+  import os
+  files = [x for x in os.listdir(groundPath) if x.startswith(args.language[:args.language.rfind("_")]+"_infer")]
+  print(files)
+  assert len(files) > 0
+  with open(groundPath+files[0], "r") as inFile:
+     headerGrammar = next(inFile).strip().split("\t")
+     print(headerGrammar)
+     dhByDependency = {}
+     distByDependency = {}
+     for line in inFile:
+         line = line.strip().split("\t")
+         assert int(line[headerGrammar.index("Counter")]) >= 1000000
+#         if line[headerGrammar.index("Language")] == language:
+#           print(line)
+         dependency = line[headerGrammar.index("Dependency")]
+         dhHere = float(line[headerGrammar.index("DH_Mean_NoPunct")])
+         distHere = float(line[headerGrammar.index("Distance_Mean_NoPunct")])
+  #       if dhHere < 0:
+   #        distHere = -distHere
+         print(dependency, dhHere, distHere)
+         dhByDependency[dependency] = dhHere
+         distByDependency[dependency] = distHere
+  for key in range(len(itos_deps)):
+     dhWeights[key] = dhByDependency[itos_deps[key].split(":")[0]]
+     distanceWeights[key] = distByDependency[itos_deps[key].split(":")[0]]
+  originalCounter = "NA"
 
 
 
@@ -202,8 +232,14 @@ def orderSentence(sentence, weights, coordinate, newWeight, printThings, trainin
 
 
 print(itos_deps)
-weights = itos_deps[::] + ["HEAD"]
-shuffle(weights)
+print(dhByDependency)
+preHeadWeights = [x for x in itos_deps if dhByDependency[x] > 0]
+postHeadWeights = [x for x in itos_deps if dhByDependency[x] <= 0]
+shuffle(preHeadWeights)
+shuffle(postHeadWeights)
+
+weights = preHeadWeights + ["HEAD"] + postHeadWeights
+
 weights = dict(zip(weights[::], range(len(weights))))
 weights = dict(list(zip(list(weights), [2*x for x in range(len(weights))])))
 print(weights)
@@ -414,11 +450,19 @@ def calculateTradeoffForWeights(weights, relevantAffix):
     #
    
 
+print(weights)
+#quit()
+HEADWeight = weights["HEAD"]
 
 for iteration in range(1000):
-  coordinate=choice(itos_deps+["HEAD"])
+  #assert weights["amod"] < weights["HEAD"]
+  #assert weights["obj"] > weights["HEAD"]
+  assert weights["HEAD"] == HEADWeight
+  coordinate=choice(itos_deps)
   mostCorrect, mostCorrectValue = 0, None
   for newValue in [-1] + [2*x+1 for x in range(len(weights))] + [weights[coordinate]]:
+     if (weights[coordinate] < weights["HEAD"]) != (newValue < weights["HEAD"]):
+        continue
      if random() < 0.0 and newValue != weights[coordinate]:
         continue
      print(newValue, mostCorrect, coordinate)
@@ -427,6 +471,7 @@ for iteration in range(1000):
      if correctCount > mostCorrect:
         mostCorrectValue = newValue
         mostCorrect = correctCount
+  assert (weights[coordinate] < weights["HEAD"]) == (mostCorrectValue < weights["HEAD"])
   print("===================")
   print("Iteration", iteration, "Best AUC", mostCorrect)
   weights[coordinate] = mostCorrectValue
