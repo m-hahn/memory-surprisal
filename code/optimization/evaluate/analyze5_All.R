@@ -21,7 +21,7 @@ files = c()
 corrP = c()
 for(language in languages) {
 for(file in list.files(PATH)) {
-   if(grepl(paste("#", language), paste("#", file)) & !grepl("Old", file) & grepl("FuncHead", file) & !grepl("POS", file)& grepl("I1_9", file)) {
+   if(grepl(paste("#", language), paste("#", file)) & !grepl("Old", file) & !grepl("FuncHead", file) & !grepl("POS", file)& grepl("I1_9", file)) {
      data = read.csv(paste(PATH, "/", file, sep=""), sep="\t") %>% mutate(Language = language)
      data_b = merge(data, data_ground, by=c("CoarseDependency"))
      if(data_b$DistanceWeight[1] != "NaN") {
@@ -50,7 +50,7 @@ data_mean = data_mean[order(data_mean$DistanceWeight),]
 
 data_bin = data_mean 
 
-PATH = "/u/scr/mhahn/deps/locality_optimized_dlm/manual_output_funchead_coarse_depl/"
+PATH = "/u/scr/mhahn/deps/locality_optimized_dlm/manual_output_funchead_coarse_depl_quasiF/"
 data_total = data.frame()
 files = c()
 corrP = c()
