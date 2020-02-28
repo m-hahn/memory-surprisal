@@ -35,7 +35,7 @@ assert args.gamma >= 1
 myID = args.idForProcess
 
 
-TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/"
+TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-auc-optimized/"
 
 
 
@@ -156,24 +156,21 @@ import numpy as np
 
 def orderSentence(sentence, weights, coordinate, newWeight, printThings, training):
    root = None
-   logits = [None]*len(sentence)
-   logProbabilityGradient = 0
-
    for line in sentence:
-       line["coarse_dep"] = makeCoarse(line["dep"])
+     line["children_DH"] = []
+     line["children_HD"] = []
+
    for j, line in enumerate(sentence):
       if line["coarse_dep"] == "root":
           root = line["index"]
           continue
       if line["coarse_dep"].startswith("punct"): # assumes that punctuation does not have non-punctuation dependents!
          continue
-      key = line["coarse_dep"]
-      line["dependency_key"] = key
       dhSampled = (weights[line["coarse_dep"]] < weights["HEAD"])
       direction = "DH" if dhSampled else "HD"
       line["direction"] = direction
       if printThings: 
-         print("\t".join(list(map(str,["ORD", line["index"], (line["word"]+"           ")[:10], ("".join(list(key)) + "         ")[:22], line["head"], dhSampled, direction   ]  ))))
+         print("\t".join(list(map(str,["ORD", line["index"], (line["word"]+"           ")[:10], line["head"], dhSampled, direction   ]  ))))
 
       headIndex = line["head"]-1
       sentence[headIndex]["children_"+direction] = (sentence[headIndex].get("children_"+direction, []) + [line["index"]])
@@ -223,6 +220,10 @@ corpusTrain = CorpusIterator_V(args.language,"train", storeMorph=True).iterator(
 pairs = set()
 counter = 0
 data = list(corpusTrain)
+for sentence in data:
+   for line in sentence:
+       line["coarse_dep"] = makeCoarse(line["dep"])
+
 print(counter)
 #print(data)
 print(len(data))
@@ -253,7 +254,7 @@ def calculateTradeoffForWeights(weights, relevantAffix):
     for sentence in data:
        depOccurs = False
        for line in sentence:
-          if line["coarse_dep"] == relevantAffix:
+          if line["coarse_dep"] == relevantAffix or relevantAffix == "HEAD":
              depOccurs = True
              break
        if not depOccurs:
@@ -270,7 +271,7 @@ def calculateTradeoffForWeights(weights, relevantAffix):
        for _ in range(args.cutoff+2):
          dev.append(stoi_words["PAD"])
 #    print(len([x for x in dev if x != 0]), wordsWithoutSentinels)
-    
+   
     array = dev    
     #print array
     
@@ -372,7 +373,7 @@ def calculateTradeoffForWeights(weights, relevantAffix):
           assert i-lengthsOfSuffixes == contextLength
           #assert lastCrossEntropy >= crossEntropy
        
-          print("countTowardsSurprisal", countTowardsSurprisal)
+          print("==================================================countTowardsSurprisal", countTowardsSurprisal)
           memory += min(lengthForPrediction, contextLength) * (lastCrossEntropy-crossEntropy)
           print("CONTEXT LENGTH "+str(contextLength)+"   "+str( crossEntropy)+"  "+str((lastCrossEntropy-crossEntropy))+"   "+str(memory))
           assert abs(totalSum - 1.0) < 0.00001, totalSum
@@ -426,18 +427,19 @@ for iteration in range(1000):
      if correctCount > mostCorrect:
         mostCorrectValue = newValue
         mostCorrect = correctCount
-  print(iteration, mostCorrect)
+  print("===================")
+  print("Iteration", iteration, "Best AUC", mostCorrect)
   weights[coordinate] = mostCorrectValue
   itos_ = sorted(itos_deps+["HEAD"], key=lambda x:weights[x])
   weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
   print(weights)
   for x in itos_:
      print("\t".join([str(y) for y in [x, weights[x]]]))
-#  if (iteration + 1) % 50 == 0:
-#     with open(TARGET_DIR+"/optimized_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
-#        print(iteration, mostCorrect, file=outFile)
-#        for key in itos_:
-#           print(key, weights[key], file=outFile)
+  if (iteration + 1) % 50 == 0:
+     with open(TARGET_DIR+"/optimized_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
+        print(iteration, mostCorrect, file=outFile)
+        for key in itos_:
+           print(key, weights[key], file=outFile)
 
 
 
