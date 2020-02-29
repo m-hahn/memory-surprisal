@@ -469,7 +469,7 @@ for iteration in range(20000):
   for newValue in [-1] + [2*x+1 for x in range(len(weights))] + [weights[coordinate]]:
      if (weights[coordinate] < weights["HEAD"]) != (newValue < weights["HEAD"]):
         continue
-     if random() < 0.5 and abs(newValue - weights[coordinate]) > 5:
+     if random() < 0.5 and abs(newValue - weights[coordinate]) > 5 and (not (len(fullAUCs) >= 2 and abs(fullAUCs[-1] - fullAUCs[-2]) < 1e-5)):
         continue
      print(newValue, mostCorrect, coordinate)
      weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}
@@ -494,6 +494,9 @@ for iteration in range(20000):
         print(str(args), file=outFile)
         for key in itos_:
            print(key, weights[key], file=outFile)
-
+     if len(fullAUCs) >= 10 and abs(fullAUCs[-10]-fullAUCs[-1])<1e-5:
+        print("STOPPING OPTIMIZATION")
+        break
+     
 
 
