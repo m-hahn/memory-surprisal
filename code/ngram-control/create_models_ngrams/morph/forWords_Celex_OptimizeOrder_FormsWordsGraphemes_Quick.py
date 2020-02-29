@@ -1,3 +1,4 @@
+assert False
 # based on yWithMorphologySequentialStreamDropoutDev_Ngrams_Log.py
 
 import random
@@ -141,8 +142,8 @@ def calculateTradeoffForWeights(weights, relevantAffix):
     dev = []
     for verb in data:
        affixes = verb[1:]
-       if relevantAffix not in [x["lemma"] for x in affixes]:
-          continue
+#       if relevantAffix not in [x["lemma"] for x in affixes]:
+ #         continue
        affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
        for ch in [verb[0]] + affixes:
          for char in ch["word"]:
