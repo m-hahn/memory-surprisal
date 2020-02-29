@@ -487,7 +487,7 @@ for iteration in range(20000):
   if (iteration + 1) % 50 == 0:
      with open(TARGET_DIR+"/optimized_"+args.language+"_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
         print(iteration, mostCorrect, file=outFile)
-        print(str(args), fie=outFile)
+        print(str(args), file=outFile)
         for key in itos_:
            print(key, weights[key], file=outFile)
 
