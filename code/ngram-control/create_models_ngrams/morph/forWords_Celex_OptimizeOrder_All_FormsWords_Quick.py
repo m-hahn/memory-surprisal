@@ -1,3 +1,4 @@
+assert False
 # based on yWithMorphologySequentialStreamDropoutDev_Ngrams_Log.py
 
 import random

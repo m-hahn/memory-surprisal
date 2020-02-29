@@ -1,4 +1,3 @@
-assert False
 # based on yWithMorphologySequentialStreamDropoutDev_Ngrams_Log.py
 
 import random
@@ -65,7 +64,6 @@ corpusTrain = CorpusIterator_V(args.language,"train", storeMorph=True).iterator(
 pairs = set()
 counter = 0
 data = []
-dataSoFar = set()
 for sentence in corpusTrain:
 #    print(len(sentence))
     verb = []
@@ -87,10 +85,8 @@ for sentence in corpusTrain:
               pairs.add((verb[i]["lemma"], verb[j]["lemma"]))
               if (verb[j]["lemma"], verb[i]["lemma"]) in pairs:
                  print("======", (verb[i]["lemma"], verb[j]["lemma"]), [x["dep"] for x in verb], "".join([x["word"] for x in verb]))
-          representation = ".".join([x["lemma"] for x in verb])
-          if len(verb) > 1 and representation not in dataSoFar:
+          if len(verb) > 1:
             data.append(verb)
-            dataSoFar.add(representation)
           counter += 1
           break
        if line["posUni"] not in ["AUX", "SCONJ"]:
@@ -145,8 +141,8 @@ def calculateTradeoffForWeights(weights, relevantAffix):
     dev = []
     for verb in data:
        affixes = verb[1:]
-       if relevantAffix not in [x["lemma"] for x in affixes]:
-          continue
+#       if relevantAffix not in [x["lemma"] for x in affixes]:
+ #         continue
        affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
        for ch in [verb[0]] + affixes:
          dev.append(ch["word"])

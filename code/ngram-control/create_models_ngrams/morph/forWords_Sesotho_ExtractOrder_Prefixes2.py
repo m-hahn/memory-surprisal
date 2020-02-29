@@ -205,15 +205,52 @@ def getCorrectOrderCount(weights_pfx, weights_sfx, coordinate, newValue):
 
 index_pfx = defaultdict(list)
 
-for verb in data:
+elementsOccurringBeforeSubject = defaultdict(int)
+
+
+
+for q in range(len(data)):
+   verb = data[q]
    prefixes_keys = [x[header[RELEVANT_KEY]] for x in verb if x[header["type1"]] == "pfx"]
    if len(prefixes_keys) <= 1:
      continue
-   print(verb[:len(prefixes_keys)])
+#   print(verb)
+   for i in range(len(verb)-1):
+      if ".SBJ" in verb[i+1][header["analysis"]]:
+         if not verb[i][header["lemma"]].startswith("t^"):
+           if not verb[i][header["lemma"]] == "rl": # suffix -ng to the auxiliary
+ #           print(verb[i], verb)
+            elementsOccurringBeforeSubject[tuple(verb[i])] += 1
+   # make it hierarchical by counting subj... subj...
+
+   segmentation = []
+   for j in range(len(verb)):
+      # subject prefix?
+      if ".SBJ" in verb[j][header["analysis"]]:
+         segmentation.append([])
+         segmentation[-1].append(verb[j])
+      else:
+         if len(segmentation) == 0:
+      #     print(verb)
+           segmentation.append([])
+         segmentation[-1].append(verb[j])
+         
+   if len(segmentation) > 1:
+    for w in range(len(segmentation)-1):
+     if len(segmentation[w]) == 2:
+         _ = 0
+     else:
+        print(segmentation[w])
+   verb = segmentation
+   data[q] = verb
    for pfx in prefixes_keys:
       index_pfx[pfx].append(verb)
    index_pfx[None].append(verb)
 
+print(sorted(list(elementsOccurringBeforeSubject.items()), key=lambda x:x[1]))
+#print(len(data))
+#quit()
+#quit()
 
 
 for iteration in range(2000):
