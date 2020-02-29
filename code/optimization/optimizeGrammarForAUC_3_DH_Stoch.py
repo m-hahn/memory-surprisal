@@ -469,7 +469,7 @@ for iteration in range(20000):
   for newValue in [-1] + [2*x+1 for x in range(len(weights))] + [weights[coordinate]]:
      if (weights[coordinate] < weights["HEAD"]) != (newValue < weights["HEAD"]):
         continue
-     if random() < 0.0 and newValue != weights[coordinate]:
+     if random() < 0.5 and abs(newValue - weights[coordinate]) > 5:
         continue
      print(newValue, mostCorrect, coordinate)
      weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}

@@ -177,7 +177,7 @@ def getCorrectOrderCount(weights_pfx, weights_sfx, coordinate, newValue):
   #      continue
    
       prefixes = [(x[header[RELEVANT_KEY]], weights_pfx[x[header[RELEVANT_KEY]]]) for x in verb if x[header["type1"]] == "pfx"]
-      assert len(prefixes) > 1
+      assert len(prefixes) > 1, verb
 #      suffixes = [(x[header[RELEVANT_KEY]], weights_sfx[x[header[RELEVANT_KEY]]]) for x in verb if x[header["type1"]] == "sfx"]
 
       for affixes in [prefixes]:    
@@ -234,14 +234,26 @@ for q in range(len(data)):
       #     print(verb)
            segmentation.append([])
          segmentation[-1].append(verb[j])
-         
-   if len(segmentation) > 1:
-    for w in range(len(segmentation)-1):
-     if len(segmentation[w]) == 2:
-         _ = 0
-     else:
-        print(segmentation[w])
-   verb = segmentation
+   ###############################################################################   
+   # Restrict to the last verb, chopping off initial auxiliaries and their affixes
+   ###############################################################################
+
+   print(segmentation[-1])
+#   if len(segmentation) > 1:
+#    for w in range(len(segmentation)-1):
+#     if len(segmentation[w]) == 2:
+#         _ = 0
+#     else:
+#        print(segmentation[w])
+
+
+   verb = segmentation[-1]
+
+   prefixes_keys = [x[header[RELEVANT_KEY]] for x in verb if x[header["type1"]] == "pfx"]
+   if len(prefixes_keys) <= 1:
+     continue
+
+
    data[q] = verb
    for pfx in prefixes_keys:
       index_pfx[pfx].append(verb)
@@ -253,9 +265,9 @@ print(sorted(list(elementsOccurringBeforeSubject.items()), key=lambda x:x[1]))
 #quit()
 
 
-for iteration in range(2000):
+for iteration in range(200):
   coordinate = choice(itos_pfx)
-  while prefixFrequency[coordinate] < 10:
+  while prefixFrequency[coordinate] < 10 and random() < 0.95:
     coordinate = choice(itos_pfx)
   mostCorrect, mostCorrectValue = 0, None
   for newValue in [-1] + [2*x+1 for x in range(len(itos_pfx))]:
@@ -275,10 +287,10 @@ for iteration in range(2000):
      print("\t".join([str(y) for y in [x, weights_pfx[x], prefixFrequency[x], len(index_pfx[x])]]))
   print(iteration, mostCorrect, prefixFrequency[coordinate], len(index_pfx[coordinate]))
   print("Total", getCorrectOrderCount(weights_pfx, weights_sfx, None, 0))
-#with open("output/extracted_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
-#  for x in itos_:
-#  #   if affixFrequencies[x] < 10:
-#   #    continue
-#     print("\t".join([str(y) for y in [x, weights[x], affixFrequencies[x]]]), file=outFile)
+with open("output/extracted_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
+  for x in itos_pfx_:
+  #   if affixFrequencies[x] < 10:
+   #    continue
+     print("\t".join([str(y) for y in [x, weights_pfx[x], prefixFrequency[x]]]), file=outFile)
 
 
