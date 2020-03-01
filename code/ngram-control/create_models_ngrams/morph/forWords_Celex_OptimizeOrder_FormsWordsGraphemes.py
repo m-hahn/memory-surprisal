@@ -342,7 +342,7 @@ for iteration in range(1000):
      print("\t".join([str(y) for y in [x, weights[x], affixFrequency[x]]]))
   if (iteration + 1) % 50 == 0:
      with open(TARGET_DIR+"/optimized_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
-        print(iteration, mostCorrect, file=outFile)
+        print(iteration, mostCorrect, str(args), file=outFile)
         for key in itos_:
            print(key, weights[key], file=outFile)
 
