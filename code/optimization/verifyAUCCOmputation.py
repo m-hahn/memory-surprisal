@@ -23,7 +23,7 @@ import random
 
 args=parser.parse_args()
 print(args)
-
+assert args.language != "Japanese_2.4"
 
 assert args.alpha >= 0
 assert args.alpha <= 1
@@ -154,7 +154,7 @@ import numpy as np
 
 
 
-def orderSentence(sentence, weights, coordinate, newWeight, printThings, training):
+def orderSentence(sentence, weights, coordinate, newWeight, printThings=True, training=False):
    root = None
    for line in sentence:
      line["children_DH"] = []
@@ -170,7 +170,7 @@ def orderSentence(sentence, weights, coordinate, newWeight, printThings, trainin
       direction = "DH" if dhSampled else "HD"
       line["direction"] = direction
       if printThings: 
-         print("\t".join(list(map(str,["ORD", line["index"], (line["word"]+"           ")[:10], line["head"], dhSampled, direction   ]  ))))
+         print("\t".join(list(map(str,["ORD", line["index"], (line["word"]+"           ")[:10], line["head"], dhSampled, direction, line["coarse_dep"], weights[line["coarse_dep"]], weights["HEAD"]   ]  ))))
 
       headIndex = line["head"]-1
       sentence[headIndex]["children_"+direction].append(line["index"])
@@ -248,31 +248,25 @@ def calculateTradeoffForWeights(weights, relevantAffix):
     dev.append(stoi_words["SOS"])
     wordsWithoutSentinels += 1
 
-    numberOfRelevantSentences = 0
-    for sentence in data:
-       #depOccurs = False
-       #for line in sentence:
-       #   if line["coarse_dep"] == relevantAffix or relevantAffix == "HEAD":
-       #      depOccurs = True
-       #      break
-       #if not depOccurs:
-       #   continue
-       numberOfRelevantSentences += 1
-       ordered = orderSentence(sentence, weights, None, None, False, False)
-       dev.append(stoi_words["SOS"])
-       wordsWithoutSentinels += 1
-       for ch in ordered:
-         dev.append(stoi_words[ch["word"]])
-         wordsWithoutSentinels += 1
-       dev.append(stoi_words["EOS"])
-       wordsWithoutSentinels += 1
-       for _ in range(args.cutoff+2):
-         dev.append(stoi_words["PAD"])
-#    print(len([x for x in dev if x != 0]), wordsWithoutSentinels)
-   
+    dev.append(stoi_words["SOS"])
+    wordsWithoutSentinels += 1
+    dev.append(3)
+    dev.append(3)
+    #dev.append(3)
+    #wordsWithoutSentinels += 1
+    wordsWithoutSentinels += 1
+    wordsWithoutSentinels += 1
+    dev.append(stoi_words["EOS"])
+    wordsWithoutSentinels += 1
+    for _ in range(args.cutoff+2):
+      dev.append(stoi_words["PAD"])
+    print(dev) 
+    assert len([x for x in dev if x != 0]) == wordsWithoutSentinels, (len([x for x in dev if x != 0]), wordsWithoutSentinels)
+
+ 
     array = dev    
     #print array
-    
+    numberOfRelevantSentences = 1
     print("Sorting "+str(numberOfRelevantSentences)+" sentences.")
     if numberOfRelevantSentences == 0:
         return 1.0
@@ -414,32 +408,19 @@ def calculateTradeoffForWeights(weights, relevantAffix):
     #
    
 
+print(weights)
+#quit()
+HEADWeight = weights["HEAD"]
 
-for iteration in range(1000):
+fullAUCs = []
+
+for iteration in range(1):
   coordinate=choice(itos_deps+["HEAD"])
   mostCorrect, mostCorrectValue = 0, None
-  for newValue in [-1] + [2*x+1 for x in range(len(weights))] + [weights[coordinate]]:
-     if random() < 0.0 and newValue != weights[coordinate]:
+  for newValue in [weights[coordinate]]:
+     if random() < 0.5 and abs(newValue - weights[coordinate]) > 5 and (not (len(fullAUCs) >= 2 and abs(fullAUCs[-1] - fullAUCs[-2]) < 1e-5)):
         continue
      print(newValue, mostCorrect, coordinate)
      weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}
      correctCount = calculateTradeoffForWeights(weights_, coordinate)
-     if correctCount > mostCorrect:
-        mostCorrectValue = newValue
-        mostCorrect = correctCount
-  print("===================")
-  print("Iteration", iteration, "Best AUC", mostCorrect)
-  weights[coordinate] = mostCorrectValue
-  itos_ = sorted(itos_deps+["HEAD"], key=lambda x:weights[x])
-  weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
-  print(weights)
-  for x in itos_:
-     print("\t".join([str(y) for y in [x, weights[x]]]))
-  if (iteration + 1) % 50 == 0:
-     with open(TARGET_DIR+"/optimized_"+args.language+"_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
-        print(iteration, mostCorrect, file=outFile)
-        for key in itos_:
-           print(key, weights[key], file=outFile)
-
-
 

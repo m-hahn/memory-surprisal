@@ -23,7 +23,7 @@ import random
 
 args=parser.parse_args()
 print(args)
-
+assert args.language != "Japanese_2.4"
 
 assert args.alpha >= 0
 assert args.alpha <= 1
@@ -252,7 +252,7 @@ def calculateTradeoffForWeights(weights, relevantAffix):
     for sentence in data:
        #depOccurs = False
        #for line in sentence:
-       #   if line["coarse_dep"] == relevantAffix or relevantAffix == "HEAD":
+       #   if line["coarse_dep"] == relevantAffix or relevantAffix == "HEAD" or relevantAffix == None:
        #      depOccurs = True
        #      break
        #if not depOccurs:
@@ -414,12 +414,17 @@ def calculateTradeoffForWeights(weights, relevantAffix):
     #
    
 
+print(weights)
+#quit()
+HEADWeight = weights["HEAD"]
 
-for iteration in range(1000):
+fullAUCs = []
+
+for iteration in range(20000):
   coordinate=choice(itos_deps+["HEAD"])
   mostCorrect, mostCorrectValue = 0, None
   for newValue in [-1] + [2*x+1 for x in range(len(weights))] + [weights[coordinate]]:
-     if random() < 0.0 and newValue != weights[coordinate]:
+     if random() < 0.5 and abs(newValue - weights[coordinate]) > 5 and (not (len(fullAUCs) >= 2 and abs(fullAUCs[-1] - fullAUCs[-2]) < 1e-5)):
         continue
      print(newValue, mostCorrect, coordinate)
      weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}
@@ -436,10 +441,16 @@ for iteration in range(1000):
   for x in itos_:
      print("\t".join([str(y) for y in [x, weights[x]]]))
   if (iteration + 1) % 50 == 0:
+     fullAUCs.append(calculateTradeoffForWeights(weights_, None))
      with open(TARGET_DIR+"/optimized_"+args.language+"_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
         print(iteration, mostCorrect, file=outFile)
+        print(" ".join([str(x) for x in fullAUCs]), file=outFile)
+        print(str(args), file=outFile)
         for key in itos_:
            print(key, weights[key], file=outFile)
-
+     if len(fullAUCs) >= 10 and abs(fullAUCs[-10]-fullAUCs[-1])<1e-5:
+        print("STOPPING OPTIMIZATION")
+        break
+     
 
 
