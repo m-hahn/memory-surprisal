@@ -12,7 +12,7 @@ parser.add_argument("--model", dest="model", type=str)
 parser.add_argument("--alpha", dest="alpha", type=float, default=0.0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
-parser.add_argument("--cutoff", dest="cutoff", type=int, default=12)
+parser.add_argument("--cutoff", dest="cutoff", type=int, default=15)
 parser.add_argument("--idForProcess", dest="idForProcess", type=int, default=random.randint(0,10000000))
 import random
 
@@ -167,19 +167,33 @@ weights_sfx = dict(list(zip(itos_sfx_, [2*x for x in range(len(itos_sfx_))])))
 
   
 
+import glob
+PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
+files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
+assert len(files) == 1
+with open(files[0], "r") as inFile:
+   next(inFile)
+   next(inFile)
+   next(inFile)
+   for line in inFile:
+      morpheme, weight = line.strip().split(" ")
+      weights_pfx[morpheme] = weight
+#
+
+
+errors = defaultdict(int)
+
 def getCorrectOrderCount(weights_pfx, weights_sfx, coordinate, newValue):
    correct = 0
    incorrect = 0
-   if len(index_pfx[coordinate]) == 0:
-     return 1.0
-   for verb in index_pfx[coordinate]:
+   for q, verb in enumerate(data):
       #prefixes_keys = [x[header["form"]] for x in verb if x[header["type1"]] == "pfx"]
 #      if coordinate not in prefixes_keys:
  #       assert False
   #      continue
    
       prefixes = [(getKey(x), weights_pfx[getKey(x)]) for x in verb if x[header["type1"]] == "pfx"]
-      assert len(prefixes) > 1, verb
+      #assert len(prefixes) > 1, verb
 #      suffixes = [(x[header[RELEVANT_KEY]], weights_sfx[x[header[RELEVANT_KEY]]]) for x in verb if x[header["type1"]] == "sfx"]
 
       for affixes in [prefixes]:    
@@ -198,12 +212,12 @@ def getCorrectOrderCount(weights_pfx, weights_sfx, coordinate, newValue):
                  correct+=1
                else:
                  incorrect+=1
- #                print("ERROR", q)
-  #               print((affixes[i][0], affixes[j][0]))
-   #              print(verb)
-#                 if affixes[i][0] == affixes[j][0]:
- #                     assert False
-               #  errors[(affixes[i][0], affixes[j][0])] += 1
+                 print(q)
+                 print((affixes[i][0], affixes[j][0]))
+                 print(verb)
+ #                if affixes[i][0] == affixes[j][0]:
+#                      assert False
+                 errors[(affixes[i][0], affixes[j][0])] += 1
         assert correct+incorrect>0, affixes
    if correct+incorrect == 0:
       print("ERROR 19722: #", coordinate, "#")
@@ -211,9 +225,6 @@ def getCorrectOrderCount(weights_pfx, weights_sfx, coordinate, newValue):
       return 1.0
    return correct/(correct+incorrect)
 
-index_pfx = defaultdict(list)
-
-elementsOccurringBeforeSubject = defaultdict(int)
 
 
 
@@ -222,14 +233,6 @@ for q in range(len(data)):
    prefixes_keys = [getKey(x) for x in verb if x[header["type1"]] == "pfx"]
    if len(prefixes_keys) <= 1:
      continue
-#   print(verb)
-   for i in range(len(verb)-1):
-      if ".SBJ" in verb[i+1][header["analysis"]]:
-         if not verb[i][header["lemma"]].startswith("t^"):
-           if not verb[i][header["lemma"]] == "rl": # suffix -ng to the auxiliary
- #           print(verb[i], verb)
-            elementsOccurringBeforeSubject[tuple(verb[i])] += 1
-   # make it hierarchical by counting subj... subj...
 
    segmentation = []
    for j in range(len(verb)):
@@ -267,45 +270,10 @@ for q in range(len(data)):
      continue
 
 
-   for pfx in prefixes_keys:
-      index_pfx[pfx].append(verb)
-   index_pfx[None].append(verb)
 
 
-
-
-print(sorted(list(elementsOccurringBeforeSubject.items()), key=lambda x:x[1]))
-#print(len(data))
-#quit()
-#quit()
-
-
-for iteration in range(200):
-  coordinate = choice(itos_pfx)
-  while prefixFrequency[coordinate] < 10 and random() < 0.95:
-    coordinate = choice(itos_pfx)
-  mostCorrect, mostCorrectValue = 0, None
-  for newValue in [-1] + [2*x+1 for x in range(len(itos_pfx))]:
-     #if random() > 0.3:
-     #  continue
-     correctCount = getCorrectOrderCount(weights_pfx, weights_sfx, coordinate, newValue)
-#     print(coordinate, newValue, iteration, correctCount)
-     if correctCount > mostCorrect:
-        mostCorrectValue = newValue
-        mostCorrect = correctCount
-  assert not (mostCorrectValue is None)
-  weights_pfx[coordinate] = mostCorrectValue
-  itos_pfx_ = sorted(itos_pfx, key=lambda x:weights_pfx[x])
-  weights_pfx = dict(list(zip(itos_pfx_, [2*x for x in range(len(itos_pfx_))])))
-  print(weights_pfx)
-  for x in itos_pfx_:
-     print("\t".join([str(y) for y in [x, weights_pfx[x], prefixFrequency[x], len(index_pfx[x])]]))
-  print(iteration, mostCorrect, prefixFrequency[coordinate], len(index_pfx[coordinate]))
-  print("Total", getCorrectOrderCount(weights_pfx, weights_sfx, None, 0))
-with open("output/extracted_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
-  for x in itos_pfx_:
-  #   if affixFrequencies[x] < 10:
-   #    continue
-     print("\t".join([str(y) for y in [x, weights_pfx[x], prefixFrequency[x]]]), file=outFile)
+result = getCorrectOrderCount(weights_pfx, weights_sfx, None, 0)
+print(errors)
+print(result)
 
 
