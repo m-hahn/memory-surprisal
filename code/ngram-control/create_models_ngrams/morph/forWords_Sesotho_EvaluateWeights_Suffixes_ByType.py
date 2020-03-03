@@ -157,9 +157,9 @@ print(suffixFrequency)
 print(itos_pfx)
 print(itos_sfx)
 
-itos_pfx_ = itos_pfx[::]
-shuffle(itos_pfx_)
-weights_pfx = dict(list(zip(itos_pfx_, [2*x for x in range(len(itos_pfx_))])))
+itos_sfx_ = itos_sfx[::]
+shuffle(itos_sfx_)
+weights_sfx = dict(list(zip(itos_sfx_, [2*x for x in range(len(itos_sfx_))])))
 
 
 
@@ -167,22 +167,22 @@ import glob
 PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
 files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
 assert len(files) == 1
-assert "Suffixes" not in files[0], files
+assert "Suffixes" in files[0], files
 with open(files[0], "r") as inFile:
    next(inFile)
    next(inFile)
    next(inFile)
    for line in inFile:
       morpheme, weight = line.strip().split(" ")
-      weights_pfx[morpheme] = int(weight)
+      weights_sfx[morpheme] = int(weight)
 #
 
 
 errors = defaultdict(int)
 
-AFFIX_KEY = "pfx"
+AFFIX_KEY = "sfx"
 
-def getCorrectOrderCount(weights_pfx, coordinate, newValue):
+def getCorrectOrderCount(weights_sfx, coordinate, newValue):
    correct = 0
    incorrect = 0
    for q, verb in enumerate(data):
@@ -191,7 +191,7 @@ def getCorrectOrderCount(weights_pfx, coordinate, newValue):
  #       assert False
   #      continue
    
-      affixes = [(getKey(x), weights_pfx[getKey(x)]) for x in verb if x[header["type1"]] == AFFIX_KEY]
+      affixes = [(getKey(x), weights_sfx[getKey(x)]) for x in verb if x[header["type1"]] == AFFIX_KEY]
       if len(affixes) <= 1:
         continue
       #assert len(prefixes) > 1, verb
@@ -274,7 +274,7 @@ for q in range(len(data)):
 
 
 
-result = getCorrectOrderCount(weights_pfx, None, 0)
+result = getCorrectOrderCount(weights_sfx, None, 0)
 print(errors)
 print(result)
 

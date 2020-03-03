@@ -178,11 +178,11 @@ def getCorrectOrderCount(weights_pfx, weights_sfx, coordinate, newValue):
  #       assert False
   #      continue
    
-      prefixes = [(getKey(x), weights_sfx[getKey(x)]) for x in verb if x[header["type1"]] == "sfx"]
-      assert len(prefixes) > 1, verb
+      suffixes = [(getKey(x), weights_sfx[getKey(x)]) for x in verb if x[header["type1"]] == "sfx"]
+      assert len(suffixes) > 1, verb
 #      suffixes = [(x[header[RELEVANT_KEY]], weights_sfx[x[header[RELEVANT_KEY]]]) for x in verb if x[header["type1"]] == "sfx"]
 
-      for affixes in [prefixes]:    
+      for affixes in [suffixes]:    
         for i in range(0, len(affixes)):
            for j in range(0, i):
                if affixes[i][0] == coordinate:
