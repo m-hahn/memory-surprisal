@@ -200,7 +200,8 @@ def calculateTradeoffForWeights(weights_pfx):
        dev.append(stoi_words["SOS"])
        wordsWithoutSentinels += 1
        for ch in ordered:
-           dev.append(stoi_words[ch[header["lemma"]]])
+         for char in ch[header["form"]]:
+           dev.append(stoi_words[char])
            wordsWithoutSentinels += 1
        dev.append(stoi_words["EOS"])
        wordsWithoutSentinels += 1
@@ -380,7 +381,8 @@ for q in range(len(data)):
 
    data[q] = verb
    for word in verb:
-     words.add(word[header["lemma"]])
+     for ch in word[header["form"]]:
+       words.add(ch)
 
 
 words = list(words)
