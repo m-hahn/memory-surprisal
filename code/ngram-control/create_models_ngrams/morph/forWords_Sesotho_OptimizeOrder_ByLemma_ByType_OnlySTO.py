@@ -142,6 +142,14 @@ for verbWithAff in data:
   prefixes_keys = [getKey(x) for x in verbWithAff if x[header["type1"]] == "pfx"]
   if not set(prefixes_keys).issubset(set(["sm", "t^", "om"])):
      continue
+  excludedPrefix = False
+  for p in verbWithAff:
+    if p[header["type1"]] == "pfx":
+       if "/" in p[1]:
+          excludedPrefix=True
+          break
+  if excludedPrefix:
+    continue
   dataChosen.append(verbWithAff)
   for affix in verbWithAff:
     affixLemma = getKey(affix) #[header[RELEVANT_KEY]]
