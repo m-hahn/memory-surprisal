@@ -1,17 +1,40 @@
 import gzip
 
+formsCounter = 0
+
+def finishForm(head, suffixes):
+  global formsCounter
+  formsCounter += 1
+  print(formsCounter)
+
+
+
 def processVerb(verb):
    head = verb[0]
    suffixes = tuple(verb[1:])
    if suffixes == ('る/語尾/る',):
-      _ = 0
+      finishForm(head, suffixes)
    elif suffixes == ('た/助動詞/た',):
-      _ = 0
+      finishForm(head, suffixes)
    elif suffixes == ('う/語尾/う',):
-      _ = 0
+      finishForm(head, suffixes)
    elif suffixes == ('い/語尾/い',):
-      _ = 0
-   elif suffixes == ('し/動詞/し', 'た/助動詞/た'):
+      finishForm(head, suffixes)
+   elif suffixes == ('し/動詞/し', 'た/助動詞/た') or suffixes == ('する/動詞/する',) or suffixes == ('っ/語尾/っ', 'た/助動詞/た') or suffixes == ('む/語尾/む',) or suffixes == ('あ/動詞/あ', 'る/語尾/る') or suffixes == ('あ/動詞/あ', 'っ/語尾/っ', 'た/助動詞/た') or suffixes == ('さ/動詞/さ', 'れ/助動詞/れ', 'た/助動詞/た') or suffixes == ('られ/助動詞/られ', 'る/語尾/る') or suffixes == ('さ/語尾/さ', 'れ/助動詞/れ', 'た/助動詞/た') or suffixes == ('わ/語尾/わ', 'な/助動詞/な', 'い/語尾/い') or suffixes == ('でき/動詞/でき', 'る/語尾/る') or suffixes == ('で/助動詞/で', 'あ/動詞/あ', 'っ/語尾/っ', 'た/助動詞/た') or suffixes == ('か/語尾/か', 'れ/助動詞/れ', 'た/助動詞/た') or suffixes == ('だっ/助動詞/だっ', 'た/助動詞/た') or suffixes == ('く/語尾/く',) or suffixes == ('し/語尾/し', 'た/助動詞/た') or suffixes ==  ('な/助動詞/な', 'い/語尾/い') or suffixes == ('で/助動詞/で', 'あ/動詞/あ', 'る/語尾/る') or suffixes == ('さ/動詞/さ', 'れ/助動詞/れ', 'る/語尾/る') or len(suffixes) == 0 or suffixes == ('い/語尾/い', 'た/助動詞/た') or suffixes == ('れ/助動詞/れ', 'る/語尾/る') or suffixes == ('す/語尾/す',) or suffixes == ('られ/助動詞/られ', 'た/助動詞/た') or suffixes == ('ら/語尾/ら', 'な/助動詞/な', 'い/語尾/い') or suffixes == ('ん/語尾/ん', 'だ/助動詞/だ') or suffixes == ('じ/語尾/じ', 'た/助動詞/た') or suffixes == ('つ/語尾/つ',) or suffixes == ('ら/語尾/ら', 'れ/助動詞/れ', 'た/助動詞/た') or suffixes == ('す/語尾/す', 'な/助動詞/な', 'り/語尾/り') or suffixes == ('ば/語尾/ば', 'れ/助動詞/れ', 'た/助動詞/た') or suffixes == ('さ/動詞/さ', 'せ/助動詞/せ', 'た/助動詞/た') or suffixes == ('な/助動詞/な', 'かっ/語尾/かっ', 'た/助動詞/た') or suffixes == ('ら/語尾/ら', 'れ/助動詞/れ', 'る/語尾/る') or suffixes == ('ら/語尾/ら', 'れ/助動詞/れ', 'る/語尾/る') or suffixes == ('さ/語尾/さ', 'れ/助動詞/れ', 'る/語尾/る') or suffixes == ('か/語尾/か', 'せ/助動詞/せ', 'た/助動詞/た') or suffixes == ('わ/語尾/わ', 'れ/助動詞/れ', 'た/助動詞/た') or suffixes == ('さ/動詞/さ', 'れ/助動詞/れ', '始め/動詞/はじめ', 'た/助動詞/た') or suffixes == ('ま/語尾/ま', 'れ/助動詞/れ', 'る/語尾/る') or suffixes == ('ま/語尾/ま', 'れ/助動詞/れ', 'た/助動詞/た'):
+      finishForm(head, suffixes)
+   elif suffixes == ('わ/語尾/わ', 'れ/助動詞/れ', 'る/語尾/る') or suffixes == ('ば/語尾/ば', 'れ/助動詞/れ', 'る/語尾/る') or suffixes == ('し/動詞/し', '続け/動詞/つづけ', 'た/助動詞/た') or suffixes == ('し/動詞/し', 'な/助動詞/な', 'い/語尾/い') or suffixes == ('じ/語尾/じ', 'られ/助動詞/られ', 'た/助動詞/た') or suffixes == ('ぶ/語尾/ぶ',) or suffixes == ('じ/語尾/じ', 'られ/助動詞/られ', 'た/助動詞/た') or suffixes == ('じ/語尾/じ', 'られ/助動詞/られ', 'る/語尾/る') :
+      finishForm(head, suffixes)
+   elif suffixes == ('でき/動詞/でき', 'な/助動詞/な', 'い/語尾/い') or suffixes == ('する/語尾/する',) or suffixes == ('始め/動詞/はじめ', 'る/語尾/る') or suffixes ==  ('ぜ/語尾/ぜ', 'られ/助動詞/られ', 'る/語尾/る') or suffixes == ('たが/助動詞/たが', 'い/動詞/い', 'た/助動詞/た') or suffixes == ('ふ/語尾/ふ',) or suffixes == ('し/動詞/し', '始め/動詞/はじめ', 'た/助動詞/た') or suffixes == ('さ/動詞/さ', 'せ/助動詞/せ', 'る/語尾/る') or suffixes == ('さ/語尾/さ', 'な/助動詞/な', 'かっ/語尾/かっ', 'た/助動詞/た') or suffixes == ('わ/語尾/わ', 'せ/助動詞/せ', 'た/助動詞/た') or suffixes== ('しめ/助動詞/しめ', 'た/助動詞/た') or suffixes == ('で/助動詞/で', 'す/語尾/す') or suffixes == ('られ/助動詞/られ', 'な/助動詞/な', 'い/語尾/い') or suffixes == ('か/語尾/か', 'れ/助動詞/れ', 'る/語尾/る') or suffixes == ('でき/動詞/でき', 'た/助動詞/た') or suffixes == ('ぐ/語尾/ぐ',) or suffixes == ('か/語尾/か', 'れ/助動詞/れ', 'る/語尾/る') or suffixes == ('で/助動詞/で', 'あ/動詞/あ', 'ろ/語尾/ろ', 'う/助動詞/う'):
+      finishForm(head, suffixes)
+   elif suffixes == ('い/語尾/い', 'だ/助動詞/だ'): # this -i- belongs to the verb, e.g. 継いだ
+      finishForm(head, suffixes)
+   elif suffixes == ('た/助動詞/た', 'し/動詞/し', 'た/助動詞/た'): # 来たした from 来す（きたす）-- the initial -ta- belongs to the verb
+      finishForm(head, suffixes)
+   elif suffixes == ('し/動詞/し', 'な/助動詞/な', 'かっ/語尾/かっ', 'た/助動詞/た'):
+      finishForm(head, suffixes)
+   elif suffixes == ('さ/動詞/さ', 'れ/助動詞/れ', 'な/助動詞/な', 'い/語尾/い') or suffixes == ('し/動詞/し', 'な/助動詞/な', 'かっ/語尾/かっ', 'た/助動詞/た'):
+      finishForm(head, suffixes)
+   elif 'て/助詞/て' in suffixes: # not included
       _ = 0
    else:
      print("....", head, "\t", suffixes)
@@ -66,7 +89,8 @@ with gzip.open("/u/scr/mhahn/FAIR18/WIKIPEDIA/japanese/japanese-train-tagged.txt
 #                print("===========", verb)
                 _ = 0
              else:
-               print(verb)
+               print("TODO", verb)
+               _ = 0
              verb = []
          elif len(verb) > 0:
              verb = []
