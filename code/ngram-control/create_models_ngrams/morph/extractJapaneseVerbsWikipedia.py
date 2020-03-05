@@ -1,5 +1,8 @@
 import gzip
 from random import shuffle, choice
+import random
+
+myID = random.randint(10000,1000000000)
 
 formsCounter = 0
 
@@ -13,7 +16,7 @@ def finishForm(head, suffixes):
      print(formsCounter)
   forms_data.append((head, suffixes))
     
-affixMorphemes = set(['き/語尾/き', '始め/動詞/はじめ', 'た/助動詞/た', 'る/語尾/る', 'な/動詞/な', 'っ/語尾/っ', 'でき/動詞/でき', 'な/助動詞/な', 'く/語尾/く', 'な/動詞/な', 'る/語尾/る', 'さ/動詞/さ', 'れ/助動詞/れ', 'な/助動詞/な', 'かっ/語尾/かっ', 'た/助動詞/た', 'み/語尾/み', '始め/動詞/はじめ', 'た/助動詞/た', 'が/語尾/が', 'れ/助動詞/れ', 'た/助動詞/た', 'な/助動詞/な', 'かっ/語尾/かっ', 'た/助動詞/た', 'だ/助動詞/だ', 'ろ/語尾/ろ', 'う/助動詞/う', 'わ/語尾/わ', 'な/助動詞/な', 'かっ/語尾/かっ', 'た/助動詞/た', 'ば/語尾/ば', 'な/助動詞/な', 'い/語尾/い', 'ら/語尾/ら', 'せ/助動詞/せ', 'た/助動詞/た', 'られ/助動詞/られ', 'な/助動詞/な', 'かっ/語尾/かっ', 'た/助動詞/た', 'られ/助動詞/られ', 'な/助動詞/な', 'かっ/語尾/かっ', 'た/助動詞/た', 'く/語尾/く', 'だ/助動詞/だ', 'ろ/語尾/ろ', 'う/助動詞/う'])
+affixMorphemes = set(['き/語尾/き', '始め/動詞/はじめ', 'た/助動詞/た', 'る/語尾/る', 'な/動詞/な', 'っ/語尾/っ', 'でき/動詞/でき', 'な/助動詞/な', 'く/語尾/く', 'な/動詞/な', 'る/語尾/る', 'さ/動詞/さ', 'れ/助動詞/れ', 'な/助動詞/な', 'かっ/語尾/かっ', 'た/助動詞/た', 'み/語尾/み', '始め/動詞/はじめ', 'た/助動詞/た', 'が/語尾/が', 'れ/助動詞/れ', 'た/助動詞/た', 'な/助動詞/な', 'かっ/語尾/かっ', 'た/助動詞/た', 'だ/助動詞/だ', 'ろ/語尾/ろ', 'う/助動詞/う', 'わ/語尾/わ', 'な/助動詞/な', 'かっ/語尾/かっ', 'た/助動詞/た', 'ば/語尾/ば', 'な/助動詞/な', 'い/語尾/い', 'ら/語尾/ら', 'せ/助動詞/せ', 'た/助動詞/た', 'られ/助動詞/られ', 'な/助動詞/な', 'かっ/語尾/かっ', 'た/助動詞/た', 'られ/助動詞/られ', 'な/助動詞/な', 'かっ/語尾/かっ', 'た/助動詞/た', 'く/語尾/く', 'だ/助動詞/だ', 'ろ/語尾/ろ', 'う/助動詞/う', 'かっ/語尾/かっ','り/語尾/り', 'ま/助動詞/ま', 'し/語尾/し', 'た/助動詞/た','に/助動詞/に', 'な/動詞/な', 'ら/語尾/ら', 'な/助動詞/な', 'かっ/語尾/かっ', 'た/助動詞/た', 'た/助動詞/た', 'らし/助動詞/らし', 'い/語尾/い', 'せ/語尾/せ', 'られ/助動詞/られ', 'た/助動詞/た', 'と/助動詞/と', 'な/動詞/な', 'っ/語尾/っ', 'た/助動詞/た', 'う/語尾/う', 'だ/助動詞/だ', 'ろ/語尾/ろ', 'う/助動詞/う', 'い/語尾/い', 'らし/助動詞/らし', 'い/語尾/い', 'させ/助動詞/させ', 'はじめ/動詞/はじめ', 'し/動詞/し', 'う/助動詞/う', 'る/語尾/る', 'た/語尾/た', 'な/助動詞/な', 'い/語尾/い', 'さ/語尾/さ', 'な/助動詞/な', 'い/語尾/い', 'ま/語尾/ま', 'な/助動詞/な', 'かっ/語尾/かっ', 'た/助動詞/た', 'り/語尾/り', 'おろ/動詞/おろ', 'し/語尾/し', 'させ/助動詞/させ', 'か/語尾/か', 'な/助動詞/な', 'い/語尾/い', 'ら/語尾/ら', 'ず/助動詞/ず', 'し/動詞/し', 'な/助動詞/な', 'く/語尾/く', 'な/動詞/な', 'っ/語尾/っ', 'た/助動詞/た', 'させ/助動詞/させ', 'た/語尾/た', 'れ/助動詞/れ', 'た/助動詞/た', 'き/語尾/き', 'まく/動詞/まく', 'り/語尾/り', 'はじめ/動詞/はじめ', 'た/助動詞/た', 'て/助動詞/て', 'られ/助動詞/られ', 'よう/助動詞/よう', 'く/語尾/く', 'あ/動詞/あ', 'る/語尾/る', 'でき/動詞/でき', 'ま/助動詞/ま', 'す/語尾/す', 'せ/動詞/せ', 'られ/助動詞/られ', 'る/語尾/る', 'り/語尾/り', 'ま/助動詞/ま', 'せ/語尾/せ', 'ん/助動詞/ん', 'ら/語尾/ら', 'れ/助動詞/れ', 'た/助動詞/た', 'く/語尾/く', 'あ/動詞/あ', 'り/語尾/り', 'ま/助動詞/ま', 'せ/語尾/せ', 'ん/助動詞/ん', 'つ/動詞/つ', 'く/語尾/く', 'さ/語尾/さ', 'れ/助動詞/れ', 'た/助動詞/た', 'い/語尾/い', 'ま/助動詞/ま', 'せ/語尾/せ', 'ん/助動詞/ん', 'られ/助動詞/られ', 'ま/助動詞/ま', 'せ/語尾/せ', 'ん/助動詞/ん', 'く/語尾/く', 'で/助動詞/で', 'あ/動詞/あ', 'る/語尾/る', 'し/動詞/し', 'ま/助動詞/ま', 'せ/語尾/せ', 'ん/助動詞/ん', 'ら/語尾/ら', 'ぬ/助動詞/ぬ', 'ぜ/語尾/ぜ', 'られ/助動詞/られ', 'た/助動詞/た', 'い/語尾/い', 'ま/助動詞/ま', 'せ/語尾/せ', 'ん/助動詞/ん', 'ぜ/語尾/ぜ', 'られ/助動詞/られ', 'た/助動詞/た', 'つづけ/動詞/つづけ', 'す/語尾/す', 'べ/助動詞/べ', 'き/語尾/き', 'だ/助動詞/だ', 'じ/語尾/じ', 'させ/助動詞/させ', 'り/語尾/り', '続け/動詞/つづけ'])
 
 def processVerb(verb):
    head = verb[0]
@@ -68,7 +71,18 @@ def processVerb(verb):
       finishForm(head, suffixes)
    elif set(suffixes).issubset(affixMorphemes) and max([ord(x) for x in head[:head.index("/")]]) > 12400:
       finishForm(head, suffixes)
+   elif (head == 'な/動詞/な' or 'な/形容詞/な' in suffixes) and set(suffixes).issubset(affixMorphemes):
+      finishForm(head, suffixes)
+   elif head == 'さ/動詞/さ' and set(suffixes).issubset(affixMorphemes):
+      finishForm(head, suffixes)
+   elif head == 'で/助動詞/で' and set(suffixes).issubset(affixMorphemes):
+      finishForm(head, suffixes)
+   elif head == 'い/動詞/い' and set(suffixes).issubset(affixMorphemes):
+      finishForm(head, suffixes)
+   elif head == 'し/動詞/し' and set(suffixes).issubset(affixMorphemes):
+      finishForm(head, suffixes)
    elif 'て/助詞/て' in suffixes: # not included
+      print("WITH TE   ", head, "\t", suffixes)
       _ = 0
    else:
      print("....", head, "\t", suffixes)
@@ -76,7 +90,7 @@ def processVerb(verb):
 counter = 0
 with gzip.open("/u/scr/mhahn/FAIR18/WIKIPEDIA/japanese/japanese-train-tagged.txt.gz", mode="r") as inFile:
    for line in inFile:
-      if formsCounter > 100000:
+      if formsCounter > 1000000:
           break
       line = line.decode().split(" ")
 #      print(line)
@@ -107,7 +121,14 @@ with gzip.open("/u/scr/mhahn/FAIR18/WIKIPEDIA/japanese/japanese-train-tagged.txt
                else:
                   verb.insert(0, lastWord[0])
          elif word == "。/補助記号/。" and len(verb) > 0:
-             if (len(verb) > 1 and verb[1] in ['し/動詞/し', 'する/動詞/する']): # form with suru
+
+             if len(verb) > 2 and verb[0] == "な/形容詞/な" and verb[1] == "く/語尾/く" and max([ord(x) for x in verb[2][:verb[2].index("/")]]) > 12500: # naku means `without'
+                del verb[0]
+                del verb[0]
+             elif len(verb) > 2 and verb[0] == "多/形容詞/おお" and verb[1] == "く/語尾/く" and max([ord(x) for x in verb[2][:verb[2].index("/")]]) > 12500: # ooku means `a lot'
+                del verb[0]
+                del verb[0]
+             elif (len(verb) > 1 and verb[1] in ['し/動詞/し', 'する/動詞/する']): # form with suru
                 processVerb(verb)
              elif ("/動詞/" in verb[0]): # starts with verb
                 processVerb(verb)
@@ -121,6 +142,10 @@ with gzip.open("/u/scr/mhahn/FAIR18/WIKIPEDIA/japanese/japanese-train-tagged.txt
                 processVerb(verb)
              elif "/形状詞/" in verb[0] and verb[1] in ['かっ/語尾/かっ',]: # noun + sa...
                 processVerb(verb)
+             elif "/形状詞/" in verb[0]:
+                processVerb(verb)
+             elif ("/形容詞/" in verb[0]): 
+                processVerb(verb)
              elif len(verb) > 1 and max([ord(x) for x in verb[1][:verb[1].index("/")]]) > 12500: # these should not be counted: the second element contains Kanji, so is likely a content morpheme
                 if verb[1] == "出来/動詞/でき" and set(verb[2:]).issubset(affixMorphemes):
                    processVerb(verb)
@@ -130,6 +155,8 @@ with gzip.open("/u/scr/mhahn/FAIR18/WIKIPEDIA/japanese/japanese-train-tagged.txt
                 else:
                    print("===========KANJI=========", "\t".join(verb))
                 _ = 0
+             elif 'て/助詞/て' in verb: # not included
+               print("WITH TE TODO ", verb)
              else:
                print("TODO", verb)
                _ = 0
@@ -157,7 +184,7 @@ for verb, suffixes in forms_data:
          atJ = suffixes[j]
          pairs[(atI, atJ)] += 1
          if (atJ, atI) in pairs and pairs[(atJ, atI)] >= pairs[(atI, atJ)]:
-            print(atI, atJ, verb, suffixes)
+            print("CONFLICT", atI, atJ, verb, suffixes)
 
 chains = sorted([(x, y) for x, y in chains.items()], key=lambda x:x[1], reverse=True)
 
@@ -249,60 +276,71 @@ with open("output/extracted_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
 
 
 
-
+# TODO where is tai as the voluntive marker?
 
 #し/動詞/し      0       14779   # suru derives verbs from (only Sino-Japanese?) nouns
-#さ/語尾/さ      2       884	#
-#する/語尾/する  4       322
-#わ/語尾/わ      6       1482
-#ぶ/語尾/ぶ      8       401
-#か/語尾/か      10      311
-#で/助動詞/で    12      825
-#あ/動詞/あ      14      14788
-#ん/語尾/ん      16      854
-#だっ/助動詞/だっ        18      1154
-#ぜ/語尾/ぜ      20      23
-#ば/語尾/ば      22      665
-#ま/助動詞/ま    24      25
-#む/語尾/む      26      358
-#ふ/語尾/ふ      28      2
-#ま/語尾/ま      30      267
-#する/動詞/する  32      5668
-#み/語尾/み      34      16
-#さ/動詞/さ      36      9876
-#ら/語尾/ら      38      1138
-#たが/助動詞/たが        40      1
-#続け/動詞/つづけ        42      36
+#. さ/語尾/さ      2       884	#
+#. する/語尾/する  4       322	#
+#. わ/語尾/わ      6       1482	#
+#. ぶ/語尾/ぶ      8       401
+#. か/語尾/か      10      311
+#で/助動詞/で    12      825	# is this always voiced version of -te-?
+#あ/動詞/あ      14      14788	# belongs to aru (better treat aru as a verb on its own?)
+#. ん/語尾/ん      16      854	#
+#だっ/助動詞/だっ        18      1154	# copula  だった (better treat desu as a verb on its own?)
+#. ぜ/語尾/ぜ      20      23	#
+#. ば/語尾/ば      22      665	#
+#ま/助動詞/ま    24      25	# polite
+#. む/語尾/む      26      358	#
+#. ふ/語尾/ふ      28      2	#
+#. ま/語尾/ま      30      267	#
+#する/動詞/する  32      5668	# again suru
+#. み/語尾/み      34      16
+#. さ/動詞/さ      36      9876
+#. ら/語尾/ら      38      1138
+#たが/助動詞/たが        40      1	# voluntive: mitagaru 見/動詞/み たが/助動詞/たが る/語尾/る `want to see'. 希望の助動詞「たがる」が付いた形。. https://www.kokugobunpou.com/%E5%8A%A9%E5%8B%95%E8%A9%9E/%E3%81%9F%E3%81%84-%E3%81%9F%E3%81%8C%E3%82%8B/: 「たい・たがる」
+#続け/動詞/つづけ        42      36	# continuative
 #しめ/助動詞/しめ        44      4
-#ぐ/語尾/ぐ      46      54
-#す/語尾/す      48      1275
-#つ/語尾/つ      50      480
-#せ/助動詞/せ    52      717
-#し/語尾/し      54      2064
-#せ/語尾/せ      56      19
-#ん/助動詞/ん    58      19
-#き/語尾/き      60      37
-#じ/語尾/じ      62      524
-#られ/助動詞/られ        64      2687
-#り/語尾/り      66      18
-#い/動詞/い      68      1
-#始め/動詞/はじめ        70      195
-#れ/助動詞/れ    72      13813
-#な/助動詞/な    74      2496
-#かっ/語尾/かっ  76      1177
-#く/語尾/く      78      596
-#な/動詞/な      80      117
-#っ/語尾/っ      82      12082
-#う/語尾/う      84      2371
-#が/語尾/が      86      24
-#らし/助動詞/らし        88      3
-#い/語尾/い      90      5012
-#た/助動詞/た    92      50444
-#だ/助動詞/だ    94      1101
-#ろ/語尾/ろ      96      27
-#う/助動詞/う    98      28
-#でき/動詞/でき  100     586
-#る/語尾/る      102     32119
+#. ぐ/語尾/ぐ      46      54
+#. す/語尾/す      48      1275
+#. つ/語尾/つ      50      480
+#せ/助動詞/せ    52      717	# causative
+#. し/語尾/し      54      2064
+#. せ/語尾/せ      56      19	# belongs to ma-se-n?
+#ん/助動詞/ん    58      19	# negation (?)
+#. き/語尾/き      60      37
+#. じ/語尾/じ      62      524
+#られ/助動詞/られ        64      2687	# passive
+#. り/語尾/り      66      18
+#い/動詞/い      68      1	# ?
+#始め/動詞/はじめ        70      195	# inchoative
+#れ/助動詞/れ    72      13813	# passive?
+#な/助動詞/な    74      2496	# negation?
+#. かっ/語尾/かっ  76      1177	#
+#. く/語尾/く      78      596	#
+#な/動詞/な      80      117	# negation marker?
+#. っ/語尾/っ      82      12082	#
+#. う/語尾/う      84      2371	#
+#. が/語尾/が      86      24	#
+#らし/助動詞/らし        88      3	# apparently: 開け/動詞/あけ られ/助動詞/られ た/助動詞/た らし/助動詞/らし い/語尾/い ake-rare-ta-rashii `apparently opened' 開けられたらしい
+#. い/語尾/い      90      5012	#
+#た/助動詞/た    92      50444	# past marker
+#だ/助動詞/だ    94      1101	# past marker, voiced version (e.g. 読んだ)
+#. ろ/語尾/ろ      96      27	#
+#う/助動詞/う    98      28	# 言え/動詞/いえ な/助動詞/な い/語尾/い だ/助動詞/だ ろ/語尾/ろ う/助動詞/う iei-nai-daroo `I can't say'. 売り出/動詞/うりだ そ/語尾/そ う/助動詞/う urida-soo `for sale' 売り出そお
+#でき/動詞/でき  100     586	# potential
+#. る/語尾/る      102     32119	# non-past marker
 #0.9918453649784598
 
-
+# 加わる
+# 加わった past
+# 加わったら kuwawattara conditional
+# 加われば kuwawareba provisional 
+# 加われる kuwawareru potential
+# 加わられる kuwawarareru passive
+# 加わらせる, 加わらす causative
+# 加わらせられる, 加わらされる causative passive
+# 加わろう, 加わる[よう/こと]にしよう volitional//hortative
+# 加わるだろう conjectural
+# 加わったり alternative
+# 加われ imperative
