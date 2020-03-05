@@ -81,6 +81,8 @@ def processVerb(verb):
       finishForm(head, suffixes)
    elif head == 'し/動詞/し' and set(suffixes).issubset(affixMorphemes):
       finishForm(head, suffixes)
+   elif head == 'あ/動詞/あ' and set(suffixes).issubset(affixMorphemes):
+      finishForm(head, suffixes)
    elif 'て/助詞/て' in suffixes: # not included
 #      print("WITH TE   ", head, "\t", suffixes)
       _ = 0
