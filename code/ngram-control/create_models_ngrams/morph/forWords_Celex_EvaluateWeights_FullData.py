@@ -153,7 +153,10 @@ mistakes = defaultdict(int)
 def getCorrectOrderCount(weights):
    correct = 0
    incorrect = 0
+   correctFull = 0
+   incorrectFull = 0
    for verb in data:
+      hasMadeMistake = False
       for i in range(1, len(verb)):
          for j in range(1, i):
              weightI = weights[verb[i]]
@@ -162,9 +165,14 @@ def getCorrectOrderCount(weights):
                correct+=1
              else:
                incorrect+=1
+               hasMadeMistake = True
                print("MISTAKE", verb[i], weights[verb[i]], verb[j], weights[verb[j]], verb)
                mistakes[(verb[i], verb[j])] += 1
-   return correct/(correct+incorrect)
+      if not hasMadeMistake:
+          correctFull += 1
+      else:
+          incorrectFull += 1
+   return correct/(correct+incorrect), correctFull/(correctFull+incorrectFull)
 
 result = getCorrectOrderCount(weights)
 print(mistakes)
