@@ -128,54 +128,50 @@ itos = sorted(list(itos))
 stoi = dict(list(zip(itos, range(len(itos)))))
 
 
-print(itos)
-print(stoi)
-
-itos_ = itos[::]
-shuffle(itos_)
-weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
-weights = {}
-import glob
-PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
-files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
-assert len(files) == 1
-with open(files[0], "r") as inFile:
-   next(inFile)
-   for line in inFile:
-      morpheme, weight = line.strip().split(" ")
-      weights[morpheme] = int(weight)
-#weights = {'める': 0, 'てる': 2, '始める': 4, 'そうだ': 6, 'られる': 8, 'あう': 10, 'ざるを得る': 12, 'える': 14, '出来る': 16, 'まい': 18, 'きる': 20, 'だめ': 22, 'ちゃう': 24, 'できる': 26, 'がたい': 28, '易い': 30, 'させる': 32, 'べる': 34, 'たー': 36, 'かける': 38, 'みたいだ': 40, 'する': 42, 'れる': 44, 'せる': 46, 'くださる': 48, 'かもしれる': 50, 'ようだ': 52, 'でした': 54, 'らしい': 56, 'たい': 58, 'かねる': 60, 'ける': 62, '出す': 64, 'ざるをえる': 66, 'ない': 68, 'にくい': 70, 'やすい': 72, '済み': 74, 'なる': 76, 'ます': 78, 'う': 80, '続ける': 82, 'た': 84, 'だ': 86}
-
 from collections import defaultdict
 
-mistakes = defaultdict(int)
+verbsCounts = defaultdict(int)
+verbsPerMorpheme = defaultdict(lambda : defaultdict(int))
+affixCount = defaultdict(int)
 
-def getCorrectOrderCount(weights):
-   correct = 0
-   incorrect = 0
-   correctFull = 0
-   incorrectFull = 0
-   for verb in data:
-      hasMadeMistake = False
-      for i in range(1, len(verb)):
-         for j in range(1, i):
-             weightI = weights[verb[i]]
-             weightJ = weights[verb[j]]
-             if weightI > weightJ:
-               correct+=1
-             else:
-               incorrect+=1
-               hasMadeMistake = True
-               print("MISTAKE", verb[i], weights[verb[i]], verb[j], weights[verb[j]], verb)
-               mistakes[(verb[i], verb[j])] += 1
-      if len(verb) > 2:
-        if not hasMadeMistake:
-            correctFull += 1
-        else:
-            incorrectFull += 1
-   return correct/(correct+incorrect), correctFull/(correctFull+incorrectFull)
+for verbWithAff in data:
+  verb = verbWithAff[0]
+  verbsCounts[verb] += 1
+  verbsCounts["_TOTAL_"] += 1
 
-result = getCorrectOrderCount(weights)
-print(mistakes)
-print(result)
+  suffixes = set(verbWithAff[1:])
+  for affix in suffixes:
+       verbsPerMorpheme[affix][verb] += 1
+       affixCount[affix] += 1
+
+results = []
+
+for affix in itos:
+#  print(affix)
+ # print(verbsPerMorpheme[affix])
+  # MI between `verb' and `was this affix found?'
+  mi = 0
+  verbFreqSum = 0
+  for verb in verbsCounts:
+     if verb == "_TOTAL_":
+        continue
+     verbFreq = verbsCounts[verb] / verbsCounts["_TOTAL_"]
+     probOfAffix = verbsPerMorpheme[affix][verb] / verbsCounts[verb] 
+     probOfAffixPrior = affixCount[affix] / verbsCounts["_TOTAL_"]
+     assert probOfAffix <= 1, probOfAffix
+     assert probOfAffixPrior <= 1
+     verbFreqSum += verbFreq
+     mi += verbFreq * (probOfAffix * log((probOfAffix+1e-10)/(probOfAffixPrior+1e-10)) + (1-probOfAffix) * log((1-probOfAffix+1e-10)/(1-probOfAffixPrior+1e-10)))
+     #print(log(probOfAffix/probOfAffixPrior))
+
+  probOfAffixPrior = affixCount[affix] / verbsCounts["_TOTAL_"]
+  entropyOfHavingAffix = -(probOfAffixPrior * log(probOfAffixPrior+1e-10) + (1-probOfAffixPrior) * log(1-probOfAffixPrior+1e-10))
+  print(affix, mi, verbFreqSum, entropyOfHavingAffix)
+  assert mi <= 0.7
+  assert mi >= 0
+  results.append((affix, mi, entropyOfHavingAffix, entropyOfHavingAffix-mi))
+results.sort(key=lambda x:x[2]-x[1], reverse=True)
+print("==========")
+for r in results:
+   print(r)
 

@@ -66,12 +66,12 @@
 みたいだ	130	3
 ない	132	630	# nai negation
 でした	134	15	# deshita
-ようだ	136	170	# yooda
+ようだ	136	170	# yooda. いうように IU-YOODA `as it says'. あったようです ARU-TA-YOODA-DA `seems to have been'. 見せなかったようだ misenakattayooda MISERU-NAI-TA-YOODA `it didn't seem'. 使うようである TSUKAU-YOODA-ARU `seems to use'. Regarding yooni, Kaiser at al. 9.5.6.3.
 だ	138	49	# da
-なる	140	102	# naru (become) 書けるようになって kakeru-yoo-ni-natte KAKU-KERU-YOODA-NARU-TE `I can write'. 行きたくなります IKU-TAI-NARU-MASU `I want to go'. 感じるようになり KANZHIRU-YOODA-NARU `come to feel'.
+なる	140	102	# naru (become) 書けるようになって kakeru-yoo-ni-natte KAKU-KERU-YOODA-NARU-TE `I can write'. 行きたくなります IKU-TAI-NARU-MASU `I want to go'. 感じるようになり KANZHIRU-YOODA-NARU `come to feel'. Kaiser et al p. 266.
 た	142	3393	# TA
 たら	144	35	# tara TODO
-う	146	92	# -u TODO
+う	146	92	# -u TODO. 維持しよう XX-SURU-U `let's keep'. なるだろう NARU-DA-U `it will be'. 嫌われよう KIRAU-RERU-U. 消えないでしょう KIERU-NAI-DA-U `will not disappear'. 優先すべきだろう YUUSEN-SURU-BESHI-DA-U `should take precedence'. also -mashoo `let's'. should be MASU-U.
 らしい	148	9
 そうだ	150	22	# sooda. 見られそうだ  mirare-sooda `likely to be seen'.
 つづける	152	1	# continuative
