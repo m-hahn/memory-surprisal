@@ -30,89 +30,8 @@ assert args.gamma >= 1
 
 #RELEVANT_KEY = "lemma"
 
-# for ordering
 def getKey(word):
   return word[header["lemma"]][:2]
-
-def getSegmentedForms(word): # return a list , preprocessing
-   if "/" not in word[header["lemma"]] and "." not in word[header["lemma"]]:
-     return [word]
-   elif "/" in word[header["lemma"]]:
-    assert word[header["lemma"]].count("/") == 1
-    lemmas = word[header["lemma"]].split("/")
-    word1 = word[::]
-    word2 = word[::]
-    word1[1] = lemmas[0]
-    word2[1] = lemmas[1]
-
-    word1[0] = "_"
-    word2[0] = "_"
-    if lemmas[0].startswith("sm") and lemmas[1].startswith("t^"): # merger between subject and tense/aspect marker (> 100 cases in the corpus)
-        _ = 0
-    elif word[header["analysis"]] == "NEG.POT": #keke, kebe. Compare Doke and Mokofeng, section 424. Seems to be better treated as an auxiliary, as it is followed by subject prefixes in the corpus.
-       return None
-    elif word[header["analysis"]] == "almost.PRF": # batlile = batla+ile. This is an auxiliary, not a prefix. Doke and Mokofeng, section 575.
-       return None
-    elif word[header["analysis"]] == "POT.PRF": # kile. This seems to be a prefix, as it is followed by subject prefixes in the corpus.
-       return None
-    elif word[header["analysis"]] == "be.PRF": # bile . Better treated as an auxiliary, for the same reason.
-       return None
-    elif word[header["analysis"]] == "do.indeed.PRF": # hlile. Same
-       return None
-    elif word[header["analysis"]] == "fill.belly.PRF": # Occurs a single time, excluded.
-       return None
-    else:
-       print("SPLIT", word1, word2, word)
-       assert False
-    return [word1, word2]
-   elif word[header["lemma"]] == "a.name" or word[header["lemma"]] == "a.place": #  exclude these data
-     return None
-   elif word[header["lemma"]].startswith("t^p.om"):
-    # print(word)
-     lemma1 = word[1][:3]
-     lemma2 = word[1][4:]
-     #print(lemma2)
-     word1 = word[::]
-     word2 = word[::]
-     word1[1] = lemma1
-     word2[1] = lemma2
- 
-     word1[0] = "_"
-     word2[0] = "_"
-     if lemma1.startswith("t^") and lemma2.startswith("om"):
-   #      print(word)
-         assert word[2].startswith("PRS")
-         return [word2]
-         _ = 0
-     else:
-        print("SPLIT", word1, word2, word)
-        assert False
-        return [word1, word2]
-   elif word[header["lemma"]].startswith("t^p.rf"):
-     lemma1 = word[1][:3]
-     lemma2 = word[1][4:]
-     #print(lemma2)
-     word1 = word[::]
-     word2 = word[::]
-     word1[1] = lemma1
-     word2[1] = lemma2
- 
-     word1[0] = "_"
-     word2[0] = "_"
-     if lemma1.startswith("t^") and lemma2.startswith("rf"):
-         assert word[2].startswith("PRS")
-         return [word2]
-         _ = 0
-     else:
-        print("SPLIT", word1, word2, word)
-        assert False
-        return [word1, word2]
-   else: # exclude these data
-     return None
-
-def getNormalizedForm(word): # for prediction
-#   print(word)
-   return stoi_words[word[header["lemma"]]]
 
 myID = args.idForProcess
 
@@ -218,28 +137,13 @@ from collections import defaultdict
 
 prefixFrequency = defaultdict(int)
 suffixFrequency = defaultdict(int)
-dataChosen = []
 for verbWithAff in data:
-  prefixesResult = []
-  for x in verbWithAff:
-    if x[header["type1"]] == "pfx":
-       segmented = getSegmentedForms(x)
-       if segmented is None:
-         prefixesResult = None
-         break
-       prefixesResult += segmented
-    else:
-       prefixesResult.append(x)
-  if prefixesResult is None: # remove this datapoint (affects <20 datapoints)
-     continue
-  dataChosen.append(prefixesResult)
-  for affix in prefixesResult:
+  for affix in verbWithAff:
     affixLemma = getKey(affix) #[header[RELEVANT_KEY]]
     if affix[header["type1"]] == "pfx":
        prefixFrequency[affixLemma] += 1
     elif affix[header["type1"]] == "sfx":
        suffixFrequency[affixLemma] += 1
-data = dataChosen
 
 itos_pfx = sorted(list((prefixFrequency)))
 stoi_pfx = dict(list(zip(itos_pfx, range(len(itos_pfx)))))
@@ -267,7 +171,7 @@ weights_sfx = dict(list(zip(itos_sfx_, [2*x for x in range(len(itos_sfx_))])))
 contextLength = args.cutoff
 lengthForPrediction = args.cutoff
 
-def calculateTradeoffForWeights(weights_pfx):
+def calculateTradeoffForWeights(weights_sfx):
     wordsWithoutSentinels = 0
     dev = []
     for _ in range(args.cutoff+2):
@@ -284,13 +188,13 @@ def calculateTradeoffForWeights(weights_pfx):
        v = [x for x in verb if x[header["type1"]] == "v"]
        assert len(prefixes)+len(v)+len(suffixes)==len(verb)
 
-       prefixes.sort(key=lambda x:weights_pfx[getKey(x)])
+       suffixes.sort(key=lambda x:weights_sfx[getKey(x)])
        ordered = prefixes + v + suffixes
 
        dev.append(stoi_words["SOS"])
        wordsWithoutSentinels += 1
        for ch in ordered:
-           dev.append(getNormalizedForm(ch))
+           dev.append(stoi_words[ch[header["lemma"]]])
            wordsWithoutSentinels += 1
        dev.append(stoi_words["EOS"])
        wordsWithoutSentinels += 1
@@ -450,7 +354,7 @@ words = set()
 # For each verb form, select only the main verb form
 for q in range(len(data)):
    verb = data[q]
-   prefixes_keys = [getKey(x) for x in verb if x[header["type1"]] == "pfx"]
+#   prefixes_keys = [getKey(x) for x in verb if x[header["type1"]] == "pfx"]
 
    segmentation = []
    for j in range(len(verb)):
@@ -468,6 +372,10 @@ for q in range(len(data)):
 
    verb = segmentation[-1]
 
+   suffixes_keys = [getKey(x) for x in verb if x[header["type1"]] == "sfx"]
+
+
+   # It is important to overwrite data[q] before continuing
    data[q] = verb
    for word in verb:
      words.add(word[header["lemma"]])
@@ -478,16 +386,17 @@ itos_words = ["PAD", "SOS", "EOS"] + words
 stoi_words = dict(zip(itos_words, range(len(itos_words))))
 print(stoi_words)
 
+
 for iteration in range(1000):
-  coordinate = choice(itos_pfx)
-  while prefixFrequency[coordinate] < 10 and random() < 0.95:
-    coordinate = choice(itos_pfx)
+  coordinate = choice(itos_sfx)
+  while suffixFrequency[coordinate] < 10 and random() < 0.95:
+    coordinate = choice(itos_sfx)
   mostCorrect, mostCorrectValue = 0, None
-  for newValue in [-1] + [2*x+1 for x in range(len(itos_pfx))] + [weights_pfx[coordinate]]:
-     if random() < 0.8 and newValue != weights_pfx[coordinate]:
+  for newValue in [-1] + [2*x+1 for x in range(len(itos_sfx))] + [weights_sfx[coordinate]]:
+     if random() < 0.8 and newValue != weights_sfx[coordinate]:
         continue
-     print(newValue, mostCorrect, coordinate,prefixFrequency[coordinate])
-     weights_ = {x : y if x != coordinate else newValue for x, y in weights_pfx.items()}
+     print(newValue, mostCorrect, coordinate,suffixFrequency[coordinate])
+     weights_ = {x : y if x != coordinate else newValue for x, y in weights_sfx.items()}
      correctCount = calculateTradeoffForWeights(weights_)
 #     print(weights_)
 #     print(coordinate, newValue, iteration, correctCount)
@@ -496,22 +405,22 @@ for iteration in range(1000):
         mostCorrect = correctCount
   assert not (mostCorrectValue is None)
   print(iteration, mostCorrect)
-  weights_pfx[coordinate] = mostCorrectValue
-  itos_pfx_ = sorted(itos_pfx, key=lambda x:weights_pfx[x])
-  weights_pfx = dict(list(zip(itos_pfx_, [2*x for x in range(len(itos_pfx_))])))
-  print(weights_pfx)
-  for x in itos_pfx_:
-     if prefixFrequency[x] < 10:
+  weights_sfx[coordinate] = mostCorrectValue
+  itos_sfx_ = sorted(itos_sfx, key=lambda x:weights_sfx[x])
+  weights_sfx = dict(list(zip(itos_sfx_, [2*x for x in range(len(itos_sfx_))])))
+  print(weights_sfx)
+  for x in itos_sfx_:
+     if suffixFrequency[x] < 10:
        continue
-     print("\t".join([str(y) for y in [x, weights_pfx[x], prefixFrequency[x]]]))
+     print("\t".join([str(y) for y in [x, weights_sfx[x], suffixFrequency[x]]]))
   if (iteration + 1) % 50 == 0:
      fullAUCs.append(calculateTradeoffForWeights(weights_))
      with open(TARGET_DIR+"/optimized_"+args.language+"_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
         print(iteration, mostCorrect, file=outFile)
         print(" ".join([str(x) for x in fullAUCs]), file=outFile)
         print(str(args), file=outFile)
-        for key in itos_pfx_:
-           print(key, weights_pfx[key], file=outFile)
+        for key in itos_sfx_:
+           print(key, weights_sfx[key], file=outFile)
 
 
 
