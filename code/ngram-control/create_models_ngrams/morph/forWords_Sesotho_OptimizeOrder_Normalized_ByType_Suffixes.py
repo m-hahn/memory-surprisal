@@ -70,7 +70,7 @@ def getSegmentedForms(word): # return a list , preprocessing
       _ = 0
     elif word[header["analysis"]] == "APPL.PRF": # ets (cf. Doke and Mokofeng, section 313?). Both APPL and PRF have relatively frequent suffix morphs of the form -ets- in the corpus.
       _ = 0
-    elif word[header["analysis"]] == "PRF.CAUS": # dits
+    elif word[header["analysis"]] == "PRF.CAUS": # dits. Also consider Doke and Mokofeng, section 369, rule 4.
       _ = 0
     elif word[header["analysis"]] == "DEP.PRF": #  e. DEP = participial mood (Doke and Mokofeng, section 431).
       _ = 0
