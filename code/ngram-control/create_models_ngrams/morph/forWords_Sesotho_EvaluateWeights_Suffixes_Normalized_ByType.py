@@ -259,6 +259,9 @@ AFFIX_KEY = "sfx"
 def getCorrectOrderCount(weights_sfx, coordinate, newValue):
    correct = 0
    incorrect = 0
+
+   correctFull = 0
+   incorrectFull = 0
    for q, verb in enumerate(data):
       #prefixes_keys = [x[header["form"]] for x in verb if x[header["type1"]] == "pfx"]
 #      if coordinate not in prefixes_keys:
@@ -271,6 +274,7 @@ def getCorrectOrderCount(weights_sfx, coordinate, newValue):
       #assert len(prefixes) > 1, verb
 #      suffixes = [(x[header[RELEVANT_KEY]], weights_sfx[x[header[RELEVANT_KEY]]]) for x in verb if x[header["type1"]] == "sfx"]
 
+      hasIncorrect = False
       for i in range(0, len(affixes)):
            for j in range(0, i):
                if affixes[i][0] == coordinate:
@@ -286,6 +290,7 @@ def getCorrectOrderCount(weights_sfx, coordinate, newValue):
                if weightI > weightJ:
                  correct+=1
                else:
+                 hasIncorrect = True
                  incorrect+=1
                  print("==========")
                  print(q)
@@ -295,12 +300,18 @@ def getCorrectOrderCount(weights_sfx, coordinate, newValue):
  #                if affixes[i][0] == affixes[j][0]:
 #                      assert False
                  errors[(affixes[i][0], affixes[j][0])] += 1
+      if len(affixes) > 1:
+        if hasIncorrect:
+           incorrectFull += 1
+        else:
+           correctFull += 1
       assert correct+incorrect>0, affixes
    if correct+incorrect == 0:
       print("ERROR 19722: #", coordinate, "#")
       assert False, (index_sfx[coordinate], coordinate)
       return 1.0
-   return correct/(correct+incorrect)
+   print((correctFull+incorrectFull))
+   return correct/(correct+incorrect), correctFull/(correctFull+incorrectFull)
 
 
 
