@@ -220,15 +220,15 @@ def constructEmptyDict():
 
 
 chains = defaultdict(int)
-prefixesByType = defaultdict(constructEmptyDict)
+suffixesByType = defaultdict(constructEmptyDict)
 
-print(prefixesByType["sm"])
+print(suffixesByType["sm"])
 
 for q in range(len(data)):
    verb = data[q]
    prefixes_keys = [getKey(x) for x in verb if x[header["type1"]] == "pfx"]
-   if len(prefixes_keys) <= 1:
-     continue
+#   if len(prefixes_keys) <= 1:
+ #    continue
 #   print(verb)
    for i in range(len(verb)-1):
       if ".SBJ" in verb[i+1][header["analysis"]]:
@@ -264,20 +264,20 @@ for q in range(len(data)):
 
    verb = segmentation[-1]
 
-   prefixes_keys = [getKey(x) for x in verb if x[header["type1"]] == "pfx"]
-   chains[tuple(prefixes_keys)] += 1
+   suffixes_keys = [getKey(x) for x in verb if x[header["type1"]] == "sfx"]
+   chains[tuple(suffixes_keys)] += 1
 
    # It is important to overwrite data[q] before continuing
    data[q] = verb
 
    for i in range(len(verb)):
-      if verb[i][header["type1"]] =="pfx":
-         prefixesByType[getKey(verb[i])][tuple(verb[i])]+= 1
+      if verb[i][header["type1"]] =="sfx":
+         suffixesByType[getKey(verb[i])][tuple(verb[i])]+= 1
 
 print(chains)
-print(prefixesByType)
-for key in prefixesByType:
-   print("======= ", key, sum([prefixesByType[key][pfx] for pfx in prefixesByType[key]]))
-   for pfx in sorted(list(prefixesByType[key]), key=lambda x:x[1]):
-      print(pfx, prefixesByType[key][pfx])
+print(suffixesByType)
+for key in suffixesByType:
+   print("======= ", key, sum([suffixesByType[key][pfx] for pfx in suffixesByType[key]]))
+   for pfx in sorted(list(suffixesByType[key]), key=lambda x:x[1]):
+      print(pfx, suffixesByType[key][pfx])
 
