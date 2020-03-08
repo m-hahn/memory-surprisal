@@ -159,8 +159,9 @@ for line in data:
      for x in line:
         x["hiragana"] = x["word"]
 
-     raw = "".join([x["word"] for x in line])
-     raw2Phonemized[raw] = " ".join([x["hiragana"] for x in line])
+     raw_ = " ".join([x["word"] for x in line])
+     raw2Phonemized[raw_] = " ".join([x["hiragana"] for x in line])
+
 
      continue
   iTagged = 0
@@ -252,16 +253,10 @@ for line in data:
         assert False
      elif x["hiragana"] == "":
         assert False
-  raw = "".join([x["word"] for x in line])
-  raw2Phonemized[raw] = " ".join([x["hiragana"] for x in line])
+  raw_ = " ".join([x["word"] for x in line])
+  raw2Phonemized[raw_] = " ".join([x["hiragana"] for x in line])
 
-with open("../data/extractedVerbs.txt", "r") as inFileRaw:
-  with open("../data/extractedVerbs_hiragana.txt", "w") as outFileTagged:
-    try:
-     for index in range(1000000):
-       raw = next(inFileRaw).strip()
-       print(raw2Phonemized[raw], file=outFileTagged)
-    except StopIteration:
-       _ = 0
-
+with open("../data/extractedVerbs_hiragana.txt", "w") as outFileTagged:
+  for raw_ in raw2Phonemized:
+     print(raw_, "\t", raw2Phonemized[raw_], file=outFileTagged)
 
