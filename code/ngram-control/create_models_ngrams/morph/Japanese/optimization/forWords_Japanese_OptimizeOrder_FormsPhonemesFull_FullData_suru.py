@@ -13,7 +13,7 @@ parser.add_argument("--model", dest="model", type=str)
 parser.add_argument("--alpha", dest="alpha", type=float, default=0.0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
-parser.add_argument("--cutoff", dest="cutoff", type=int, default=12)
+parser.add_argument("--cutoff", dest="cutoff", type=int, default=3)
 parser.add_argument("--idForProcess", dest="idForProcess", type=int, default=random.randint(0,10000000))
 import random
 
@@ -35,7 +35,7 @@ assert args.gamma >= 1
 myID = args.idForProcess
 
 
-TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-morphology/"
+TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/"
 
 
 
@@ -136,47 +136,120 @@ print(stoi)
 
 itos_ = itos[::]
 shuffle(itos_)
-if args.model == "RANDOM":
-  weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
-  weights['する'] = -1
-elif args.model == "REAL":
-  weights = None
-elif args.model != "REAL":
-  weights = {}
-  import glob
-  PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
-  files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
-  assert len(files) == 1
-  assert "_FormsPhonemesFull_" in files[0]
-  with open(files[0], "r") as inFile:
-     next(inFile)
-     for line in inFile:
-        morpheme, weight = line.strip().split(" ")
-        weights[morpheme] = int(weight)
+weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
 
+raw2Tagged = dict()
 
-
-
-raw2Hiragana = dict()
-
-with open("../data/extractedVerbs_hiragana.txt", "r") as inFileHiragana:
+with open("../data/extractedVerbs.txt", "r") as inFileRaw:
+  with open("../data/extractedVerbs_tagged.txt", "r") as inFileTagged:
     try:
      for index in range(1000000):
-       tagged = next(inFileHiragana).strip().split("\t")
-       raw, tagged = tagged
-       raw2Hiragana[raw.strip()] = tagged.strip()
+       raw = next(inFileRaw).strip()
+       tagged = next(inFileTagged).strip()
+       raw2Tagged[raw] = tagged
     except StopIteration:
        _ = 0
-
 for line in data:
  # print(" ".join([x["word"] for x in line]))
-  raw = " ".join([x["word"] for x in line])
-  hiragana = raw2Hiragana[raw].split(" ")
+  raw = "".join([x["word"] for x in line])
+  if False and max([ord(y) for y in raw]) < 12531: # no need to transform
+    for x in line:
+      x["hiragana"] = x["word"]
+    continue
+  tagged = [x.split("/") for x in raw2Tagged[raw].split(" ")]
+  if raw == "".join([x[2] for x in tagged]):
+     for x in line:
+        x["hiragana"] = x["word"]
+     continue
+  iTagged = 0
+  jTagged = 0
+  iLine = 0
+  jLine = 0
+  line[iLine]["hiragana"] = ""
+
+  for i in range(len(raw)):
+#    print(iTagged, jTagged, tagged)    
+    jTagged += 1
+    if jTagged == len(tagged[iTagged][0]):
+      line[iLine]["hiragana"] += tagged[iTagged][2]
+      iTagged += 1
+      jTagged = 0 
+    jLine += 1
+    if jLine == len(line[iLine]["word"]):
+      iLine += 1
+      if iLine < len(line):
+        line[iLine]["hiragana"] = ""
+      jLine = 0 
+     
 #  print(line)
- # print(hiragana)
-  assert len(hiragana) == len(line)
-  for i in range(len(line)):
-    line[i]["hiragana"] = hiragana[i]
+  assert "".join([x["hiragana"] for x in line]) == "".join([x[2] for x in tagged])
+#  print(line)
+#  print(tagged)
+#  print([x["word"] for x in line])
+#  print("RAW", raw)
+#  print(max([ord(y) for y in raw]))
+  hasFoundProblem = []
+  for index, x in enumerate(line):
+#     print(x["word"], "==", x["hiragana"])
+     if x["word"] != x["hiragana"] and max([ord(y) for y in x["word"]]) < 200 and x["word"] not in ["fax", "pr"]:
+        hasFoundProblem.append(index)
+     elif x["hiragana"] == "":
+        hasFoundProblem.append(index)
+#     assert x["hiragana"]  != "", tagged
+  if len(hasFoundProblem)>0:
+    assert len(line) > 1
+ #   print(hasFoundProblem)
+    if hasFoundProblem == [0]:
+      assert len(line) > 1
+      if line[1]["hiragana"].endswith(line[1]["word"]): 
+         line[0]["hiragana"] = line[1]["hiragana"][:-len(line[1]["word"])]
+         line[1]["hiragana"] = line[1]["word"]
+      elif len(line[1]["hiragana"]) == len(line[0]["word"]) + len(line[1]["word"]):
+         line[0]["hiragana"] = line[1]["hiragana"][:len(line[0]["word"])]
+         line[1]["hiragana"] = line[1]["hiragana"][len(line[0]["word"]):]
+      elif line[0]["word"] == "出":
+         assert line[1]["hiragana"].startswith("で")
+         line[0]["hiragana"] = "で"
+         line[1]["hiragana"] = line[1]["hiragana"][1:]
+      elif line[0]["word"] == "見":
+         assert line[1]["hiragana"].startswith("み")
+         line[0]["hiragana"] = "み"
+         line[1]["hiragana"] = line[1]["hiragana"][1:]
+      elif line[1]["hiragana"].count(line[0]["word"][-1]) == 1:
+         line[0]["hiragana"] = line[1]["hiragana"][:line[1]["hiragana"].index(line[0]["word"][-1])]
+         line[1]["hiragana"] = line[1]["hiragana"][line[1]["hiragana"].index(line[0]["word"][-1]):]
+      else:
+         assert False
+    elif hasFoundProblem == [1]:
+      if line[1]["word"] + line[2]["word"] == line[2]["hiragana"]:
+        line[1]["hiragana"] = line[1]["word"]
+        line[2]["hiragana"] = line[2]["word"]
+      else:
+        assert False
+    elif hasFoundProblem == [2]:
+      if line[2]["word"] + line[3]["word"] == line[3]["hiragana"]:
+        line[2]["hiragana"] = line[2]["word"]
+        line[3]["hiragana"] = line[3]["word"]
+      else:
+        assert False
+    elif hasFoundProblem == [0,1]:
+       if line[0]["word"] == "見":
+         line[0]["hiragana"] = "み"
+       if line[0]["word"] == "つ":
+          line[0]["hiragana"] = line[0]["word"]
+       if line[1]["word"] == "込":
+         line[1]["hiragana"] = "こ"
+       if line[1]["word"] == "け":
+          line[1]["hiragana"] = line[1]["word"]
+       line[2]["hiragana"] = line[2]["hiragana"][len(line[0]["hiragana"])+len(line[1]["hiragana"]):]
+#  print(line)
+#  assert "".join([x["hiragana"] for x in line]) == ("".join([x[2] for x in tagged])).replace("ＰＲ", "pr")
+  for index, x in enumerate(line):
+ #    print(x["word"], "==", x["hiragana"])
+     if x["word"] != x["hiragana"] and max([ord(y) for y in x["word"]]) < 200 and x["word"] not in ["pr", "fax"]:
+        assert False
+     elif x["hiragana"] == "":
+        assert False
 
 cachedPhonemization = {}
 
@@ -196,13 +269,11 @@ def phonemize(x):
    phonemized = cachedPhonemization[x]
    return phonemized
 
-
 def calculateTradeoffForWeights(weights):
     dev = []
     for verb in data:
        affixes = verb[1:]
-       if args.model != "REAL":
-          affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
+       affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
        for ch in [verb[0]] + affixes:
          for char in phonemize(ch["hiragana"]):
            dev.append(char)
@@ -341,12 +412,12 @@ def calculateTradeoffForWeights(weights):
            lastProbabilityFiltered = [x for x in lastProbability if x is not None]
            surprisal = - sum([x for x in lastProbabilityFiltered])/len(lastProbabilityFiltered)
        except ValueError:
-           print("PROBLEM", file=sys.stderr)
-           print(lastProbability, file=sys.stderr)
+    #       print >> sys.stderr, "PROBLEM"
+     #      print >> sys.stderr, lastProbability
            surprisal = 1000
        devSurprisalTable.append(surprisal)
-       print("Surprisal", surprisal, len(itos))
-    print(devSurprisalTable)
+     #  print("Surprisal", surprisal, len(itos))
+    #print(devSurprisalTable)
     mis = [devSurprisalTable[i] - devSurprisalTable[i+1] for i in range(len(devSurprisalTable)-1)]
     tmis = [mis[x]*(x+1) for x in range(len(mis))]
     #print(mis)
@@ -354,27 +425,65 @@ def calculateTradeoffForWeights(weights):
     auc = 0
     memory = 0
     mi = 0
-    print(mis)
-    print(tmis)
     for i in range(len(mis)):
        mi += mis[i]
        memory += tmis[i]
        auc += mi * tmis[i]
-    print("MaxMemory", memory)
+    #print("MaxMemory", memory)
     assert 7>memory
     auc += mi * (7-memory)
-    print("AUC", auc)
+    #print("AUC", auc)
+    return auc
     #assert False
     
-    outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model+".txt"
-    print(outpath)
-    with open(outpath, "w") as outFile:
-       print(str(args), file=outFile)
-       print(" ".join(map(str,devSurprisalTable)), file=outFile)
-    
+    #outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model+".txt"
+    #print(outpath)
+    #with open(outpath, "w") as outFile:
+    #         print >> outFile, str(args)
+    #         print >> outFile, devSurprisalTable[-1]
+    #         print >> outFile, " ".join(map(str,devSurprisalTable))
     #
     #
-    return auc
    
-calculateTradeoffForWeights(weights)
+
+
+for iteration in range(1000):
+  coordinate=choice(itos)
+  if coordinate == 'する' and weights[coordinate] == 0: # Force suru to be at the beginning
+      continue
+
+  while affixFrequency.get(coordinate, 0) < 10 and random() < 0.95:
+     coordinate = choice(itos)
+  mostCorrect, mostCorrectValue = 0, None
+  for newValue in [-1] + [2*x+1 for x in range(len(itos))] + [weights[coordinate]]:
+     if coordinate == 'する':
+        break
+     if random() < 0.9 and newValue != weights[coordinate]:
+        continue
+     print(newValue, mostCorrect, coordinate, affixFrequency[coordinate])
+     weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}
+     correctCount = calculateTradeoffForWeights(weights_)
+#     print(weights_)
+#     print(coordinate, newValue, iteration, correctCount)
+     if correctCount > mostCorrect:
+        mostCorrectValue = newValue
+        mostCorrect = correctCount
+  if coordinate == 'する':
+     mostCorrectValue = -1
+  print(iteration, mostCorrect)
+  weights[coordinate] = mostCorrectValue
+  itos_ = sorted(itos, key=lambda x:weights[x])
+  weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
+  print(weights)
+  for x in itos_:
+     if affixFrequency[x] < 10:
+       continue
+     print("\t".join([str(y) for y in [x, weights[x], affixFrequency[x]]]))
+  if (iteration + 1) % 50 == 0:
+     with open(TARGET_DIR+"/optimized_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
+        print(iteration, mostCorrect, str(args), file=outFile)
+        for key in itos_:
+           print(key, weights[key], file=outFile)
+
+
 
