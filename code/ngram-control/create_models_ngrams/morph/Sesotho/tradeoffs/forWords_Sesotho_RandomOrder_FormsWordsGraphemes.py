@@ -106,7 +106,6 @@ from math import log, exp
 from random import random, shuffle, randint, Random, choice
 
 
-from corpusIterator_V import CorpusIterator_V
 
 originalDistanceWeights = {}
 
@@ -169,9 +168,10 @@ weights_sfx = dict(list(zip(itos_sfx_, [2*x for x in range(len(itos_sfx_))])))
 import glob
 PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
 files = glob.glob(PATH+"/optimized_*.py_"+args.model_sfx+".tsv")
+print(files, args.model_sfx)
 assert len(files) == 1
 assert "Suffixes" in files[0], files
-assert "Normalized" in files[0]
+assert "FormsWordsGraphemes" in files[0]
 with open(files[0], "r") as inFile:
    next(inFile)
    next(inFile)
@@ -184,7 +184,7 @@ with open(files[0], "r") as inFile:
 files = glob.glob(PATH+"/optimized_*.py_"+args.model_pfx+".tsv")
 assert len(files) == 1
 assert "Suffixes" not in files[0], files
-assert "Normalized" in files[0]
+assert "FormsWordsGraphemes" in files[0]
 with open(files[0], "r") as inFile:
    next(inFile)
    next(inFile)
