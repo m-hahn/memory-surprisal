@@ -8,6 +8,9 @@ models_sfx = glob.glob(PATH+"optimized_Sesotho_Acqdiv_forWords_Sesotho_OptimizeO
 
 models_pfx.sort()
 models_sfx.sort()
+import random
+random.shuffle(models_pfx)
+random.shuffle(models_sfx)
 
 import subprocess
 
@@ -19,5 +22,5 @@ for i in range(min(len(models_pfx), len(models_sfx))):
     subprocess.call(["/u/nlp/anaconda/main/anaconda3/envs/py37-mhahn/bin/python", "forWords_Sesotho_RandomOrder_FormsWordsGraphemes.py", "--model_pfx", model_pfx, "--model_sfx", model_sfx])
 model_pfx = "REAL"
 model_sfx = "REAL"
-subprocess.call(["/u/nlp/anaconda/main/anaconda3/envs/py37-mhahn/bin/python", "forWords_Sesotho_RandomOrder_FormsWordsGraphemes.py", "--model_pfx", model_pfx, "--model_sfx", model_sfx])
+#subprocess.call(["/u/nlp/anaconda/main/anaconda3/envs/py37-mhahn/bin/python", "forWords_Sesotho_RandomOrder_FormsWordsGraphemes.py", "--model_pfx", model_pfx, "--model_sfx", model_sfx])
 
