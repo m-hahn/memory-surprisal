@@ -138,6 +138,9 @@ itos_ = itos[::]
 shuffle(itos_)
 if args.model == "RANDOM":
   weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
+  weights['する'] = -1
+elif args.model == "REAL":
+  weights = None
 elif args.model != "REAL":
   weights = {}
   import glob

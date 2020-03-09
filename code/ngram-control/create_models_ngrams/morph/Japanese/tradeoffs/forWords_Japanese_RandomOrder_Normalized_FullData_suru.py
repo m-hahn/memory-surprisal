@@ -138,6 +138,9 @@ itos_ = itos[::]
 shuffle(itos_)
 if args.model == "RANDOM":
   weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
+  weights['する'] = -1
+elif args.model == "REAL":
+  weights = None
 elif args.model != "REAL":
   weights = {}
   import glob
@@ -153,45 +156,13 @@ elif args.model != "REAL":
 
 
 
-raw2Hiragana = dict()
-
-with open("../data/extractedVerbs_hiragana.txt", "r") as inFileHiragana:
-    try:
-     for index in range(1000000):
-       tagged = next(inFileHiragana).strip().split("\t")
-       raw, tagged = tagged
-       raw2Hiragana[raw.strip()] = tagged.strip()
-    except StopIteration:
-       _ = 0
-
-for line in data:
- # print(" ".join([x["word"] for x in line]))
-  raw = " ".join([x["word"] for x in line])
-  hiragana = raw2Hiragana[raw].split(" ")
-#  print(line)
- # print(hiragana)
-  assert len(hiragana) == len(line)
-  for i in range(len(line)):
-    line[i]["hiragana"] = hiragana[i]
-
-cachedPhonemization = {}
-
-def phonemize(x):
-   if x not in cachedPhonemization:
-      phonemized = romkan.to_roma(x)
-      if max([ord(y) for y in phonemized]) > 200: # contains Kanji
-         cachedPhonemization[x] = x
-      else:
-        if x.endswith("っ"):
-          assert phonemized.endswith("xtsu")
-          phonemized = phonemized.replace("xtsu", "G") # G for `geminate'
-        phonemized = phonemized.replace("ch", "C")
-        phonemized = phonemized.replace("sh", "S")
-        phonemized = phonemized.replace("ts", "T")
-        cachedPhonemization[x] = phonemized
-   phonemized = cachedPhonemization[x]
-   return phonemized
-
+def getRepresentation(lemma):
+   if lemma == "させる" or lemma == "せる":
+     return "CAUSATIVE"
+   elif lemma == "れる" or lemma == "られる" or lemma == "える" or lemma == "得る" or lemma == "ける":
+     return "PASSIVE_POTENTIAL"
+   else:
+     return lemma
 
 def calculateTradeoffForWeights(weights):
     dev = []
@@ -200,8 +171,7 @@ def calculateTradeoffForWeights(weights):
        if args.model != "REAL":
           affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
        for ch in [verb[0]] + affixes:
-         for char in phonemize(ch["hiragana"]):
-           dev.append(char)
+          dev.append(getRepresentation(ch["lemma"]))
        #    print(char)
        dev.append("EOS")
        for _ in range(args.cutoff+2):
