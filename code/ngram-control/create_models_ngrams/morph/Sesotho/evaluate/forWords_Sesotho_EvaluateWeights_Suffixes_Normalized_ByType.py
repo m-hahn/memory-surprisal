@@ -44,7 +44,7 @@ def getSegmentedFormsVerb(word):
       words[i][0] = "_"
       words[i][1] = lemmas[i]
       words[i][3] = "v" if i == 0 else "sfx"      
-    print("SPLIT", words, word) # frequent: verb stem + past suffix merged
+    #print("SPLIT", words, word) # frequent: verb stem + past suffix merged
     return words
    else: # 
     print("TODO", word)
@@ -162,7 +162,7 @@ from math import log, exp
 from random import random, shuffle, randint, Random, choice
 
 
-from corpusIterator_V import CorpusIterator_V
+#from corpusIterator_V import CorpusIterator_V
 
 originalDistanceWeights = {}
 
@@ -286,20 +286,20 @@ def getCorrectOrderCount(weights_sfx, coordinate, newValue):
                    weightJ = newValue
                else:
                   weightJ = affixes[j][1]
-               print(weightI, weightJ)
+               #print(weightI, weightJ)
                if weightI > weightJ:
                  correct+=1
                else:
                  hasIncorrect = True
                  incorrect+=1
-                 print("==========")
-                 print(q)
-                 print(affixes)
-                 print("Error pair", (affixes[i][0], affixes[j][0]))
-                 print(verb)
+                 #print("==========")
+                 #print(q)
+                 #print(affixes)
+                 #print("Error pair", (affixes[i][0], affixes[j][0]))
+                 #print(verb)
  #                if affixes[i][0] == affixes[j][0]:
 #                      assert False
-                 errors[(affixes[i][0], affixes[j][0])] += 1
+                 errors[(affixes[j][0], affixes[i][0])] += 1
       if len(affixes) > 1:
         if hasIncorrect:
            incorrectFull += 1
@@ -337,7 +337,7 @@ for q in range(len(data)):
    # Restrict to the last verb, chopping off initial auxiliaries and their affixes
    ###############################################################################
 
-   print(segmentation[-1])
+   #print(segmentation[-1])
 #   if len(segmentation) > 1:
 #    for w in range(len(segmentation)-1):
 #     if len(segmentation[w]) == 2:
@@ -362,5 +362,10 @@ for q in range(len(data)):
 result = getCorrectOrderCount(weights_sfx, None, 0)
 print(errors)
 print(result)
+
+with open("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+args.model+".txt", "w") as outFile:
+   print(result[0], file=outFile)
+   print(result[1], file=outFile)
+print("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+args.model+".txt")
 
 

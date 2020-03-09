@@ -7,9 +7,9 @@
 すぎる	12	6
 あう	14	2
 尽くす	16	1
-出来る	18	18	# potential
+出来る	18	18	# dekiru 
 うる	20	2
-できる	22	130	# potential
+できる	22	130	# dekiru
 ね	24	1
 こむ	26	2
 済み	28	1
@@ -37,16 +37,16 @@
 なら	72	6
 難い	74	1
 せる	76	178	# seru (causative) せる・させる
-得る	78	3
+得る	78	3	# 期待し得る kitai-shi-eru `can expect'. たり得ない tari-e-nai `can't help' (both from GSD). Is this the potential form?
 易い	80	2
 づめる	82	1
 だめ	84	1
-える	86	31	# eru ?
+える	86	31	# eru (potential)
 かける	88	8
-める	90	22	# 
+める	90	22	# ??? 楽しめる enjoyable? (GSD)
 いける	92	1
 らす	94	4
-れる	96	1605	# reru (passive)
+れる	96	1605	# reru (passive and potential)
 続ける	98	24	# tsudzukeru continuative
 られる	100	301	# rareru (passive)
 始める	102	21	# inchoative
@@ -68,7 +68,7 @@
 でした	134	15	# deshita
 ようだ	136	170	# yooda. いうように IU-YOODA `as it says'. あったようです ARU-TA-YOODA-DA `seems to have been'. 見せなかったようだ misenakattayooda MISERU-NAI-TA-YOODA `it didn't seem'. 使うようである TSUKAU-YOODA-ARU `seems to use'. Regarding yooni, Kaiser at al. 9.5.6.3.
 だ	138	49	# da
-なる	140	102	# naru (become) 書けるようになって kakeru-yoo-ni-natte KAKU-KERU-YOODA-NARU-TE `I can write'. 行きたくなります IKU-TAI-NARU-MASU `I want to go'. 感じるようになり KANZHIRU-YOODA-NARU `come to feel'. Kaiser et al p. 266.
+なる	140	102	# naru (become) 書けるようになって kakeru-yoo-ni-natte KAKU-KERU-YOODA-NARU-TE `I can write'. 行きたくなります IKU-TAI-NARU-MASU `I want to go'. 感じるようになり KANZHIRU-YOODA-NARU `come to feel' (cf Vaccari p. 240). Kaiser et al p. 266. Vaccari p. 218-220.
 た	142	3393	# TA
 たら	144	35	# tara TODO
 う	146	92	# -u TODO. 維持しよう XX-SURU-U `let's keep'. なるだろう NARU-DA-U `it will be'. 嫌われよう KIRAU-RERU-U. 消えないでしょう KIERU-NAI-DA-U `will not disappear'. 優先すべきだろう YUUSEN-SURU-BESHI-DA-U `should take precedence'. also -mashoo `let's'. should be MASU-U.

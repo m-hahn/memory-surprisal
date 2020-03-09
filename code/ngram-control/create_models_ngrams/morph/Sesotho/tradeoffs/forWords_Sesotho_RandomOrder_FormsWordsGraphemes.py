@@ -30,6 +30,8 @@ assert args.gamma >= 1
 
 
 
+def getKey(word):
+  return word[header["lemma"]][:2]
 
 
 myID = args.idForProcess
@@ -137,7 +139,7 @@ prefixFrequency = defaultdict(int)
 suffixFrequency = defaultdict(int)
 for verbWithAff in data:
   for affix in verbWithAff:
-    affixLemma = affix[header["form"]]
+    affixLemma = getKey(affix) #[header["form"]]
     if affix[header["type1"]] == "pfx":
        prefixFrequency[affixLemma] += 1
     elif affix[header["type1"]] == "sfx":
@@ -202,9 +204,15 @@ def calculateTradeoffForWeights(weights_pfx, weights_sfx):
        v = [x for x in verb if x[header["type1"]] == "v"]
        assert len(prefixes)+len(v)+len(suffixes)==len(verb)
        if args.model_sfx != "REAL":
-          suffixes = sorted(suffixes, key=lambda x:weights_sfx[x[header["form"]]])
+          suffixes.sort(key=lambda x:weights_sfx[getKey(x)])
        if args.model_pfx != "REAL":
-          prefixes = sorted(prefixes, key=lambda x:weights_pfx[x[header["form"]]])
+          prefixes.sort(key=lambda x:weights_pfx[getKey(x)])
+       if False and (len(prefixes) > 1 or len(suffixes) > 1):
+          print(weights_pfx["t^"], weights_pfx["sm"])
+          print("========")
+          print(prefixes)
+          print(suffixes)
+          assert False
        ordered = prefixes + v + suffixes
 
        for ch in ordered:

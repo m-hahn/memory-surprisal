@@ -107,7 +107,7 @@ from math import log, exp
 from random import random, shuffle, randint, Random, choice
 
 
-from corpusIterator_V import CorpusIterator_V
+#from corpusIterator_V import CorpusIterator_V
 
 originalDistanceWeights = {}
 
@@ -168,6 +168,7 @@ PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
 files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
 assert len(files) == 1
 assert "Suffixes" in files[0], files
+assert "Normalized" not in files[0]
 with open(files[0], "r") as inFile:
    next(inFile)
    next(inFile)
@@ -185,6 +186,9 @@ AFFIX_KEY = "sfx"
 def getCorrectOrderCount(weights_sfx, coordinate, newValue):
    correct = 0
    incorrect = 0
+
+   correctFull = 0
+   incorrectFull = 0
    for q, verb in enumerate(data):
       #prefixes_keys = [x[header["form"]] for x in verb if x[header["type1"]] == "pfx"]
 #      if coordinate not in prefixes_keys:
@@ -197,6 +201,7 @@ def getCorrectOrderCount(weights_sfx, coordinate, newValue):
       #assert len(prefixes) > 1, verb
 #      suffixes = [(x[header[RELEVANT_KEY]], weights_sfx[x[header[RELEVANT_KEY]]]) for x in verb if x[header["type1"]] == "sfx"]
 
+      hasIncorrect = False
       for i in range(0, len(affixes)):
            for j in range(0, i):
                if affixes[i][0] == coordinate:
@@ -208,25 +213,32 @@ def getCorrectOrderCount(weights_sfx, coordinate, newValue):
                    weightJ = newValue
                else:
                   weightJ = affixes[j][1]
-               print(weightI, weightJ)
+               #print(weightI, weightJ)
                if weightI > weightJ:
                  correct+=1
                else:
+                 hasIncorrect = True
                  incorrect+=1
-                 print("==========")
-                 print(q)
-                 print(affixes)
-                 print("Error pair", (affixes[i][0], affixes[j][0]))
-                 print(verb)
+                 #print("==========")
+                 #print(q)
+                 #print(affixes)
+                 #print("Error pair", (affixes[i][0], affixes[j][0]))
+                 #print(verb)
  #                if affixes[i][0] == affixes[j][0]:
 #                      assert False
-                 errors[(affixes[i][0], affixes[j][0])] += 1
+                 errors[(affixes[j][0], affixes[i][0])] += 1
+      if len(affixes) > 1:
+        if hasIncorrect:
+           incorrectFull += 1
+        else:
+           correctFull += 1
       assert correct+incorrect>0, affixes
    if correct+incorrect == 0:
       print("ERROR 19722: #", coordinate, "#")
       assert False, (index_sfx[coordinate], coordinate)
       return 1.0
-   return correct/(correct+incorrect)
+   print((correctFull+incorrectFull))
+   return correct/(correct+incorrect), correctFull/(correctFull+incorrectFull)
 
 
 
@@ -252,7 +264,7 @@ for q in range(len(data)):
    # Restrict to the last verb, chopping off initial auxiliaries and their affixes
    ###############################################################################
 
-   print(segmentation[-1])
+   #print(segmentation[-1])
 #   if len(segmentation) > 1:
 #    for w in range(len(segmentation)-1):
 #     if len(segmentation[w]) == 2:
@@ -277,5 +289,10 @@ for q in range(len(data)):
 result = getCorrectOrderCount(weights_sfx, None, 0)
 print(errors)
 print(result)
+
+with open("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+args.model+".txt", "w") as outFile:
+   print(result[0], file=outFile)
+   print(result[1], file=outFile)
+print("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+args.model+".txt")
 
 
