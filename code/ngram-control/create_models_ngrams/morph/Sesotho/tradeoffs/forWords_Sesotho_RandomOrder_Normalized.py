@@ -322,6 +322,36 @@ itos_sfx_ = itos_sfx[::]
 shuffle(itos_sfx_)
 weights_sfx = dict(list(zip(itos_sfx_, [2*x for x in range(len(itos_sfx_))])))
 
+import glob
+PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
+
+if args.model_sfx not in ["REAL", "RANDOM"]:
+  files = glob.glob(PATH+"/optimized_*.py_"+args.model_sfx+".tsv")
+  print(files, args.model_sfx)
+  assert len(files) == 1
+  assert "Suffixes" in files[0], files
+  assert "Normalized" in files[0]
+  with open(files[0], "r") as inFile:
+     next(inFile)
+     next(inFile)
+     next(inFile)
+     for line in inFile:
+        morpheme, weight = line.strip().split(" ")
+        weights_sfx[morpheme] = int(weight)
+#
+if args.model_pfx not in ["REAL", "RANDOM"]:
+  files = glob.glob(PATH+"/optimized_*.py_"+args.model_pfx+".tsv")
+  assert len(files) == 1
+  assert "Suffixes" not in files[0], files
+  assert "Normalized" in files[0]
+  with open(files[0], "r") as inFile:
+     next(inFile)
+     next(inFile)
+     next(inFile)
+     for line in inFile:
+        morpheme, weight = line.strip().split(" ")
+        weights_pfx[morpheme] = int(weight)
+
 def calculateTradeoffForWeights(weights_pfx, weights_sfx):
     dev = []
     for verb in data:

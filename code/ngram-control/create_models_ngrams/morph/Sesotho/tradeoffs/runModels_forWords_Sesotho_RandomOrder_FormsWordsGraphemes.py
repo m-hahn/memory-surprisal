@@ -17,4 +17,7 @@ for i in range(min(len(models_pfx), len(models_sfx))):
     model_pfx = model_pfx[model_pfx.rfind("_")+1:-4]
     model_sfx = model_sfx[model_sfx.rfind("_")+1:-4]
     subprocess.call(["/u/nlp/anaconda/main/anaconda3/envs/py37-mhahn/bin/python", "forWords_Sesotho_RandomOrder_FormsWordsGraphemes.py", "--model_pfx", model_pfx, "--model_sfx", model_sfx])
+model_pfx = "REAL"
+model_sfx = "REAL"
+subprocess.call(["/u/nlp/anaconda/main/anaconda3/envs/py37-mhahn/bin/python", "forWords_Sesotho_RandomOrder_FormsWordsGraphemes.py", "--model_pfx", model_pfx, "--model_sfx", model_sfx])
 
