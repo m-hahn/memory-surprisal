@@ -361,9 +361,9 @@ def calculateTradeoffForWeights(weights_pfx, weights_sfx):
        v = [x for x in verb if x[header["type1"]] == "v"]
        assert len(prefixes)+len(v)+len(suffixes)==len(verb)
        if args.model_sfx != "REAL":
-          suffixes = sorted(suffixes, key=lambda x:weights_sfx[getKey(x)])
+          suffixes.sort(key=lambda x:weights_sfx[getKey(x)])
        if args.model_pfx != "REAL":
-          prefixes = sorted(prefixes, key=lambda x:weights_pfx[getKey(x)])
+          prefixes.sort(key=lambda x:weights_pfx[getKey(x)])
        ordered = prefixes + v + suffixes
 
        for ch in ordered:
