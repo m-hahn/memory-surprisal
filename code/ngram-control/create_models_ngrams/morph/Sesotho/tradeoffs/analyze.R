@@ -13,7 +13,7 @@ data$Type = ifelse(data$Model %in% c("REAL", "RANDOM"), as.character(data$Model)
 plot = ggplot(data, aes(x=Distance, y=MI, color=Type)) + geom_line(size=2)
 plot = plot + theme_bw()
 plot = plot + theme(axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text = element_text(size=20))
-plot = plot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), legend.position="none")
+plot = plot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) #, legend.position="none")
 plot = plot + theme(axis.line = element_line(colour = "black"),
             panel.grid.major = element_blank(),
                 panel.grid.minor = element_blank(),
