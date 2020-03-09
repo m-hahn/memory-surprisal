@@ -30,7 +30,141 @@ assert args.gamma >= 1
 
 
 
+# for ordering
+def getKey(word):
+  return word[header["lemma"]][:2]
 
+def getSegmentedFormsVerb(word):
+   if "/" not in word[header["lemma"]] and "." not in word[header["lemma"]]:
+     return [word]
+   elif "/" in word[header["lemma"]]:
+    lemmas = word[header["lemma"]].split("/")
+    words = [word[::] for _ in lemmas]
+    for i in range(len(lemmas)):
+      words[i][0] = "_"
+      words[i][1] = lemmas[i]
+      words[i][3] = "v" if i == 0 else "sfx"      
+    print("SPLIT", words, word) # frequent: verb stem + past suffix merged
+    return words
+   else: # 
+    print("TODO", word)
+    assert False
+
+
+def getSegmentedForms_Suffix(word): # return a list , preprocessing
+   if "/" not in word[header["lemma"]] and "." not in word[header["lemma"]]:
+     return [word]
+   elif "/" in word[header["lemma"]]:
+    assert word[header["lemma"]].count("/") == 1
+    lemmas = word[header["lemma"]].split("/")
+    word1 = word[::]
+    word2 = word[::]
+    word1[1] = lemmas[0]
+    word2[1] = lemmas[1]
+
+    word1[0] = "_"
+    word2[0] = "_"
+    if lemmas[0] == "t^pf" and lemmas[1] == "m^in": # ~360 cases, mostly -e-. TODO think about the order of the morphemes in the allegedly merged morpheme.
+      _ = 0
+    elif word[header["analysis"]] == "REVERS.CAUS": # os (Doke and Mokofeng, section 345)
+      _ = 0
+    elif word[header["analysis"]] == "APPL.PRF": # ets (cf. Doke and Mokofeng, section 313?). Both APPL and PRF have relatively frequent suffix morphs of the form -ets- in the corpus.
+      _ = 0
+    elif word[header["analysis"]] == "PRF.CAUS": # dits. Also consider Doke and Mokofeng, section 369, rule 4.
+      _ = 0
+    elif word[header["analysis"]] == "DEP.PRF": #  e. DEP = participial mood (Doke and Mokofeng, section 431).
+      _ = 0
+    elif word[header["analysis"]] in ["PRF.PASS", "PRS.APPL", "cl.PRF", "IND.PRS", "PRF.REVERS", "NEG.PRF"]: # rare, together 10 data points
+      _ = 0
+    else:
+      print("SPLIT", word1, word2, word)
+    return [word1, word2]
+   else: # 
+    print("TODO", word)
+    assert word[1] == "m..." # occurs 1 time
+    return None
+
+
+
+def getSegmentedForms_Prefix(word): # return a list , preprocessing
+   if "/" not in word[header["lemma"]] and "." not in word[header["lemma"]]:
+     return [word]
+   elif "/" in word[header["lemma"]]:
+    assert word[header["lemma"]].count("/") == 1
+    lemmas = word[header["lemma"]].split("/")
+    word1 = word[::]
+    word2 = word[::]
+    word1[1] = lemmas[0]
+    word2[1] = lemmas[1]
+
+    word1[0] = "_"
+    word2[0] = "_"
+    if lemmas[0].startswith("sm") and lemmas[1].startswith("t^"): # merger between subject and tense/aspect marker (> 100 cases in the corpus)
+        _ = 0
+    elif word[header["analysis"]] == "NEG.POT": #keke, kebe. Compare Doke and Mokofeng, section 424. Seems to be better treated as an auxiliary, as it is followed by subject prefixes in the corpus.
+       return None
+    elif word[header["analysis"]] == "almost.PRF": # batlile = batla+ile. This is an auxiliary, not a prefix. Doke and Mokofeng, section 575.
+       return None
+    elif word[header["analysis"]] == "POT.PRF": # kile. This seems to be a prefix, as it is followed by subject prefixes in the corpus.
+       return None
+    elif word[header["analysis"]] == "be.PRF": # bile . Better treated as an auxiliary, for the same reason.
+       return None
+    elif word[header["analysis"]] == "do.indeed.PRF": # hlile. Same
+       return None
+    elif word[header["analysis"]] == "fill.belly.PRF": # Occurs a single time, excluded.
+       return None
+    else:
+       print("SPLIT", word1, word2, word)
+       assert False
+    return [word1, word2]
+   elif word[header["lemma"]] == "a.name" or word[header["lemma"]] == "a.place": #  exclude these data
+     return None
+   elif word[header["lemma"]].startswith("t^p.om"):
+    # print(word)
+     lemma1 = word[1][:3]
+     lemma2 = word[1][4:]
+     #print(lemma2)
+     word1 = word[::]
+     word2 = word[::]
+     word1[1] = lemma1
+     word2[1] = lemma2
+ 
+     word1[0] = "_"
+     word2[0] = "_"
+     if lemma1.startswith("t^") and lemma2.startswith("om"):
+   #      print(word)
+         assert word[2].startswith("PRS")
+         return [word2]
+         _ = 0
+     else:
+        print("SPLIT", word1, word2, word)
+        assert False
+        return [word1, word2]
+   elif word[header["lemma"]].startswith("t^p.rf"):
+     lemma1 = word[1][:3]
+     lemma2 = word[1][4:]
+     #print(lemma2)
+     word1 = word[::]
+     word2 = word[::]
+     word1[1] = lemma1
+     word2[1] = lemma2
+ 
+     word1[0] = "_"
+     word2[0] = "_"
+     if lemma1.startswith("t^") and lemma2.startswith("rf"):
+         assert word[2].startswith("PRS")
+         return [word2]
+         _ = 0
+     else:
+        print("SPLIT", word1, word2, word)
+        assert False
+        return [word1, word2]
+   else: # exclude these data
+     return None
+
+def getNormalizedForm(word): # for prediction
+#   print(word)
+   return word[header["lemma"]]
 
 myID = args.idForProcess
 
@@ -106,7 +240,7 @@ from math import log, exp
 from random import random, shuffle, randint, Random, choice
 
 
-from corpusIterator_V import CorpusIterator_V
+#from corpusIterator_V import CorpusIterator_V
 
 originalDistanceWeights = {}
 
@@ -136,13 +270,37 @@ from collections import defaultdict
 
 prefixFrequency = defaultdict(int)
 suffixFrequency = defaultdict(int)
+dataChosen = []
 for verbWithAff in data:
-  for affix in verbWithAff:
-    affixLemma = affix[header["form"]]
+  affixesResult = []
+  for x in verbWithAff:
+    if x[header["type1"]] == "pfx":
+       segmented = getSegmentedForms_Prefix(x)
+       if segmented is None:
+         prefixesResult = None
+         break
+       affixesResult += segmented
+    elif x[header["type1"]] == "sfx":
+       segmented = getSegmentedForms_Suffix(x)
+       if segmented is None:
+         suffixesResult = None
+         break
+       affixesResult += segmented
+    elif x[header["type1"]] == "v":
+       segmented = getSegmentedFormsVerb(x)
+       affixesResult += segmented
+    else:
+       assert False
+  if affixesResult is None: # remove this datapoint (affects <20 datapoints)
+     continue
+  dataChosen.append(affixesResult)
+  for affix in affixesResult:
+    affixLemma = getKey(affix) #[header[RELEVANT_KEY]]
     if affix[header["type1"]] == "pfx":
        prefixFrequency[affixLemma] += 1
     elif affix[header["type1"]] == "sfx":
        suffixFrequency[affixLemma] += 1
+data = dataChosen
 
 itos_pfx = sorted(list((prefixFrequency)))
 stoi_pfx = dict(list(zip(itos_pfx, range(len(itos_pfx)))))
@@ -164,35 +322,6 @@ itos_sfx_ = itos_sfx[::]
 shuffle(itos_sfx_)
 weights_sfx = dict(list(zip(itos_sfx_, [2*x for x in range(len(itos_sfx_))])))
 
-
-
-import glob
-PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
-files = glob.glob(PATH+"/optimized_*.py_"+args.model_sfx+".tsv")
-assert len(files) == 1
-assert "Suffixes" in files[0], files
-assert "Normalized" in files[0]
-with open(files[0], "r") as inFile:
-   next(inFile)
-   next(inFile)
-   next(inFile)
-   for line in inFile:
-      morpheme, weight = line.strip().split(" ")
-      weights_sfx[morpheme] = int(weight)
-#
-
-files = glob.glob(PATH+"/optimized_*.py_"+args.model_pfx+".tsv")
-assert len(files) == 1
-assert "Suffixes" not in files[0], files
-assert "Normalized" in files[0]
-with open(files[0], "r") as inFile:
-   next(inFile)
-   next(inFile)
-   next(inFile)
-   for line in inFile:
-      morpheme, weight = line.strip().split(" ")
-      weights_pfx[morpheme] = int(weight)
-
 def calculateTradeoffForWeights(weights_pfx, weights_sfx):
     dev = []
     for verb in data:
@@ -208,9 +337,7 @@ def calculateTradeoffForWeights(weights_pfx, weights_sfx):
        ordered = prefixes + v + suffixes
 
        for ch in ordered:
-         for char in ch[header["form"]]:
-           dev.append(char)
-           print(char)
+           dev.append(getNormalizedForm(ch))
        dev.append("EOS")
        for _ in range(args.cutoff+2):
          dev.append("PAD")
