@@ -60,6 +60,13 @@ morphKeyValuePairs = set()
 
 vocab_lemmas = {}
 
+
+def processVerb(verb):
+    if len(verb) > 0:
+      if "VERB" in [x["posUni"] for x in verb[1:]]:
+        print([x["word"] for x in verb])
+      data.append([x["lemma"] for x in verb])
+
 corpusTrain = CorpusIterator_V(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
 pairs = set()
 counter = 0
@@ -67,34 +74,28 @@ data = []
 for sentence in corpusTrain:
 #    print(len(sentence))
     verb = []
-    for line in sentence[::-1]:
-#       print(line)
+    for line in sentence:
        if line["posUni"] == "PUNCT":
+          processVerb(verb)
+          verb = []
           continue
-       verb.append(line)
-       if line["posUni"] == "VERB":
-          verb = verb[::-1]
-#          print(verb)
-#          print([x["dep"] for x in verb])
-#          print([x["posUni"] for x in verb])
-#          print([x["word"] for x in verb])
-#          print([x["lemma"] for x in verb])
-#          print([x["head"] for x in verb])
-          for i in range(1,len(verb)):
-            for j in range(1,i):
-              pairs.add((verb[i]["lemma"], verb[j]["lemma"]))
-              if (verb[j]["lemma"], verb[i]["lemma"]) in pairs:
-                 print("======", (verb[i]["lemma"], verb[j]["lemma"]), [x["dep"] for x in verb], "".join([x["word"] for x in verb]))
-          if len(verb) > 1:
-            data.append([x["lemma"] for x in verb])
-          counter += 1
-          break
-       if line["posUni"] not in ["AUX", "SCONJ"]:
-          break
-       if line["dep"] not in ["aux"]:
-          break
+       elif line["posUni"] == "VERB":
+          processVerb(verb)
+          verb = []
+          verb.append(line)
+       elif line["posUni"] == "AUX" and len(verb) > 0:
+          verb.append(line)
+       elif line["posUni"] == "SCONJ" and line["word"] == 'て':
+          verb.append(line)
+          processVerb(verb)
+          verb = []
+       else:
+          processVerb(verb)
+          verb = []
+print(len(data))
+#quit()
 print(counter)
-print(data)
+#print(data)
 print(len(data))
 
 #quit()
@@ -133,39 +134,48 @@ print(stoi)
 itos_ = itos[::]
 shuffle(itos_)
 weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
-weights = {}
-import glob
-PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
-files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
-assert len(files) == 1
-with open(files[0], "r") as inFile:
-   next(inFile)
-   for line in inFile:
-      morpheme, weight = line.strip().split(" ")
-      weights[morpheme] = int(weight)
-#weights = {'める': 0, 'てる': 2, '始める': 4, 'そうだ': 6, 'られる': 8, 'あう': 10, 'ざるを得る': 12, 'える': 14, '出来る': 16, 'まい': 18, 'きる': 20, 'だめ': 22, 'ちゃう': 24, 'できる': 26, 'がたい': 28, '易い': 30, 'させる': 32, 'べる': 34, 'たー': 36, 'かける': 38, 'みたいだ': 40, 'する': 42, 'れる': 44, 'せる': 46, 'くださる': 48, 'かもしれる': 50, 'ようだ': 52, 'でした': 54, 'らしい': 56, 'たい': 58, 'かねる': 60, 'ける': 62, '出す': 64, 'ざるをえる': 66, 'ない': 68, 'にくい': 70, 'やすい': 72, '済み': 74, 'なる': 76, 'ます': 78, 'う': 80, '続ける': 82, 'た': 84, 'だ': 86}
 
-from collections import defaultdict
-
-mistakes = defaultdict(int)
-
-def getCorrectOrderCount(weights):
+def getCorrectOrderCount(weights, coordinate, newValue):
    correct = 0
    incorrect = 0
    for verb in data:
       for i in range(1, len(verb)):
          for j in range(1, i):
-             weightI = weights[verb[i]]
-             weightJ = weights[verb[j]]
+             if verb[i] == coordinate:
+                 weightI = newValue
+             else:
+                weightI = weights[verb[i]]
+
+             if verb[j] == coordinate:
+                 weightJ = newValue
+             else:
+                weightJ = weights[verb[j]]
              if weightI > weightJ:
                correct+=1
              else:
                incorrect+=1
-               print("MISTAKE", verb[i], weights[verb[i]], verb[j], weights[verb[j]], verb)
-               mistakes[(verb[i], verb[j])] += 1
    return correct/(correct+incorrect)
 
-result = getCorrectOrderCount(weights)
-print(mistakes)
-print(result)
+for iteration in range(200):
+  coordinate = choice(itos)
+  mostCorrect, mostCorrectValue = 0, None
+  for newValue in [-1] + [2*x+1 for x in range(len(itos))]:
+     correctCount = getCorrectOrderCount(weights, coordinate, newValue)
+#     print(coordinate, newValue, iteration, correctCount)
+     if correctCount > mostCorrect:
+        mostCorrectValue = newValue
+        mostCorrect = correctCount
+  print(iteration, mostCorrect)
+  weights[coordinate] = mostCorrectValue
+  itos_ = sorted(itos, key=lambda x:weights[x])
+  weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
+  print(weights)
+  for x in itos_:
+     print("\t".join([str(y) for y in [x, weights[x], affixFrequencies[x]]]))
+with open("output/extracted_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
+  for x in itos_:
+  #   if affixFrequencies[x] < 10:
+   #    continue
+     print("\t".join([str(y) for y in [x, weights[x], affixFrequencies[x]]]), file=outFile)
+
 

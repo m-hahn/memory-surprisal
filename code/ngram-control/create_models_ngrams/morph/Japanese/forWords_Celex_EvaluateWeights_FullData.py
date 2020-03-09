@@ -60,6 +60,13 @@ morphKeyValuePairs = set()
 
 vocab_lemmas = {}
 
+
+def processVerb(verb):
+    if len(verb) > 0:
+      if "VERB" in [x["posUni"] for x in verb[1:]]:
+        print([x["word"] for x in verb])
+      data.append([x["lemma"] for x in verb])
+
 corpusTrain = CorpusIterator_V(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
 pairs = set()
 counter = 0
@@ -67,34 +74,28 @@ data = []
 for sentence in corpusTrain:
 #    print(len(sentence))
     verb = []
-    for line in sentence[::-1]:
-#       print(line)
+    for line in sentence:
        if line["posUni"] == "PUNCT":
+          processVerb(verb)
+          verb = []
           continue
-       verb.append(line)
-       if line["posUni"] == "VERB":
-          verb = verb[::-1]
-#          print(verb)
-#          print([x["dep"] for x in verb])
-#          print([x["posUni"] for x in verb])
-#          print([x["word"] for x in verb])
-#          print([x["lemma"] for x in verb])
-#          print([x["head"] for x in verb])
-          for i in range(1,len(verb)):
-            for j in range(1,i):
-              pairs.add((verb[i]["lemma"], verb[j]["lemma"]))
-              if (verb[j]["lemma"], verb[i]["lemma"]) in pairs:
-                 print("======", (verb[i]["lemma"], verb[j]["lemma"]), [x["dep"] for x in verb], "".join([x["word"] for x in verb]))
-          if len(verb) > 1:
-            data.append([x["lemma"] for x in verb])
-          counter += 1
-          break
-       if line["posUni"] not in ["AUX", "SCONJ"]:
-          break
-#       if line["dep"] not in ["aux"]:
- #         break
+       elif line["posUni"] == "VERB":
+          processVerb(verb)
+          verb = []
+          verb.append(line)
+       elif line["posUni"] == "AUX" and len(verb) > 0:
+          verb.append(line)
+       elif line["posUni"] == "SCONJ" and line["word"] == 'て':
+          verb.append(line)
+          processVerb(verb)
+          verb = []
+       else:
+          processVerb(verb)
+          verb = []
+print(len(data))
+#quit()
 print(counter)
-print(data)
+#print(data)
 print(len(data))
 
 #quit()
@@ -142,13 +143,20 @@ with open(files[0], "r") as inFile:
    next(inFile)
    for line in inFile:
       morpheme, weight = line.strip().split(" ")
-      weights[morpheme] = weight
-#weights = {'できる': 0, 'いける': 2, 'える': 4, 'でした': 6, 'たー': 8, 'める': 10, 'う': 12, 'ある': 14, 'られる': 16, 'ようだ': 18, 'まいる': 20, 'くださる': 22, '済み': 24, 'いらっしゃる': 26, 'おる': 28, 'かね ': 30, '始める': 32, '下さる': 34, '過ぎる': 36, 'ざるをえる': 38, 'あう': 40, 'ざるを得る': 42, 'こと': 44, 'ける': 46, 'てる': 48, '合う': 50, 'べる': 52, 'せる': 54, 'ので': 56, '込む': 58, 'から': 60, 'らしい': 62, '出来る': 64, '参る': 66, 'たい': 68, '頂く': 70, 'みたいだ': 72, 'なさる': 74, 'が': 76, 'がちだ': 78, 'そうだ': 80, 'ない': 82, 'づらい': 84, 'ちゃう': 86, 'ま~す': 88, 'ゆく': 90, 'の': 92, 'べし': 94, 'やる': 96, 'ん': 98, 'おく': 100, 'だ': 102, 'だめ': 104, '出す': 106, 'もらえる': 108, 'なければ': 110, 'いただく': 112, 'かもしれる': 114, 'なる': 116, 'させる': 118, '回る': 120, 'す ': 122, 'れる': 124, 'し': 126, 'くれる': 128, 'きる': 130, 'にくい': 132, 'ば': 134, 'がたい': 136, 'すぎる': 138, 'ます': 140, 'いく': 142, '易い': 144, '続ける': 146, 'みる': 148, 'まい': 150, 'ため': 152, 'やすい': 154, 'ね': 156, 'よい': 158, 'ほしい': 160, 'かける': 162, '直す': 164, 'らす': 166, 'た': 168, 'いる': 170, '行く': 172, 'しまう': 174, 'もらう': 176, '来る': 178, 'て': 180}
+      weights[morpheme] = int(weight)
+#weights = {'める': 0, 'てる': 2, '始める': 4, 'そうだ': 6, 'られる': 8, 'あう': 10, 'ざるを得る': 12, 'える': 14, '出来る': 16, 'まい': 18, 'きる': 20, 'だめ': 22, 'ちゃう': 24, 'できる': 26, 'がたい': 28, '易い': 30, 'させる': 32, 'べる': 34, 'たー': 36, 'かける': 38, 'みたいだ': 40, 'する': 42, 'れる': 44, 'せる': 46, 'くださる': 48, 'かもしれる': 50, 'ようだ': 52, 'でした': 54, 'らしい': 56, 'たい': 58, 'かねる': 60, 'ける': 62, '出す': 64, 'ざるをえる': 66, 'ない': 68, 'にくい': 70, 'やすい': 72, '済み': 74, 'なる': 76, 'ます': 78, 'う': 80, '続ける': 82, 'た': 84, 'だ': 86}
+
+from collections import defaultdict
+
+mistakes = defaultdict(int)
 
 def getCorrectOrderCount(weights):
    correct = 0
    incorrect = 0
+   correctFull = 0
+   incorrectFull = 0
    for verb in data:
+      hasMadeMistake = False
       for i in range(1, len(verb)):
          for j in range(1, i):
              weightI = weights[verb[i]]
@@ -157,14 +165,17 @@ def getCorrectOrderCount(weights):
                correct+=1
              else:
                incorrect+=1
-               errorsFrequency[(verb[i], verb[j])] = errorsFrequency.get((verb[i], verb[j]),0)+1
-               print("ERROR", errorsFrequency[(verb[i], verb[j])] )
-   return correct/(correct+incorrect)
-errorsFrequency = {}
-print("ERRORS FREQUENCY")
-accuracy = (getCorrectOrderCount(weights))
-print(sorted(list(errorsFrequency.items()), key=lambda x:x[1]))
-print(accuracy)
+               hasMadeMistake = True
+               print("MISTAKE", verb[i], weights[verb[i]], verb[j], weights[verb[j]], verb)
+               mistakes[(verb[i], verb[j])] += 1
+      if len(verb) > 2:
+        if not hasMadeMistake:
+            correctFull += 1
+        else:
+            incorrectFull += 1
+   return correct/(correct+incorrect), correctFull/(correctFull+incorrectFull)
 
-
+result = getCorrectOrderCount(weights)
+print(mistakes)
+print(result)
 

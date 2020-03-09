@@ -1,4 +1,5 @@
-# based on yWithMorphologySequentialStreamDropoutDev_Ngrams_Log.py
+# optimizeGrammarForAUC_2.py
+# Too slow, should replace with the original plugin-estimator suffix array
 
 import random
 import sys
@@ -56,6 +57,159 @@ from corpusIterator_V import CorpusIterator_V
 
 originalDistanceWeights = {}
 
+def makeCoarse(x):
+   if ":" in x:
+      return x[:x.index(":")]
+   return x
+
+def initializeOrderTable():
+   orderTable = {}
+   keys = set()
+   vocab = {}
+   distanceSum = {}
+   distanceCounts = {}
+   depsVocab = set()
+   for partition in ["train", "dev"]:
+     for sentence in CorpusIterator_V(args.language,partition).iterator():
+      for line in sentence:
+          vocab[line["word"]] = vocab.get(line["word"], 0) + 1
+          line["coarse_dep"] = makeCoarse(line["dep"])
+          depsVocab.add(line["coarse_dep"])
+          posFine.add(line["posFine"])
+          posUni.add(line["posUni"])
+  
+          if line["coarse_dep"] == "root":
+             continue
+          posHere = line["posUni"]
+          posHead = sentence[line["head"]-1]["posUni"]
+          dep = line["coarse_dep"]
+          direction = "HD" if line["head"] < line["index"] else "DH"
+          key = dep
+          keyWithDir = (dep, direction)
+          orderTable[keyWithDir] = orderTable.get(keyWithDir, 0) + 1
+          keys.add(key)
+          distanceCounts[key] = distanceCounts.get(key,0.0) + 1.0
+          distanceSum[key] = distanceSum.get(key,0.0) + abs(line["index"] - line["head"])
+   #print orderTable
+   dhLogits = {}
+   for key in keys:
+      hd = orderTable.get((key, "HD"), 0) + 1.0
+      dh = orderTable.get((key, "DH"), 0) + 1.0
+      dhLogit = log(dh) - log(hd)
+      dhLogits[key] = dhLogit
+      originalDistanceWeights[key] = (distanceSum[key] / distanceCounts[key])
+   return dhLogits, vocab, keys, depsVocab
+
+
+
+dhLogits, vocab, vocab_deps, depsVocab = initializeOrderTable()
+
+posUni = list(posUni)
+itos_pos_uni = posUni
+stoi_pos_uni = dict(zip(posUni, range(len(posUni))))
+
+posFine = list(posFine)
+itos_pos_ptb = posFine
+stoi_pos_ptb = dict(zip(posFine, range(len(posFine))))
+
+
+
+itos_pure_deps = sorted(list(depsVocab)) 
+stoi_pure_deps = dict(zip(itos_pure_deps, range(len(itos_pure_deps))))
+   
+
+itos_deps = sorted(vocab_deps)
+stoi_deps = dict(zip(itos_deps, range(len(itos_deps))))
+
+print(itos_deps)
+
+
+
+
+# "linearization_logprobability"
+def recursivelyLinearize(sentence, position, result, gradients_from_the_left_sum):
+   line = sentence[position-1]
+   # Loop Invariant: these are the gradients relevant at everything starting at the left end of the domain of the current element
+   allGradients = gradients_from_the_left_sum #+ sum(line.get("children_decisions_logprobs",[]))
+
+
+   # there are the gradients of its children
+   if "children_DH" in line:
+      for child in line["children_DH"]:
+         allGradients = recursivelyLinearize(sentence, child, result, allGradients)
+   result.append(line)
+   line["relevant_logprob_sum"] = allGradients
+   if "children_HD" in line:
+      for child in line["children_HD"]:
+         allGradients = recursivelyLinearize(sentence, child, result, allGradients)
+   return allGradients
+
+import numpy.random
+import numpy as np
+
+
+
+def orderSentence(sentence, weights, coordinate, newWeight, printThings, training):
+   root = None
+   logits = [None]*len(sentence)
+   logProbabilityGradient = 0
+
+   for line in sentence:
+       line["coarse_dep"] = makeCoarse(line["dep"])
+   for j, line in enumerate(sentence):
+      if line["coarse_dep"] == "root":
+          root = line["index"]
+          continue
+      if line["coarse_dep"].startswith("punct"): # assumes that punctuation does not have non-punctuation dependents!
+         continue
+      key = line["coarse_dep"]
+      line["dependency_key"] = key
+      dhSampled = (weights[line["coarse_dep"]] < weights["HEAD"])
+      direction = "DH" if dhSampled else "HD"
+      line["direction"] = direction
+      if printThings: 
+         print("\t".join(list(map(str,["ORD", line["index"], (line["word"]+"           ")[:10], ("".join(list(key)) + "         ")[:22], line["head"], dhSampled, direction   ]  ))))
+
+      headIndex = line["head"]-1
+      sentence[headIndex]["children_"+direction] = (sentence[headIndex].get("children_"+direction, []) + [line["index"]])
+
+   for line in sentence:
+      if "children_DH" in line:
+        line["children_DH"] = sorted(line["children_DH"], key=lambda x:weights[sentence[x-1]["coarse_dep"]])
+      if "children_HD" in line:
+        line["children_HD"] = sorted(line["children_HD"], key=lambda x:weights[sentence[x-1]["coarse_dep"]])
+    
+
+   
+   linearized = []
+   logprob_sum = recursivelyLinearize(sentence, root, linearized, None)
+   if printThings or len(linearized) == 0:
+     print(" ".join(map(lambda x:x["word"], sentence)))
+     print(" ".join(map(lambda x:x["word"], linearized)))
+
+
+   # store new dependency links
+   moved = [None] * len(sentence)
+   for i, x in enumerate(linearized):
+      moved[x["index"]-1] = i
+   for i,x in enumerate(linearized):
+      if x["head"] == 0: # root
+         x["reordered_head"] = 0
+      else:
+         x["reordered_head"] = 1+moved[x["head"]-1]
+   return linearized
+
+
+
+print(itos_deps)
+weights = itos_deps[::] + ["HEAD"]
+shuffle(weights)
+weights = dict(zip(weights[::], range(len(weights))))
+weights = dict(list(zip(list(weights), [2*x for x in range(len(weights))])))
+print(weights)
+
+
+
 morphKeyValuePairs = set()
 
 vocab_lemmas = {}
@@ -63,38 +217,9 @@ vocab_lemmas = {}
 corpusTrain = CorpusIterator_V(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
 pairs = set()
 counter = 0
-data = []
-for sentence in corpusTrain:
-#    print(len(sentence))
-    verb = []
-    for line in sentence[::-1]:
-#       print(line)
-       if line["posUni"] == "PUNCT":
-          continue
-       verb.append(line)
-       if line["posUni"] == "VERB":
-          verb = verb[::-1]
-#          print(verb)
-#          print([x["dep"] for x in verb])
-#          print([x["posUni"] for x in verb])
-#          print([x["word"] for x in verb])
-#          print([x["lemma"] for x in verb])
-#          print([x["head"] for x in verb])
-          for i in range(1,len(verb)):
-            for j in range(1,i):
-              pairs.add((verb[i]["lemma"], verb[j]["lemma"]))
-              if (verb[j]["lemma"], verb[i]["lemma"]) in pairs:
-                 print("======", (verb[i]["lemma"], verb[j]["lemma"]), [x["dep"] for x in verb], "".join([x["word"] for x in verb]))
-          if len(verb) > 1:
-            data.append(verb)
-          counter += 1
-          break
-       if line["posUni"] not in ["AUX", "SCONJ"]:
-          break
-       if line["dep"] not in ["aux"]:
-          break
+data = list(corpusTrain)
 print(counter)
-print(data)
+#print(data)
 print(len(data))
 
 #quit()
@@ -102,50 +227,29 @@ import torch.nn as nn
 import torch
 from torch.autograd import Variable
 
+torch.manual_seed(myID)
 
+import os
 import numpy.random
 
 
 
-import torch.cuda
-import torch.nn.functional
-
-
-words = []
-
-affixFrequency = {}
-for verbWithAff in data:
-  for affix in verbWithAff[1:]:
-    affixLemma = affix["lemma"]
-    affixFrequency[affixLemma] = affixFrequency.get(affixLemma, 0)+1
-
-
-itos = set()
-for verbWithAff in data:
-  for affix in verbWithAff[1:]:
-    affixLemma = affix["lemma"]
-    itos.add(affixLemma)
-itos = sorted(list(itos))
-stoi = dict(list(zip(itos, range(len(itos)))))
-
-
-print(itos)
-print(stoi)
-
-itos_ = itos[::]
-shuffle(itos_)
-weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
-
-
-def calculateTradeoffForWeights(weights):
+def calculateTradeoffForWeights(weights, relevantAffix):
     dev = []
-    for verb in data:
-       affixes = verb[1:]
-       affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
-       for ch in [verb[0]] + affixes:
-         for char in ch["word"]:
-           dev.append(char)
-       #    print(char)
+    for _ in range(args.cutoff+2):
+      dev.append("PAD")
+    dev.append("SOS")
+    for sentence in data:
+       depOccurs = False
+       for line in sentence:
+          if line["coarse_dep"] == relevantAffix:
+             depOccurs = True
+             break
+       if not depOccurs:
+          continue
+       ordered = orderSentence(sentence, weights, None, None, False, False)
+       for ch in ordered:
+         dev.append(ch["word"])
        dev.append("EOS")
        for _ in range(args.cutoff+2):
          dev.append("PAD")
@@ -165,13 +269,13 @@ def calculateTradeoffForWeights(weights):
     idev = range(len(dev))
     itrain = range(len(train))
     
-    idev = sorted(idev, key=lambda i:dev[i:i+20])
-    itrain = sorted(itrain, key=lambda i:train[i:i+20])
+    idev = sorted(idev, key=lambda i:dev[i:i+args.cutoff+2])
+    itrain = idev #sorted(itrain, key=lambda i:train[i:i+args.cutoff+2])
     
 #    print(idev)
     
     idevInv = [x[1] for x in sorted(zip(idev, range(len(idev))), key=lambda x:x[0])]
-    itrainInv = [x[1] for x in sorted(zip(itrain, range(len(itrain))), key=lambda x:x[0])]
+    itrainInv = idevInv # [x[1] for x in sorted(zip(itrain, range(len(itrain))), key=lambda x:x[0])]
     
     assert idev[idevInv[5]] == 5
     assert itrain[itrainInv[5]] == 5
@@ -207,7 +311,7 @@ def calculateTradeoffForWeights(weights):
             end[j] = l
          start2, end2 = start[j], end[j]
          assert start2 <= end2
-         if start2 > 0 and end2 < len(train):
+         if False and start2 > 0 and end2 < len(train):
            assert prefix > tuple(train[itrain[start2-1]:itrain[start2-1]+k])
            assert prefix <= tuple(train[itrain[start2]:itrain[start2]+k])
            assert prefix >= tuple(train[itrain[end2-1]:itrain[end2-1]+k])
@@ -219,10 +323,16 @@ def calculateTradeoffForWeights(weights):
     newProbability = [None for _ in idev]
     
     devSurprisalTable = []
+    startKLast, endKLast = None, None
     for k in range(0,args.cutoff):
 #       print(k)
-       startK, endK = getStartEnd(k) # Possible speed optimization: There is some redundant computation here, could be reused from the previous iteration. But the algorithm is very fast already.
+       if startKLast == None:
+          startK, endK = getStartEnd(k) # Possible speed optimization: There is some redundant computation here, could be reused from the previous iteration. But the algorithm is very fast already.
+       else:
+          startK, endK = startKLast, endKLast
        startK2, endK2 = getStartEnd(k+1)
+       startKLast, endKLast = startK2, endK2
+
        cachedFollowingCounts = {}
        for j in range(len(idev)):
     #      print(dev[idev[j]])
@@ -230,7 +340,7 @@ def calculateTradeoffForWeights(weights):
              continue
           start2, end2 = startK2[j], endK2[j]
           devPref = tuple(dev[idev[j]:idev[j]+k+1])
-          if start2 > 0 and end2 < len(train):
+          if False and start2 > 0 and end2 < len(train):
             assert devPref > tuple(train[itrain[start2-1]:itrain[start2-1]+k+1]), (devPref, tuple(train[itrain[start2-1]:itrain[start2-1]+k+1]))
             assert devPref <= tuple(train[itrain[start2]:itrain[start2]+k+1]), (devPref, tuple(train[itrain[start2]:itrain[start2]+k+1]))
             assert devPref >= tuple(train[itrain[end2-1]:itrain[end2-1]+k+1])
@@ -250,17 +360,19 @@ def calculateTradeoffForWeights(weights):
                   assert k > 0
                   newProbability[j] = lastProbability[j]
                else:
-                  assert countPrefix >= countNgram, (countPrefix, countNgram)
+                  #assert countPrefix >= countNgram, (countPrefix, countNgram)
        
-                  following = set()
+#                  following = set()
                   if (prefixStart, prefixEnd) in cachedFollowingCounts:
                       followingCount = cachedFollowingCounts[(prefixStart, prefixEnd)]
                   else:
+                    followingCount = 0
                     for l in range(prefixStart, prefixEnd):
                       if k < itrain[l]+1:
-                         following.add(train[itrain[l]-1])
+#                         following.add(train[itrain[l]-1])
+                         followingCount += 1
                          assert devPref[1:] == tuple(train[itrain[l]-1:itrain[l]+k])[1:], (k, itrain[l], l, devPref , tuple(train[itrain[l]-1:itrain[l]+k]))
-                    followingCount = len(following)
+ #                   followingCount = len(following)
                     cachedFollowingCounts[(prefixStart, prefixEnd)] = followingCount
                   if followingCount == 0:
                       newProbability[j] = lastProbability[j]
@@ -298,8 +410,8 @@ def calculateTradeoffForWeights(weights):
        memory += tmis[i]
        auc += mi * tmis[i]
     #print("MaxMemory", memory)
-    assert 7>memory
-    auc += mi * (7-memory)
+    assert 10>memory, memory
+    auc += mi * (10-memory)
     #print("AUC", auc)
     return auc
     #assert False
@@ -316,35 +428,29 @@ def calculateTradeoffForWeights(weights):
 
 
 for iteration in range(1000):
-  coordinate=choice(itos)
-  while affixFrequency.get(coordinate, 0) < 10 and random() < 0.95:
-     coordinate = choice(itos)
+  coordinate=choice(itos_deps+["HEAD"])
   mostCorrect, mostCorrectValue = 0, None
-  for newValue in [-1] + [2*x+1 for x in range(len(itos))] + [weights[coordinate]]:
+  for newValue in [-1] + [2*x+1 for x in range(len(weights))] + [weights[coordinate]]:
      if random() < 0.8 and newValue != weights[coordinate]:
         continue
-     print(newValue, mostCorrect, coordinate, affixFrequency[coordinate])
+     print(newValue, mostCorrect, coordinate)
      weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}
-     correctCount = calculateTradeoffForWeights(weights_)
-#     print(weights_)
-#     print(coordinate, newValue, iteration, correctCount)
+     correctCount = calculateTradeoffForWeights(weights_, coordinate)
      if correctCount > mostCorrect:
         mostCorrectValue = newValue
         mostCorrect = correctCount
   print(iteration, mostCorrect)
   weights[coordinate] = mostCorrectValue
-  itos_ = sorted(itos, key=lambda x:weights[x])
+  itos_ = sorted(itos+["HEAD"], key=lambda x:weights[x])
   weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
   print(weights)
   for x in itos_:
-     if affixFrequency[x] < 10:
-       continue
-     print("\t".join([str(y) for y in [x, weights[x], affixFrequency[x]]]))
-  if (iteration + 1) % 50 == 0:
-     with open(TARGET_DIR+"/optimized_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
-        print(iteration, mostCorrect, str(args), file=outFile)
-        for key in itos_:
-           print(key, weights[key], file=outFile)
+     print("\t".join([str(y) for y in [x, weights[x]]]))
+#  if (iteration + 1) % 50 == 0:
+#     with open(TARGET_DIR+"/optimized_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
+#        print(iteration, mostCorrect, file=outFile)
+#        for key in itos_:
+#           print(key, weights[key], file=outFile)
 
 
 

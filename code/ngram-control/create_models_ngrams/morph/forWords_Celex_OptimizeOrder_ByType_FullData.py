@@ -60,6 +60,13 @@ morphKeyValuePairs = set()
 
 vocab_lemmas = {}
 
+
+def processVerb(verb):
+    if len(verb) > 0:
+      if "VERB" in [x["posUni"] for x in verb[1:]]:
+        print([x["word"] for x in verb])
+      data.append(verb)
+
 corpusTrain = CorpusIterator_V(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
 pairs = set()
 counter = 0
@@ -67,34 +74,28 @@ data = []
 for sentence in corpusTrain:
 #    print(len(sentence))
     verb = []
-    for line in sentence[::-1]:
-#       print(line)
+    for line in sentence:
        if line["posUni"] == "PUNCT":
+          processVerb(verb)
+          verb = []
           continue
-       verb.append(line)
-       if line["posUni"] == "VERB":
-          verb = verb[::-1]
-#          print(verb)
-#          print([x["dep"] for x in verb])
-#          print([x["posUni"] for x in verb])
-#          print([x["word"] for x in verb])
-#          print([x["lemma"] for x in verb])
-#          print([x["head"] for x in verb])
-          for i in range(1,len(verb)):
-            for j in range(1,i):
-              pairs.add((verb[i]["lemma"], verb[j]["lemma"]))
-              if (verb[j]["lemma"], verb[i]["lemma"]) in pairs:
-                 print("======", (verb[i]["lemma"], verb[j]["lemma"]), [x["dep"] for x in verb], "".join([x["word"] for x in verb]))
-          if len(verb) > 1:
-            data.append(verb)
-          counter += 1
-          break
-       if line["posUni"] not in ["AUX", "SCONJ"]:
-          break
-       if line["dep"] not in ["aux"]:
-          break
+       elif line["posUni"] == "VERB":
+          processVerb(verb)
+          verb = []
+          verb.append(line)
+       elif line["posUni"] == "AUX" and len(verb) > 0:
+          verb.append(line)
+       elif line["posUni"] == "SCONJ" and line["word"] == 'て':
+          verb.append(line)
+          processVerb(verb)
+          verb = []
+       else:
+          processVerb(verb)
+          verb = []
+print(len(data))
+#quit()
 print(counter)
-print(data)
+#print(data)
 print(len(data))
 
 #quit()
@@ -143,8 +144,7 @@ def calculateTradeoffForWeights(weights):
        affixes = verb[1:]
        affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
        for ch in [verb[0]] + affixes:
-         for char in ch["word"]:
-           dev.append(char)
+          dev.append(ch["lemma"])
        #    print(char)
        dev.append("EOS")
        for _ in range(args.cutoff+2):
@@ -321,7 +321,7 @@ for iteration in range(1000):
      coordinate = choice(itos)
   mostCorrect, mostCorrectValue = 0, None
   for newValue in [-1] + [2*x+1 for x in range(len(itos))] + [weights[coordinate]]:
-     if random() < 0.8 and newValue != weights[coordinate]:
+     if random() < 0.9 and newValue != weights[coordinate]:
         continue
      print(newValue, mostCorrect, coordinate, affixFrequency[coordinate])
      weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}

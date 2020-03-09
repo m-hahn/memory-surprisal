@@ -2,6 +2,7 @@
 
 import random
 import sys
+import romkan
 
 objectiveName = "LM"
 
@@ -12,7 +13,7 @@ parser.add_argument("--model", dest="model", type=str)
 parser.add_argument("--alpha", dest="alpha", type=float, default=0.0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
-parser.add_argument("--cutoff", dest="cutoff", type=int, default=3)
+parser.add_argument("--cutoff", dest="cutoff", type=int, default=12)
 parser.add_argument("--idForProcess", dest="idForProcess", type=int, default=random.randint(0,10000000))
 import random
 
@@ -34,7 +35,7 @@ assert args.gamma >= 1
 myID = args.idForProcess
 
 
-TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/"
+TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-morphology/"
 
 
 
@@ -60,6 +61,13 @@ morphKeyValuePairs = set()
 
 vocab_lemmas = {}
 
+
+def processVerb(verb):
+    if len(verb) > 0:
+      if "VERB" in [x["posUni"] for x in verb[1:]]:
+        print([x["word"] for x in verb])
+      data.append(verb)
+
 corpusTrain = CorpusIterator_V(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
 pairs = set()
 counter = 0
@@ -67,34 +75,28 @@ data = []
 for sentence in corpusTrain:
 #    print(len(sentence))
     verb = []
-    for line in sentence[::-1]:
-#       print(line)
+    for line in sentence:
        if line["posUni"] == "PUNCT":
+          processVerb(verb)
+          verb = []
           continue
-       verb.append(line)
-       if line["posUni"] == "VERB":
-          verb = verb[::-1]
-#          print(verb)
-#          print([x["dep"] for x in verb])
-#          print([x["posUni"] for x in verb])
-#          print([x["word"] for x in verb])
-#          print([x["lemma"] for x in verb])
-#          print([x["head"] for x in verb])
-          for i in range(1,len(verb)):
-            for j in range(1,i):
-              pairs.add((verb[i]["lemma"], verb[j]["lemma"]))
-              if (verb[j]["lemma"], verb[i]["lemma"]) in pairs:
-                 print("======", (verb[i]["lemma"], verb[j]["lemma"]), [x["dep"] for x in verb], "".join([x["word"] for x in verb]))
-          if len(verb) > 1:
-            data.append(verb)
-          counter += 1
-          break
-       if line["posUni"] not in ["AUX", "SCONJ"]:
-          break
-       if line["dep"] not in ["aux"]:
-          break
+       elif line["posUni"] == "VERB":
+          processVerb(verb)
+          verb = []
+          verb.append(line)
+       elif line["posUni"] == "AUX" and len(verb) > 0:
+          verb.append(line)
+       elif line["posUni"] == "SCONJ" and line["word"] == 'て':
+          verb.append(line)
+          processVerb(verb)
+          verb = []
+       else:
+          processVerb(verb)
+          verb = []
+print(len(data))
+#quit()
 print(counter)
-print(data)
+#print(data)
 print(len(data))
 
 #quit()
@@ -134,17 +136,42 @@ print(stoi)
 
 itos_ = itos[::]
 shuffle(itos_)
-weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
+if args.model == "RANDOM":
+  weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
+  weights['する'] = -1
+elif args.model == "REAL":
+  weights = None
+elif args.model != "REAL":
+  weights = {}
+  import glob
+  PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
+  files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
+  assert len(files) == 1
+  with open(files[0], "r") as inFile:
+     next(inFile)
+     for line in inFile:
+        morpheme, weight = line.strip().split(" ")
+        weights[morpheme] = int(weight)
 
+
+
+
+def getRepresentation(lemma):
+   if lemma == "させる" or lemma == "せる":
+     return "CAUSATIVE"
+   elif lemma == "れる" or lemma == "られる" or lemma == "える" or lemma == "得る" or lemma == "ける":
+     return "PASSIVE_POTENTIAL"
+   else:
+     return lemma
 
 def calculateTradeoffForWeights(weights):
     dev = []
     for verb in data:
        affixes = verb[1:]
-       affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
+       if args.model != "REAL":
+          affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
        for ch in [verb[0]] + affixes:
-         for char in ch["word"]:
-           dev.append(char)
+          dev.append(getRepresentation(ch["lemma"]))
        #    print(char)
        dev.append("EOS")
        for _ in range(args.cutoff+2):
@@ -280,12 +307,12 @@ def calculateTradeoffForWeights(weights):
            lastProbabilityFiltered = [x for x in lastProbability if x is not None]
            surprisal = - sum([x for x in lastProbabilityFiltered])/len(lastProbabilityFiltered)
        except ValueError:
-    #       print >> sys.stderr, "PROBLEM"
-     #      print >> sys.stderr, lastProbability
+           print("PROBLEM", file=sys.stderr)
+           print(lastProbability, file=sys.stderr)
            surprisal = 1000
        devSurprisalTable.append(surprisal)
-     #  print("Surprisal", surprisal, len(itos))
-    #print(devSurprisalTable)
+       print("Surprisal", surprisal, len(itos))
+    print(devSurprisalTable)
     mis = [devSurprisalTable[i] - devSurprisalTable[i+1] for i in range(len(devSurprisalTable)-1)]
     tmis = [mis[x]*(x+1) for x in range(len(mis))]
     #print(mis)
@@ -293,58 +320,27 @@ def calculateTradeoffForWeights(weights):
     auc = 0
     memory = 0
     mi = 0
+    print(mis)
+    print(tmis)
     for i in range(len(mis)):
        mi += mis[i]
        memory += tmis[i]
        auc += mi * tmis[i]
-    #print("MaxMemory", memory)
+    print("MaxMemory", memory)
     assert 7>memory
     auc += mi * (7-memory)
-    #print("AUC", auc)
-    return auc
+    print("AUC", auc)
     #assert False
     
-    #outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model+".txt"
-    #print(outpath)
-    #with open(outpath, "w") as outFile:
-    #         print >> outFile, str(args)
-    #         print >> outFile, devSurprisalTable[-1]
-    #         print >> outFile, " ".join(map(str,devSurprisalTable))
+    outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model+".txt"
+    print(outpath)
+    with open(outpath, "w") as outFile:
+       print(str(args), file=outFile)
+       print(" ".join(map(str,devSurprisalTable)), file=outFile)
+    
     #
     #
+    return auc
    
-
-
-for iteration in range(1000):
-  coordinate=choice(itos)
-  while affixFrequency.get(coordinate, 0) < 10 and random() < 0.95:
-     coordinate = choice(itos)
-  mostCorrect, mostCorrectValue = 0, None
-  for newValue in [-1] + [2*x+1 for x in range(len(itos))] + [weights[coordinate]]:
-     if random() < 0.8 and newValue != weights[coordinate]:
-        continue
-     print(newValue, mostCorrect, coordinate, affixFrequency[coordinate])
-     weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}
-     correctCount = calculateTradeoffForWeights(weights_)
-#     print(weights_)
-#     print(coordinate, newValue, iteration, correctCount)
-     if correctCount > mostCorrect:
-        mostCorrectValue = newValue
-        mostCorrect = correctCount
-  print(iteration, mostCorrect)
-  weights[coordinate] = mostCorrectValue
-  itos_ = sorted(itos, key=lambda x:weights[x])
-  weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
-  print(weights)
-  for x in itos_:
-     if affixFrequency[x] < 10:
-       continue
-     print("\t".join([str(y) for y in [x, weights[x], affixFrequency[x]]]))
-  if (iteration + 1) % 50 == 0:
-     with open(TARGET_DIR+"/optimized_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
-        print(iteration, mostCorrect, str(args), file=outFile)
-        for key in itos_:
-           print(key, weights[key], file=outFile)
-
-
+calculateTradeoffForWeights(weights)
 

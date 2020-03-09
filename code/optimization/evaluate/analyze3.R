@@ -9,7 +9,7 @@ for(file in list.files("~/scr/CODE/memory-surprisal/results/manual_output_ground
 }
 data_ground = read.csv(paste("~/scr/CODE/memory-surprisal/results/manual_output_ground_coarse/", result, sep=""), sep="\t")
 data_ground = data_ground %>% rename(CoarseDependency = Dependency)
-PATH = "/u/scr/mhahn/deps/locality_optimized_dlm/manual_output_funchead_coarse_depl/"
+PATH = "/u/scr/mhahn/deps/locality_optimized_dlm/manual_output_funchead_coarse_depl_quasiF/"
 data_total = data.frame()
 files = c()
 corrP = c()

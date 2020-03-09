@@ -1,3 +1,4 @@
+assert False
 # based on yWithMorphologySequentialStreamDropoutDev_Ngrams_Log.py
 
 import random
@@ -12,7 +13,7 @@ parser.add_argument("--model", dest="model", type=str)
 parser.add_argument("--alpha", dest="alpha", type=float, default=0.0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
-parser.add_argument("--cutoff", dest="cutoff", type=int, default=3)
+parser.add_argument("--cutoff", dest="cutoff", type=int, default=7)
 parser.add_argument("--idForProcess", dest="idForProcess", type=int, default=random.randint(0,10000000))
 import random
 
@@ -64,6 +65,7 @@ corpusTrain = CorpusIterator_V(args.language,"train", storeMorph=True).iterator(
 pairs = set()
 counter = 0
 data = []
+dataSoFar = set()
 for sentence in corpusTrain:
 #    print(len(sentence))
     verb = []
@@ -85,14 +87,16 @@ for sentence in corpusTrain:
               pairs.add((verb[i]["lemma"], verb[j]["lemma"]))
               if (verb[j]["lemma"], verb[i]["lemma"]) in pairs:
                  print("======", (verb[i]["lemma"], verb[j]["lemma"]), [x["dep"] for x in verb], "".join([x["word"] for x in verb]))
-          if len(verb) > 1:
+          representation = ".".join([x["lemma"] for x in verb])
+          if len(verb) > 1 and representation not in dataSoFar:
             data.append(verb)
+            dataSoFar.add(representation)
           counter += 1
           break
        if line["posUni"] not in ["AUX", "SCONJ"]:
           break
-       if line["dep"] not in ["aux"]:
-          break
+#       if line["dep"] not in ["aux"]:
+ #         break
 print(counter)
 print(data)
 print(len(data))
@@ -137,15 +141,15 @@ shuffle(itos_)
 weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
 
 
-def calculateTradeoffForWeights(weights):
+def calculateTradeoffForWeights(weights, relevantAffix):
     dev = []
     for verb in data:
        affixes = verb[1:]
+       if relevantAffix not in [x["lemma"] for x in affixes]:
+          continue
        affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
        for ch in [verb[0]] + affixes:
-         for char in ch["word"]:
-           dev.append(char)
-       #    print(char)
+         dev.append(ch["word"])
        dev.append("EOS")
        for _ in range(args.cutoff+2):
          dev.append("PAD")
@@ -298,8 +302,8 @@ def calculateTradeoffForWeights(weights):
        memory += tmis[i]
        auc += mi * tmis[i]
     #print("MaxMemory", memory)
-    assert 7>memory
-    auc += mi * (7-memory)
+    assert 5>memory
+    auc += mi * (5-memory)
     #print("AUC", auc)
     return auc
     #assert False
@@ -325,7 +329,7 @@ for iteration in range(1000):
         continue
      print(newValue, mostCorrect, coordinate, affixFrequency[coordinate])
      weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}
-     correctCount = calculateTradeoffForWeights(weights_)
+     correctCount = calculateTradeoffForWeights(weights_, coordinate)
 #     print(weights_)
 #     print(coordinate, newValue, iteration, correctCount)
      if correctCount > mostCorrect:
@@ -336,13 +340,14 @@ for iteration in range(1000):
   itos_ = sorted(itos, key=lambda x:weights[x])
   weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
   print(weights)
+  assert 'する' in weights
   for x in itos_:
      if affixFrequency[x] < 10:
        continue
      print("\t".join([str(y) for y in [x, weights[x], affixFrequency[x]]]))
   if (iteration + 1) % 50 == 0:
      with open(TARGET_DIR+"/optimized_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
-        print(iteration, mostCorrect, str(args), file=outFile)
+        print(iteration, mostCorrect, file=outFile)
         for key in itos_:
            print(key, weights[key], file=outFile)
 

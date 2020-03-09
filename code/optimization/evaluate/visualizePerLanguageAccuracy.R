@@ -5,15 +5,18 @@ library(dplyr)
 library(ggplot2)
 
 
-data = read.csv("output/perLanguageMeans_FuncHead.tsv", sep="\t")
+data = read.csv("output/perLanguageMeans.tsv", sep="\t")
 
 data$Type = as.character(data$Script)
 
-data[data$Script == "readDataDistCrossLGPUDepLengthMomentumEntropyUnbiasedBaseline_OrderBugFixed_NoPunct_NEWPYTORCH_AllCorpPerLang_BoundIterations_FuncHead_CoarseOnly.py",]$Type = "DepL"
-data[data$Script == "readDataDistCrossGPUFreeAllTwoEqual_NoClip_ByCoarseOnly_FixObj_OnlyLangmod_Replication_Best.py",]$Type = "LSTM"
+data$Type = "NONE"
+data[data$Script == "optimizeDependencyLength_QuasiF.py",]$Type = "DepL"
+data[data$Script == "optimizeGrammarForI1_10_Long.py",]$Type = "10"
+data[data$Script == "optimizeGrammarForI1_7_Long.py",]$Type = "_7"
+data[data$Script == "optimizeGrammarForI1_9_Long.py",]$Type = "_9"
 
 
-plot = ggplot(data, aes(x=Type, y=Accuracy, fill=Type)) + geom_col() + facet_wrap(~Language)
+plot = ggplot(data %>% filter(Type != "NONE"), aes(x=Type, y=Accuracy, fill=Type)) + geom_col() + facet_wrap(~Language)
 
-ggsave("output/perLanguageMeans_FuncHead.pdf")
+ggsave("output/perLanguageMeans.pdf")
 
