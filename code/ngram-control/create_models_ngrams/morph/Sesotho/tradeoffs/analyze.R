@@ -52,4 +52,14 @@ plot = plot + theme(axis.line = element_line(colour = "black"),
                     panel.background = element_blank())
 ggsave(plot, file=paste("figures/Sesotho-suffixes-byMorphemes-auc.pdf", sep=""), height=4, width=4)
 
+barWidth = (max(data$AUC) - min(data$AUC))/30
+
+plot = ggplot(data, aes(x=AUC, fill=Type, color=Type))
+plot = plot + theme_classic()
+plot = plot + theme(legend.position="none")
+plot = plot + geom_density(data= data%>%filter(Type == "RANDOM"), aes(y=..scaled..)) 
+plot = plot + geom_bar(data = data %>% filter(!(Type %in% c("RANDOM"))) %>% group_by(Type) %>% summarise(AUC=mean(AUC)) %>% mutate(y=1),  aes(y=y, group=Type), width=barWidth, stat="identity", position = position_dodge())
+ggsave(plot, file=paste("figures/Sesotho-suffixes-byMorphemes-auc-hist.pdf", sep=""), height=4, width=4)
+
+
 
