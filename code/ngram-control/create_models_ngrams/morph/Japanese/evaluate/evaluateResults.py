@@ -15,12 +15,17 @@ files = os.listdir("/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/")
 for line in data:
     line.append("RANDOM" if line[header["Model"]] == "RANDOM" else "OPTIM")
     relevant = [x for x in files if "_"+line[header["Model"]]+".tsv" in x]
-    print(relevant)
-    print(line)
+    print(line[header["Model"]])
+    if line[header["Model"]] == "2980412":
+     print(relevant)
+
     if len(relevant) == 0:
        assert line[-1] == "RANDOM"
        line.append("both")
     else:
+       print(relevant)
+#    print(line)
+
        if "FormsPhonemesFull" in relevant[0] and "suru" not in relevant[0]:
            line.append("phonemes")
        elif "Normalized" in relevant[0] and "suru" not in relevant[0]:

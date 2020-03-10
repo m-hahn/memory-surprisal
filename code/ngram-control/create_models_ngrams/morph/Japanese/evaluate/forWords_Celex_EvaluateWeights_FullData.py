@@ -174,7 +174,7 @@ def getCorrectOrderCount(weights):
                incorrect+=1
                hasMadeMistake = True
                print("MISTAKE", verb[i], weights[verb[i]], verb[j], weights[verb[j]], verb)
-               mistakes[(verb[i], verb[j])] += 1
+               mistakes[(verb[j], verb[i])] += 1
       if len(verb) > 2:
         if not hasMadeMistake:
             correctFull += 1
@@ -189,6 +189,10 @@ print(result)
 with open("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+str(myID)+"_"+args.model+".txt", "w") as outFile:
    print(result[0], file=outFile)
    print(result[1], file=outFile)
+   mistakes = list(mistakes.items())
+   mistakes.sort(key=lambda x:x[1], reverse=True)
+   for x, y in mistakes:
+      print(x[0], x[1], y, file=outFile)
 print("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+str(myID)+"_"+args.model+".txt")
 
 

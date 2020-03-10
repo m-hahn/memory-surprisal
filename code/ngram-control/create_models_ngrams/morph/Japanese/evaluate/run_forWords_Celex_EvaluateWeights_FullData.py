@@ -15,6 +15,8 @@ print(models_sfx)
 for model in models_sfx:
     model = model[model.rfind("_")+1:-4]
     subprocess.call(["/u/nlp/anaconda/main/anaconda3/envs/py37-mhahn/bin/python", "forWords_Celex_EvaluateWeights_FullData.py", "--model", model])
-
+for _ in range(10):
+    model = "RANDOM"
+    subprocess.call(["/u/nlp/anaconda/main/anaconda3/envs/py37-mhahn/bin/python", "forWords_Celex_EvaluateWeights_FullData.py", "--model", model])
 
 
