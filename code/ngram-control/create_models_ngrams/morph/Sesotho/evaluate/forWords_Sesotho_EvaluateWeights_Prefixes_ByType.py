@@ -162,22 +162,23 @@ shuffle(itos_pfx_)
 weights_pfx = dict(list(zip(itos_pfx_, [2*x for x in range(len(itos_pfx_))])))
 
 
-
-import glob
-PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
-files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
-assert len(files) == 1
-assert "Suffixes" not in files[0], files
-assert "Normalized" not in files[0]
-with open(files[0], "r") as inFile:
-   next(inFile)
-   next(inFile)
-   next(inFile)
-   for line in inFile:
-      morpheme, weight = line.strip().split(" ")
-      weights_pfx[morpheme] = int(weight)
-#
-
+if args.model == "RANDOM":
+  weights_pfx = dict(list(zip(itos_pfx_, [2*x for x in range(len(itos_pfx_))])))
+else:
+  weights_pfx = {}
+  import glob
+  PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
+  files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
+  assert len(files) == 1
+  assert "Suffixes" not in files[0], files
+  assert "Normalized" not in files[0]
+  with open(files[0], "r") as inFile:
+     next(inFile)
+     next(inFile)
+     next(inFile)
+     for line in inFile:
+        morpheme, weight = line.strip().split(" ")
+        weights_pfx[morpheme] = int(weight)
 
 errors = defaultdict(int)
 
@@ -290,9 +291,9 @@ result = getCorrectOrderCount(weights_pfx, None, 0)
 print(errors)
 print(result)
 
-with open("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+args.model+".txt", "w") as outFile:
+with open("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+str(myID)+"_"+args.model+".txt", "w") as outFile:
    print(result[0], file=outFile)
    print(result[1], file=outFile)
-print("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+args.model+".txt")
+print("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+str(myID)+"_"+args.model+".txt")
 
 
