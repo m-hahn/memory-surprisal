@@ -65,3 +65,4 @@ plot = plot + geom_bar(data = data %>% filter(!(Type %in% c("RANDOM"))) %>% grou
 ggsave(plot, file=paste("figures/Japanese-suffixes-byPhonemes-auc-hist.pdf", sep=""), height=4, width=4)
 
 
+

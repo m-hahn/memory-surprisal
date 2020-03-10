@@ -294,6 +294,10 @@ print(result)
 with open("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+str(myID)+"_"+args.model+".txt", "w") as outFile:
    print(result[0], file=outFile)
    print(result[1], file=outFile)
+   errors = list(errors.items())
+   errors.sort(key=lambda x:x[1], reverse=True)
+   for x, y in errors:
+      print(x[0], x[1], y, file=outFile)
 print("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+str(myID)+"_"+args.model+".txt")
 
 
