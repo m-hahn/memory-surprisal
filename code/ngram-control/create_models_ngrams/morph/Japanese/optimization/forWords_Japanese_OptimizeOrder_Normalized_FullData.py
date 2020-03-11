@@ -325,15 +325,15 @@ def calculateTradeoffForWeights(weights):
 
 for iteration in range(1000):
   coordinate=choice(itos)
-  if coordinate == 'する' and weights[coordinate] == 0: # Force suru to be at the beginning
-      continue
+#  if coordinate == 'する' and weights[coordinate] == 0: # Force suru to be at the beginning
+ #     continue
 
   while affixFrequency.get(coordinate, 0) < 10 and random() < 0.95:
      coordinate = choice(itos)
   mostCorrect, mostCorrectValue = 0, None
   for newValue in [-1] + [2*x+1 for x in range(len(itos))] + [weights[coordinate]]:
-     if coordinate == 'する':
-        break
+#     if coordinate == 'する':
+ #       break
      if random() < 0.9 and newValue != weights[coordinate]:
         continue
      print(newValue, mostCorrect, coordinate, affixFrequency[coordinate])
@@ -344,8 +344,8 @@ for iteration in range(1000):
      if correctCount > mostCorrect:
         mostCorrectValue = newValue
         mostCorrect = correctCount
-  if coordinate == 'する':
-     mostCorrectValue = -1
+#  if coordinate == 'する':
+ #    mostCorrectValue = -1
   print(iteration, mostCorrect)
   weights[coordinate] = mostCorrectValue
   itos_ = sorted(itos, key=lambda x:weights[x])

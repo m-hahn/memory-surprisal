@@ -153,12 +153,21 @@ from collections import defaultdict
 
 errors = defaultdict(int)
 
+hasSeenType = set()
+
 def getCorrectOrderCount(weights):
    correct = 0
    incorrect = 0
    correctFull = 0
    incorrectFull = 0
+
+   correctTypes = 0
+   incorrectTypes = 0
+   correctFullTypes = 0
+   incorrectFullTypes = 0
    for verb in data:
+      keyForThisVerb = " ".join(verb)
+      hasSeenThisVerb = (keyForThisVerb in hasSeenType)
       hasMadeMistake = False
       for i in range(1, len(verb)):
 #         if verb[i] == 'する':
@@ -170,17 +179,27 @@ def getCorrectOrderCount(weights):
              weightJ = weights[verb[j]]
              if weightI > weightJ:
                correct+=1
+               if not hasSeenThisVerb:
+                 correctTypes += 1
              else:
                incorrect+=1
+               if not hasSeenThisVerb:
+                 incorrectTypes += 1
                hasMadeMistake = True
                print("MISTAKE", verb[i], weights[verb[i]], verb[j], weights[verb[j]], verb)
                errors[(verb[j], verb[i])] += 1
       if len(verb) > 2:
         if not hasMadeMistake:
             correctFull += 1
+            if not hasSeenThisVerb:
+              correctFullTypes += 1
         else:
             incorrectFull += 1
-   return correct/(correct+incorrect), correctFull/(correctFull+incorrectFull)
+            if not hasSeenThisVerb:
+              incorrectFullTypes += 1
+      if not hasSeenThisVerb:
+        hasSeenType.add(keyForThisVerb)
+   return correct/(correct+incorrect), correctFull/(correctFull+incorrectFull),correctTypes/(correctTypes+incorrectTypes), correctFullTypes/(correctFullTypes+incorrectFullTypes)
 
 result = getCorrectOrderCount(weights)
 print(errors)
@@ -189,6 +208,8 @@ print(result)
 with open("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+str(myID)+"_"+args.model+".txt", "w") as outFile:
    print(result[0], file=outFile)
    print(result[1], file=outFile)
+   print(result[2], file=outFile)
+   print(result[3], file=outFile)
    errors = list(errors.items())
    errors.sort(key=lambda x:x[1], reverse=True)
    for x, y in errors:
