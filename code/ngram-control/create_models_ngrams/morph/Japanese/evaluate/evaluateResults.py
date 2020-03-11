@@ -28,10 +28,13 @@ for line in data:
 
        if "FormsPhonemesFull" in relevant[0] and "suru" not in relevant[0]:
            line.append("phonemes")
-       elif "Normalized" in relevant[0] and "suru" not in relevant[0]:
+       elif ("Normalized" in relevant[0] and "suru" not in relevant[0]) or "MorphemeGrammar_FullData.py" in relevant[0]:
            line.append("morphemes")
        else:
            line.append("neither")
+       if "MorphemeGrammar" in relevant[0]:
+           print("MORPHEME")
+           line[-1] += "_m"
 
 def mean(x):
     return sum(x)/len(x)
@@ -66,4 +69,7 @@ print(results)
 print("Phonemes   &   "+results[("phonemes", "OPTIM")]+" \\\\")
 print("Morphemes  &   "+results[("morphemes", "OPTIM")]+" \\\\")
 print("Random     &  "+results[("both", "RANDOM")]+" \\\\")
+print("Phonemes (m)   &   "+results[("phonemes_m", "OPTIM")]+" \\\\")
+print("Morphemes (m)  &   "+results[("morphemes_m", "OPTIM")]+" \\\\")
+print("Random     &  "+results[("both_m", "RANDOM")]+" \\\\")
 
