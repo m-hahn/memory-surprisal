@@ -102,12 +102,10 @@ for sentence in corpusTrain:
           processVerb(verb)
           verb = []
 print(len(data))
-#quit()
 print(counter)
 #print(data)
 print(len(data))
 
-#quit()
 import torch.nn as nn
 import torch
 from torch.autograd import Variable
@@ -144,7 +142,11 @@ print(stoi)
 
 itos_ = itos[::]
 shuffle(itos_)
+print(itos_)
 weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
+print(weights)
+#quit()
+
 
 raw2Tagged = dict()
 

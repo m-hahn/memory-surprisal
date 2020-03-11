@@ -12,6 +12,7 @@ PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/"
 
 import glob
 files = glob.glob(PATH+"accuracy_forWords_Celex_EvaluateWeights_FullData.py_*.txt")
+files += glob.glob(PATH+"accuracy_forWords_Celex_EvaluateWeights_MorphemeGrammar_FullData.py_*.txt")
 
 
 optimizedGrammars = glob.glob("/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/*.tsv")
@@ -54,8 +55,12 @@ with open("results.tsv", "w") as outFile:
          grammar = dict([x.split(" ") for x in grammar[1:]])
       #   print(grammar)
          morphemes = [("suru", ['する'])]
-         morphemes.append(("causative", ['せる']))
-         morphemes.append(('passive/potential', ['れる', 'られる', '得る', 'える']))
+         if "MorphemeGrammar" not in f:
+           morphemes.append(("causative", ['せる']))
+           morphemes.append(('passive/potential', ['れる', 'られる', '得る', 'える']))
+         else:
+           morphemes.append(("causative", ['CAUSATIVE']))
+           morphemes.append(('passive/potential', ['PASSIVE_POTENTIAL']))
          morphemes.append(('politeness', ['ます']))
          morphemes.append(('desiderative', ['たい']))
          morphemes.append(('negation', ['ない']))
