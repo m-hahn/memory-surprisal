@@ -1,7 +1,7 @@
 PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/"
 
 import glob
-models = glob.glob(PATH+"optimized_Japanese_2.4_optimized_forWords_Japanese_OptimizeOrder_Normalized_FullData.py_*.tsv")
+models = glob.glob(PATH+"optimized_forWords_Japanese_OptimizeOrder_Normalized_FullData.py_*.tsv")
 
 models.sort()
 
