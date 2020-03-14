@@ -2,15 +2,14 @@
 
 import random
 import sys
-import romkan
 
 objectiveName = "LM"
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument("--language", dest="language", type=str, default="Japanese-GSD_2.4")
+parser.add_argument("--language", dest="language", type=str, default="Japanese_2.4")
 parser.add_argument("--model", dest="model", type=str)
-parser.add_argument("--alpha", dest="alpha", type=float, default=1.0)
+parser.add_argument("--alpha", dest="alpha", type=float, default=0.0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
 parser.add_argument("--cutoff", dest="cutoff", type=int, default=12)
@@ -44,14 +43,6 @@ posUni = set()
 posFine = set() 
 
 
-def getRepresentation(lemma):
-   if lemma == "させる" or lemma == "せる":
-     return "CAUSATIVE"
-   elif lemma == "れる" or lemma == "られる" or lemma == "える" or lemma == "得る" or lemma == "ける":
-     return "PASSIVE_POTENTIAL"
-   else:
-     return lemma
-
 
 
 
@@ -70,46 +61,42 @@ morphKeyValuePairs = set()
 vocab_lemmas = {}
 
 
-def processVerb(verb, data_):
+def processVerb(verb):
     if len(verb) > 0:
       if "VERB" in [x["posUni"] for x in verb[1:]]:
         print([x["word"] for x in verb])
-      data_.append(verb)
+      data.append(verb)
 
 corpusTrain = CorpusIterator_V(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
-corpusDev = CorpusIterator_V(args.language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
-
 pairs = set()
 counter = 0
-data_train = []
-data_dev = []
-for corpus, data_ in [(corpusTrain, data_train), (corpusDev, data_dev)]:
- for sentence in corpus:
+data = []
+for sentence in corpusTrain:
 #    print(len(sentence))
     verb = []
     for line in sentence:
        if line["posUni"] == "PUNCT":
-          processVerb(verb, data_)
+          processVerb(verb)
           verb = []
           continue
        elif line["posUni"] == "VERB":
-          processVerb(verb, data_)
+          processVerb(verb)
           verb = []
           verb.append(line)
        elif line["posUni"] == "AUX" and len(verb) > 0:
           verb.append(line)
        elif line["posUni"] == "SCONJ" and line["word"] == 'て':
           verb.append(line)
-          processVerb(verb, data_)
+          processVerb(verb)
           verb = []
        else:
-          processVerb(verb, data_)
+          processVerb(verb)
           verb = []
- print("len(data_)", len(data_))
- #quit()
- print(counter)
- #print(data)
- print(len(data_))
+print(len(data))
+#quit()
+print(counter)
+#print(data)
+print(len(data))
 
 #quit()
 import torch.nn as nn
@@ -128,14 +115,14 @@ import torch.nn.functional
 words = []
 
 affixFrequency = {}
-for verbWithAff in data_train:
+for verbWithAff in data:
   for affix in verbWithAff[1:]:
     affixLemma = affix["lemma"]
     affixFrequency[affixLemma] = affixFrequency.get(affixLemma, 0)+1
 
 
 itos = set()
-for verbWithAff in data_train:
+for verbWithAff in data:
   for affix in verbWithAff[1:]:
     affixLemma = affix["lemma"]
     itos.add(affixLemma)
@@ -148,49 +135,32 @@ print(stoi)
 
 itos_ = itos[::]
 shuffle(itos_)
-if args.model == "RANDOM":
-  weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
-#  weights['する'] = -1
-elif args.model in ["REAL", "REVERSE"]:
-  weights = None
-elif args.model != "REAL":
-  weights = {}
-  import glob
-  PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
-  files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
-  assert len(files) == 1
-  assert "Normalized" in files[0]
-  with open(files[0], "r") as inFile:
-     next(inFile)
-     for line in inFile:
-        morpheme, weight = line.strip().split(" ")
-        weights[morpheme] = int(weight)
-
-
+weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
 
 
 def calculateTradeoffForWeights(weights):
-    train = []
     dev = []
-    for data, processed in [(data_train, train), (data_dev, dev)]:
-      for verb in data:
-         affixes = verb[1:]
-         if args.model == "REAL":
-            _ = 0
-         elif args.model == "REVERSE":
-            affixes = affixes[::-1]
-         else:
-            affixes = sorted(affixes, key=lambda x:weights.get(x["lemma"], 0))
-         for ch in [verb[0]] + affixes:
-            processed.append(getRepresentation(ch["lemma"]))
-         #    print(char)
-         processed.append("EOS")
-         for _ in range(args.cutoff+2):
-           processed.append("PAD")
-         processed.append("SOS")
-      
-    itos = list(set(train) | set(dev))
-      
+    for verb in data:
+       affixes = verb[1:]
+       if args.model == "RANDOM":
+          affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
+       elif args.model == "REAL":
+          assert args.model == "REAL"
+       elif args.model == "SHUFFLE":
+          Random(myID).shuffle(affixes)
+       else:
+            assert False
+       for ch in [verb[0]] + affixes:
+         for char in ch["word"]:
+           dev.append(char)
+       #    print(char)
+       dev.append("EOS")
+       for _ in range(args.cutoff+2):
+         dev.append("PAD")
+       dev.append("SOS")
+    
+    itos = list(set(dev))
+    
     
     dev = dev[::-1]
     #dev = list(createStreamContinuous(corpusDev))[::-1]
@@ -198,7 +168,7 @@ def calculateTradeoffForWeights(weights):
     
     #corpusTrain = CorpusIterator(args.language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
     #train = list(createStreamContinuous(corpusTrain))[::-1]
-    train = train[::-1]
+    train = dev
     
     idev = range(len(dev))
     itrain = range(len(train))
@@ -303,7 +273,7 @@ def calculateTradeoffForWeights(weights):
                   if followingCount == 0:
                       newProbability[j] = lastProbability[j]
                   else:
-                      #assert countNgram > 0
+                      assert countNgram > 0
                       probability = log(max(countNgram - args.alpha, 0.0) + args.alpha * followingCount * exp(lastProbability[j])) -  log(countPrefix)
                       newProbability[j] = probability
              else:
