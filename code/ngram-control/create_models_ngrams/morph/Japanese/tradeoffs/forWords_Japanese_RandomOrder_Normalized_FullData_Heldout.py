@@ -8,12 +8,12 @@ objectiveName = "LM"
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument("--language", dest="language", type=str, default="Japanese_2.4")
+parser.add_argument("--language", dest="language", type=str, default="Japanese-GSD_2.4")
 parser.add_argument("--model", dest="model", type=str)
-parser.add_argument("--alpha", dest="alpha", type=float, default=0.0)
+parser.add_argument("--alpha", dest="alpha", type=float, default=1.0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
-parser.add_argument("--cutoff", dest="cutoff", type=int, default=12)
+parser.add_argument("--cutoff", dest="cutoff", type=int, default=3)
 parser.add_argument("--idForProcess", dest="idForProcess", type=int, default=random.randint(0,10000000))
 import random
 
@@ -44,6 +44,14 @@ posUni = set()
 posFine = set() 
 
 
+def getRepresentation(lemma):
+   if lemma == "させる" or lemma == "せる":
+     return "CAUSATIVE"
+   elif lemma == "れる" or lemma == "られる" or lemma == "える" or lemma == "得る" or lemma == "ける":
+     return "PASSIVE_POTENTIAL"
+   else:
+     return lemma
+
 
 
 
@@ -62,42 +70,46 @@ morphKeyValuePairs = set()
 vocab_lemmas = {}
 
 
-def processVerb(verb):
+def processVerb(verb, data_):
     if len(verb) > 0:
       if "VERB" in [x["posUni"] for x in verb[1:]]:
         print([x["word"] for x in verb])
-      data.append(verb)
+      data_.append(verb)
 
 corpusTrain = CorpusIterator_V(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
+corpusDev = CorpusIterator_V(args.language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
+
 pairs = set()
 counter = 0
-data = []
-for sentence in corpusTrain:
+data_train = []
+data_dev = []
+for corpus, data_ in [(corpusTrain, data_train), (corpusDev, data_dev)]:
+ for sentence in corpus:
 #    print(len(sentence))
     verb = []
     for line in sentence:
        if line["posUni"] == "PUNCT":
-          processVerb(verb)
+          processVerb(verb, data_)
           verb = []
           continue
        elif line["posUni"] == "VERB":
-          processVerb(verb)
+          processVerb(verb, data_)
           verb = []
           verb.append(line)
        elif line["posUni"] == "AUX" and len(verb) > 0:
           verb.append(line)
        elif line["posUni"] == "SCONJ" and line["word"] == 'て':
           verb.append(line)
-          processVerb(verb)
+          processVerb(verb, data_)
           verb = []
        else:
-          processVerb(verb)
+          processVerb(verb, data_)
           verb = []
-print(len(data))
-#quit()
-print(counter)
-#print(data)
-print(len(data))
+ print("len(data_)", len(data_))
+ #quit()
+ print(counter)
+ #print(data)
+ print(len(data_))
 
 #quit()
 import torch.nn as nn
@@ -116,14 +128,14 @@ import torch.nn.functional
 words = []
 
 affixFrequency = {}
-for verbWithAff in data:
+for verbWithAff in data_train:
   for affix in verbWithAff[1:]:
     affixLemma = affix["lemma"]
     affixFrequency[affixLemma] = affixFrequency.get(affixLemma, 0)+1
 
 
 itos = set()
-for verbWithAff in data:
+for verbWithAff in data_train:
   for affix in verbWithAff[1:]:
     affixLemma = affix["lemma"]
     itos.add(affixLemma)
@@ -138,7 +150,7 @@ itos_ = itos[::]
 shuffle(itos_)
 if args.model == "RANDOM":
   weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
-  weights['する'] = -1
+#  weights['する'] = -1
 elif args.model == "REAL":
   weights = None
 elif args.model != "REAL":
@@ -147,7 +159,7 @@ elif args.model != "REAL":
   PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
   files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
   assert len(files) == 1
-  assert "_FormsPhonemesFull_" in files[0]
+  assert "Normalized" in files[0]
   with open(files[0], "r") as inFile:
      next(inFile)
      for line in inFile:
@@ -157,63 +169,24 @@ elif args.model != "REAL":
 
 
 
-raw2Hiragana = dict()
-
-with open("../data/extractedVerbs_hiragana.txt", "r") as inFileHiragana:
-    try:
-     for index in range(1000000):
-       tagged = next(inFileHiragana).strip().split("\t")
-       raw, tagged = tagged
-       raw2Hiragana[raw.strip()] = tagged.strip()
-    except StopIteration:
-       _ = 0
-
-for line in data:
- # print(" ".join([x["word"] for x in line]))
-  raw = " ".join([x["word"] for x in line])
-  hiragana = raw2Hiragana[raw].split(" ")
-#  print(line)
- # print(hiragana)
-  assert len(hiragana) == len(line)
-  for i in range(len(line)):
-    line[i]["hiragana"] = hiragana[i]
-
-cachedPhonemization = {}
-
-def phonemize(x):
-   if x not in cachedPhonemization:
-      phonemized = romkan.to_roma(x)
-      if max([ord(y) for y in phonemized]) > 200: # contains Kanji
-         cachedPhonemization[x] = x
-      else:
-        if x.endswith("っ"):
-          assert phonemized.endswith("xtsu")
-          phonemized = phonemized.replace("xtsu", "G") # G for `geminate'
-        phonemized = phonemized.replace("ch", "C")
-        phonemized = phonemized.replace("sh", "S")
-        phonemized = phonemized.replace("ts", "T")
-        cachedPhonemization[x] = phonemized
-   phonemized = cachedPhonemization[x]
-   return phonemized
-
-
 def calculateTradeoffForWeights(weights):
+    train = []
     dev = []
-    for verb in data:
-       affixes = verb[1:]
-       if args.model != "REAL":
-          affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
-       for ch in [verb[0]] + affixes:
-         for char in phonemize(ch["hiragana"]):
-           dev.append(char)
-       #    print(char)
-       dev.append("EOS")
-       for _ in range(args.cutoff+2):
-         dev.append("PAD")
-       dev.append("SOS")
-    
-    itos = list(set(dev))
-    
+    for data, processed in [(data_train, train), (data_dev, dev)]:
+      for verb in data:
+         affixes = verb[1:]
+         if args.model != "REAL":
+            affixes = sorted(affixes, key=lambda x:weights.get(x["lemma"], 0))
+         for ch in [verb[0]] + affixes:
+            processed.append(getRepresentation(ch["lemma"]))
+         #    print(char)
+         processed.append("EOS")
+         for _ in range(args.cutoff+2):
+           processed.append("PAD")
+         processed.append("SOS")
+      
+    itos = list(set(train) | set(dev))
+      
     
     dev = dev[::-1]
     #dev = list(createStreamContinuous(corpusDev))[::-1]
@@ -221,7 +194,7 @@ def calculateTradeoffForWeights(weights):
     
     #corpusTrain = CorpusIterator(args.language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
     #train = list(createStreamContinuous(corpusTrain))[::-1]
-    train = dev
+    train = train[::-1]
     
     idev = range(len(dev))
     itrain = range(len(train))
@@ -326,7 +299,7 @@ def calculateTradeoffForWeights(weights):
                   if followingCount == 0:
                       newProbability[j] = lastProbability[j]
                   else:
-                      assert countNgram > 0
+                      #assert countNgram > 0
                       probability = log(max(countNgram - args.alpha, 0.0) + args.alpha * followingCount * exp(lastProbability[j])) -  log(countPrefix)
                       newProbability[j] = probability
              else:

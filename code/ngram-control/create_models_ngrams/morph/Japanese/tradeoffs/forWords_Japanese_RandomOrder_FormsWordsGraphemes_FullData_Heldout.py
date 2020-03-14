@@ -2,7 +2,6 @@
 
 import random
 import sys
-import romkan
 
 objectiveName = "LM"
 
@@ -136,42 +135,24 @@ print(stoi)
 
 itos_ = itos[::]
 shuffle(itos_)
-if args.model == "RANDOM":
-  weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
-  weights['する'] = -1
-elif args.model == "REAL":
-  weights = None
-elif args.model != "REAL":
-  weights = {}
-  import glob
-  PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
-  files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
-  assert len(files) == 1
-  with open(files[0], "r") as inFile:
-     next(inFile)
-     for line in inFile:
-        morpheme, weight = line.strip().split(" ")
-        weights[morpheme] = int(weight)
+weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
 
-
-
-
-def getRepresentation(lemma):
-   if lemma == "させる" or lemma == "せる":
-     return "CAUSATIVE"
-   elif lemma == "れる" or lemma == "られる" or lemma == "える" or lemma == "得る" or lemma == "ける":
-     return "PASSIVE_POTENTIAL"
-   else:
-     return lemma
 
 def calculateTradeoffForWeights(weights):
     dev = []
     for verb in data:
        affixes = verb[1:]
-       if args.model != "REAL":
+       if args.model == "RANDOM":
           affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
+       elif args.model == "REAL":
+          assert args.model == "REAL"
+       elif args.model == "SHUFFLE":
+          Random(myID).shuffle(affixes)
+       else:
+            assert False
        for ch in [verb[0]] + affixes:
-          dev.append(getRepresentation(ch["lemma"]))
+         for char in ch["word"]:
+           dev.append(char)
        #    print(char)
        dev.append("EOS")
        for _ in range(args.cutoff+2):
