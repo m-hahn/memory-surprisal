@@ -175,7 +175,10 @@ def calculateTradeoffForWeights(weights):
        else:
           affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
        for ch in [verb[0]] + affixes:
-          dev.append(getRepresentation(ch["lemma"]))
+          if affixFrequency.get(ch["lemma"], 10)< 10:
+            dev.append("OOV")
+          else:
+            dev.append(getRepresentation(ch["lemma"]))
        #    print(char)
        dev.append("EOS")
        for _ in range(args.cutoff+2):

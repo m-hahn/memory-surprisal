@@ -151,7 +151,7 @@ shuffle(itos_)
 if args.model == "RANDOM":
   weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
 #  weights['する'] = -1
-elif args.model == "REAL":
+elif args.model in ["REAL", "REVERSE"]:
   weights = None
 elif args.model != "REAL":
   weights = {}
@@ -175,7 +175,11 @@ def calculateTradeoffForWeights(weights):
     for data, processed in [(data_train, train), (data_dev, dev)]:
       for verb in data:
          affixes = verb[1:]
-         if args.model != "REAL":
+         if args.model == "REAL":
+            _ = 0
+         elif args.model == "REVERSE":
+            affixes = affixes[::-1]
+         else:
             affixes = sorted(affixes, key=lambda x:weights.get(x["lemma"], 0))
          for ch in [verb[0]] + affixes:
             processed.append(getRepresentation(ch["lemma"]))
