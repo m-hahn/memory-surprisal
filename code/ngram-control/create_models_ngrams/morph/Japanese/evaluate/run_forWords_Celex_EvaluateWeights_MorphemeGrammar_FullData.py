@@ -2,8 +2,9 @@
 PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/"
 
 import glob
-models_sfx = glob.glob(PATH+"optimized_forWords_Japanese_OptimizeOrder_MorpgemeGrammar__FullData.py_*.tsv")
-models_sfx += glob.glob(PATH+"optimized_forWords_Japanese_OptimizeOrder_MorphemeGrammar_FormsPhonemesFull_FullData.py_*.tsv")
+models_sfx = glob.glob(PATH+"optimized_forWords_Japanese_OptimizeOrder_MorphemeGrammar*FullData*.py_*.tsv")
+#models_sfx += glob.glob(PATH+"optimized_forWords_Japanese_OptimizeOrder_MorphemeGrammar_Normalized_FullData.py_*.tsv")
+#models_sfx += glob.glob(PATH+"optimized_forWords_Japanese_OptimizeOrder_MorphemeGrammar_FormsPhonemesFull_FullData.py_*.tsv")
 
 import random
 random.shuffle(models_sfx)

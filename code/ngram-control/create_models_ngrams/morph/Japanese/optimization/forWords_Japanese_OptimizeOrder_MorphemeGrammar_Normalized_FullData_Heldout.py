@@ -315,7 +315,7 @@ def calculateTradeoffForWeights(weights):
     assert 7>memory
     auc += mi * (7-memory)
     #print("AUC", auc)
-    return auc
+    return auc, devSurprisalTable
     #assert False
     
     #outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model+".txt"
@@ -344,7 +344,7 @@ for iteration in range(1000):
         continue
      print(newValue, mostCorrect, coordinate, affixFrequency[coordinate])
      weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}
-     correctCount = calculateTradeoffForWeights(weights_)
+     correctCount, _ = calculateTradeoffForWeights(weights_)
 #     print(weights_)
 #     print(coordinate, newValue, iteration, correctCount)
      if correctCount > mostCorrect:
@@ -362,8 +362,10 @@ for iteration in range(1000):
        continue
      print("\t".join([str(y) for y in [x, weights[x], affixFrequency[x]]]))
   if (iteration + 1) % 50 == 0:
+     _, surprisals = calculateTradeoffForWeights(weights_)
+
      with open(TARGET_DIR+"/optimized_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
-        print(iteration, mostCorrect, str(args), file=outFile)
+        print(iteration, mostCorrect, str(args), surprisals, file=outFile)
         for key in itos_:
            print(key, weights[key], file=outFile)
 
