@@ -37,7 +37,7 @@ with open("results.tsv", "w") as outFile:
      inFile = list(inFile)
      if len(inFile) < 5:
        continue
-     print(inFile[3])
+     #print(inFile[3])
      if "." not in inFile[3]:
        continue
      accuracy_pairs = inFile[0]
@@ -50,7 +50,7 @@ with open("results.tsv", "w") as outFile:
         #print("\n\n\n===============", script, "==================")
         lastScript = script
      model = f[f.rfind("_")+1:-4]
-     if model in hasSeenModels:
+     if model in hasSeenModels and model != "RANDOM":
         continue
      else:
         hasSeenModels.add(model)
@@ -68,7 +68,7 @@ with open("results.tsv", "w") as outFile:
        #print(script, opt_script, model, accuracy_pairs.strip(), accuracy_full.strip())
        #print(errors[:10])
        optimizedRelevant = [x for x in optimizedGrammars if model in x]
-       print(optimizedRelevant)
+       #print(optimizedRelevant)
        assert len(optimizedRelevant) == 1
        with open(optimizedRelevant[0], "r") as inFileG:
          grammar = inFileG.read().strip().split("\n")
@@ -80,12 +80,13 @@ with open("results.tsv", "w") as outFile:
          arguments = grammar[2]
          grammar = dict([x.split(" ") for x in grammar[3:]])
       #   print(grammar)
-         print(f)
-         print(sorted(list(grammar)))
+ #        print(f)
+         #print(sorted(list(grammar)))
          morphemes_prefixes = ['ng', 'om', 'sm', 'sr', 't^']
-         morphemes = [(x,[x]) for x in morphemes_prefixes] 
-     #    print(morphemes)
-         print(morphemes)
+         morphemes_suffixes = ['ap', 'c', 'nt', 'rv', 'rc', 'p', 't^', 'm^', 'wh', 'rl']
+         morphemes = [(x,[x]) for x in (morphemes_prefixes if "refix" in f else morphemes_suffixes)] 
+         #print(morphemes)
+         #print(morphemes)
          weights = flatten([[(x, y, int(grammar[y])) for y in z] for x, z in morphemes])
          weights.sort(key=lambda x:x[2])
          #print(weights)

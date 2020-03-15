@@ -12,6 +12,7 @@ scripts = sorted(list(set([x[header["Script"]] for x in data])))
 print(scripts)
 
 for line in data:
+#    print(line[header["Model"]])
     line.append("RANDOM" if line[header["Model"]] == "RANDOM" else "OPTIM")
 
 def mean(x):
@@ -25,7 +26,7 @@ def sd(x):
 results = {}
 for script in scripts:
     data_ = [x for x in data if x[header["Script"]] == script]
-    #print(data_)
+   # print(data_)
   #  print(script)
     for typ in ["RANDOM", "OPTIM"]:
 #        print(typ)
@@ -35,6 +36,9 @@ for script in scripts:
  #       print(accuracy_pairs)
         accuracy_full = [float(x[header["Accuracy_Full"]]) for x in data__]
   #      print(accuracy_full)
+        if len(accuracy_full) == 0 or len(accuracy_pairs) == 0:
+           print(script, typ)
+           continue
         results[(script, typ)] = ("".join([str(x) for x in [round(mean(accuracy_pairs),3), " (SD ", round(sd(accuracy_pairs), 3), ") & ", round(mean(accuracy_full), 3), " (SD ", round(sd(accuracy_full), 3), ")"]]))
 
 print(results)

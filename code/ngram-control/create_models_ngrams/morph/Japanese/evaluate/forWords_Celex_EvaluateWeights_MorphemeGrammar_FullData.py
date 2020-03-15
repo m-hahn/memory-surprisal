@@ -180,11 +180,7 @@ def getCorrectOrderCount(weights):
       hasSeenThisVerb = (keyForThisVerb in hasSeenType)
       hasMadeMistake = False
       for i in range(1, len(verb)):
-#         if verb[i] == 'する':
- #           continue
          for j in range(1, i):
-  #           if verb[j] == 'する':
-   #             continue
              weightI = weights[getRepresentation(verb[i]["lemma"])]
              weightJ = weights[getRepresentation(verb[j]["lemma"])]
              if weightI > weightJ:
