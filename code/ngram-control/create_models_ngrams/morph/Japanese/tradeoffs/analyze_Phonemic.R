@@ -1,19 +1,22 @@
-data = read.csv("results.tsv", sep="\t")
-
-
 library(tidyr)
 library(dplyr)
 library(ggplot2)
 
-data = data %>% filter(Script == "forWords_Japanese_RandomOrder_FormsPhonemesFull_FullData_suru.py")
+######################################
+
+data = read.csv("results.tsv", sep="\t")
 
 
-data$Type = ifelse(data$Model %in% c("REAL", "RANDOM"), as.character(data$Model), "Optimized")
+data = data %>% filter(Script == "forWords_Japanese_RandomOrder_FormsPhonemesFull_FullData.py")
 
-plot = ggplot(data, aes(x=Distance, y=MI, color=Type)) + geom_line() #size=2)
+
+data$Type = ifelse(data$Model %in% c("REAL", "RANDOM", "REVERSE"), as.character(data$Model), "Optimized")
+
+data_ = data %>% group_by(Distance, Type) %>% summarise(MI=median(MI))
+plot = ggplot(data_, aes(x=Distance, y=MI, color=Type)) + geom_line() #size=2)
 plot = plot + theme_bw()
 plot = plot + theme(axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text = element_text(size=20))
-plot = plot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) #, legend.position="none")
+plot = plot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), legend.position="none")
 plot = plot + theme(axis.line = element_line(colour = "black"),
             panel.grid.major = element_blank(),
                 panel.grid.minor = element_blank(),
@@ -35,14 +38,14 @@ plot = plot + theme(axis.line = element_line(colour = "black"),
 ggsave(plot, file=paste("figures/Japanese-suffixes-byPhonemes-memsurp.pdf", sep=""), height=4, width=4)
 
 
-
+######################################
 
 data = read.csv("results_auc.tsv", sep="\t")
 
-data = data %>% filter(Script == "forWords_Japanese_RandomOrder_FormsPhonemesFull_FullData_suru.py")
+data = data %>% filter(Script == "forWords_Japanese_RandomOrder_FormsPhonemesFull_FullData.py")
 
 
-data$Type = ifelse(data$Model %in% c("REAL", "RANDOM"), as.character(data$Model), "Optimized")
+data$Type = ifelse(data$Model %in% c("REAL", "RANDOM", "REVERSE"), as.character(data$Model), "Optimized")
 
 plot = ggplot(data, aes(x=AUC, y=1, color=Type, fill=Type)) + geom_bar(stat="identity") #size=2)
 plot = plot + theme_bw()
