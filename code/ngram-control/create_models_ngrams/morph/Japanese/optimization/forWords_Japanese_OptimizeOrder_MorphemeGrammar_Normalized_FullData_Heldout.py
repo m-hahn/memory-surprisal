@@ -343,7 +343,7 @@ for iteration in range(1000):
    #     break
      if random() < 0.9 and newValue != weights[coordinate]:
         continue
-     print(newValue, mostCorrect, coordinate, affixFrequency[coordinate])
+     print(newValue, mostCorrect, coordinate, affixFrequency.get(coordinate,0))
      weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}
      correctCount, _ = calculateTradeoffForWeights(weights_)
 #     print(weights_)
@@ -359,9 +359,9 @@ for iteration in range(1000):
   weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
   print(weights)
   for x in itos_:
-     if affixFrequency[x] < 10:
+     if affixFrequency.get(x,0) < 10:
        continue
-     print("\t".join([str(y) for y in [x, weights[x], affixFrequency[x]]]))
+     print("\t".join([str(y) for y in [x, weights[x], affixFrequency.get(x,0)]]))
   if (iteration + 1) % 50 == 0:
      _, surprisals = calculateTradeoffForWeights(weights_)
 
