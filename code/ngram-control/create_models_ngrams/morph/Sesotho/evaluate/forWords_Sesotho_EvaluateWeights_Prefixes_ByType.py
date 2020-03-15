@@ -182,63 +182,52 @@ else:
 
 errors = defaultdict(int)
 
-AFFIX_KEY = "pfx"
-
 hasSeenType = set()
 
-def getCorrectOrderCount(weights_pfx, coordinate, newValue):
+
+AFFIX_KEY = "pfx"
+
+def getCorrectOrderCount(weights_pfx):
    correct = 0
    incorrect = 0
-
    correctFull = 0
    incorrectFull = 0
+
    correctTypes = 0
    incorrectTypes = 0
    correctFullTypes = 0
    incorrectFullTypes = 0
    for q, verb in enumerate(data):
-      keyForThisVerb = " ".join([x["lemma"] for x in verb])
-      hasSeenThisVerb = (keyForThisVerb in hasSeenType)
-      hasMadeMistake = False
-  
       affixes = [(getKey(x), weights_pfx[getKey(x)]) for x in verb if x[header["type1"]] == AFFIX_KEY]
       if len(affixes) <= 1:
         continue
-      #assert len(prefixes) > 1, verb
-#      suffixes = [(x[header[RELEVANT_KEY]], weights_sfx[x[header[RELEVANT_KEY]]]) for x in verb if x[header["type1"]] == "sfx"]
 
-      hasIncorrect = False
+      keyForThisVerb = " ".join([x[header["lemma"]] for x in verb])
+      hasSeenThisVerb = (keyForThisVerb in hasSeenType)
+      hasMadeMistake = False
       for i in range(0, len(affixes)):
-           for j in range(0, i):
-               if affixes[i][0] == coordinate:
-                   weightI = newValue
-               else:
-                  weightI = affixes[i][1]
-  
-               if affixes[j][0] == coordinate:
-                   weightJ = newValue
-               else:
-                  weightJ = affixes[j][1]
-               #print(weightI, weightJ)
-               if weightI > weightJ:
-                 correct+=1
-                 if not hasSeenThisVerb:
-                   correctTypes += 1
-               else:
-                 hasIncorrect = True
-                 incorrect+=1
-                 if not hasSeenThisVerb:
-                    incorrectTypes += 1
-                 errors[(affixes[j][0], affixes[i][0])] += 1
+         for j in range(0, i):
+             weightI = affixes[i][1]
+             weightJ = affixes[j][1]
+             if weightI > weightJ:
+               correct+=1
+               if not hasSeenThisVerb:
+                 correctTypes += 1
+             else:
+               incorrect+=1
+               if not hasSeenThisVerb:
+                 incorrectTypes += 1
+               hasMadeMistake = True
+               errors[(affixes[j][0], affixes[i][0])] += 1
       if len(affixes) > 1:
-        if hasIncorrect:
-           incorrectFull += 1
-           if not hasSeenThisVerb:
-             incorrectFullTypes += 1
+        if not hasMadeMistake:
+            correctFull += 1
+            if not hasSeenThisVerb:
+              correctFullTypes += 1
         else:
-           correctFull += 1
-           if not hasSeenThisVerb:
-             correctFullTypes += 1
+            incorrectFull += 1
+            if not hasSeenThisVerb:
+              incorrectFullTypes += 1
       assert correct+incorrect>0, affixes
       if not hasSeenThisVerb:
         hasSeenType.add(keyForThisVerb)
@@ -291,7 +280,7 @@ for q in range(len(data)):
 
 
 
-result = getCorrectOrderCount(weights_pfx, None, 0)
+result = getCorrectOrderCount(weights_pfx)
 print(errors)
 print(result)
 
