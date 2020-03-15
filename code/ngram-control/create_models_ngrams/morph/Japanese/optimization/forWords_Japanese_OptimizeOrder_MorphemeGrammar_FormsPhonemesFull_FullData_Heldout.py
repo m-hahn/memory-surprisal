@@ -13,7 +13,7 @@ parser.add_argument("--model", dest="model", type=str)
 parser.add_argument("--alpha", dest="alpha", type=float, default=1.0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
-parser.add_argument("--cutoff", dest="cutoff", type=int, default=7)
+parser.add_argument("--cutoff", dest="cutoff", type=int, default=3)
 parser.add_argument("--idForProcess", dest="idForProcess", type=int, default=random.randint(0,10000000))
 import random
 
@@ -35,7 +35,7 @@ assert args.gamma >= 1
 myID = args.idForProcess
 
 
-TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-morphology/"
+TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/"
 
 
 
@@ -43,6 +43,14 @@ posUni = set()
 
 posFine = set() 
 
+
+def getRepresentation(lemma):
+   if lemma == "させる" or lemma == "せる":
+     return "CAUSATIVE"
+   elif lemma == "れる" or lemma == "られる" or lemma == "える" or lemma == "得る" or lemma == "ける":
+     return "PASSIVE_POTENTIAL"
+   else:
+     return lemma
 
 
 
@@ -122,15 +130,16 @@ words = []
 affixFrequency = {}
 for verbWithAff in data_train:
   for affix in verbWithAff[1:]:
-    affixLemma = affix["lemma"]
+    affixLemma = getRepresentation(affix["lemma"])
     affixFrequency[affixLemma] = affixFrequency.get(affixLemma, 0)+1
 
 
 itos = set()
-for verbWithAff in data_train:
-  for affix in verbWithAff[1:]:
-    affixLemma = affix["lemma"]
-    itos.add(affixLemma)
+for data_ in [data_train, data_dev]:
+  for verbWithAff in data_:
+    for affix in verbWithAff[1:]:
+      affixLemma = getRepresentation(affix["lemma"])
+      itos.add(affixLemma)
 itos = sorted(list(itos))
 stoi = dict(list(zip(itos, range(len(itos)))))
 
@@ -140,25 +149,10 @@ print(stoi)
 
 itos_ = itos[::]
 shuffle(itos_)
-if args.model == "RANDOM":
-  weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
-#  weights['する'] = -1
-elif args.model in ["REAL", "REVERSE"]:
-  weights = None
-elif args.model != "REAL":
-  weights = {}
-  import glob
-  PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
-  files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
-  assert len(files) == 1
-  assert "_FormsPhonemesFull_" in files[0]
-  with open(files[0], "r") as inFile:
-     next(inFile)
-     for line in inFile:
-        morpheme, weight = line.strip().split(" ")
-        weights[morpheme] = int(weight)
-
-
+print(itos_)
+weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
+print(weights)
+#quit()
 
 
 raw2Hiragana = dict()
@@ -216,12 +210,7 @@ def calculateTradeoffForWeights(weights):
     for data, processed in [(data_train, train), (data_dev, dev)]:
       for verb in data:
          affixes = verb[1:]
-         if args.model == "REAL":
-            _ = 0
-         elif args.model == "REVERSE":
-            affixes = affixes[::-1]
-         else:
-            affixes = sorted(affixes, key=lambda x:weights.get(x["lemma"], 0))
+         affixes = sorted(affixes, key=lambda x:weights[getRepresentation(x["lemma"])])
          for ch in [verb[0]] + affixes:
            for char in phonemize(ch["hiragana"]):
              processed.append(char)
@@ -360,12 +349,12 @@ def calculateTradeoffForWeights(weights):
            lastProbabilityFiltered = [x for x in lastProbability if x is not None]
            surprisal = - sum([x for x in lastProbabilityFiltered])/len(lastProbabilityFiltered)
        except ValueError:
-           print("PROBLEM", file=sys.stderr)
-           print(lastProbability, file=sys.stderr)
+    #       print >> sys.stderr, "PROBLEM"
+     #      print >> sys.stderr, lastProbability
            surprisal = 1000
        devSurprisalTable.append(surprisal)
-       print("Surprisal", surprisal, len(itos))
-    print(devSurprisalTable)
+     #  print("Surprisal", surprisal, len(itos))
+    #print(devSurprisalTable)
     mis = [devSurprisalTable[i] - devSurprisalTable[i+1] for i in range(len(devSurprisalTable)-1)]
     tmis = [mis[x]*(x+1) for x in range(len(mis))]
     #print(mis)
@@ -373,27 +362,58 @@ def calculateTradeoffForWeights(weights):
     auc = 0
     memory = 0
     mi = 0
-    print(mis)
-    print(tmis)
     for i in range(len(mis)):
        mi += mis[i]
        memory += tmis[i]
        auc += mi * tmis[i]
-    print("MaxMemory", memory)
+    #print("MaxMemory", memory)
     assert 7>memory
     auc += mi * (7-memory)
-    print("AUC", auc)
+    #print("AUC", auc)
+    return auc
     #assert False
     
-    outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model+".txt"
-    print(outpath)
-    with open(outpath, "w") as outFile:
-       print(str(args), file=outFile)
-       print(" ".join(map(str,devSurprisalTable)), file=outFile)
-    
+    #outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model+".txt"
+    #print(outpath)
+    #with open(outpath, "w") as outFile:
+    #         print >> outFile, str(args)
+    #         print >> outFile, devSurprisalTable[-1]
+    #         print >> outFile, " ".join(map(str,devSurprisalTable))
     #
     #
-    return auc
    
-calculateTradeoffForWeights(weights)
+
+
+for iteration in range(1000):
+  coordinate=choice(itos)
+  while affixFrequency.get(coordinate, 0) < 10 and random() < 0.95:
+     coordinate = choice(itos)
+  mostCorrect, mostCorrectValue = 0, None
+  for newValue in [-1] + [2*x+1 for x in range(len(itos))] + [weights[coordinate]]:
+     if random() < 0.9 and newValue != weights[coordinate]:
+        continue
+     print(newValue, mostCorrect, coordinate, affixFrequency.get(coordinate,0))
+     weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}
+     correctCount = calculateTradeoffForWeights(weights_)
+#     print(weights_)
+#     print(coordinate, newValue, iteration, correctCount)
+     if correctCount > mostCorrect:
+        mostCorrectValue = newValue
+        mostCorrect = correctCount
+  print(iteration, mostCorrect)
+  weights[coordinate] = mostCorrectValue
+  itos_ = sorted(itos, key=lambda x:weights[x])
+  weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
+  print(weights)
+  for x in itos_:
+     if affixFrequency.get(x,0) < 10:
+       continue
+     print("\t".join([str(y) for y in [x, weights[x], affixFrequency.get(x,0)]]))
+  if (iteration + 1) % 50 == 0:
+     with open(TARGET_DIR+"/optimized_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
+        print(iteration, mostCorrect, str(args), file=outFile)
+        for key in itos_:
+           print(key, weights[key], file=outFile)
+
+
 

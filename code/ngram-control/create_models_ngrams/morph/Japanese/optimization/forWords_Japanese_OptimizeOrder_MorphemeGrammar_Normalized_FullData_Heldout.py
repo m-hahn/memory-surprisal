@@ -134,10 +134,11 @@ for verbWithAff in data_train:
 
 
 itos = set()
-for verbWithAff in data_train:
-  for affix in verbWithAff[1:]:
-    affixLemma = getRepresentation(affix["lemma"])
-    itos.add(affixLemma)
+for data_ in [data_train, data_dev]:
+  for verbWithAff in data_:
+    for affix in verbWithAff[1:]:
+      affixLemma = getRepresentation(affix["lemma"])
+      itos.add(affixLemma)
 itos = sorted(list(itos))
 stoi = dict(list(zip(itos, range(len(itos)))))
 
