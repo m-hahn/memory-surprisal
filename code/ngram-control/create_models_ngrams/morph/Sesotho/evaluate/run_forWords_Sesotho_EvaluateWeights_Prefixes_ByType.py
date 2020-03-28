@@ -4,7 +4,7 @@ PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/"
 import glob
 
 for aff in ["Prefixes", "Suffixes"]:
-  models = glob.glob(PATH+"optimized_Sesotho_Acqdiv_forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_"+aff+"_ByType.py_*.tsv")
+  models = glob.glob(PATH+"optimized_Sesotho_Acqdiv_forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_"+aff+"_ByType*.py_*.tsv")
   
   import random
   random.shuffle(models)

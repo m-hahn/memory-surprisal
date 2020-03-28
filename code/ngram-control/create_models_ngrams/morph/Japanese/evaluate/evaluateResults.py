@@ -7,6 +7,8 @@ with open("results.tsv", "r") as inFile:
     data = data[1:]
 #print(header)
 #print(data)
+header["Type"] = len(header)
+header["Target"] = len(header)
 
 
 import os
@@ -35,6 +37,7 @@ for line in data:
        if "MorphemeGrammar" in relevant[0]:
            print("MORPHEME")
            line[-1] += "_m"
+    assert len(line) == len(header), line
 
 def mean(x):
     return sum(x)/len(x)
@@ -44,25 +47,28 @@ from math import sqrt
 def sd(x):
     return sqrt(mean([y**2 for y in x]) - mean(x)**2)
 
-scripts = sorted(list(set([x[-1] for x in data])))
+scripts = sorted(list(set([x[header["Target"]] for x in data])))
 
 
 results = {}
+resultsTypes = {}
 for script in scripts:
-    data_ = [x for x in data if x[-1] == script]
+    data_ = [x for x in data if x[header["Target"]] == script]
     #print(data_)
   #  print(script)
     for typ in ["RANDOM", "OPTIM"]:
 #        print(typ)
-        data__ = [x for x in data_ if x[-2] == typ]
+        data__ = [x for x in data_ if x[header["Type"]] == typ]
         #print(data__)
         accuracy_pairs = [float(x[header["Accuracy_Pairs"]]) for x in data__]
- #       print(accuracy_pairs)
         accuracy_full = [float(x[header["Accuracy_Full"]]) for x in data__]
   #      print(accuracy_full)
         if len(data__) == 0:
            continue
         results[(script, typ)] = ("".join([str(x) for x in [round(mean(accuracy_pairs),3), " (SD ", round(sd(accuracy_pairs), 3), ") & ", round(mean(accuracy_full), 3), " (SD ", round(sd(accuracy_full), 3), ")"]]))
+        accuracy_pairs_types = [float(x[header["Accuracy_Pairs_Types"]]) for x in data__]
+        accuracy_full_types = [float(x[header["Accuracy_Full_Types"]]) for x in data__]
+        resultsTypes[(script, typ)] = ("".join([str(x) for x in [round(mean(accuracy_pairs_types),3), " (SD ", round(sd(accuracy_pairs_types), 3), ") & ", round(mean(accuracy_full_types), 3), " (SD ", round(sd(accuracy_full_types), 3), ")"]]))
 
 print(results)
 
@@ -72,4 +78,14 @@ print("Random     &  "+results[("both", "RANDOM")]+" \\\\")
 print("Phonemes (m)   &   "+results[("phonemes_m", "OPTIM")]+" \\\\")
 print("Morphemes (m)  &   "+results[("morphemes_m", "OPTIM")]+" \\\\")
 print("Random     &  "+results[("both_m", "RANDOM")]+" \\\\")
+print("")
+print("")
+print("")
+print("")
+print("Phonemes   &   "+resultsTypes[("phonemes", "OPTIM")]+" \\\\")
+print("Morphemes  &   "+resultsTypes[("morphemes", "OPTIM")]+" \\\\")
+print("Random     &  "+resultsTypes[("both", "RANDOM")]+" \\\\")
+print("Phonemes (m)   &   "+resultsTypes[("phonemes_m", "OPTIM")]+" \\\\")
+print("Morphemes (m)  &   "+resultsTypes[("morphemes_m", "OPTIM")]+" \\\\")
+print("Random     &  "+resultsTypes[("both_m", "RANDOM")]+" \\\\")
 

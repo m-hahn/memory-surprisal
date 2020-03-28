@@ -73,6 +73,8 @@ with open("results.tsv", "w") as outFile:
       #   print(grammar)
          #print(grammar[0])
          arguments = grammar[0]
+         if "cutoff=3" in arguments:
+           continue
          grammar = dict([x.split(" ") for x in grammar[1:]])
       #   print(grammar)
          morphemes = [("suru", ['する'])]

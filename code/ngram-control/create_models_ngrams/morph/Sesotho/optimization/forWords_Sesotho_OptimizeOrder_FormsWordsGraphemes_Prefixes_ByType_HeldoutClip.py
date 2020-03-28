@@ -7,9 +7,9 @@ objectiveName = "LM"
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument("--language", dest="language", type=str, default="Japanese_2.4")
+parser.add_argument("--language", dest="language", type=str, default="Sesotho_Acqdiv")
 parser.add_argument("--model", dest="model", type=str)
-parser.add_argument("--alpha", dest="alpha", type=float, default=0.0)
+parser.add_argument("--alpha", dest="alpha", type=float, default=1.0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
 parser.add_argument("--cutoff", dest="cutoff", type=int, default=3)
@@ -28,29 +28,85 @@ assert args.delta >= 0
 assert args.gamma >= 1
 
 
+#RELEVANT_KEY = "lemma"
 
 
+def getKey(word):
+  return word[header["lemma"]][:2]
 
 myID = args.idForProcess
 
 
 TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/"
 
+words = []
 
+header = ["form", "lemma", "analysis", "type1", "type2"]
+header = dict(list(zip(header, range(len(header)))))
+
+def processWord(word):
+   nonAffix = [x[-3] for x in word if x[-3] not in ["sfx","pfx"]]
+#   print(nonAffix, len(word))
+
+   assert len(nonAffix) == 1
+   if nonAffix[0] == "v":
+#      print( [x[-3] for x in word if x[-3] in ["sfx","pfx"]])
+
+      words.append([x[8:] for x in word])
 
 posUni = set() 
 
 posFine = set() 
 
+currentWord = []
+with open("/u/scr/mhahn/CODE/acqdiv-database/csv/morphemes5.csv", "r") as inFile:
+  next(inFile)
+  for line in inFile:
+     line = line.strip().replace('","', ',').split(",")
+     if len(line) > 14:
+#       print(line)
+#       assert len(line) == 15, len(line)
+       line[9] = ",".join(line[9:-4])
+       line = line[:10] + line[-4:]
+ #      print(line)
+       assert len(line) == 14, len(line)
+#     print(len(line))
+     assert len(line) == 14, line
+     if line[4] == "Sesotho":
+#       print(line)
+       if line[-3] == "sfx":
+         currentWord.append(line)
+       elif line[-3] == "pfx" and len(currentWord) > 0 and currentWord[-1][-3] != "pfx":
+         #print([x[-3] for x in currentWord])
+         processWord(currentWord)
+         currentWord = []
+  #       print("---")
+         currentWord.append(line)
+       elif line[-3] == "pfx":
+         currentWord.append(line)
+       elif line[-3] != "sfx" and len(currentWord) > 0 and currentWord[-1][-3] == "sfx":
+         #print([x[-3] for x in currentWord])
+         processWord(currentWord)
+         currentWord = []
+ #        print("---")
+         currentWord.append(line)
+       elif line[-3] not in ["sfx", "pfx"] and len(currentWord) > 0 and currentWord[-1][-3] != "pfx":
+         #print([x[-3] for x in currentWord])
+         processWord(currentWord)
+         currentWord = []
+#         print("---")
+         currentWord.append(line)
+       else:
+          currentWord.append(line)
+   #    print(line[-3])
 
-
-
+#print(words)
+#quit()
 
 
 from math import log, exp
 from random import random, shuffle, randint, Random, choice
 
-header = ["index", "word", "lemma", "posUni", "posFine", "morph", "head", "dep", "_", "_"]
 
 from corpusIterator_V import CorpusIterator_V
 
@@ -60,43 +116,17 @@ morphKeyValuePairs = set()
 
 vocab_lemmas = {}
 
-
-def processVerb(verb):
-    if len(verb) > 0:
-      if "VERB" in [x["posUni"] for x in verb[1:]]:
-        print([x["word"] for x in verb])
-      data.append(verb)
-
-corpusTrain = CorpusIterator_V(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
 pairs = set()
 counter = 0
-data = []
-for sentence in corpusTrain:
-#    print(len(sentence))
-    verb = []
-    for line in sentence:
-       if line["posUni"] == "PUNCT":
-          processVerb(verb)
-          verb = []
-          continue
-       elif line["posUni"] == "VERB":
-          processVerb(verb)
-          verb = []
-          verb.append(line)
-       elif line["posUni"] == "AUX" and len(verb) > 0:
-          verb.append(line)
-       elif line["posUni"] == "SCONJ" and line["word"] == 'て':
-          verb.append(line)
-          processVerb(verb)
-          verb = []
-       else:
-          processVerb(verb)
-          verb = []
-print(len(data))
-#quit()
-print(counter)
-#print(data)
-print(len(data))
+Random(0).shuffle(words)
+data_train = words[int(0.05*len(words)):]
+data_dev = words[:int(0.05*len(words))]
+
+
+#data = words
+
+
+
 
 #quit()
 import torch.nn as nn
@@ -112,63 +142,80 @@ import torch.cuda
 import torch.nn.functional
 
 
-words = []
+from collections import defaultdict
 
-affixFrequency = {}
-for verbWithAff in data:
-  for affix in verbWithAff[1:]:
-    affixLemma = affix["lemma"]
-    affixFrequency[affixLemma] = affixFrequency.get(affixLemma, 0)+1
+prefixFrequency = defaultdict(int)
+suffixFrequency = defaultdict(int)
+for data_ in [data_train, data_dev]:
+  for verbWithAff in data_:
+    for affix in verbWithAff:
+      affixLemma = getKey(affix) #[header[RELEVANT_KEY]]
+      if affix[header["type1"]] == "pfx":
+         prefixFrequency[affixLemma] += 1
+      elif affix[header["type1"]] == "sfx":
+         suffixFrequency[affixLemma] += 1
+
+itos_pfx = sorted(list((prefixFrequency)))
+stoi_pfx = dict(list(zip(itos_pfx, range(len(itos_pfx)))))
+
+itos_sfx = sorted(list((suffixFrequency)))
+stoi_sfx = dict(list(zip(itos_sfx, range(len(itos_sfx)))))
+
+print(prefixFrequency)
+print(suffixFrequency)
+
+print(itos_pfx)
+print(itos_sfx)
+
+itos_pfx_ = itos_pfx[::]
+shuffle(itos_pfx_)
+weights_pfx = dict(list(zip(itos_pfx_, [2*x for x in range(len(itos_pfx_))])))
+
+itos_sfx_ = itos_sfx[::]
+shuffle(itos_sfx_)
+weights_sfx = dict(list(zip(itos_sfx_, [2*x for x in range(len(itos_sfx_))])))
+
+  
 
 
-itos = set()
-for verbWithAff in data:
-  for affix in verbWithAff[1:]:
-    affixLemma = affix["lemma"]
-    itos.add(affixLemma)
-itos = sorted(list(itos))
-stoi = dict(list(zip(itos, range(len(itos)))))
+contextLength = args.cutoff
+lengthForPrediction = args.cutoff
 
-
-print(itos)
-print(stoi)
-
-itos_ = itos[::]
-shuffle(itos_)
-weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
-
-
-def getRepresentation(lemma):
-   if lemma == "させる" or lemma == "せる":
-     return "CAUSATIVE"
-   elif lemma == "れる" or lemma == "られる" or lemma == "える" or lemma == "得る" or lemma == "ける":
-     return "PASSIVE_POTENTIAL"
-   else:
-     return lemma
-
-def calculateTradeoffForWeights(weights):
+def calculateTradeoffForWeights(weights_pfx):
+    train = []
     dev = []
-    for verb in data:
-       affixes = verb[1:]
-       affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
-       for ch in [verb[0]] + affixes:
-          dev.append(getRepresentation(ch["lemma"]))
-       #    print(char)
-       dev.append("EOS")
-       for _ in range(args.cutoff+2):
-         dev.append("PAD")
-       dev.append("SOS")
-    
-    itos = list(set(dev))
-    
-    
+    for data, processed in [(data_train, train), (data_dev, dev)]:
+      for _ in range(args.cutoff+2):
+        processed.append(stoi_words["PAD"])
+      processed.append(stoi_words["SOS"])
+  
+      numberOfRelevantSentences = 0
+      for verb in data:
+         numberOfRelevantSentences += 1
+  
+         prefixes = [x for x in verb if x[header["type1"]] == "pfx"]
+         suffixes = [x for x in verb if x[header["type1"]] == "sfx"]
+         v = [x for x in verb if x[header["type1"]] == "v"]
+         assert len(prefixes)+len(v)+len(suffixes)==len(verb)
+  
+         prefixes.sort(key=lambda x:weights_pfx[getKey(x)])
+         ordered = prefixes + v + suffixes
+  
+         processed.append(stoi_words["SOS"])
+         for ch in ordered:
+           for char in ch[header["form"]]:
+             processed.append(stoi_words[char])
+         processed.append(stoi_words["EOS"])
+         for _ in range(args.cutoff+2):
+           processed.append(stoi_words["PAD"])
+   
     dev = dev[::-1]
     #dev = list(createStreamContinuous(corpusDev))[::-1]
     
     
     #corpusTrain = CorpusIterator(args.language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
     #train = list(createStreamContinuous(corpusTrain))[::-1]
-    train = dev
+    train = train[::-1]
     
     idev = range(len(dev))
     itrain = range(len(train))
@@ -234,7 +281,7 @@ def calculateTradeoffForWeights(weights):
        cachedFollowingCounts = {}
        for j in range(len(idev)):
     #      print(dev[idev[j]])
-          if dev[idev[j]] in ["PAD", "SOS"]:
+          if dev[idev[j]] in [stoi_words["PAD"], stoi_words["SOS"]]:
              continue
           start2, end2 = startK2[j], endK2[j]
           devPref = tuple(dev[idev[j]:idev[j]+k+1])
@@ -273,13 +320,13 @@ def calculateTradeoffForWeights(weights):
                   if followingCount == 0:
                       newProbability[j] = lastProbability[j]
                   else:
-                      assert countNgram > 0
+                      #assert countNgram > 0
                       probability = log(max(countNgram - args.alpha, 0.0) + args.alpha * followingCount * exp(lastProbability[j])) -  log(countPrefix)
                       newProbability[j] = probability
              else:
                 newProbability[j] = lastProbability[j]
           elif k == 0:
-                  probability = log(countNgram + args.delta) - log(len(train) + args.delta * len(itos))
+                  probability = log(countNgram + args.delta) - log(len(train) + args.delta * len(itos_words))
                   newProbability[j] = probability
        lastProbability = newProbability 
        newProbability = [None for _ in idev]
@@ -294,7 +341,10 @@ def calculateTradeoffForWeights(weights):
        devSurprisalTable.append(surprisal)
      #  print("Surprisal", surprisal, len(itos))
     #print(devSurprisalTable)
+    for k in range(len(devSurprisalTable)):
+        devSurprisalTable[k] = min(devSurprisalTable[:k+1])
     mis = [devSurprisalTable[i] - devSurprisalTable[i+1] for i in range(len(devSurprisalTable)-1)]
+    print(mis)
     tmis = [mis[x]*(x+1) for x in range(len(mis))]
     #print(mis)
     #print(tmis)
@@ -306,8 +356,8 @@ def calculateTradeoffForWeights(weights):
        memory += tmis[i]
        auc += mi * tmis[i]
     #print("MaxMemory", memory)
-    assert 7>memory
-    auc += mi * (7-memory)
+    assert 20>memory, memory
+    auc += mi * (20-memory)
     #print("AUC", auc)
     return auc
     #assert False
@@ -323,43 +373,77 @@ def calculateTradeoffForWeights(weights):
    
 
 
-for iteration in range(1000):
-  coordinate=choice(itos)
-#  if coordinate == 'する' and weights[coordinate] == 0: # Force suru to be at the beginning
- #     continue
+fullAUCs = []
 
-  while affixFrequency.get(coordinate, 0) < 10 and random() < 0.95:
-     coordinate = choice(itos)
+words = set()
+
+# For each verb form, select only the main verb form
+for data_ in [data_train, data_dev]:
+  for q in range(len(data_)):
+     verb = data_[q]
+  #   prefixes_keys = [getKey(x) for x in verb if x[header["type1"]] == "pfx"]
+  
+     segmentation = []
+     for j in range(len(verb)):
+        # subject prefix?
+        if ".SBJ" in verb[j][header["analysis"]]:
+           segmentation.append([])
+           segmentation[-1].append(verb[j])
+        else:
+           if len(segmentation) == 0:
+             segmentation.append([])
+           segmentation[-1].append(verb[j])
+     ###############################################################################   
+     # Restrict to the last verb, chopping off initial auxiliaries and their affixes
+     ###############################################################################
+  
+     verb = segmentation[-1]
+  
+     data_[q] = verb
+     for word in verb:
+       for ch in word[header["form"]]:
+         words.add(ch)
+
+
+words = list(words)
+itos_words = ["PAD", "SOS", "EOS"] + words
+stoi_words = dict(zip(itos_words, range(len(itos_words))))
+print(stoi_words)
+
+for iteration in range(1000):
+  coordinate = choice(itos_pfx)
+  while prefixFrequency[coordinate] < 10 and random() < 0.95:
+    coordinate = choice(itos_pfx)
   mostCorrect, mostCorrectValue = 0, None
-  for newValue in [-1] + [2*x+1 for x in range(len(itos))] + [weights[coordinate]]:
-#     if coordinate == 'する':
- #       break
-     if random() < 0.9 and newValue != weights[coordinate]:
+  for newValue in [-1] + [2*x+1 for x in range(len(itos_pfx))] + [weights_pfx[coordinate]]:
+     if random() < 0.8 and newValue != weights_pfx[coordinate]:
         continue
-     print(newValue, mostCorrect, coordinate, affixFrequency[coordinate])
-     weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}
+     print(newValue, mostCorrect, coordinate,prefixFrequency[coordinate])
+     weights_ = {x : y if x != coordinate else newValue for x, y in weights_pfx.items()}
      correctCount = calculateTradeoffForWeights(weights_)
 #     print(weights_)
 #     print(coordinate, newValue, iteration, correctCount)
      if correctCount > mostCorrect:
         mostCorrectValue = newValue
         mostCorrect = correctCount
-#  if coordinate == 'する':
- #    mostCorrectValue = -1
+  assert not (mostCorrectValue is None)
   print(iteration, mostCorrect)
-  weights[coordinate] = mostCorrectValue
-  itos_ = sorted(itos, key=lambda x:weights[x])
-  weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
-  print(weights)
-  for x in itos_:
-     if affixFrequency[x] < 10:
+  weights_pfx[coordinate] = mostCorrectValue
+  itos_pfx_ = sorted(itos_pfx, key=lambda x:weights_pfx[x])
+  weights_pfx = dict(list(zip(itos_pfx_, [2*x for x in range(len(itos_pfx_))])))
+  print(weights_pfx)
+  for x in itos_pfx_:
+     if prefixFrequency[x] < 10:
        continue
-     print("\t".join([str(y) for y in [x, weights[x], affixFrequency[x]]]))
+     print("\t".join([str(y) for y in [x, weights_pfx[x], prefixFrequency[x]]]))
   if (iteration + 1) % 50 == 0:
-     with open(TARGET_DIR+"/optimized_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
-        print(iteration, mostCorrect, str(args), file=outFile)
-        for key in itos_:
-           print(key, weights[key], file=outFile)
+     fullAUCs.append(calculateTradeoffForWeights(weights_))
+     with open(TARGET_DIR+"/optimized_"+args.language+"_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
+        print(iteration, mostCorrect, file=outFile)
+        print(" ".join([str(x) for x in fullAUCs]), file=outFile)
+        print(str(args), file=outFile)
+        for key in itos_pfx_:
+           print(key, weights_pfx[key], file=outFile)
 
 
 

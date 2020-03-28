@@ -65,6 +65,8 @@ with open("results.tsv", "w") as outFile:
        assert len(relevantModelFiles) == 1
        opt_script = relevantModelFiles[0]
        opt_script = opt_script[opt_script.index("forWords"):opt_script.index(".py")+3]
+       if "Heldout.py" in opt_script:
+          continue
        #print(script, opt_script, model, accuracy_pairs.strip(), accuracy_full.strip())
        #print(errors[:10])
        optimizedRelevant = [x for x in optimizedGrammars if model in x]

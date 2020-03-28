@@ -22,6 +22,9 @@ with open("results.tsv", "w") as outFile:
      script = f[f.index("forWords"):f.index("_model")]
      model = f[f.rfind("_")+1:-4]
      run = f[find_second_last(f, "_")+1:f.rfind("_")]
+     print(surps)
+     for i in range(len(surps)):
+        surps[i] = min(surps[:i+1])
      print(script, model, surps)
      mis = [surps[i] - surps[i+1] for i in range(len(surps)-1)]
      print(mis)

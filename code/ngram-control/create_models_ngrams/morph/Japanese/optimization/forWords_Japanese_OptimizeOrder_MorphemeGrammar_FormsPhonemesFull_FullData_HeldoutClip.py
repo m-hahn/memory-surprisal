@@ -8,12 +8,12 @@ objectiveName = "LM"
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument("--language", dest="language", type=str, default="Japanese_2.4")
+parser.add_argument("--language", dest="language", type=str, default="Japanese-GSD_2.4")
 parser.add_argument("--model", dest="model", type=str)
-parser.add_argument("--alpha", dest="alpha", type=float, default=0.0)
+parser.add_argument("--alpha", dest="alpha", type=float, default=1.0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
-parser.add_argument("--cutoff", dest="cutoff", type=int, default=3)
+parser.add_argument("--cutoff", dest="cutoff", type=int, default=7)
 parser.add_argument("--idForProcess", dest="idForProcess", type=int, default=random.randint(0,10000000))
 import random
 
@@ -44,6 +44,14 @@ posUni = set()
 posFine = set() 
 
 
+def getRepresentation(lemma):
+   if lemma == "させる" or lemma == "せる":
+     return "CAUSATIVE"
+   elif lemma == "れる" or lemma == "られる" or lemma == "える" or lemma == "得る" or lemma == "ける":
+     return "PASSIVE_POTENTIAL"
+   else:
+     return lemma
+
 
 
 
@@ -62,42 +70,46 @@ morphKeyValuePairs = set()
 vocab_lemmas = {}
 
 
-def processVerb(verb):
+def processVerb(verb, data_):
     if len(verb) > 0:
       if "VERB" in [x["posUni"] for x in verb[1:]]:
         print([x["word"] for x in verb])
-      data.append(verb)
+      data_.append(verb)
 
 corpusTrain = CorpusIterator_V(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
+corpusDev = CorpusIterator_V(args.language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
+
 pairs = set()
 counter = 0
-data = []
-for sentence in corpusTrain:
+data_train = []
+data_dev = []
+for corpus, data_ in [(corpusTrain, data_train), (corpusDev, data_dev)]:
+ for sentence in corpus:
 #    print(len(sentence))
     verb = []
     for line in sentence:
        if line["posUni"] == "PUNCT":
-          processVerb(verb)
+          processVerb(verb, data_)
           verb = []
           continue
        elif line["posUni"] == "VERB":
-          processVerb(verb)
+          processVerb(verb, data_)
           verb = []
           verb.append(line)
        elif line["posUni"] == "AUX" and len(verb) > 0:
           verb.append(line)
        elif line["posUni"] == "SCONJ" and line["word"] == 'て':
           verb.append(line)
-          processVerb(verb)
+          processVerb(verb, data_)
           verb = []
        else:
-          processVerb(verb)
+          processVerb(verb, data_)
           verb = []
-print(len(data))
-#quit()
-print(counter)
-#print(data)
-print(len(data))
+ print("len(data_)", len(data_))
+ #quit()
+ print(counter)
+ #print(data)
+ print(len(data_))
 
 #quit()
 import torch.nn as nn
@@ -116,17 +128,18 @@ import torch.nn.functional
 words = []
 
 affixFrequency = {}
-for verbWithAff in data:
+for verbWithAff in data_train:
   for affix in verbWithAff[1:]:
-    affixLemma = affix["lemma"]
+    affixLemma = getRepresentation(affix["lemma"])
     affixFrequency[affixLemma] = affixFrequency.get(affixLemma, 0)+1
 
 
 itos = set()
-for verbWithAff in data:
-  for affix in verbWithAff[1:]:
-    affixLemma = affix["lemma"]
-    itos.add(affixLemma)
+for data_ in [data_train, data_dev]:
+  for verbWithAff in data_:
+    for affix in verbWithAff[1:]:
+      affixLemma = getRepresentation(affix["lemma"])
+      itos.add(affixLemma)
 itos = sorted(list(itos))
 stoi = dict(list(zip(itos, range(len(itos)))))
 
@@ -136,120 +149,41 @@ print(stoi)
 
 itos_ = itos[::]
 shuffle(itos_)
+print(itos_)
 weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
+print(weights)
+#quit()
 
-raw2Tagged = dict()
 
-with open("../data/extractedVerbs.txt", "r") as inFileRaw:
-  with open("../data/extractedVerbs_tagged.txt", "r") as inFileTagged:
+raw2Hiragana = dict()
+
+with open("../data/extractedVerbs_hiragana.txt", "r") as inFileHiragana:
     try:
      for index in range(1000000):
-       raw = next(inFileRaw).strip()
-       tagged = next(inFileTagged).strip()
-       raw2Tagged[raw] = tagged
+       tagged = next(inFileHiragana).strip().split("\t")
+       raw, tagged = tagged
+       raw2Hiragana[raw.strip()] = tagged.strip()
     except StopIteration:
        _ = 0
-for line in data:
- # print(" ".join([x["word"] for x in line]))
-  raw = "".join([x["word"] for x in line])
-  if False and max([ord(y) for y in raw]) < 12531: # no need to transform
-    for x in line:
-      x["hiragana"] = x["word"]
-    continue
-  tagged = [x.split("/") for x in raw2Tagged[raw].split(" ")]
-  if raw == "".join([x[2] for x in tagged]):
-     for x in line:
-        x["hiragana"] = x["word"]
-     continue
-  iTagged = 0
-  jTagged = 0
-  iLine = 0
-  jLine = 0
-  line[iLine]["hiragana"] = ""
+with open("../data/extractedVerbs_hiragana_dev.txt", "r") as inFileHiragana:
+    try:
+     for index in range(1000000):
+       tagged = next(inFileHiragana).strip().split("\t")
+       raw, tagged = tagged
+       raw2Hiragana[raw.strip()] = tagged.strip()
+    except StopIteration:
+       _ = 0
 
-  for i in range(len(raw)):
-#    print(iTagged, jTagged, tagged)    
-    jTagged += 1
-    if jTagged == len(tagged[iTagged][0]):
-      line[iLine]["hiragana"] += tagged[iTagged][2]
-      iTagged += 1
-      jTagged = 0 
-    jLine += 1
-    if jLine == len(line[iLine]["word"]):
-      iLine += 1
-      if iLine < len(line):
-        line[iLine]["hiragana"] = ""
-      jLine = 0 
-     
-#  print(line)
-  assert "".join([x["hiragana"] for x in line]) == "".join([x[2] for x in tagged])
-#  print(line)
-#  print(tagged)
-#  print([x["word"] for x in line])
-#  print("RAW", raw)
-#  print(max([ord(y) for y in raw]))
-  hasFoundProblem = []
-  for index, x in enumerate(line):
-#     print(x["word"], "==", x["hiragana"])
-     if x["word"] != x["hiragana"] and max([ord(y) for y in x["word"]]) < 200 and x["word"] not in ["fax", "pr"]:
-        hasFoundProblem.append(index)
-     elif x["hiragana"] == "":
-        hasFoundProblem.append(index)
-#     assert x["hiragana"]  != "", tagged
-  if len(hasFoundProblem)>0:
-    assert len(line) > 1
- #   print(hasFoundProblem)
-    if hasFoundProblem == [0]:
-      assert len(line) > 1
-      if line[1]["hiragana"].endswith(line[1]["word"]): 
-         line[0]["hiragana"] = line[1]["hiragana"][:-len(line[1]["word"])]
-         line[1]["hiragana"] = line[1]["word"]
-      elif len(line[1]["hiragana"]) == len(line[0]["word"]) + len(line[1]["word"]):
-         line[0]["hiragana"] = line[1]["hiragana"][:len(line[0]["word"])]
-         line[1]["hiragana"] = line[1]["hiragana"][len(line[0]["word"]):]
-      elif line[0]["word"] == "出":
-         assert line[1]["hiragana"].startswith("で")
-         line[0]["hiragana"] = "で"
-         line[1]["hiragana"] = line[1]["hiragana"][1:]
-      elif line[0]["word"] == "見":
-         assert line[1]["hiragana"].startswith("み")
-         line[0]["hiragana"] = "み"
-         line[1]["hiragana"] = line[1]["hiragana"][1:]
-      elif line[1]["hiragana"].count(line[0]["word"][-1]) == 1:
-         line[0]["hiragana"] = line[1]["hiragana"][:line[1]["hiragana"].index(line[0]["word"][-1])]
-         line[1]["hiragana"] = line[1]["hiragana"][line[1]["hiragana"].index(line[0]["word"][-1]):]
-      else:
-         assert False
-    elif hasFoundProblem == [1]:
-      if line[1]["word"] + line[2]["word"] == line[2]["hiragana"]:
-        line[1]["hiragana"] = line[1]["word"]
-        line[2]["hiragana"] = line[2]["word"]
-      else:
-        assert False
-    elif hasFoundProblem == [2]:
-      if line[2]["word"] + line[3]["word"] == line[3]["hiragana"]:
-        line[2]["hiragana"] = line[2]["word"]
-        line[3]["hiragana"] = line[3]["word"]
-      else:
-        assert False
-    elif hasFoundProblem == [0,1]:
-       if line[0]["word"] == "見":
-         line[0]["hiragana"] = "み"
-       if line[0]["word"] == "つ":
-          line[0]["hiragana"] = line[0]["word"]
-       if line[1]["word"] == "込":
-         line[1]["hiragana"] = "こ"
-       if line[1]["word"] == "け":
-          line[1]["hiragana"] = line[1]["word"]
-       line[2]["hiragana"] = line[2]["hiragana"][len(line[0]["hiragana"])+len(line[1]["hiragana"]):]
-#  print(line)
-#  assert "".join([x["hiragana"] for x in line]) == ("".join([x[2] for x in tagged])).replace("ＰＲ", "pr")
-  for index, x in enumerate(line):
- #    print(x["word"], "==", x["hiragana"])
-     if x["word"] != x["hiragana"] and max([ord(y) for y in x["word"]]) < 200 and x["word"] not in ["pr", "fax"]:
-        assert False
-     elif x["hiragana"] == "":
-        assert False
+for data_ in [data_train, data_dev]:
+  for line in data_:
+   # print(" ".join([x["word"] for x in line]))
+    raw = " ".join([x["word"] for x in line])
+    hiragana = raw2Hiragana[raw].split(" ")
+  #  print(line)
+   # print(hiragana)
+    assert len(hiragana) == len(line)
+    for i in range(len(line)):
+      line[i]["hiragana"] = hiragana[i]
 
 cachedPhonemization = {}
 
@@ -269,22 +203,25 @@ def phonemize(x):
    phonemized = cachedPhonemization[x]
    return phonemized
 
+
 def calculateTradeoffForWeights(weights):
+    train = []
     dev = []
-    for verb in data:
-       affixes = verb[1:]
-       affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
-       for ch in [verb[0]] + affixes:
-         for char in phonemize(ch["hiragana"]):
-           dev.append(char)
-       #    print(char)
-       dev.append("EOS")
-       for _ in range(args.cutoff+2):
-         dev.append("PAD")
-       dev.append("SOS")
-    
-    itos = list(set(dev))
-    
+    for data, processed in [(data_train, train), (data_dev, dev)]:
+      for verb in data:
+         affixes = verb[1:]
+         affixes = sorted(affixes, key=lambda x:weights[getRepresentation(x["lemma"])])
+         for ch in [verb[0]] + affixes:
+           for char in phonemize(ch["hiragana"]):
+             processed.append(char)
+         #    print(char)
+         processed.append("EOS")
+         for _ in range(args.cutoff+2):
+           processed.append("PAD")
+         processed.append("SOS")
+      
+    itos = list(set(train) | set(dev))
+      
     
     dev = dev[::-1]
     #dev = list(createStreamContinuous(corpusDev))[::-1]
@@ -292,7 +229,7 @@ def calculateTradeoffForWeights(weights):
     
     #corpusTrain = CorpusIterator(args.language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
     #train = list(createStreamContinuous(corpusTrain))[::-1]
-    train = dev
+    train = train[::-1]
     
     idev = range(len(dev))
     itrain = range(len(train))
@@ -397,7 +334,7 @@ def calculateTradeoffForWeights(weights):
                   if followingCount == 0:
                       newProbability[j] = lastProbability[j]
                   else:
-                      assert countNgram > 0
+                      #assert countNgram > 0
                       probability = log(max(countNgram - args.alpha, 0.0) + args.alpha * followingCount * exp(lastProbability[j])) -  log(countPrefix)
                       newProbability[j] = probability
              else:
@@ -418,7 +355,10 @@ def calculateTradeoffForWeights(weights):
        devSurprisalTable.append(surprisal)
      #  print("Surprisal", surprisal, len(itos))
     #print(devSurprisalTable)
+    for k in range(len(devSurprisalTable)):
+        devSurprisalTable[k] = min(devSurprisalTable[:k+1])
     mis = [devSurprisalTable[i] - devSurprisalTable[i+1] for i in range(len(devSurprisalTable)-1)]
+    print(mis)
     tmis = [mis[x]*(x+1) for x in range(len(mis))]
     #print(mis)
     #print(tmis)
@@ -433,7 +373,7 @@ def calculateTradeoffForWeights(weights):
     assert 7>memory
     auc += mi * (7-memory)
     #print("AUC", auc)
-    return auc
+    return auc, devSurprisalTable
     #assert False
     
     #outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model+".txt"
@@ -455,9 +395,9 @@ for iteration in range(1000):
   for newValue in [-1] + [2*x+1 for x in range(len(itos))] + [weights[coordinate]]:
      if random() < 0.9 and newValue != weights[coordinate]:
         continue
-     print(newValue, mostCorrect, coordinate, affixFrequency[coordinate])
+     print(newValue, mostCorrect, coordinate, affixFrequency.get(coordinate,0))
      weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}
-     correctCount = calculateTradeoffForWeights(weights_)
+     correctCount, _ = calculateTradeoffForWeights(weights_)
 #     print(weights_)
 #     print(coordinate, newValue, iteration, correctCount)
      if correctCount > mostCorrect:
@@ -469,12 +409,14 @@ for iteration in range(1000):
   weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
   print(weights)
   for x in itos_:
-     if affixFrequency[x] < 10:
+     if affixFrequency.get(x,0) < 10:
        continue
-     print("\t".join([str(y) for y in [x, weights[x], affixFrequency[x]]]))
+     print("\t".join([str(y) for y in [x, weights[x], affixFrequency.get(x,0)]]))
   if (iteration + 1) % 50 == 0:
+     _, surprisals = calculateTradeoffForWeights(weights_)
+
      with open(TARGET_DIR+"/optimized_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
-        print(iteration, mostCorrect, str(args), file=outFile)
+        print(iteration, mostCorrect, str(args), surprisals, file=outFile)
         for key in itos_:
            print(key, weights[key], file=outFile)
 
