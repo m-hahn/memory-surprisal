@@ -258,83 +258,81 @@ shuffle(itos_pfx_)
 weights_pfx = dict(list(zip(itos_pfx_, [2*x for x in range(len(itos_pfx_))])))
 
 
-
-import glob
-PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
-files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
-assert len(files) == 1
-assert "Suffixes" not in files[0], files
-assert "Normalized" in files[0]
-with open(files[0], "r") as inFile:
-   next(inFile)
-   next(inFile)
-   next(inFile)
-   for line in inFile:
-      morpheme, weight = line.strip().split(" ")
-      weights_pfx[morpheme] = int(weight)
-#
-
+if args.model == "RANDOM":
+  weights_pfx = dict(list(zip(itos_pfx_, [2*x for x in range(len(itos_pfx_))])))
+else:
+  weights_pfx = {}
+  import glob
+  PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
+  files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
+  assert len(files) == 1
+  assert "Suffixes" not in files[0], files
+  assert "Normalized" in files[0]
+  with open(files[0], "r") as inFile:
+     next(inFile)
+     next(inFile)
+     next(inFile)
+     for line in inFile:
+        morpheme, weight = line.strip().split(" ")
+        weights_pfx[morpheme] = int(weight)
 
 errors = defaultdict(int)
 
+hasSeenType = set()
+
+
 AFFIX_KEY = "pfx"
 
-def getCorrectOrderCount(weights_pfx, coordinate, newValue):
+def getCorrectOrderCount(weights_pfx):
    correct = 0
    incorrect = 0
-
    correctFull = 0
    incorrectFull = 0
+
+   correctTypes = 0
+   incorrectTypes = 0
+   correctFullTypes = 0
+   incorrectFullTypes = 0
    for q, verb in enumerate(data):
-      #prefixes_keys = [x[header["form"]] for x in verb if x[header["type1"]] == "pfx"]
-#      if coordinate not in prefixes_keys:
- #       assert False
-  #      continue
-   
       affixes = [(getKey(x), weights_pfx[getKey(x)]) for x in verb if x[header["type1"]] == AFFIX_KEY]
       if len(affixes) <= 1:
         continue
-      #assert len(prefixes) > 1, verb
-#      suffixes = [(x[header[RELEVANT_KEY]], weights_sfx[x[header[RELEVANT_KEY]]]) for x in verb if x[header["type1"]] == "sfx"]
 
-      hasIncorrect = False
+      keyForThisVerb = " ".join([x[header["lemma"]] for x in verb])
+      hasSeenThisVerb = (keyForThisVerb in hasSeenType)
+      hasMadeMistake = False
       for i in range(0, len(affixes)):
-           for j in range(0, i):
-               if affixes[i][0] == coordinate:
-                   weightI = newValue
-               else:
-                  weightI = affixes[i][1]
-  
-               if affixes[j][0] == coordinate:
-                   weightJ = newValue
-               else:
-                  weightJ = affixes[j][1]
-               #print(weightI, weightJ)
-               if weightI > weightJ:
-                 correct+=1
-               else:
-                 hasIncorrect = True
-                 incorrect+=1
-                 #print("==========")
-                 #print(q)
-                 #print(affixes)
-                 #print("Error pair", (affixes[i][0], affixes[j][0]))
-                 #print(verb)
- #                if affixes[i][0] == affixes[j][0]:
-#                      assert False
-                 errors[(affixes[j][0], affixes[i][0])] += 1
+         for j in range(0, i):
+             weightI = affixes[i][1]
+             weightJ = affixes[j][1]
+             if weightI > weightJ:
+               correct+=1
+               if not hasSeenThisVerb:
+                 correctTypes += 1
+             else:
+               incorrect+=1
+               if not hasSeenThisVerb:
+                 incorrectTypes += 1
+               hasMadeMistake = True
+               errors[(affixes[j][0], affixes[i][0])] += 1
       if len(affixes) > 1:
-        if hasIncorrect:
-           incorrectFull += 1
+        if not hasMadeMistake:
+            correctFull += 1
+            if not hasSeenThisVerb:
+              correctFullTypes += 1
         else:
-           correctFull += 1
+            incorrectFull += 1
+            if not hasSeenThisVerb:
+              incorrectFullTypes += 1
       assert correct+incorrect>0, affixes
+      if not hasSeenThisVerb:
+        hasSeenType.add(keyForThisVerb)
    if correct+incorrect == 0:
       print("ERROR 19722: #", coordinate, "#")
       assert False, (index_sfx[coordinate], coordinate)
       return 1.0
    print((correctFull+incorrectFull))
-   return correct/(correct+incorrect), correctFull/(correctFull+incorrectFull)
+   return correct/(correct+incorrect), correctFull/(correctFull+incorrectFull), correctTypes/(correctTypes+incorrectTypes), correctFullTypes/(correctFullTypes+incorrectFullTypes)
 
 
 
@@ -382,13 +380,19 @@ for q in range(len(data)):
 
 
 
-result = getCorrectOrderCount(weights_pfx, None, 0)
+result = getCorrectOrderCount(weights_pfx)
 print(errors)
 print(result)
 
-with open("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+args.model+".txt", "w") as outFile:
+with open("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+str(myID)+"_"+args.model+".txt", "w") as outFile:
    print(result[0], file=outFile)
    print(result[1], file=outFile)
-print("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+args.model+".txt")
+   print(result[2], file=outFile)
+   print(result[3], file=outFile)
+   errors = list(errors.items())
+   errors.sort(key=lambda x:x[1], reverse=True)
+   for x, y in errors:
+      print(x[0], x[1], y, file=outFile)
+print("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+str(myID)+"_"+args.model+".txt")
 
 

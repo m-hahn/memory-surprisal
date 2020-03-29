@@ -133,49 +133,87 @@ print(stoi)
 
 itos_ = itos[::]
 shuffle(itos_)
-weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
-weights = {}
-import glob
-PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
-files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
-assert len(files) == 1
-with open(files[0], "r") as inFile:
-   next(inFile)
-   for line in inFile:
-      morpheme, weight = line.strip().split(" ")
-      weights[morpheme] = int(weight)
-#weights = {'める': 0, 'てる': 2, '始める': 4, 'そうだ': 6, 'られる': 8, 'あう': 10, 'ざるを得る': 12, 'える': 14, '出来る': 16, 'まい': 18, 'きる': 20, 'だめ': 22, 'ちゃう': 24, 'できる': 26, 'がたい': 28, '易い': 30, 'させる': 32, 'べる': 34, 'たー': 36, 'かける': 38, 'みたいだ': 40, 'する': 42, 'れる': 44, 'せる': 46, 'くださる': 48, 'かもしれる': 50, 'ようだ': 52, 'でした': 54, 'らしい': 56, 'たい': 58, 'かねる': 60, 'ける': 62, '出す': 64, 'ざるをえる': 66, 'ない': 68, 'にくい': 70, 'やすい': 72, '済み': 74, 'なる': 76, 'ます': 78, 'う': 80, '続ける': 82, 'た': 84, 'だ': 86}
+if args.model == "RANDOM":
+  weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
+#  weights['する'] = -1
+else:
+  weights = {}
+  weights = {}
+  import glob
+  PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
+  files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
+  assert len(files) == 1
+  with open(files[0], "r") as inFile:
+     next(inFile)
+     for line in inFile:
+        morpheme, weight = line.strip().split(" ")
+        weights[morpheme] = int(weight)
 
 from collections import defaultdict
 
-mistakes = defaultdict(int)
+errors = defaultdict(int)
+
+hasSeenType = set()
 
 def getCorrectOrderCount(weights):
    correct = 0
    incorrect = 0
    correctFull = 0
    incorrectFull = 0
+
+   correctTypes = 0
+   incorrectTypes = 0
+   correctFullTypes = 0
+   incorrectFullTypes = 0
    for verb in data:
+      keyForThisVerb = " ".join(verb)
+      hasSeenThisVerb = (keyForThisVerb in hasSeenType)
       hasMadeMistake = False
       for i in range(1, len(verb)):
+#         if verb[i] == 'する':
+ #           continue
          for j in range(1, i):
+  #           if verb[j] == 'する':
+   #             continue
              weightI = weights[verb[i]]
              weightJ = weights[verb[j]]
              if weightI > weightJ:
                correct+=1
+               if not hasSeenThisVerb:
+                 correctTypes += 1
              else:
                incorrect+=1
+               if not hasSeenThisVerb:
+                 incorrectTypes += 1
                hasMadeMistake = True
                print("MISTAKE", verb[i], weights[verb[i]], verb[j], weights[verb[j]], verb)
-               mistakes[(verb[i], verb[j])] += 1
+               errors[(verb[j], verb[i])] += 1
       if len(verb) > 2:
         if not hasMadeMistake:
             correctFull += 1
+            if not hasSeenThisVerb:
+              correctFullTypes += 1
         else:
             incorrectFull += 1
-   return correct/(correct+incorrect), correctFull/(correctFull+incorrectFull)
+            if not hasSeenThisVerb:
+              incorrectFullTypes += 1
+      if not hasSeenThisVerb:
+        hasSeenType.add(keyForThisVerb)
+   return correct/(correct+incorrect), correctFull/(correctFull+incorrectFull),correctTypes/(correctTypes+incorrectTypes), correctFullTypes/(correctFullTypes+incorrectFullTypes)
 
 result = getCorrectOrderCount(weights)
-print(mistakes)
+print(errors)
 print(result)
+
+with open("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+str(myID)+"_"+args.model+".txt", "w") as outFile:
+   print(result[0], file=outFile)
+   print(result[1], file=outFile)
+   print(result[2], file=outFile)
+   print(result[3], file=outFile)
+   errors = list(errors.items())
+   errors.sort(key=lambda x:x[1], reverse=True)
+   for x, y in errors:
+      print(x[0], x[1], y, file=outFile)
+print("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+str(myID)+"_"+args.model+".txt")
+
 

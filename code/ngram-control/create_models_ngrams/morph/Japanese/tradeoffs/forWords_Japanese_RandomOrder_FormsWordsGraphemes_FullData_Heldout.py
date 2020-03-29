@@ -2,7 +2,6 @@
 
 import random
 import sys
-import romkan
 
 objectiveName = "LM"
 
@@ -136,75 +135,23 @@ print(stoi)
 
 itos_ = itos[::]
 shuffle(itos_)
-if args.model == "RANDOM":
-  weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
-  weights['する'] = -1
-elif args.model == "REAL":
-  weights = None
-elif args.model != "REAL":
-  weights = {}
-  import glob
-  PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
-  files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
-  assert len(files) == 1
-  assert "_FormsPhonemesFull_" in files[0]
-  with open(files[0], "r") as inFile:
-     next(inFile)
-     for line in inFile:
-        morpheme, weight = line.strip().split(" ")
-        weights[morpheme] = int(weight)
-
-
-
-
-raw2Hiragana = dict()
-
-with open("../data/extractedVerbs_hiragana.txt", "r") as inFileHiragana:
-    try:
-     for index in range(1000000):
-       tagged = next(inFileHiragana).strip().split("\t")
-       raw, tagged = tagged
-       raw2Hiragana[raw.strip()] = tagged.strip()
-    except StopIteration:
-       _ = 0
-
-for line in data:
- # print(" ".join([x["word"] for x in line]))
-  raw = " ".join([x["word"] for x in line])
-  hiragana = raw2Hiragana[raw].split(" ")
-#  print(line)
- # print(hiragana)
-  assert len(hiragana) == len(line)
-  for i in range(len(line)):
-    line[i]["hiragana"] = hiragana[i]
-
-cachedPhonemization = {}
-
-def phonemize(x):
-   if x not in cachedPhonemization:
-      phonemized = romkan.to_roma(x)
-      if max([ord(y) for y in phonemized]) > 200: # contains Kanji
-         cachedPhonemization[x] = x
-      else:
-        if x.endswith("っ"):
-          assert phonemized.endswith("xtsu")
-          phonemized = phonemized.replace("xtsu", "G") # G for `geminate'
-        phonemized = phonemized.replace("ch", "C")
-        phonemized = phonemized.replace("sh", "S")
-        phonemized = phonemized.replace("ts", "T")
-        cachedPhonemization[x] = phonemized
-   phonemized = cachedPhonemization[x]
-   return phonemized
+weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
 
 
 def calculateTradeoffForWeights(weights):
     dev = []
     for verb in data:
        affixes = verb[1:]
-       if args.model != "REAL":
+       if args.model == "RANDOM":
           affixes = sorted(affixes, key=lambda x:weights[x["lemma"]])
+       elif args.model == "REAL":
+          assert args.model == "REAL"
+       elif args.model == "SHUFFLE":
+          Random(myID).shuffle(affixes)
+       else:
+            assert False
        for ch in [verb[0]] + affixes:
-         for char in phonemize(ch["hiragana"]):
+         for char in ch["word"]:
            dev.append(char)
        #    print(char)
        dev.append("EOS")
