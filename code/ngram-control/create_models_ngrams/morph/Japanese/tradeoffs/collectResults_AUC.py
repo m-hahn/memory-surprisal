@@ -3,7 +3,7 @@ import os
 
 PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology"
 
-files = [x for x in os.listdir(PATH) if "forWords_Japanese" in x]
+files = sorted([x for x in os.listdir(PATH) if "forWords_Japanese" in x])
 
 # MAK at https://stackoverflow.com/questions/14063195/python-3-get-2nd-to-last-index-of-occurrence-in-string
 def find_second_last(text, pattern):
