@@ -14,10 +14,12 @@ unigramCE = mean(data$UnigramCE)
 data$Type = ifelse(data$Model %in% c("REAL", "RANDOM", "REVERSE"), as.character(data$Model), "Optimized")
 
 data_ = data %>% group_by(Distance, Type) %>% summarise(MI=median(MI))
-data_ = data_ %>% filter(Distance < 5)
+data_ = data_ %>% filter(Distance <= 7)
+data_ = data_ %>% filter(Type %in% c("REAL", "RANDOM"))
 plot = ggplot(data_, aes(x=Distance, y=MI, color=Type)) + geom_line() #size=2)
 plot = plot + theme_bw()
-plot = plot + theme(axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text = element_text(size=20))
+plot = plot + xlab("Distance") + ylab("Mutual Information")
+plot = plot + theme(axis.title.x=element_text(size=20), axis.title.y=element_text(size=20), axis.text = element_text(size=20))
 plot = plot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), legend.position="none")
 plot = plot + theme(axis.line = element_line(colour = "black"),
             panel.grid.major = element_blank(),
@@ -36,11 +38,12 @@ data = data %>% filter(Script == "forWords_Japanese_RandomOrder_FormsPhonemesFul
 
 data = data %>% group_by(Type, Memory) %>% summarise(Surprisal=unigramCE-median(MI))
 
+data_ = data %>% filter(Type %in% c("REAL", "RANDOM"))
 
-plot = ggplot(data, aes(x=Memory, y=Surprisal, color=Type)) + geom_line() #size=2)
+plot = ggplot(data_, aes(x=Memory, y=Surprisal, color=Type)) + geom_line() #size=2)
 plot = plot + theme_bw()
-plot = plot + theme(axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text = element_text(size=20))
-plot = plot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) #, legend.position="none")
+plot = plot + theme(axis.title.x=element_text(size=20), axis.title.y=element_text(size=20), axis.text = element_text(size=20))
+plot = plot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), legend.position="none")
 plot = plot + theme(axis.line = element_line(colour = "black"),
             panel.grid.major = element_blank(),
                 panel.grid.minor = element_blank(),
@@ -60,7 +63,10 @@ data = data %>% filter(Script == "forWords_Japanese_RandomOrder_FormsPhonemesFul
 
 data$Type = ifelse(data$Model %in% c("REAL", "RANDOM", "REVERSE"), as.character(data$Model), "Optimized")
 
-plot = ggplot(data, aes(x=AUC, y=1, color=Type, fill=Type)) + geom_bar(stat="identity") #size=2)
+data_ = data %>% filter(Type %in% c("REAL", "RANDOM"))
+
+
+plot = ggplot(data_, aes(x=AUC, y=1, color=Type, fill=Type)) + geom_bar(stat="identity") #size=2)
 plot = plot + theme_bw()
 plot = plot + theme(axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text = element_text(size=20))
 plot = plot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) #, legend.position="none")
@@ -73,7 +79,7 @@ ggsave(plot, file=paste("figures/Japanese-suffixes-byPhonemes-auc-heldout.pdf", 
 
 barWidth = (max(data$AUC) - min(data$AUC))/30
 
-plot = ggplot(data, aes(x=AUC, fill=Type, color=Type))
+plot = ggplot(data_, aes(x=AUC, fill=Type, color=Type))
 plot = plot + theme_classic()
 #plot = plot + theme(legend.position="none")
 plot = plot + geom_density(data= data%>%filter(Type == "RANDOM"), aes(y=..scaled..)) 
