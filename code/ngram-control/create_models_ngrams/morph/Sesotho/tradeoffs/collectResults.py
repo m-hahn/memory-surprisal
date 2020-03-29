@@ -3,7 +3,7 @@ import os
 
 PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology"
 
-files = [x for x in os.listdir(PATH) if "forWords_Sesotho" in x]
+files = sorted([x for x in os.listdir(PATH) if "forWords_Sesotho" in x])
 
 # MAK at https://stackoverflow.com/questions/14063195/python-3-get-2nd-to-last-index-of-occurrence-in-string
 def find_second_last(text, pattern):
@@ -11,7 +11,7 @@ def find_second_last(text, pattern):
 
 
 with open("results.tsv", "w") as outFile:
- print("\t".join([str(x) for x in ["Script", "Run", "Model", "Distance", "Surprisal", "MI", "Memory"]]), file=outFile)
+ print("\t".join([str(x) for x in ["Script", "Run", "Model", "Distance", "Surprisal", "MI", "Memory", "UnigramCE", "Type"]]), file=outFile)
  for f in files:
   with open(PATH+"/"+f, "r") as inFile:
      args, surps = inFile 
@@ -24,6 +24,8 @@ with open("results.tsv", "w") as outFile:
      run = f[find_second_last(f, "_")+1:f.rfind("_")]
      print(script, model, surps)
      mis = [surps[i] - surps[i+1] for i in range(len(surps)-1)]
+     for i in range(len(mis), 12):
+        mis.append(0)
      print(mis)
      tmis = [mis[i] * (i+1) for i in range(len(mis))]
      print(tmis)
@@ -35,4 +37,4 @@ with open("results.tsv", "w") as outFile:
      print(surprisals)
      print(memories)
      for i in range(len(mis)):
-       print("\t".join([str(x) for x in [script, run, model, i, surps[i], mis[i], memories[i]]]), file=outFile)
+       print("\t".join([str(x) for x in [script, run, model, i, surprisals[i], mis[i], memories[i], surprisals[0], model if model in ["REAL", "RANDOM", "REVERSE"] else "OPTIM"]]), file=outFile)
