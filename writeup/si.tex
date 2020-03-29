@@ -54,6 +54,12 @@
 \newtheorem{lemma}[theorem]{Lemma}
 
 
+
+% https://tex.stackexchange.com/questions/24132/overline-outside-of-math-mode
+\makeatletter
+\newcommand*{\textoverline}[1]{$\overline{\hbox{#1}}\m@th$}
+\makeatother
+
 \frenchspacing
 %\def\baselinestretch{0.975}
 
@@ -91,7 +97,7 @@ We first make explicit how we formalize language processing for proving the theo
 
 \paragraph{Ingredient 1: Language as a Stationary Stochastic Process}
 We represent language as a stochastic process of words $\dots w_{-2} w_{-1} w_0 w_{1} w_{2} \dots$, extending indefinitely both into the past and into the future.
-The symbols $w_i$ belong to a common set, representing the words of the language.\footnote{Could also be phonemes, sentences, ..., any other kind of unit.}
+The symbols $w_i$ belong to a common set, representing the words of the language.\footnote{Could also be phonemes, sentences, or any other kind of unit.}
 
 %We model the sequence as a probabilistic sequence; that is, given a context $w_{<t}$, the next word is distributed according to a distribution $p(w_t|w_{<t})$.
 
@@ -102,7 +108,8 @@ We make the assumption that this process is \emph{stationary}.
 Formally, this means that the conditional distribution $P(w_t|w_{<t})$ does not depend on $t$, it only depends on the (semi-infinite) context sequence $w_{<t}$.
 Informally, this says that the process has no `internal clock', and that the statistical rules of the language do not change at the timescale we are interested in.
 In reality, the statistical rules of language do change: They change as language changes over generations, and they also change between different situations -- e.g., depending on the interlocutor at a given point in time.
-Given that we are interested in memory needs in the processing of \emph{individual sentences}, at a timescale of seconds or minutes, stationarity seems to be a reasonable assumption to make.
+However, we are interested in memory needs in the processing of \emph{individual sentences}, at a timescale of seconds or minutes.
+At this level, the statistical regularities of language do not change, making stationarity a reasonable modeling assumption.
 
 
 %
@@ -191,7 +198,7 @@ Then this listener will incur surprisal at least
 %The average number of bits required to encode this state is $\operatorname{H}[m_t]$, which by assumption is at most $\sum_{t=1}^T t I_t$.
 %As the listener's predictions are made on the basis of her memory state, her average surprisal is at least $\operatorname{H}[w_t | m_t]$.
 \begin{proof}
-The difference between the listener's surprisal and optimal surprisal is $\operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]$.\footnote{A listener whose predictions are not optimal given $m_t$ can only incur even higher surprisal.}
+The difference between the listener's average surprisal $S_M$ and optimal surprisal $S_\infty$ is $S_M - S_\infty = \operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]$.\footnote{A listener whose predictions are not optimal given $m_t$ can only incur even higher surprisal.}
 By the assumption of stationarity, we can, for any positive integer $T$, rewrite this expression as
 \begin{equation}\label{eq:byStation}
 \operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}] =  \frac{1}{T} \sum_{t'=1}^{T} \left(\operatorname{H}[w_{t'} | m_{t'}] - \operatorname{H}[w_{t'} | w_{<t'}]\right) 
@@ -227,15 +234,19 @@ The first term $I[w_{1\dots T}, w_{\leq 0}]$ can be rewritten in terms of $I_t$:
 I[w_{1\dots T}, w_{\leq 0}] &= \sum_{i=1}^T \sum_{j=-1}^{-\infty} I[w_i, w_j | w_{j+1}...w_{i-1}] = \sum_{t=1}^T t I_t + T \sum_{t > T} I_t
 \end{align}
 Therefore
-\begin{align*}
+\begin{align}\label{eq:surp-diff-expanded}
 \operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]& \geq \frac{1}{T} \left(\sum_{t=1}^T t I_t + T \sum_{t > T} I_t - I[w_{1\dots T}, m_1]\right) 
-\end{align*}
-$I[w_{1\dots T}|m_1]$ is at most $\operatorname{H}[m_1]$, which is at most $\sum_{t=1}^T t I_t$ by assumption. Thus, the expression above is bounded by
+\end{align}
+The term $I[w_{1\dots T}|m_1]$ is at most $\operatorname{H}[m_1]$, which is at most $\sum_{t=1}^T t I_t$ by assumption. Thus,  (\ref{eq:surp-diff-expanded}) implies the following:
 \begin{align*}
 \operatorname{H}[w_t | m_t] - \operatorname{H}[w_t | w_{<t}]& \geq \frac{1}{T} \left(\sum_{t=1}^T t I_t + T \sum_{t > T} I_t - \sum_{t=1}^T t I_t\right) \\
 &= \sum_{t > T} I_t
 \end{align*}
-Rearranging shows that the listener's surprisal is at least $\operatorname{H}[w_t|m_t] \geq \operatorname{H}[w_t | w_{<t}] + \sum_{t > T} I_t$, as claimed.
+Rearranging yields
+\begin{align}
+\operatorname{H}[w_t|m_t] \geq \operatorname{H}[w_t | w_{<t}] + \sum_{t > T} I_t
+\end{align}
+as claimed.
 \end{proof}
 
 
@@ -247,14 +258,16 @@ Rearranging shows that the listener's surprisal is at least $\operatorname{H}[w_
 
 We have been assuming that $m_t$ is a deterministic function of $x_t$ and $m_{t-1}$.
 Here, we show that this assumption can be relaxed to stochastic encoding functions.
+That is, we show that our result holds if
+$m_t$ is not a deterministic function of $w_{t-1}$ and $m_{t-1}$, but includes randomness in processing.
 
-We relax condition (X) to the following requirement, for all values of $m_1, (w_{t})_{t \in \mathbb{Z}}, m_0$:
+To formalize that setting, we relax Comprehension Postulate 1 to the following requirement, for all values of $m_1, (w_{t})_{t \in \mathbb{Z}}, m_0$:
 \begin{equation}\label{eq:listener-markov-nondeterministic}
 p(m_1| (w_{t})_{t \in \mathbb{Z}}, m_0)   = p(m_1 | m_0, w_1)
 \end{equation}
 This says that $m_1$ contains no information about the utterances beyond what is contained in $m_0$ and $w_1$.	
 
-The one place in the proof where (X) plays a role is the proof of the inequality:
+The one place in the proof where Comprehension Postulate 1 plays a role is the proof of the inequality:
 \begin{equation}
 	H[w_t | m_t] \geq H[w_t|w_{1 \dots t-1}, m_1]
 \end{equation}
@@ -536,9 +549,21 @@ To prove this, we note:
 The first step follows from the definition of $Y$. The second step follows from the fact that $X_t$, and thus also $Y_t$, is stationary, and thus adding $t$ to each index in the expression does not change the resulting value. The third step uses the fact that mutual information is symmetric.
 
 
-\section{Example where window model is not optimal}
+\section{Examples with Analytical Calculations}
+
+Here, we provide examples of the theorem in settings where analytical calculations are possible.
+
+
+\subsection{Example I: Tight Bounds in Artificial Language}
+
+Here we provide explicit calculations for the artificial language simulation, showing that the bounds provided by the theorem are tight in this case.
+
+TODO
+
+\subsection{Example II: Window-Based Model not Optimal}
 
 Here we provide an example of a stochastic process where a window-based memory encoding is not optimal, but the bound provided by our theorem still holds.
+This is an example where the bound provided by the theorem is loose: while it bounds the memory-surprisal tradeoff of all possible listeners, the bound is `optimistic', meaning that no mathematically possible memory encoding function $M$ can exactly achieve the bound.
 
 Let $k$ be some positive integer.
 Consider a process
@@ -574,6 +599,38 @@ Since $y_{t+1} = v_{t-2k+1}$, this model achieves a surprisal reduction of $H[v_
 
 This result does not contradict our theorem because the theorem only provides \emph{bounds} across models, which are not necessarily achieved by a given window-based model.
 In fact, for the process described here, no memory encoding function $M$ can exactly achieve the theoretical bound described by the theorem.
+
+\subsection{Example III: Tight Bound for Retrieval Model}
+
+Here, we provide an example where our bound is tight for the retrieval-based model even though it is quite loose for the capacity model.
+That means, while no memory encoding function can exactly achieve the bound in the capacity-bounded setting, there are memory encoding functions that exactly achieve the bound in the retrieval-based setting.
+
+Let $k$ be a positive integer.
+Consider a process $x_{t+1} = (y_{t+1}, z_{t+1}, u_{t+1}, v_{t+1})$ where
+\begin{enumerate}
+    \item $y_{t+1}$ consists of $2k$ random bits.
+    \item $z_{t+1}$ is a draw from $Bernoulli(\frac{1}{4k})$.
+    \item $u_{t+1}$ consists of $2k$ random bits if $z_t = 0$ and is equal to $y_{t-2k+1}$ else.
+    \item $v_{t+1} := z_t$ 
+\end{enumerate}
+Predicting observations $x_{t+1}$ optimally requires storing $y_{t-2k+1}, \dots, y_{t}$ and $z_t$.
+This amounts to $(2k+1)\cdot 2k + H_2[1/4k]$ bits of memory in the capacity-based model.
+However, $I[u_{t+1}, y_{t-2k+1}|z_{t+1}] \leq 1/k$ (TODO).
+Therefore, the theorem bounds the memory cost only by $HM \geq \sum_{t=1}^\infty t I_t = 1$.
+The bound provided by the theorem is therefore loose in this case.
+
+However, it is tight for the retrieval-based model:
+We use $s_t$ to store $y_{t-2k+1}, \dots, y_{t}$, and we use the working memory $m_{t+1}$ to store $z_t$.
+Then, if $z_t = 1$, we retrieve $r_t = g(x_{t-1}, m_{t-1}, s_{t-1}) := y_{t-2k+1}$.
+The cost of storing $z_t$ is $H_2[1/4k]$, and the cost of retrieving $r_t$ is $\frac{1}{4k} \cdot 2k$.
+
+
+
+In total, $H[m_t] = H_2[1/4k]$ and $H[r_t] = 1/k$.
+
+Taking, in the theorem, $T=1$ and $S\rightarrow\infty$, we obtain $H[m_t] \geq H_2[1/4k]$ and $H[r_t] \geq 1/k$.
+Thus, the bound is tight for both working memory and retrieval costs.
+
 
 \section{Corpus Size per Language}
 
@@ -783,9 +840,630 @@ In fact, for the process described here, no memory encoding function $M$ can exa
 %
 %-- Chinese treebank \citep{xue-chinese-2013}
 
+\section{Chart Parsing Control}
+
+LSTMs and n-gram models are linear sequence models that might incorporate biases towards linear order as opposed to hierarchical structure.
+Here we use chart parsing to show that the results also hold when estimating $I_t$ using a model that is based on hierarchical structure and incorporates no bias towards linear closeness.
+
+We use PCFGs.
+PCFG surprisal is often computed in psycholinguistic research using approximate incremental parsers, but these might themselves incorporate some biases towards linear closeness.
+We instead opt for exact inference for PCFGs using exact chart parsing.
+
+\subsection{Deriving PCFGs from Dependency Corpora}
 
 
-\section{Optimization}
+
+We binarize, and give assign nonterminal labels to intermediate nodes based on (1) the POS of the head, (2) the lexical identity of the head, (3) the dependency label linking head and dependent.
+We binarize so that left children branch off before right children.
+
+The preterminals are labeled by POS tag and lexical identity.
+
+It is necessary to reduce the number of preterminals and nonterminals, both to deal with data sparsity, and to make chart parsing tractable.
+In our implementation for calculating $I_t$ (see below), we found that up to 700 nonterminals were compatible with efficient inference.
+(For comparison, the Berkeley parser uses X nonterminals for its English grammar, but employs a highly optimized coarse-to-fine strategy.)
+
+We reduced the number of nonterminals as follows:
+(1) For words with frequency below a threshold parameter, we did not record lexical identity in preterminals and nonterminals.
+(2) Nonterminals that only differ in the relation label were merged if their frequency fell below a threshold parameter,
+(2) Nonterminals that only differ in the head's lexical identity were merged if their frequency fell below a threshold parameter.
+
+Words occurring less than 3 times in the dataset were replaced by OOV.
+
+Alternative: merge-and-split, but that would have taken too long to run on all the corpora.
+
+We chose the threshold parameters for (1)-(3) separately for each language by sampling 15 configurations, and choosing the one that minimized estimated surprisal (see below) on a sampled baseline grammar, while resulting in at most 700 nonterminals and preterminals.
+
+mention approaches in the literature
+
+An alternative avoiding binarization would be to use the Earley parser, but that would have made it less feasible to parallelize processing on GPUs (see below).
+
+\subsection{Estimating $I_t$ with Chart Parsing}
+algorithm, cite Goodman's thesis
+
+Calculating $I_t$ requires estimating entropies $H[X_1, \dots, X_t]$, and thus probabilities $P(X_1, \dots, X_t)$.
+This is challenging because it requires marginalization over possible positions in a sequence.
+
+There is a known extension of the CKY algorithm that calculates \emph{prefix} probabilities
+\begin{equation}
+P[\#, X_1, \dots, X_t] := \sum_N \sum_{Y_{1\dots N}} P(\#, X_1, \dots, X_t, Y_{1\dots N}, \#)
+\end{equation}
+(here, $\#$ denotes the beginning/end of a sentence), that is, the probability mass assigned to all sentences starting with the given prefix $X_1, \dots, X_t$.
+
+However, simultaneously summing over possible left \emph{and} right continuations is more challenging.\footnote{(CITE) describe a method for calculating infix probabilities, but that method computes something subtly different from the quantity required here, and it is also computationally costly.}
+We approach this by restricting the summation on the left to prefixes of a fixed length:
+\begin{equation}
+    \sum_{Y_1\dots Y_N} P(\#, Y_1 \dots Y_N, X_1, \dots, X_t)
+\end{equation}
+and estimating
+\begin{equation}
+    P(X_t|X_1\dots X_{t-1}) \approx \E_{Y_1\dots Y_N} P(X_t|\#, Y_1 \dots Y_N, X_1, \dots, X_{t-1})
+\end{equation}
+Under certain conditions on the PCFG, this approximation converges to the tru value for sufficiently large values of $N$.\footnote{TODO say something about Markov chain convergence: For each $t$, consider for each nonterminal $\tau$ the number $n_\tau$ of nodes with this nonterminal dominating $w_\tau$. This is a Markov chain.}
+Empirically, we found that the values already became essentially stationary at $N\geq 5$.
+
+The resulting algorithm is shown in X.
+
+For computational efficiency, we estimated $I_t$ for $t=1, \dots 5$, finding $I_t$ to be very close to zero for higher $t$.
+
+We ran the algorithm on all contiguous sequences of length $T=5$.
+Following (CITE), we took advantage of GPU parallelization for implementation, processing 1,000 sequences in parallel.
+
+
+\subsection{Results}
+We computed $I_t$ for the MLE grammar and for five random baseline grammars.
+
+We did not run this on the observed orderings, as these may have crossing branches, making binarization difficult and thus rendering comparison with baselines less straightforward.
+
+Figure~\ref{fig:resu-pcfg}
+
+Limitations: Absolute numbers aren't comparable with other models because there are many OOVs (they are necessary because the number of non- and preterminals has to be kept low).
+Also, the amount of exploited predictive information $\sum_t I_t$ is much lower than in the other models. Agrees with the observation that PCFG independence assumptions are inadequate, and that chart parsers have not historically reached good perplexities (parsers with good perplexities such as Roark Parser and RNNGs do not make these independence assumptions, but also do not allow efficient exact chart parsing).
+Nonetheless, the experiment confirms the finding with a model that is based on hierarchical syntactic structure while enabling exact inference.
+
+\begin{center}
+\includegraphics[width=\textwidth]{results-table-pcfg.pdf}
+\captionof{figure}{PCFG estimator, comparing fitted grammars (blue) with baselines (red)}\label{fig:resu-pcfg}
+\end{center}
+
+
+
+
+\section{Morphology}
+
+\subsection{Japanese}
+
+Here, we describe how we determined the Japanese verb suffixes described in the main paper.
+
+%Japanese orthography does not indicate word boundaries, and there is no universally accepted segmentation.
+We determined a set of frequent morphemes as follows.
+We selected all morphemes occurring in the dataset at least 50 times and annotated their meaning/function.
+Among these, three morphemes are treated as independent words, not suffixes, by \cite{kaiser2013japanese} (\textit{dekiru} `be able to', \textit{naru} `become', \textit{yoo} `as if'); we excluded these.
+Furthermore, passive and potential markers are formally identical for many verbs; we included both here.
+
+We list the morphemes according to the order extracted according to the model.
+%While this ordering matches almost all observed forms, there are some orderings that do not fit into this pattern, see below.
+
+Note that there  is no universally accepted segmentation for Japanese suffixes; we follow the UD tokenization in choosing which suffixes to segment.\footnote{The biggest difference to some other treatments is that the ending -\textit{u}/-\textit{ru} is viewed as part of the preceding morpheme that appears in some environments due to allomorphic variation, while it is viewed as a nonpast suffix in some other treatments \citep[p.116]{hasegawa2014japanese}.}
+
+
+
+\begin{enumerate}
+\item VALENCE: causative (-\textit{(s)ase}-). \cite[142]{hasegawa2014japanese} \cite[Chapter 13]{kaiser2013japanese}. In the UD data, this is lemmatized as \textit{saseru}, \textit{seru} (190 occurrences).
+\item VOICE: passive (-\textit{are}-, -\textit{rare}-) \cite[152]{hasegawa2014japanese} \cite[Chapter 12]{kaiser2013japanese}  In the UD data, this is lemmatized as \textit{rareru}, \textit{reru} ($\approx$ 2000 occurrences).
+\item MOOD, MODALITY:
+\begin{enumerate}
+\item potential (allomorphs -\textit{are}-, -\textit{rare}-, -\textit{e}-). In the UD data, this is lemmatized as \textit{rareru}, \textit{reru}, \textit{eru}, \textit{keru}.
+This is formally identical to the passive morpheme for many verbs (\cite[346]{vaccari1938complete}, \cite[398]{kaiser2013japanese}).
+
+%atsuka-e-nai `can't handle' %扱えない GSD treebank
+%araso-e-nai `can't dispute' % 争えない GSD treebank
+
+%how is this ordered relative to PASSIVE? In UD, they don't seem to be always separated (ambiguity of reru/rareru. \cite[346]{vaccari1938complete}: identical to the passive for one class, or -eru for other verb class).
+%\cite[398]{kaiser2013japanese}
+
+\item politeness -\textit{mas}- (allomorphs -\textit{masu}-, -\textit{mashi}-, -\textit{mase}-) \cite[190]{kaiser2013japanese}. % 見できます, 見ましたい
+In the UD data, this is lemmatized as \textit{masu} ($\approx$ 600 occurrences).
+\item MODALITY: desiderative -\textit{ta}- (allomorphs: -\textit{tai}, -\textit{taku}-, -\textit{taka}-) (85 occurrences) \cite[238]{kaiser2013japanese}. %mi-mashi-tai `I want to see'
+\end{enumerate}
+\item NEGATION: negation -\textit{na}- (allomorphs: -\textit{nai}, -\textit{n}-, -\textit{nakat}-). 
+%also -mai for negative+volition.
+Lemmatized as \textit{nai} (630 occurrences).
+\item TENSE/ASPECT/MOOD:
+\begin{enumerate}
+\item -\textit{ta} for past (4K occurrences) \cite[211]{kaiser2013japanese}
+\item -\textit{yoo} for hortative, future, and similar meanings \cite[229]{kaiser2013japanese}. This is lemmatized as \textit{u} (92 occurrences).
+\end{enumerate}
+%Q how do-nai- and -yoo interact? Should -yoo be placed together with desiderative?
+\item -\textit{te} derives a nonfinite form \cite[186]{kaiser2013japanese}. (4K occurrences)
+\end{enumerate}
+
+
+%When labeling morphemes, we consider the lemmas, and unite saseru and seru to CAUSATIVE and reru+rareru+eru+keru to PASSIVE/POTENTIAL.
+
+
+
+%EXAMPLES:
+
+We provide examples illustrating the relative ordering of different morphemes.
+Note that passive and potential markers do not co-occur.
+We omit examples with -te; it always follows other suffixes that are compatible with it.
+
+
+
+\begin{tabular}{lllllllll|lllllll}
+%     & VALENCE   & VOICE    & \multicolumn{3}{c}{MOOD/MODALITY} & NEGATION & TENSE \\
+Stem & Caus. & Pass. & Pot. & Polite. & Desid. & Neg. & TAM & \\ \hline
+mi &          &      & &            &          & naka     & tta    & did not see \cite[153]{vaccari1938complete}\\
+mi &          &      & &            & taku     & nai      &         & I do not wish to see \cite[98]{vaccari1938complete} \\
+mi &          &      & &            & taku     & naka    & tta       & I did not wish to see \cite[98]{vaccari1938complete} \\
+%oyog & ase    &      & &            &          &         & ta    &     & made swim \\
+tat & ase     & rare & &            &          &         & ta         & was made to stand up \cite[396]{kaiser2013japanese} \\
+waraw  &       & are & &            &           &         & ta        & was laughed at \cite[384]{kaiser2013japanese} \\
+mi     &       & rare& & mase       &          & n        &           & is not seen \cite[337]{vaccari1938complete} \\
+mi     &       & rare& & mash      &           &          & yoo      & will be seen \cite[337]{vaccari1938complete} \\
+de     &       &    & &            &           & naka     & roo      & will not go out \cite[170]{vaccari1938complete} \\
+mi     &       &    & e & mase       &           & n        &          & cannot see \cite[349]{vaccari1938complete} \\
+%mi     &       &    & & mashi      & tai       &          &      &    & want to see
+\end{tabular}
+
+
+%Not all combinations are possible. 
+%`was not seen' is miraremasen deshita \cite[337]{vaccari1938complete}, not MIRU-RERU-MASE-NAI-TA
+%Negation is not directly combined with -yoo.
+
+%Some relatively frequent morphemes that are below the threshold include:
+
+%\begin{enumerate}
+%\item nakereba `if not' (cf \cite[9.3.1.4]{kaiser2013japanese})
+%\item tsudzukeru (continuative, 30 occurrences)
+%\item yasui `easy to'
+%\item hajimeru (inchoative, 21)
+%\item naru (`become', 102). Maybe this should be excluded, not treated as an affix in the books.
+%\item yooda (180) EVIDENTIAL? yooda. but past -ta- can be after it: iruyoodatta IRU-YOODA-TA (Kaiser et al 9.5.6.1.1.1) vs misenakattayooda MISERU-NAI-TA-YOODA `it didn't seem' (GSD treebank). Maybe this should be thought of better as an SCONJ at least when including -ni, Vaccari p. 238-241.
+%\item beki Necessitative \cite[248]{kaiser2013japanese}
+%\item soo `likely to' \cite[258]{kaiser2013japanese}, probably not AUX in UD
+%\item dekiru potential (180), 
+%\end{enumerate}
+
+
+
+
+% volitional 加わろう kawawar-oo
+% volitional polite 加わりましょう kawawar-i-mashy-oo
+% volitional neg 加わるまい(+), 加わらない[よう/こと]にしよう kawawaru-mai, kawawara-nai-yoo-nishyoo
+% volitional neg polite 加わりますまい, 加わらない[よう/こと]にしましょう  kawawari-masu-mai, kawawar-anai-yoo-nishimashyoo
+
+%  verb-valence-voice-aspect-tense-mood-modality-person-number
+
+% http://nihongo.monash.edu/cgi-bin/wwwjdic?1W%B2%F1%B5%C4%A4%CB%B2%C3%A4%EF%A4%EB_v5r
+% passive negative
+% 加わられない kuwawar-are-nai
+
+% passive negative polite
+% 加わられません kuwawar-are-mase-n
+
+% causative polite
+% 加わらせます kuwawar-ase-masu
+
+% causative negative polite
+% 加わらせません kuwawar-ase-mase-n
+% 加わらしません kuwawar-ashi-mase-n
+
+% da/de/na (lemmatized as da): copula (?). na after adjectives.
+
+
+
+
+%honorific -masu
+
+%-s-are-naka-tta ?passive+negative.past?
+
+
+
+% -u/-ru (non-past) -- not segmented off in UD?
+
+% suru - reru - ta
+% suru -masu - ta
+% reru - ta
+% suru - ta
+% masu - ta
+% rareru - ta
+% masu - nai - deshita
+% suru - reru
+% suru - nai
+% masu - nai
+% reru - masu - ta
+% dekiru - masu
+
+% TODO in excluding -te-, have to deal with -de- as in 読んで yonde (Vaccari p. 109)
+
+%(('し/動詞/し', 'た/助動詞/た'), 14389)
+%(('る/語尾/る',), 13880)
+%(('あ/動詞/あ', 'る/語尾/る'), 11481)
+%(('っ/語尾/っ', 'た/助動詞/た'), 9378)
+%(('さ/動詞/さ', 'れ/助動詞/れ', 'た/助動詞/た'), 7143)
+%(('さ/動詞/さ', 'れ/助動詞/れ', 'る/語尾/る'), 1966)
+%(('られ/助動詞/られ', 'る/語尾/る'), 1156)
+%(('だっ/助動詞/だっ', 'た/助動詞/た'), 1151)
+%(('られ/助動詞/られ', 'た/助動詞/た'), 1114)
+%(('ん/語尾/ん', 'だ/助動詞/だ'), 854)
+%((), 839)
+%(('い/語尾/い', 'た/助動詞/た'), 761)
+%(('わ/語尾/わ', 'れ/助動詞/れ', 'た/助動詞/た'), 715)
+%(('で/助動詞/で', 'あ/動詞/あ', 'る/語尾/る'), 688)
+%(('さ/語尾/さ', 'れ/助動詞/れ', 'た/助動詞/た'), 599)
+%(('わ/語尾/わ', 'れ/助動詞/れ', 'る/語尾/る'), 595)
+%(('れ/助動詞/れ', 'る/語尾/る'), 563)
+%(('く/語尾/く',), 485)
+
+
+% ('できる', 'ます'): 11, ('かもしれる', 'ます', 'ない'): 1, 
+%('ない', 'た'): 29, ('ちゃう', 'ます', 'た'): 2, 
+%('する', 'ます'): 23, ('られる', 'ます'): 4, ('できる',): 18, ('する', 'せる', 'た'): 12, ('たい', 'ない'): 1, ('する', 'ます', 'ない'): 4, ('せる', 'ない'): 1, ('らしい',): 2, ('出来る', 'ます', 'ない'): 1, ('かもしれる', 'ない'): 1, ('れる', 'ない', 'た'): 1, ('ない', 'だめ', 'だ'): 1, ('する', 'れる', 'そうだ'): 2, ('える',): 5, ('かねる', 'ない'): 1, ('れる', 'ようだ', 'なる', 'た'): 3, ('せる', 'ます', 'ない'): 2, ('続ける', 'た'): 1, ('られる', 'ようだ', 'なる', 'ます', 'た'): 1, ('できる', 'ます', 'た'): 7, ('する', 'せる'): 2, ('やすい', 'なる', 'た'): 1, ('くださる', 'ます'): 1, ('ようだ', 'なる', 'ます', 'た'): 2, ('える', 'ようだ', 'なる', 'た'): 1, ('する', 'がたい'): 1, ('する', 'れる', 'ます', 'た'): 6, ('ざるを得る', 'ます', 'ない'): 1, ('ようだ', 'なる', 'た'): 10, ('する', 'れる', 'ます'): 3, ('られる', 'ます', 'た'): 4, ('える', 'た'): 1, ('する', 'ます', 'う'): 1, ('する', 'ます', 'ない', 'でした'): 1, ('済み',): 1, ('ようだ',): 2, ('出す', 'た'): 1, ('出す',): 1, ('する', 'た', 'みたいだ'): 1, ('させる', 'た'): 2, ('きる', 'た'): 1, ('する', 'たい'): 2, ('続ける',): 2, ('ざるをえる', 'ます', 'ない'): 1, ('める', 'ます'): 6, ('せる', 'ます'): 1, ('ようだ', 'なる'): 7, ('られる', 'ようだ', 'なる', 'た'): 1, ('始める', 'た'): 2, ('ない', 'なる'): 2, ('かねる', 'ます'): 1, ('始める',): 2, ('する', 'れる', 'ない', 'た'): 1, ('える', 'ます'): 3, ('た', 'そうだ'): 4, ('れる', 'ます', 'ない'): 1, ('する', 'ようだ', 'なる'): 4, ('する', 'える', 'ない'): 1, ('ける', 'ます'): 3, ('できる', 'ない', 'た'): 1, ('する', 'ない', 'た'): 2, ('出来る', 'ます'): 1, ('れる', '始める'): 1, ('ます', 'う'): 4, ('する', '始める', 'た', 'そうだ'): 1, ('する', 'れる', 'た', 'ようだ'): 1, ('できる', 'まい'): 1, ('た', 'らしい'): 1, ('する', 'ようだ', 'なる', 'た'): 2, (' える', 'ます', 'ない'): 1, ('ける',): 2, ('られる', 'た', 'そうだ'): 1, ('られる', 'そうだ'): 1, ('れる', 'にくい'): 1, ('する', 'やすい'): 1, ('ける', 'た'): 1, ('する', 'れる', 'ます', 'ない'): 2, ('そ うだ',): 1, ('ない', 'た', 'ようだ'): 1, ('ます', 'たー'): 1, ('できる', 'た'): 3, ('べる',): 1, ('する', 'れる', 'ようだ', 'なる', 'ます', 'た'): 1, ('ない', 'ようだ'): 1, ('ける', 'ます', 'う'): 1, ('ちゃう', 'ます'): 1, ('する', 'そうだ'): 1, ('たい', 'なる'): 1, ('ようだ', 'なる', 'ます'): 1, ('たい', 'ない', 'た'): 1, ('やすい',): 3, ('かける',): 1, ('ない', 'なる', 'ようだ', 'なる', 'た'): 1, ('ない', 'そうだ'): 1, ('する', 'たい', 'ない', 'らしい'): 1, ('する', 'ちゃう', 'ます'): 1, ('た', 'ようだ'): 1, ('られる', 'たい', 'ない'): 1, ('える', 'ない'): 1, ('てる', 'ない'): 1, ('する', '易い', 'なる', 'た'): 1, ('れる', 'ない'): 1})
+
+
+% nai (negation)
+
+
+
+
+
+\subsection{Sesotho}
+
+Here, we describe how we determined the Sesotho verb prefixes and suffixes.
+
+Sesotho has composite forms consisting of an inflected auxiliary followed by an inflected verb.
+Both verbs carry subject agreement.
+While they are annotated as a unit in the Demuth corpus, they are treated as separate words in grammars \citep{doke1967textbook,guma1971outline}.
+We separated these, taking the main verb to start at its subject agreement prefix.
+We only considered main verbs for the experiments here.
+
+Forms in child utterances are annotated with well-formed adult forms; we took these here.
+
+In the Demuth corpus, each morpheme is annotated; a one- or two-letter key indicates the type of morpheme (e.g. subject agreement, TAM marker).
+We classified morphemes by this annotation.
+
+
+According to \cite{demuth1992acquisition}, affixes in the Sesotho verb have the following order:
+\begin{enumerate}
+    \item Subject agreement
+    \item Tense/aspect
+    \item Object agreement
+    \item Verb stem
+    \item `Extension'/perfect/passive markers, where `extension' refers to causative, neuter/stative, reversive, etc.
+    \item Mood
+\end{enumerate}
+We refined this description by considering all morpheme types occurring at least 50 times in the corpus.
+
+As in Japanese, morphemes show different forms depending on their environment, and the corpus contains some instances of fused neighboring morphemes that were not segmented further.
+
+
+\paragraph{Prefixes}
+
+
+\begin{enumerate}
+    \item Subject agreement: 
+    
+    This morpheme encodes agreement with the subject, for person, number, and noun class (the latter only in the 3rd person) \cite[\textsection 395]{doke1967textbook} \cite[p. 162]{guma1971outline}.
+    
+    In the Demuth corpus, this is annotated as \textit{sm} (17K occurrences) for ordinary forms, and \textit{sr} (193 occurrences) for forms used in relative clauses.
+
+   
+    
+    \item Negation:
+    
+    In various TAM forms, negation is encoded with a morpheme -\textit{sa}- in this position (362 occurrences) \cite[p. 172]{guma1971outline} \cite[\textsection 429]{doke1967textbook}.
+    Common allomorphs in the corpus include \textit{ska}, \textit{seka}, \textit{sa}, \textit{skaba}.
+    
+    
+%    sa used in Negative Dependent Present (Paroz 1946, p.31) and Perfect (ibid p. 80). E.g. Sec 13.38 p.172 in Guma 1971. -sa- and -se- Lombard 1985 p. 108, appear in different moods.
+    %What is the order of NEGATION and TENSE/ASPECT?
+    
+    \item Tense/Aspect/Mood (13K occurrences)
+    
+    Tense/aspect marker (t\^{} 13K) \cite[p. 165]{guma1971outline}
+    
+    Common TAM markers in this position in the corpus include, with the labels provided in the Demuth corpus:
+    
+    \begin{itemize}
+    \item -tla-, -tlo-, -ilo- future \cite[\textsection 410--412]{doke1967textbook}
+    \item -a- present \cite[\textsection 400]{doke1967textbook}
+    \item -ka- potential \cite[\textsection 422--428]{doke1967textbook}
+    \item -sa- persistive \cite[\textsection 413--418]{doke1967textbook}
+    \item -tswa- recent past \cite[\textsection 404--406]{doke1967textbook} 
+    %\item 
+    %..
+    %Past subjunctive
+    
+    
+    %Potential -ka- (cannot be combined with negation marker in the previous slot, \cite[\textsection 424]{doke1967textbook}).
+    \end{itemize}
+    
+    
+    %Some of the common markers in the corpus are t\^{}f for future and t\^{}pf for perfect.
+    %(e.g., ile- for remote past \cite[\textsection 177]{doke1967textbook})
+    
+    In the corpus, TAM prefixes are often fused with the subsequent object marker.
+    
+    
+    
+    \item OBJECT agreement (labeled om, 6K occurrences) or reflexive (labeled rf, 751 occurrences).
+    
+    Similar to subject agreement, object agreement denotes person, number, and noun class features of the object.
+    Unlike subject agreement, it is optional \cite[\textsection 459]{doke1967textbook}.
+    
+    Object agreement and reflexive marking are mutually exclusive \cite[p. 165]{guma1971outline}.
+\end{enumerate}
+
+In addition to these morphemes used in finite verbs, there is an \textit{infinitive} prefix \textit{ho}- (labeled `if', 314 occurrences) \cite[\textsection\textsection 378-384]{doke1967textbook}, which is compatible with TAM markers \cite[\textsection 379]{doke1967textbook} and object agreement \cite[\textsection 382]{doke1967textbook}.
+%Additionally FINITENESS (?) Conditional morpheme (\emph{ho}, `if', 314), comes before object agreement.
+
+%In agreement with Bybee's hierarchy, subject agreement is encoded in a position further away than TAM features.
+
+
+%TODO ha- negation is a prefix coming before the subject agreement prefix (Guma 1971, p. 164).  ga- in Lomard 1985 p. 108.
+
+
+
+%Also some merging between tense and object markers. for the lemma-based version, have to construct a version where all of this merging is undone (e.g. including a slash, or t\^{}.om2s)
+
+
+\paragraph{Verb Suffixes in Sesotho}
+
+Again, we extracted morpheme types occurring at least 50 times.
+
+\begin{enumerate}
+\item Reversive: (labeled \textit{rv}, 214 occurrences),  \cite[\textsection 345]{doke1967textbook}.
+    
+    This suffix changes semantics.
+    Examples: tlama `bind' -- tlam\textoverline{o}lla `loosen', etsa `do' -- ets\textoverline{o}lla `undo' \citep[\textsection 346]{doke1967textbook}.
+    Such suffixes are found across Bantu languages \cite{schadeberg2003derivation}.
+
+
+    %General references (comparative Bantu):
+%Schadeberg, Thilo C. 2003. Derivations. In Derek Nurse and Gerard Philippson (eds.), The Bantu languages, 71–89. London: Routledge.
+%Doke, Clement. 1935. Bantu linguistic terminology. London: Longman, Green \& Co
+%Guthrie, Malcolm. 1962. The status of radical extensions in Bantu languages. Journal of African Languages 1(3). 202–220.
+
+
+    \item VALENCE:
+    \begin{enumerate}
+    \item causative (labeled \textit{c}, 1K occurrences), -\textit{isa} (with morphophonological changes) \cite[\textsection 325]{doke1967textbook}
+    
+
+    
+    \item neuter (labeled \textit{nt}, 229 occurrences), -\textit{eha}, -\textit{ahala} \cite[\textsection 307]{doke1967textbook}
+    
+    The neuter suffix reduces valence: lahla `throw away' -- lahlela `get lost', s\textoverline{e}nya `to damage' -- s\textoverline{e}nyeha `to get damaged' \citep[\textsection 308]{doke1967textbook}.
+
+    
+    
+    \item applicative
+    (labeled \textit{ap}, 2K occurrences) -el- \cite[\textsection 310]{doke1967textbook}
+    
+    The applicative suffix increases valence: b\textoverline{o}lela `to say' b\textoverline{o}lella `to say to (s.o.)' \citep[\textsection 310]{doke1967textbook}.
+    
+    %\cite[p. 109]{lombard1969handbook}
+    
+%    Example from Demuth corpus: 
+    
+ %   I am lighting for you
+    
+  %  ke-a-u-khan-ts-ets-a
+    
+   % sm1s-t\^{}p-om2s-shine-c-ap-m\^{}in
+    
+    
+%    Leave my blanket alone then
+    
+ %   tl-oh-el-a kobo ya-ka he
+    
+  %  come-rv-ap-m\^{}i blanket(9,10) 9-1s ij
+    
+    
+    
+    \item Perfective/Completive -\textit{ella} (annotated cl, 66 occurrences) \cite[\textsection 336]{doke1967textbook}
+    
+    
+    This does not actually change valence, but it is formally a reduplication of the applicative suffix \cite[\textsection 336]{doke1967textbook}, and as such its ordering behavior patterns with that of valence suffixes, in particular, it is placed before the passive suffix.\footnote{Example from the Demuth corpus: u-neh-el-ets-w-a-ng t\^{}p.om2s-give-ap-cl-p-m\^{}in-wh `What is it that you want passed to you?'.}
+    
+    \item Reciprocal -\textit{ana} (annotated rc, 103 times)  \cite[\textsection 338]{doke1967textbook}
+    
+    This reduces valence: rata `to love' -- ratana `to love another' \citep[\textsection 338]{doke1967textbook}.
+    
+    \end{enumerate}
+    
+    Some of these suffixes can be stacked, e.g., see \cite[\textsection 345]{doke1967textbook} for reversive+causative, and \cite[\textsection 314-315]{doke1967textbook} for applicative suffixes applied to other valence affixes.\footnote{Example of reciprocal+applicative from Demuth corpus: ba-arol-el-an-a sm2-t\^{}p\_divide-ap-rc-m\^{}in `Do they share?'}
+    
+    Some other suffixes documented in the literature do not occur frequently or are not annotated in the corpus (e.g., the associative suffix \cite[textsection 343]{doke1967textbook}).
+    
+    \item VOICE: passive -\textit{w}- (labeled \textit{p}, 1K occurrences) \cite[\textsection 300]{doke1967textbook} 
+    
+    %\cite[p. 114]{lombard1969handbook}
+    
+    %Passive follows applicative: sho-el-oa die-APPL-PASS \cite[\textsection 324]{doke1967textbook}
+    
+    
+    \item TENSE: tense (labeled t\^{}, 3K occurrences) .
+    
+    The only tense suffix is the perfect affix -\textit{il}-, which has a range of allomorphs depending on the preceding stem and valence/voice suffixes, if present \cite[\textsection 369]{doke1967textbook}, \cite[p. 167]{guma1971outline}. % \cite[p. 116]{lombard1969handbook}.
+    Common morphs in the Demuth corpus are -il- and -its-.
+    
+     
+    \item MOOD: Mood (labeled m\^{}, 37K occurrences)
+    
+    In the Demuth corpus, the following mood endings are labeled (the analysis provided by \cite{demuth1992acquisition} is different from that provided by \cite{doke1967textbook}, meaning the citations are only approximate):
+    
+    \begin{enumerate}
+    \item Imperative (labeled IMP) \cite[\textsection 386--387]{doke1967textbook}: singular (-e, labeled IMP) \cite[\textsection 386]{doke1967textbook} and plural (-ang, labeled IMP.PL) \cite[\textsection 386]{doke1967textbook}.
+    
+    Similar subjunctive SBJV1 -\textit{e} (singular), -\textit{eng} (plural).
+    
+    \item IND (-a, -e) and NEG  (-e, -a) \cite[\textsection 394--421]{doke1967textbook}.
+    
+    \item subjunctive SBJV2 (-e, -a)  \cite[\textsection 444--455]{doke1967textbook}
+    \end{enumerate}
+    
+    %We note that the analysis of these suffixes as mood endings follows \cite{demuth1992acquisition}.
+    
+    % Demuth:
+    %The mood of infinitives is m^in if affirmative indicative, m^x if neg in indicative assertive, declarative, affirmative statements 
+    %pt participial in compound tenses, subordinate clauses, relative clauses 
+    %x negative in negative utterances ha ke-tseb-e ng sm1s-t^p_v^know-m^x I don’t know 
+    %i imperative m-ph-e om1s-v^give-m^i Give me. 
+    %ip imp plural bon-ang v^see-m^ip Look! 
+    %s subjunctive ere ke-bon-e  ht sm1s-t^p_v^see-m^s Let me see. 
+    %sp plural subjunctive ha re-y-eng ht sm1p-t^p_v^go-m^sp Let’s go. 
+    
+    \item Interrogative (labeled \textit{wh}, 2K times) and relative (labeled \textit{rl}, 857 times) markers -\textit{ng}.
+    
+    The interrogative marker -\textit{ng} is a clitic form of \textit{eng} `what' according to \cite[p. 168]{guma1971outline}, \cite[\textsection 160, 320, 714]{doke1967textbook}; it is treated as a suffix in the Demuth corpus.
+    
+    The relative marker -\textit{ng} is affixed to verbs in relative clauses are marked with -ng \cite[\textsection 271, 793]{doke1967textbook}.
+    
+
+\end{enumerate}
+
+Examples from \cite{demuth1992acquisition}:
+
+\begin{tabular}{lllllllll|lllllll}
+Sbj. & Ng. & TAM & Obj. & V & Val. & Voice & Tense & Mood \\ \hline
+o       &          &     &        & pheh &         &       & il    & e  & (Thabo) cooked (food) (\cite{demuth1992acquisition} (15)) \\
+ke      &          &     & e      & f   &          & uw    &      & e   & (I) was given (the book) (\cite{demuth1992acquisition} (26c)) \\
+o       &          &     &        & pheh & el      &      &       & a & (Thabo) cooks (food for Mpho) (\cite{demuth1992acquisition} (41))\\
+o       &          &     &        & pheh & el      & w    &      & a & (Mpho) is being cooked (food) (\cite{demuth1992acquisition} (42))
+\end{tabular}
+
+
+
+
+
+
+
+
+\section{Some theoretical thoughts (scratch area)}
+\subsection{Learnability bounds}
+
+\paragraph{Upper bounds via n-gram models:}
+Want to show that, if we know a process has stronger locality, there is a learning algorithm with lower sample complexity.
+
+\begin{thm}
+The class of processes with fixed bounds on $H_0$ on $EE$ can be learned up to KL loss $2\epsilon$ with ... samples with prob ...
+\end{thm}
+
+We want to learn a process to average KL distance $2\epsilon$.
+Assume excess entropy is $\leq I$, then only need to learn $N := I/\epsilon$-gram-model for KL loss $\epsilon$.
+
+(Or, to get a better bound, take $N$ so that $\sum_{t=N}^\infty I_t < \epsilon$.).
+
+So $N = \sum_{t=1}^\infty t I_t/\epsilon$.
+How many samples are needed to learn this up to $\epsilon$? Probably that will scale with the block entropy, which is $N H_0 + \sum_{t=1}^N t I_t$, with $H_0$ the unigram entropy.
+So the sample complexity would seem to scale with
+$$\exp\left(H_0 \sum_{t=1}^\infty t I_t/\epsilon + \sum_{t=1}^{\sum_{t=1}^\infty t I_t/\epsilon} t I_t\right)$$
+
+
+Want to learn $P(Y|X)$ up to $\mathbb{E}_x D_{KL}(P(y|x)||\hat P(y|x)) \leq \epsilon$.
+How many i.i.d. samples from $(X,Y)$ do we need?
+
+Assume the distribution of $Z$ has `low' entropy.
+How many i.i.d. samples do we need to get a good estimate of $P(Z)$?
+Something scaling with $\exp(H(Z))$?
+
+Convergence
+
+references:
+
+\url{https://arxiv.org/pdf/1904.02291.pdf} leads to:
+
+$$Pr(D_{KL}(\hat P(z)||P(z)) \geq \epsilon) \leq e^{-n\epsilon} \left(\frac{e\epsilon n}{|V|-1}\right)^{|V|-1}$$
+if $V$ is the set of values of $Z$, when $\epsilon > \frac{|V|-1}{n}$.
+
+
+Is it possible to get something similar but with $|V|$ replaced with $H[X]+|V_Y|$?
+
+\begin{thm}(must be something standard)
+Let $X$ be an RV. Then $1-\epsilon$ of its probability mass is concentrated on at most
+???
+values.
+\end{thm}
+
+\begin{proof}
+Assume no way of covering $1-\epsilon$ probability mass takes less than $K$ values.
+That is (ordering $p_i$ by magnitude downwards):
+$$\sum_{i=1}^K p_i \leq 1-\epsilon$$
+
+Want to show that $H[X]$ cannot be too small.
+
+First, note
+
+$(1-\epsilon) - (K-1) \frac{1-\epsilon}{|V|-K} \geq p_1 \geq \dots \geq p_K \geq \frac{1-\epsilon}{|V|-K}$
+
+or (reformulating slightly)
+
+$(1-\epsilon) (1 - (K-1) \frac{1}{|V|-K}) \geq p_1 \geq \dots \geq p_K \geq \frac{1-\epsilon}{|V|-K}$
+
+$H[X] \geq \sum_{i=1}^K \frac{1-\epsilon}{|V|-K} \log \frac{1}{(1-\epsilon) (1 -  \frac{K-1}{|V|-K})} = K \frac{1-\epsilon}{|V|-K} \log \frac{1}{(1-\epsilon) (1 -  \frac{K-1}{|V|-K})} = K \frac{1-\epsilon}{|V|-K} \log \frac{1}{(1-\epsilon) \frac{|V|-K-K+1}{|V|-K})} = K \frac{1-\epsilon}{|V|-K} \log \frac{{|V|-K}}{(1-\epsilon) (|V|-2K+1)}$
+
+
+And so
+
+
+$H[X] \geq  K \frac{1-\epsilon}{|V|-K} \log \frac{{|V|-K}}{(1-\epsilon) (|V|-2K+1)} =  (1-\epsilon) \frac{K}{|V|-K} \log \frac{{|V|-K}}{(1-\epsilon) (|V|-2K+1)} $
+If $K << |V|$, this is close to zero.
+
+-----
+
+So
+$H[X] \geq K \frac{1-\epsilon}{|V|-K} \log \frac{{|V|-K}}{(1-\epsilon) (|V|-K)} = \frac{K}{|V|-K} (1-\epsilon) \log \frac{1}{(1-\epsilon)}$
+
+So
+
+$\frac{K}{|V|-K} \leq H[X] \frac{1}{(1-\epsilon) \log \frac{1}{(1-\epsilon)}}$
+
+However, this bound does not seem very useful, as it never allows one to conclude something like $K << |V|$.
+
+Or, a better bound:
+
+$H[X] \geq  - (1-\epsilon) \log \left[ (1-\epsilon)  \left(\frac{|V|-2K+1}{|V|-K}\right) \right] + \epsilon \log \frac{1}{\epsilon}$
+
+So If $K << |V|$, then $H[X] \geq ... \approx -(1-\epsilon) \log (1-\epsilon)  + \epsilon \log \frac{1}{\epsilon}$ .
+
+
+\end{proof}
+
+
+%Then
+%$$H[X] \leq (1-\epsilon) \log \frac{K}{1-\epsilon} + \epsilon \log \frac{|V|-K}{\epsilon}$$
+%So
+%$$H[X] \leq (1-\epsilon) \log \frac{K}{1-\epsilon} + \epsilon \log \frac{|V|}{\epsilon}$$
+%So
+%$$H[X] - \epsilon \log \frac{|V|}{\epsilon} \leq (1-\epsilon) \log \frac{K}{1-\epsilon}$$
+%So
+%$$\exp\left(\frac{H[X] - \epsilon \log \frac{|V|}{\epsilon}}{1-\epsilon}\right) (1-\epsilon) \leq K$$
+%Taking the contrapositive, if
+%$$\exp\left(\frac{H[X] - \epsilon \log \frac{|V|}{\epsilon}}{1-\epsilon}\right) (1-\epsilon) > K$$
+%then $$\sum_{i=1}^K p_i > 1-\epsilon$$
+
+
+To get intuition, if $I_t = \alpha \cdot t^{-3}$, then excess entropy $I=\alpha \pi^2/6$, and (bounds are a bit crude here)
+\begin{align}
+& H_0 \sum_{t=1}^\infty t \alpha t^{-3}/\epsilon + \sum_{t=1}^{\sum_{t=1}^\infty t \alpha t^{-3}/\epsilon} t \alpha \cdot t^{-3} \\
+= & H_0 \alpha/\epsilon \cdot \sum_{t=1}^\infty  t^{1-3} + \sum_{t=1}^{\sum_{t=1}^\infty t \alpha t^{-3}/\epsilon} t \alpha \cdot t^{-3} \\
+\leq & H_0 \alpha/\epsilon \cdot \pi^2/6 + \sum_{t=1}^{\alpha/\epsilon \cdot \pi^2/6} t \alpha \cdot t^{-3} \\
+= & \frac{H_0 \alpha \pi^2}{6 \epsilon} + \alpha \sum_{t=1}^{\alpha/\epsilon \cdot \pi^2/6}  t^{-2} \leq  \frac{H_0 \alpha \pi^2}{6 \epsilon} + \alpha \pi^2/6  \leq  \left(\frac{H_0}{\epsilon} + 1\right) \frac{\alpha \pi^2}{6} \\
+\end{align}
+
+
+Question: Can there be meaningful lower bounds in terms of locality?
+
+Question: Can we give a lower bound by considering that learning sequences itself requires short-term memory?
+
+try to derive something for Trading Value and Information paper
+
+
+\subsection{Optimization}
+Area under $t - H_t$ curve up to $T$: $\sum_{t=1}^T H_t = T H + \sum_{t=1}^T t I_t$
+
 We cannot optimize for AUC using the method of (CITE), because we cannot construct an unbiased gradient estimator
 $AUC \propto \sum_{t} (\sum_{s \leq t} I_s) tI_t = \sum_{s \leq t}  tI_t I_s = I_1^2 + 2 I_1 I_2 + 2 I_2^2 + \dots$
 
