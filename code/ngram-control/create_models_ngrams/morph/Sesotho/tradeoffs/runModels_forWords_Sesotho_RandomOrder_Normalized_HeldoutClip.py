@@ -8,6 +8,9 @@ models_sfx = glob.glob(PATH+"optimized_Sesotho_Acqdiv_forWords_Sesotho_OptimizeO
 
 models_pfx.sort()
 models_sfx.sort()
+import random
+random.shuffle(models_pfx)
+random.shuffle(models_sfx)
 
 import subprocess
 
