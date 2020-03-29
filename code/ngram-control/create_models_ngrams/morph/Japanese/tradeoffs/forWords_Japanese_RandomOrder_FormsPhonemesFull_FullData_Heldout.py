@@ -366,6 +366,8 @@ def calculateTradeoffForWeights(weights):
        devSurprisalTable.append(surprisal)
        print("Surprisal", surprisal, len(itos))
     print(devSurprisalTable)
+    for k in range(len(devSurprisalTable)):
+        devSurprisalTable[k] = min(devSurprisalTable[:k+1])
     mis = [devSurprisalTable[i] - devSurprisalTable[i+1] for i in range(len(devSurprisalTable)-1)]
     tmis = [mis[x]*(x+1) for x in range(len(mis))]
     #print(mis)
