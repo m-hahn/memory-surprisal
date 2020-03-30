@@ -26,5 +26,5 @@ subprocess.call(["/u/nlp/anaconda/main/anaconda3/envs/py37-mhahn/bin/python", "f
 for _ in range(10):
   model_pfx = "RANDOM"
   model_sfx = "RANDOM"
-  subprocess.call(["/u/nlp/anaconda/main/anaconda3/envs/py37-mhahn/bin/python", "forWords_Sesotho_RandomOrder_FormsWordsGraphemes_HeldoutClip.py", "--model_pfx", model_pfx, "--model_sfx", model_sfx])
+  subprocess.call(["/u/nlp/anaconda/main/anaconda3/envs/py37-mhahn/bin/python", "forWords_Sesotho_RandomOrder_FormsWordsGraphemes.py", "--model_pfx", model_pfx, "--model_sfx", model_sfx])
  

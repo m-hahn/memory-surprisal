@@ -7,7 +7,7 @@ library(ggplot2)
 data = read.csv("results.tsv", sep="\t")
 
 
-data = data %>% filter(Script == "forWords_Sesotho_RandomOrder_Normalized.py")
+data = data %>% filter(Script == "forWords_Sesotho_RandomOrder_Normalized_HeldoutClip.py")
 
 unigramCE = mean(data$UnigramCE)
 
@@ -26,12 +26,12 @@ plot = plot + theme(axis.line = element_line(colour = "black"),
                 panel.grid.minor = element_blank(),
                 panel.border = element_blank(),
                     panel.background = element_blank())
-ggsave(plot, file=paste("figures/Sesotho-suffixes-byMorphemes-it.pdf", sep=""), height=4, width=4)
+ggsave(plot, file=paste("figures/Sesotho-suffixes-byMorphemes-it-heldout.pdf", sep=""), height=4, width=4)
 
 data = read.csv("results_interpolated.tsv", sep="\t")
 
 
-data = data %>% filter(Script == "forWords_Sesotho_RandomOrder_Normalized.py")
+data = data %>% filter(Script == "forWords_Sesotho_RandomOrder_Normalized_HeldoutClip.py")
 
 data = data %>% group_by(Type, Memory) %>% summarise(Surprisal=unigramCE-median(MI))
 
@@ -46,14 +46,14 @@ plot = plot + theme(axis.line = element_line(colour = "black"),
                 panel.grid.minor = element_blank(),
                 panel.border = element_blank(),
                     panel.background = element_blank())
-ggsave(plot, file=paste("figures/Sesotho-suffixes-byMorphemes-memsurp.pdf", sep=""), height=4, width=4)
+ggsave(plot, file=paste("figures/Sesotho-suffixes-byMorphemes-memsurp-heldout.pdf", sep=""), height=4, width=4)
 
 
 ######################################
 
 data = read.csv("results_auc.tsv", sep="\t")
 
-data = data %>% filter(Script == "forWords_Sesotho_RandomOrder_Normalized.py")
+data = data %>% filter(Script == "forWords_Sesotho_RandomOrder_Normalized_HeldoutClip.py")
 
 
 data$Type = ifelse(data$Model %in% c("REAL", "RANDOM", "REVERSE"), as.character(data$Model), "Optimized")
@@ -70,7 +70,7 @@ plot = plot + theme(axis.line = element_line(colour = "black"),
                 panel.grid.minor = element_blank(),
                 panel.border = element_blank(),
                     panel.background = element_blank())
-ggsave(plot, file=paste("figures/Sesotho-suffixes-byMorphemes-auc.pdf", sep=""), height=4, width=4)
+ggsave(plot, file=paste("figures/Sesotho-suffixes-byMorphemes-auc-heldout.pdf", sep=""), height=4, width=4)
 
 barWidth = (max(data$AUC) - min(data$AUC))/30
 
@@ -79,7 +79,7 @@ plot = plot + theme_classic()
 plot = plot + theme(legend.position="none")
 plot = plot + geom_density(data= data_%>%filter(Type == "RANDOM"), aes(y=..scaled..)) 
 plot = plot + geom_bar(data = data_ %>% filter(!(Type %in% c("RANDOM"))) %>% group_by(Type) %>% summarise(AUC=mean(AUC)) %>% mutate(y=1),  aes(y=y, group=Type), width=barWidth, stat="identity", position = position_dodge())
-ggsave(plot, file=paste("figures/Sesotho-suffixes-byMorphemes-auc-hist.pdf", sep=""), height=4, width=4)
+ggsave(plot, file=paste("figures/Sesotho-suffixes-byMorphemes-auc-hist-heldout.pdf", sep=""), height=4, width=4)
 
 
 

@@ -19,7 +19,9 @@ def readTSV(x):
         try:
           vals=  [float(y[column]) for y in data]
         except ValueError:
+          print("NOT NUMERIC", column)
           vals=  [y[column] for y in data]
+          print(vals)
       for i in range(len(data)):
           data[i][column] = vals[i]
     return (header, data)
