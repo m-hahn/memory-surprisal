@@ -34,7 +34,7 @@ ggsave(plot, file=paste("figures/Sesotho-suffixes-byPhonemes-it-heldout.pdf", se
 data = read.csv("results_interpolated.tsv", sep="\t")
 
 
-data = data %>% filter(Script == "forWords_Sesotho_RandomOrder_FormsPhonemesGraphemes_HeldoutClip.py")
+data = data %>% filter(Script == "forWords_Sesotho_RandomOrder_FormsWordsGraphemes_HeldoutClip.py")
 
 data = data %>% group_by(Type, Memory) %>% summarise(Surprisal=unigramCE-median(MI))
 
