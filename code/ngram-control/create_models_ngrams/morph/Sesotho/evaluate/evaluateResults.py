@@ -29,7 +29,6 @@ def mean(x):
 from math import sqrt
 
 def sd(x):
-    print(x)
     return sqrt(mean([y**2 for y in x]) - mean(x)**2+1e-10)
 
 results = {}
