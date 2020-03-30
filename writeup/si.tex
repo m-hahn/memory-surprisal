@@ -1377,15 +1377,23 @@ o       &          &     &        & pheh & el      & w    &      & a & (Mpho) is
 
 \begin{figure}
 \begin{center}
-\begin{tabular}{c||llll}
-             &       Pairs & Full \\ \hline\hline
-Optimized for Phoneme Prediction   &   0.976 (SD 0.007) & 0.971 (SD 0.011) \\
-Optimized for Morpheme Prediction  &   0.873 (SD 0.154) & 0.85 (SD 0.184) \\
-Random Baseline     &  0.519 (SD 0.177) & 0.559 (SD 0.202) \\
+\begin{tabular}{ccc||llll}
+	& &              &       Pairs & Full \\ \hline\hline
+	Tokens &	Simple & Optimized for Phoneme Prediction   &   0.976 (SD 0.006) & 0.972 (SD 0.01) \\
+	&	& Optimized for Morpheme Prediction  &   0.93 (SD 0.01) & 0.919 (SD 0.008) \\ \hline
+	&	Heldout & Optimized for Phoneme Prediction   &   0.962 (SD 0.001) & 0.957 (SD 0.002) \\
+	&	& Optimized for Morpheme Prediction  &   0.954 (SD 0.009) & 0.945 (SD 0.012) \\ \hline
+	&	&	Random Baseline    &  0.504 (SD 0.0) & 0.414 (SD 0.0) \\ \hline \hline
+	Types & Simple & Optimized for Phoneme Prediction   &   0.968 (SD 0.006) & 0.961 (SD 0.011) \\
+	& & Optimized for Morpheme Prediction  &   0.903 (SD 0.014) & 0.883 (SD 0.011) \\ \hline
+	& Heldout & Optimized for Phoneme Prediction   &   0.946 (SD 0.002) & 0.937 (SD 0.002) \\
+	& & Optimized for Morpheme Prediction  &   0.938 (SD 0.011) & 0.922 (SD 0.014) \\ \hline
+	& & Random Baseline    &  0.482 (SD 0.0) & 0.379 (SD 0.0) \\
 \end{tabular}
 \end{center}
-\caption{Accuracy of approximately optimized orderings, and of random baseline orderings, in predicting verb suffix order in Japanese. `Pairs' denotes the rate of pairs of morphemes that are ordered correctly, and `Full' denotes the rate of verb forms where order is predicted entirely correctly. We show means and standard deviations over different runs of the optimization algorithm (`Optimized'), and over different random orderings (`Random').}\label{fig:acc-japanese}
+\caption{Accuracy of approximately optimized orderings, and of random baseline orderings, in predicting verb suffix order in Japanese. `Pairs' denotes the rate of pairs of morphemes that are ordered correctly, and `Full' denotes the rate of verb forms where order is predicted entirely correctly. We show means and standard deviations over different runs of the optimization algorithm (`Optimized'), and over different random orderings (`Random'). `Tokens' resultsare obtained by counting each form by the number of occurrences in the data set; `Types' results count each form only once. `Simple' models are optimized for in-sample AUC, `Heldout' models are optimized for heldout AUC.}\label{fig:acc-japanese}
 \end{figure}
+
 
 
 \subsection{Results: Sesotho}
@@ -1397,6 +1405,10 @@ Random Baseline     &  0.519 (SD 0.177) & 0.559 (SD 0.202) \\
 \includegraphics[width=0.3\textwidth]{../code/ngram-control/create_models_ngrams/morph/Sesotho/tradeoffs/figures/Sesotho-suffixes-byPhonemes-it.pdf}
 \includegraphics[width=0.3\textwidth]{../code/ngram-control/create_models_ngrams/morph/Sesotho/tradeoffs/figures/Sesotho-suffixes-byPhonemes-memsurp.pdf}
 \includegraphics[width=0.3\textwidth]{../code/ngram-control/create_models_ngrams/morph/Sesotho/tradeoffs/figures/Sesotho-suffixes-byPhonemes-auc-hist.pdf}
+
+		\includegraphics[width=0.3\textwidth]{../code/ngram-control/create_models_ngrams/morph/Sesotho/tradeoffs/figures/Sesotho-suffixes-byPhonemes-it-heldout.pdf}
+\includegraphics[width=0.3\textwidth]{../code/ngram-control/create_models_ngrams/morph/Sesotho/tradeoffs/figures/Sesotho-suffixes-byPhonemes-memsurp-heldout.pdf}
+\includegraphics[width=0.3\textwidth]{../code/ngram-control/create_models_ngrams/morph/Sesotho/tradeoffs/figures/Sesotho-suffixes-byPhonemes-auc-hist-heldout.pdf}
 \end{center}
 	\caption{Sesotho verb affixes, measuring prediction on the level of phonemes, for real (blue), random (green), and approximately optimized (red) orderings. Left: $I_t$ as a function of $t$. Center: Memory-surprisal tradeoff. Right: Areas under the curve for the memory-surprisal tradeoff.}\label{fig:jap-phon}
 \end{figure}
@@ -1407,6 +1419,10 @@ Random Baseline     &  0.519 (SD 0.177) & 0.559 (SD 0.202) \\
 \includegraphics[width=0.3\textwidth]{../code/ngram-control/create_models_ngrams/morph/Sesotho/tradeoffs/figures/Sesotho-suffixes-byMorphemes-it.pdf}
 \includegraphics[width=0.3\textwidth]{../code/ngram-control/create_models_ngrams/morph/Sesotho/tradeoffs/figures/Sesotho-suffixes-byMorphemes-memsurp.pdf}
 \includegraphics[width=0.3\textwidth]{../code/ngram-control/create_models_ngrams/morph/Sesotho/tradeoffs/figures/Sesotho-suffixes-byMorphemes-auc-hist.pdf}
+
+		\includegraphics[width=0.3\textwidth]{../code/ngram-control/create_models_ngrams/morph/Sesotho/tradeoffs/figures/Sesotho-suffixes-byMorphemes-it-heldout.pdf}
+\includegraphics[width=0.3\textwidth]{../code/ngram-control/create_models_ngrams/morph/Sesotho/tradeoffs/figures/Sesotho-suffixes-byMorphemes-memsurp-heldout.pdf}
+\includegraphics[width=0.3\textwidth]{../code/ngram-control/create_models_ngrams/morph/Sesotho/tradeoffs/figures/Sesotho-suffixes-byMorphemes-auc-hist-heldout.pdf}
 \end{center}
 	\caption{Sesotho verb affixes, measuring prediction on the level of morphemes, for real (blue), random (green), and approximately optimized (red) orderings. Left: $I_t$ as a function of $t$. Center: Memory-surprisal tradeoff. Right: Areas under the curve for the memory-surprisal tradeoff.}\label{fig:jap-morph}
 \end{figure}
@@ -1416,17 +1432,35 @@ Random Baseline     &  0.519 (SD 0.177) & 0.559 (SD 0.202) \\
 %cp ~/memory-surprisal/code/ngram-control/create_models_ngrams/morph/Sesotho/tradeoffs/figures/* figures/
 
 
+
 \begin{figure}
-\begin{tabular}{cc||ll|ll}
-             &              & \multicolumn{2}{c}{Prefixes}    & \multicolumn{2}{|c}{Suffixes} \\
-             &              & Pairs & Full & Pairs & Full \\ \hline\hline
-             Phonemes   &   Optimized  &  0.987 (SD 0.004) & 0.983 (SD 0.006) & 0.914 (SD 0.131) & 0.906 (SD 0.14) \\
-           &   Random  &  0.468 (SD 0.321) & 0.364 (SD 0.353) & 0.459 (SD 0.224) & 0.409 (SD 0.235) \\ \hline
-Morphemes  &   Optimized  &  0.997 (SD 0.0) & 0.995 (SD 0.0) & 0.804 (SD 0.0) & 0.721 (SD 0.0) \\
-           &   Random  &  0.521 (SD 0.331) & 0.43 (SD 0.349) & 0.468 (SD 0.233) & 0.401 (SD 0.251) \\
+\begin{tabular}{cccc||ll|ll}
+	&& &              & \multicolumn{2}{c}{Prefixes}    & \multicolumn{2}{|c}{Suffixes} \\
+	  &&   &              & Pairs & Full & Pairs & Full \\ \hline\hline
+	Tok. & Simple & Phon.   &   Opt.  &  0.987 (SD 0.004) & 0.983 (SD 0.006) & 0.914 (SD 0.131) & 0.906 (SD 0.14) \\
+	& &           &   Rand.  &  0.322 (SD 0.253) & 0.195 (SD 0.24) & 0.588 (SD 0.155) & 0.554 (SD 0.167) \\
+	& & Morph.  &   Opt.  &  0.997 (SD 0.0) & 0.995 (SD 0.0) & 0.804 (SD 0.0) & 0.721 (SD 0.0) \\
+	& &           &   Rand.  &  0.672 (SD 0.305) & 0.604 (SD 0.338) & 0.423 (SD 0.204) & 0.332 (SD 0.211) \\ \hline
+	&	Heldout & Phon.   &   Opt.  &  0.993 (SD 0.0) & 0.989 (SD 0.0) & 0.792 (SD 0.102) & 0.734 (SD 0.13) \\
+	 &&  &   Rand.  &  0.322 (SD 0.253) & 0.195 (SD 0.24) & 0.588 (SD 0.155) & 0.554 (SD 0.167) \\
+	&&Morph.  &   Opt.  &  0.988 (SD 0.0) & 0.989 (SD 0.0) & 0.756 (SD 0.014) & 0.676 (SD 0.017) \\
+	  && &   Rand.  &  0.672 (SD 0.305) & 0.604 (SD 0.338) & 0.423 (SD 0.204) & 0.332 (SD 0.211) \\ \hline\hline
+	Typ. & Simple & Phon.   &   Opt.  &  0.979 (SD 0.006) & 0.972 (SD 0.009) & 0.92 (SD 0.113) & 0.912 (SD 0.116) \\
+	& &           &   Rand.  &  0.338 (SD 0.248) & 0.205 (SD 0.219) & 0.592 (SD 0.137) & 0.55 (SD 0.149) \\
+	& & Morph.  &   Opt.  &  0.994 (SD 0.0) & 0.99 (SD 0.0) & 0.841 (SD 0.0) & 0.754 (SD 0.0) \\
+	& &           &   Rand.  &  0.666 (SD 0.302) & 0.588 (SD 0.329) & 0.438 (SD 0.213) & 0.329 (SD 0.22) \\ \hline
+	&Heldout&Phon.   &   Opt.  &  0.988 (SD 0.0) & 0.981 (SD 0.0) & 0.831 (SD 0.079) & 0.77 (SD 0.107) \\
+	&&           &   Rand.  &  0.338 (SD 0.248) & 0.205 (SD 0.219) & 0.592 (SD 0.137) & 0.55 (SD 0.149) \\
+	&&Morph.  &   Opt.  &  0.98 (SD 0.0) & 0.98 (SD 0.0) & 0.783 (SD 0.021) & 0.698 (SD 0.025) \\
+	&&           &   Rand.  &  0.666 (SD 0.302) & 0.588 (SD 0.329) & 0.438 (SD 0.213) & 0.329 (SD 0.22) \\
 \end{tabular}
-\caption{Accuracy of approximately optimized orderings, and of random baseline orderings, in predicting verb affix order in Sesotho. `Pairs' denotes the rate of pairs of morphemes that are ordered correctly, and `Full' denotes the rate of verb forms where order is predicted entirely correctly. We show means and standard deviations over different runs of the optimization algorithm (`Optimized'), and over different random orderings (`Random').}\label{fig:acc-sesotho}
+\caption{Accuracy of approximately optimized orderings, and of random baseline orderings, in predicting verb affix order in Sesotho. `Pairs' denotes the rate of pairs of morphemes that are ordered correctly, and `Full' denotes the rate of verb forms where order is predicted entirely correctly. We show means and standard deviations over different runs of the optimization algorithm (`Opt.'), and over different random orderings (`Random'). `Tokens' resultsare obtained by counting each form by the number of occurrences in the data set; `Types' results count each form only once. `Simple' models are optimized for in-sample AUC, `Heldout' models are optimized for heldout AUC.}\label{fig:acc-sesotho}
 \end{figure}
+
+
+
+
+
 
 \section{Some theoretical thoughts (scratch area)}
 \subsection{Learnability bounds}
