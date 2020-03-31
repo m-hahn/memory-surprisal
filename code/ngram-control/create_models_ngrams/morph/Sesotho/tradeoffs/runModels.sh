@@ -1,0 +1,4 @@
+~/python-py37-mhahn runModels_forWords_Sesotho_RandomOrder_FormsWordsGraphemes_HeldoutClip.py
+~/python-py37-mhahn runModels_forWords_Sesotho_RandomOrder_FormsWordsGraphemes.py
+~/python-py37-mhahn runModels_forWords_Sesotho_RandomOrder_Normalized_HeldoutClip.py
+~/python-py37-mhahn runModels_forWords_Sesotho_RandomOrder_Normalized.py
