@@ -78,8 +78,22 @@ with open("results.tsv", "w") as outFile:
          #print(grammar[0])
          iterations, auc = grammar[0].split(" ")
          auc = float(auc)
-         convergenceHistory = grammar[1]
+         convergenceHistory = grammar[1].split(" ")
+         if 50 * len(convergenceHistory) < 1000: # exclude unfinished runs
+            continue
          arguments = grammar[2]
+         cutoffPerScript = {}
+         cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Prefixes_ByType.py'] = 12
+         cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Prefixes_ByType_HeldoutClip.py'] = 3
+         cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Suffixes_ByType.py'] = 12
+         cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Suffixes_ByType_HeldoutClip.py'] = 7
+         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Prefixes.py'] = 3
+         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Prefixes_HeldoutClip.py'] = 3
+         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Suffixes.py'] = 3
+         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Suffixes_HeldoutClip.py'] = 3
+         if opt_script in cutoffPerScript:
+           if "cutoff="+str(cutoffPerScript[opt_script]) not in arguments:
+             continue
          grammar = dict([x.split(" ") for x in grammar[3:]])
       #   print(grammar)
  #        print(f)
@@ -95,7 +109,7 @@ with open("results.tsv", "w") as outFile:
          #print(accuracy_full)
          #print(errors[:10])
          #auc = float(arguments[arguments.index(" ")+1:arguments.find(" ", arguments.find(" ")+1)])
-         resultsByOptScript[opt_script].append(((auc, script, opt_script, model, accuracy_pairs.strip(), accuracy_full.strip()), arguments, weights, accuracy_full, errors[:10]))
+         resultsByOptScript[opt_script].append(((auc, len(convergenceHistory)*50, script, opt_script, model, accuracy_pairs.strip(), accuracy_full.strip()), arguments, weights, accuracy_full, errors[:10]))
 
 print("\n")
 print("\n")
@@ -114,3 +128,6 @@ for opt_script in sorted(list(resultsByOptScript)):
         print("---")
         for s in r:
           print(s)
+
+
+print(sorted(list(resultsByOptScript)))
