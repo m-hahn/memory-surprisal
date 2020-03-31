@@ -498,9 +498,9 @@ for iteration in range(1000):
   while suffixFrequency[coordinate] < 10 and random() < 0.95:
     coordinate = choice(itos_sfx)
   mostCorrect, mostCorrectValue = 0, None
-  for newValue in [-1] + [2*x+1 for x in range(len(itos_sfx))] + [weights_sfx[coordinate]]:
-     if random() < 0.8 and newValue != weights_sfx[coordinate]:
-        continue
+  for newValue in [-1] + [2*x+1 for x in range(len(itos_sfx))]: #+ [weights_sfx[coordinate]]:
+#     if random() < 0.8 and newValue != weights_sfx[coordinate]:
+ #       continue
      print(newValue, mostCorrect, coordinate,suffixFrequency[coordinate])
      weights_ = {x : y if x != coordinate else newValue for x, y in weights_sfx.items()}
      correctCount = calculateTradeoffForWeights(weights_)
