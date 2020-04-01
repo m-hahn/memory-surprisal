@@ -84,13 +84,13 @@ with open("results.tsv", "w") as outFile:
          arguments = grammar[2]
          cutoffPerScript = {}
          cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Prefixes_ByType.py'] = 12
-         cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Prefixes_ByType_HeldoutClip.py'] = 3
+         cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Prefixes_ByType_HeldoutClip.py'] = 7
          cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Suffixes_ByType.py'] = 12
          cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Suffixes_ByType_HeldoutClip.py'] = 7
-         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Prefixes.py'] = 3
-         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Prefixes_HeldoutClip.py'] = 3
-         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Suffixes.py'] = 3
-         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Suffixes_HeldoutClip.py'] = 3
+         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Prefixes.py'] = 12
+         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Prefixes_HeldoutClip.py'] = 4
+         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Suffixes.py'] = 12
+         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Suffixes_HeldoutClip.py'] = 4
          if opt_script in cutoffPerScript:
            if "cutoff="+str(cutoffPerScript[opt_script]) not in arguments:
              continue
