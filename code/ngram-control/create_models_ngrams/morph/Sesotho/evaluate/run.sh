@@ -1,0 +1,2 @@
+~/python-py37-mhahn run_forWords_Sesotho_EvaluateWeights_Prefixes_ByType.py
+~/python-py37-mhahn run_forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py

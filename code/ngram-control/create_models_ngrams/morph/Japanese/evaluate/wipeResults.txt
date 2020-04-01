@@ -1,0 +1,1 @@
+rm /u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_forWords_*Celex*.txt
