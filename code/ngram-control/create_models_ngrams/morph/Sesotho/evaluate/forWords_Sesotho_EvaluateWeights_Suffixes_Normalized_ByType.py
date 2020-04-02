@@ -194,23 +194,7 @@ prefixFrequency = defaultdict(int)
 suffixFrequency = defaultdict(int)
 dataChosen = []
 for verbWithAff in data:
-  suffixesResult = []
-  for x in verbWithAff:
-    if x[header["type1"]] == "sfx":
-       segmented = getSegmentedForms(x)
-       if segmented is None:
-         suffixesResult = None
-         break
-       suffixesResult += segmented
-    elif x[header["type1"]] == "v":
-       segmented = getSegmentedFormsVerb(x)
-       suffixesResult += segmented
-    else:
-       suffixesResult.append(x)
-  if suffixesResult is None: # remove this datapoint (affects <20 datapoints)
-     continue
-  dataChosen.append(suffixesResult)
-  for affix in suffixesResult:
+  for affix in verbWithAff:
     affixLemma = getKey(affix) #[header[RELEVANT_KEY]]
     if affix[header["type1"]] == "pfx":
        prefixFrequency[affixLemma] += 1

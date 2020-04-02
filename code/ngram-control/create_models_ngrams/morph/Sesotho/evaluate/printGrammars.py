@@ -83,16 +83,18 @@ with open("results.tsv", "w") as outFile:
             continue
          arguments = grammar[2]
          cutoffPerScript = {}
-         cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Prefixes_ByType.py'] = 12
-         cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Prefixes_ByType_HeldoutClip.py'] = 7
-         cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Suffixes_ByType.py'] = 12
-         cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Suffixes_ByType_HeldoutClip.py'] = 7
-         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Prefixes.py'] = 12
+         #cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Prefixes_ByType.py'] = 12
+         #cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Prefixes_ByType_HeldoutClip.py'] = 7
+         #cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Suffixes_ByType.py'] = 12
+         #cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Suffixes_ByType_HeldoutClip.py'] = 7
+         #cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Prefixes.py'] = 12
          cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Prefixes_HeldoutClip.py'] = 4
-         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Suffixes.py'] = 12
+         #cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Suffixes.py'] = 12
          cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Suffixes_HeldoutClip.py'] = 4
          if opt_script in cutoffPerScript:
            if "cutoff="+str(cutoffPerScript[opt_script]) not in arguments:
+             continue
+         else:
              continue
          grammar = dict([x.split(" ") for x in grammar[3:]])
       #   print(grammar)
@@ -120,14 +122,22 @@ print("\n")
 print("\n")
 print("\n")
 print("\n")
+
+names = {}
+print(morphemes_prefixes)
+print(morphemes_suffixes)
+names = {'ng' : "Negation", 'om' : "Object", 'sm' : "Subject", 'sr' : "Subject (relative)", 't^' : "Tense/aspect", 'ap' : "Applicative", 'c' : "Causative", 'nt' : "Neuter", 'rv' : "Reversive", 'rc' : "Reciprocal", 'p' : "Passive", 'm^' : "Mood", 'wh' : "Interrogative", 'rl' : "Relative"}
 for opt_script in sorted(list(resultsByOptScript)):
     print("\n")
     print("\n")
     print("=============  "+opt_script+"  ==================")
-    for r in sorted(resultsByOptScript[opt_script], key=lambda x:x[0][0]):
-        print(r[2])
-#        for s in r:
- #         print(s)
+    morphemes = (morphemes_suffixes if "Suffix" in opt_script else morphemes_prefixes)
+    with open(glob.glob("../extract/output/extracted_forWords_Sesotho_ExtractOrder_"+("Suf" if "Suffix" in opt_script else "Pre")+"fixes2_ByType.py_*.tsv")[0], "r") as inFile:
+        real = [x.split("\t") for x in inFile.read().strip().split("\n")]
+    real = [x[0] for x in real if x[0] in morphemes]
+    print(real)
+    optimized = [y[-3] for y in sorted(resultsByOptScript[opt_script], key=lambda x:x[0][0])[-1:]]
+    print(optimized)
+    for i in range(len(morphemes)):
+        print(" & ".join([names[real[i]]] + [names[x[i][0]] for x in optimized]), "\\\\")
 
-
-print(sorted(list(resultsByOptScript)))
