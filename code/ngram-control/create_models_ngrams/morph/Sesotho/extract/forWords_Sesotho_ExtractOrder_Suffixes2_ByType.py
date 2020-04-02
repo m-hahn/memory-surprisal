@@ -8,7 +8,6 @@ objectiveName = "LM"
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--language", dest="language", type=str, default="Sesotho_Acqdiv")
-parser.add_argument("--model", dest="model", type=str)
 parser.add_argument("--alpha", dest="alpha", type=float, default=0.0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
@@ -30,8 +29,63 @@ assert args.gamma >= 1
 
 #RELEVANT_KEY = "lemma"
 
+# for ordering
 def getKey(word):
   return word[header["lemma"]][:2]
+
+def getSegmentedFormsVerb(word):
+   if "/" not in word[header["lemma"]] and "." not in word[header["lemma"]]:
+     return [word]
+   elif "/" in word[header["lemma"]]:
+    lemmas = word[header["lemma"]].split("/")
+    words = [word[::] for _ in lemmas]
+    for i in range(len(lemmas)):
+      words[i][0] = "_"
+      words[i][1] = lemmas[i]
+      words[i][3] = "v" if i == 0 else "sfx"      
+    #print("SPLIT", words, word) # frequent: verb stem + past suffix merged
+    return words
+   else: # 
+    print("TODO", word)
+    assert False
+
+
+def getSegmentedForms(word): # return a list , preprocessing
+   if "/" not in word[header["lemma"]] and "." not in word[header["lemma"]]:
+     return [word]
+   elif "/" in word[header["lemma"]]:
+    assert word[header["lemma"]].count("/") == 1
+    lemmas = word[header["lemma"]].split("/")
+    word1 = word[::]
+    word2 = word[::]
+    word1[1] = lemmas[0]
+    word2[1] = lemmas[1]
+
+    word1[0] = "_"
+    word2[0] = "_"
+    if lemmas[0] == "t^pf" and lemmas[1] == "m^in": # ~360 cases, mostly -e-. TODO think about the order of the morphemes in the allegedly merged morpheme.
+      _ = 0
+    elif word[header["analysis"]] == "REVERS.CAUS": # os (Doke and Mokofeng, section 345)
+      _ = 0
+    elif word[header["analysis"]] == "APPL.PRF": # ets (cf. Doke and Mokofeng, section 313?). Both APPL and PRF have relatively frequent suffix morphs of the form -ets- in the corpus.
+      _ = 0
+    elif word[header["analysis"]] == "PRF.CAUS": # dits. Also consider Doke and Mokofeng, section 369, rule 4.
+      _ = 0
+    elif word[header["analysis"]] == "DEP.PRF": #  e. DEP = participial mood (Doke and Mokofeng, section 431).
+      _ = 0
+    elif word[header["analysis"]] in ["PRF.PASS", "PRS.APPL", "cl.PRF", "IND.PRS", "PRF.REVERS", "NEG.PRF"]: # rare, together 10 data points
+      _ = 0
+    else:
+      print("SPLIT", word1, word2, word)
+    return [word1, word2]
+   else: # 
+    print("TODO", word)
+    assert word[1] == "m..." # occurs 1 time
+    return None
+
+def getNormalizedForm(word): # for prediction
+#   print(word)
+   return stoi_words[word[header["lemma"]]]
 
 myID = args.idForProcess
 
@@ -107,7 +161,7 @@ from math import log, exp
 from random import random, shuffle, randint, Random, choice
 
 
-from corpusIterator_V import CorpusIterator_V
+#from corpusIterator_V import CorpusIterator_V
 
 originalDistanceWeights = {}
 
@@ -135,8 +189,10 @@ import torch.nn.functional
 
 from collections import defaultdict
 
+assert len(data) > 0
 prefixFrequency = defaultdict(int)
 suffixFrequency = defaultdict(int)
+#dataChosen = []
 for verbWithAff in data:
   for affix in verbWithAff:
     affixLemma = getKey(affix) #[header[RELEVANT_KEY]]
@@ -144,6 +200,8 @@ for verbWithAff in data:
        prefixFrequency[affixLemma] += 1
     elif affix[header["type1"]] == "sfx":
        suffixFrequency[affixLemma] += 1
+#assert len(dataChosen) > 0
+#data = dataChosen
 
 itos_pfx = sorted(list((prefixFrequency)))
 stoi_pfx = dict(list(zip(itos_pfx, range(len(itos_pfx)))))
@@ -157,17 +215,12 @@ print(suffixFrequency)
 print(itos_pfx)
 print(itos_sfx)
 
-itos_pfx_ = itos_pfx[::]
-shuffle(itos_pfx_)
-weights_pfx = dict(list(zip(itos_pfx_, [2*x for x in range(len(itos_pfx_))])))
-
 itos_sfx_ = itos_sfx[::]
 shuffle(itos_sfx_)
 weights_sfx = dict(list(zip(itos_sfx_, [2*x for x in range(len(itos_sfx_))])))
 
-  
 
-def getCorrectOrderCount(weights_pfx, weights_sfx, coordinate, newValue):
+def getCorrectOrderCount(weights_sfx, coordinate, newValue):
    correct = 0
    incorrect = 0
    if len(index_sfx[coordinate]) == 0:
@@ -216,9 +269,12 @@ index_sfx = defaultdict(list)
 elementsOccurringBeforeSubject = defaultdict(int)
 
 
+print(len(data))
+#quit()
 
 for q in range(len(data)):
    verb = data[q]
+ #  print(verb)
 #   prefixes_keys = [getKey(x) for x in verb if x[header["type1"]] == "pfx"]
  #  if len(prefixes_keys) <= 1:
   #   continue
@@ -259,7 +315,7 @@ for q in range(len(data)):
 
    suffixes_keys = [getKey(x) for x in verb if x[header["type1"]] == "sfx"]
 
-
+#   print(suffixes_keys)
    # It is important to overwrite data[q] before continuing
    data[q] = verb
 
@@ -288,7 +344,7 @@ for iteration in range(200):
   for newValue in [-1] + [2*x+1 for x in range(len(itos_sfx))]:
      #if random() > 0.3:
      #  continue
-     correctCount = getCorrectOrderCount(weights_pfx, weights_sfx, coordinate, newValue)
+     correctCount = getCorrectOrderCount(weights_sfx, coordinate, newValue)
 #     print(coordinate, newValue, iteration, correctCount)
      if correctCount > mostCorrect:
         mostCorrectValue = newValue
@@ -301,7 +357,7 @@ for iteration in range(200):
   for x in itos_sfx_:
      print("\t".join([str(y) for y in [x, weights_sfx[x], suffixFrequency[x], len(index_sfx[x])]]))
   print(iteration, mostCorrect, suffixFrequency[coordinate], len(index_sfx[coordinate]))
-  print("Total", getCorrectOrderCount(weights_sfx, weights_sfx, None, 0))
+  print("Total", getCorrectOrderCount(weights_sfx, None, 0))
 with open("output/extracted_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
   for x in itos_sfx_:
   #   if affixFrequencies[x] < 10:

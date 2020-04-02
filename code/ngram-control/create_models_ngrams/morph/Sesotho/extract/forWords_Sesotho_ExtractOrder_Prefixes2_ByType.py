@@ -8,7 +8,6 @@ objectiveName = "LM"
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--language", dest="language", type=str, default="Sesotho_Acqdiv")
-parser.add_argument("--model", dest="model", type=str)
 parser.add_argument("--alpha", dest="alpha", type=float, default=0.0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
@@ -30,8 +29,89 @@ assert args.gamma >= 1
 
 #RELEVANT_KEY = "lemma"
 
+# for ordering
 def getKey(word):
   return word[header["lemma"]][:2]
+
+def getSegmentedForms(word): # return a list , preprocessing
+   if "/" not in word[header["lemma"]] and "." not in word[header["lemma"]]:
+     return [word]
+   elif "/" in word[header["lemma"]]:
+    assert word[header["lemma"]].count("/") == 1
+    lemmas = word[header["lemma"]].split("/")
+    word1 = word[::]
+    word2 = word[::]
+    word1[1] = lemmas[0]
+    word2[1] = lemmas[1]
+
+    word1[0] = "_"
+    word2[0] = "_"
+    if lemmas[0].startswith("sm") and lemmas[1].startswith("t^"): # merger between subject and tense/aspect marker (> 100 cases in the corpus)
+        _ = 0
+    elif word[header["analysis"]] == "NEG.POT": #keke, kebe. Compare Doke and Mokofeng, section 424. Seems to be better treated as an auxiliary, as it is followed by subject prefixes in the corpus.
+       return None
+    elif word[header["analysis"]] == "almost.PRF": # batlile = batla+ile. This is an auxiliary, not a prefix. Doke and Mokofeng, section 575.
+       return None
+    elif word[header["analysis"]] == "POT.PRF": # kile. This seems to be a prefix, as it is followed by subject prefixes in the corpus.
+       return None
+    elif word[header["analysis"]] == "be.PRF": # bile . Better treated as an auxiliary, for the same reason.
+       return None
+    elif word[header["analysis"]] == "do.indeed.PRF": # hlile. Same
+       return None
+    elif word[header["analysis"]] == "fill.belly.PRF": # Occurs a single time, excluded.
+       return None
+    else:
+       print("SPLIT", word1, word2, word)
+       assert False
+    return [word1, word2]
+   elif word[header["lemma"]] == "a.name" or word[header["lemma"]] == "a.place": #  exclude these data
+     return None
+   elif word[header["lemma"]].startswith("t^p.om"):
+    # print(word)
+     lemma1 = word[1][:3]
+     lemma2 = word[1][4:]
+     #print(lemma2)
+     word1 = word[::]
+     word2 = word[::]
+     word1[1] = lemma1
+     word2[1] = lemma2
+ 
+     word1[0] = "_"
+     word2[0] = "_"
+     if lemma1.startswith("t^") and lemma2.startswith("om"):
+   #      print(word)
+         assert word[2].startswith("PRS")
+         return [word2]
+         _ = 0
+     else:
+        print("SPLIT", word1, word2, word)
+        assert False
+        return [word1, word2]
+   elif word[header["lemma"]].startswith("t^p.rf"):
+     lemma1 = word[1][:3]
+     lemma2 = word[1][4:]
+     #print(lemma2)
+     word1 = word[::]
+     word2 = word[::]
+     word1[1] = lemma1
+     word2[1] = lemma2
+ 
+     word1[0] = "_"
+     word2[0] = "_"
+     if lemma1.startswith("t^") and lemma2.startswith("rf"):
+         assert word[2].startswith("PRS")
+         return [word2]
+         _ = 0
+     else:
+        print("SPLIT", word1, word2, word)
+        assert False
+        return [word1, word2]
+   else: # exclude these data
+     return None
+
+def getNormalizedForm(word): # for prediction
+#   print(word)
+   return stoi_words[word[header["lemma"]]]
 
 myID = args.idForProcess
 
@@ -107,7 +187,7 @@ from math import log, exp
 from random import random, shuffle, randint, Random, choice
 
 
-from corpusIterator_V import CorpusIterator_V
+#from corpusIterator_V import CorpusIterator_V
 
 originalDistanceWeights = {}
 
@@ -137,13 +217,28 @@ from collections import defaultdict
 
 prefixFrequency = defaultdict(int)
 suffixFrequency = defaultdict(int)
+dataChosen = []
 for verbWithAff in data:
-  for affix in verbWithAff:
+  prefixesResult = []
+  for x in verbWithAff:
+    if x[header["type1"]] == "pfx":
+       segmented = getSegmentedForms(x)
+       if segmented is None:
+         prefixesResult = None
+         break
+       prefixesResult += segmented
+    else:
+       prefixesResult.append(x)
+  if prefixesResult is None: # remove this datapoint (affects <20 datapoints)
+     continue
+  dataChosen.append(prefixesResult)
+  for affix in prefixesResult:
     affixLemma = getKey(affix) #[header[RELEVANT_KEY]]
     if affix[header["type1"]] == "pfx":
        prefixFrequency[affixLemma] += 1
     elif affix[header["type1"]] == "sfx":
        suffixFrequency[affixLemma] += 1
+data = dataChosen
 
 itos_pfx = sorted(list((prefixFrequency)))
 stoi_pfx = dict(list(zip(itos_pfx, range(len(itos_pfx)))))
@@ -161,13 +256,10 @@ itos_pfx_ = itos_pfx[::]
 shuffle(itos_pfx_)
 weights_pfx = dict(list(zip(itos_pfx_, [2*x for x in range(len(itos_pfx_))])))
 
-itos_sfx_ = itos_sfx[::]
-shuffle(itos_sfx_)
-weights_sfx = dict(list(zip(itos_sfx_, [2*x for x in range(len(itos_sfx_))])))
 
   
 
-def getCorrectOrderCount(weights_pfx, weights_sfx, coordinate, newValue):
+def getCorrectOrderCount(weights_pfx, coordinate, newValue):
    correct = 0
    incorrect = 0
    if len(index_pfx[coordinate]) == 0:
@@ -288,7 +380,7 @@ for iteration in range(200):
   for newValue in [-1] + [2*x+1 for x in range(len(itos_pfx))]:
      #if random() > 0.3:
      #  continue
-     correctCount = getCorrectOrderCount(weights_pfx, weights_sfx, coordinate, newValue)
+     correctCount = getCorrectOrderCount(weights_pfx, coordinate, newValue)
 #     print(coordinate, newValue, iteration, correctCount)
      if correctCount > mostCorrect:
         mostCorrectValue = newValue
@@ -301,7 +393,7 @@ for iteration in range(200):
   for x in itos_pfx_:
      print("\t".join([str(y) for y in [x, weights_pfx[x], prefixFrequency[x], len(index_pfx[x])]]))
   print(iteration, mostCorrect, prefixFrequency[coordinate], len(index_pfx[coordinate]))
-  print("Total", getCorrectOrderCount(weights_pfx, weights_sfx, None, 0))
+  print("Total", getCorrectOrderCount(weights_pfx, None, 0))
 with open("output/extracted_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
   for x in itos_pfx_:
   #   if affixFrequencies[x] < 10:
