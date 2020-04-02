@@ -337,7 +337,7 @@ weights_sfx = dict(list(zip(itos_sfx_, [2*x for x in range(len(itos_sfx_))])))
 import glob
 PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
 
-if args.model_sfx not in ["REAL", "RANDOM"]:
+if args.model_sfx not in ["REAL", "RANDOM", "REVERSE"]:
   files = glob.glob(PATH+"/optimized_*.py_"+args.model_sfx+".tsv")
   print(files, args.model_sfx)
   assert len(files) == 1
@@ -351,7 +351,7 @@ if args.model_sfx not in ["REAL", "RANDOM"]:
         morpheme, weight = line.strip().split(" ")
         weights_sfx[morpheme] = int(weight)
 #
-if args.model_pfx not in ["REAL", "RANDOM"]:
+if args.model_pfx not in ["REAL", "RANDOM", "REVERSE"]:
   files = glob.glob(PATH+"/optimized_*.py_"+args.model_pfx+".tsv")
   assert len(files) == 1
   assert "Suffixes" not in files[0], files
@@ -374,9 +374,17 @@ def calculateTradeoffForWeights(weights_pfx, weights_sfx):
          suffixes = [x for x in verb if x[header["type1"]] == "sfx"]
          v = [x for x in verb if x[header["type1"]] == "v"]
          assert len(prefixes)+len(v)+len(suffixes)==len(verb)
-         if args.model_sfx != "REAL":
+         if args.model_sfx == "REAL":
+            _ = 0
+         elif args.model_sfx == "REVERSE":
+            suffixes = suffixes[::-1]
+         else:
             suffixes.sort(key=lambda x:weights_sfx[getKey(x)])
-         if args.model_pfx != "REAL":
+         if args.model_pfx == "REAL":
+            _ = 0
+         elif args.model_pfx == "REVERSE":
+            prefixes = prefixes[::-1]
+         else:
             prefixes.sort(key=lambda x:weights_pfx[getKey(x)])
          ordered = prefixes + v + suffixes
   

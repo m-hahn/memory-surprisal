@@ -29,6 +29,8 @@ with open("results_auc.tsv", "w") as outFile:
          model = "RANDOM"
      elif "REAL" in model:
          model = "REAL"
+     elif "REVERSE" in model:
+         model = "REVERSE"
      run = f[find_third_last(f, "_")+1:find_second_last(f, "_")]
      print(script, model, surps)
      mis = [surps[i] - surps[i+1] for i in range(len(surps)-1)]
