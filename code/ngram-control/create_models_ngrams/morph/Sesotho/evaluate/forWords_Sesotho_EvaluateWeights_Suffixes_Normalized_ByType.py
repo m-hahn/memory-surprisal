@@ -200,7 +200,6 @@ for verbWithAff in data:
        prefixFrequency[affixLemma] += 1
     elif affix[header["type1"]] == "sfx":
        suffixFrequency[affixLemma] += 1
-data = dataChosen
 
 itos_pfx = sorted(list((prefixFrequency)))
 stoi_pfx = dict(list(zip(itos_pfx, range(len(itos_pfx)))))
@@ -289,9 +288,7 @@ def getCorrectOrderCount(weights_sfx):
       if not hasSeenThisVerb:
         hasSeenType.add(keyForThisVerb)
    if correct+incorrect == 0:
-      print("ERROR 19722: #", coordinate, "#")
-      assert False, (index_sfx[coordinate], coordinate)
-      return 1.0
+      assert False
    print((correctFull+incorrectFull))
    return correct/(correct+incorrect), correctFull/(correctFull+incorrectFull), correctTypes/(correctTypes+incorrectTypes), correctFullTypes/(correctFullTypes+incorrectFullTypes)
 

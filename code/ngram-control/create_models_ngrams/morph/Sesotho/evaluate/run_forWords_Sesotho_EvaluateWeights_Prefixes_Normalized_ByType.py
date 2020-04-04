@@ -3,7 +3,7 @@ PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/"
 
 import glob
 
-for aff in ["Prefixes", "Suffixes"]:
+for aff in ["Suffixes"]:
   models = glob.glob(PATH+"optimized_Sesotho_Acqdiv_forWords_Sesotho_OptimizeOrder_Normalized_ByType_"+aff+"*.py_*.tsv")
   
   import random
