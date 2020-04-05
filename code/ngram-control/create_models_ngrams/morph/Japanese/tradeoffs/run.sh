@@ -1,0 +1,4 @@
+~/python-py37-mhahn runModels_forWords_Japanese_RandomOrder_FormsPhonemesFull_Heldout.py
+~/python-py37-mhahn runModels_forWords_Japanese_RandomOrder_FormsPhonemesFull.py
+~/python-py37-mhahn runModels_forWords_Japanese_RandomOrder_Normalized_Heldout.py
+~/python-py37-mhahn runModels_forWords_Japanese_RandomOrder_Normalized.py
