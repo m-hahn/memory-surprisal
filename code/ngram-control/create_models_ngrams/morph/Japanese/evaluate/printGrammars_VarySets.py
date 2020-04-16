@@ -85,7 +85,7 @@ with open("results.tsv", "w") as outFile:
          #cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Suffixes_ByType.py'] = 12
          #cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Suffixes_ByType_HeldoutClip.py'] = 7
          #cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Prefixes.py'] = 12
-         cutoffPerScript['forWords_Japanese_OptimizeOrder_MorphemeGrammar_Normalized_FullData_HeldoutClip.py'] = 4
+         cutoffPerScript['forWords_Japanese_OptimizeOrder_MorphemeGrammar_Normalized_FullData_HeldoutClip_VarySets.py'] = 4
          #cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Suffixes.py'] = 12
 #         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Suffixes_HeldoutClip.py'] = 4
          if opt_script in cutoffPerScript:
@@ -118,7 +118,7 @@ with open("results.tsv", "w") as outFile:
          #print(accuracy_full)
          #print(errors[:10])
          auc = float(arguments[arguments.index(" ")+1:arguments.find(" ", arguments.find(" ")+1)])
-         resultsByOptScript[opt_script].append(((auc, script, opt_script, model, accuracy_pairs.strip(), accuracy_full.strip()), arguments, weights, accuracy_full, errors))
+         resultsByOptScript[opt_script].append(((auc, script, opt_script, model, accuracy_pairs.strip(), accuracy_full.strip()), arguments, weights, accuracy_full, errors[:10]))
 
 print("\n")
 print("\n")
@@ -142,32 +142,8 @@ for opt_script in sorted(list(resultsByOptScript)):
         real = [x.split("\t") for x in inFile.read().strip().split("\n")]
     print("REAL", real)
     real = [x[0] for x in real if x[0] in morphemes]
-    optimized = [y[-3] for y in sorted(resultsByOptScript[opt_script], key=lambda x:x[0][0])[-1:]]
+    optimized = [y[-3] for y in sorted(resultsByOptScript[opt_script], key=lambda x:x[0][0])[-10:]]
     print("optimized", optimized)
     for i in range(len(morphemes)):
-        print(" & ".join([str(i+1), names[real[i]]] + [names[x[i][1]] for x in optimized]), "\\\\")
-    optimized_errors = [y[-1] for y in sorted(resultsByOptScript[opt_script], key=lambda x:x[0][0])[-1:]]
-    errors = defaultdict(int)
-    print(optimized_errors[0])
-    for error in optimized_errors[0]:
-        left, right, freq = error.strip().split(" ")
-        if left in names and right in names and left != right:
-           key = (names.get(left, "other"), names.get(right, "other"))
-        else:
-          key = "(other)"
-        errors[key] += int(freq)
-    print("======================")
-    errors = sorted(list(errors.items()), key=lambda x:x[1], reverse=True)
-    count = 0
-    for error, count in errors:
-       if error == "(other)":
-          continue
-          print("\\multicolumn{2}{c}{(other)}", "&", count, "\\\\") #  + sum([x[1] for x in errors[5:]])
-       else:
-          count += 1
-          print(error[0], "&", error[1], "&",count, "\\\\")
-       if count == 4:
-          break
-
-
+        print(" & ".join([names[real[i]]] + [names[x[i][1]] for x in optimized]), "\\\\")
 

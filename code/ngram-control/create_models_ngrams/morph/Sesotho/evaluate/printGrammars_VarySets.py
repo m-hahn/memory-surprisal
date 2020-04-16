@@ -11,9 +11,8 @@ def flatten(x):
 PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/"
 
 import glob
-#files = glob.glob(PATH+"accuracy_forWords_Celex_EvaluateWeights_FullData.py_*.txt")
-files = glob.glob(PATH+"accuracy_forWords_Celex_EvaluateWeights_MorphemeGrammar_FullData.py_*.txt")
-
+files = glob.glob(PATH+"accuracy_forWords_Sesotho_EvaluateWeights_*.py_*.txt")
+print(files)
 
 optimizedGrammars = glob.glob("/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/*.tsv")
 
@@ -77,48 +76,42 @@ with open("results.tsv", "w") as outFile:
          grammar = inFileG.read().strip().split("\n")
       #   print(grammar)
          #print(grammar[0])
-         arguments = grammar[0]
-
+         iterations, auc = grammar[0].split(" ")
+         auc = float(auc)
+         convergenceHistory = grammar[1].split(" ")
+         if 50 * len(convergenceHistory) < 1000: # exclude unfinished runs
+            continue
+         arguments = grammar[2]
          cutoffPerScript = {}
          #cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Prefixes_ByType.py'] = 12
          #cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Prefixes_ByType_HeldoutClip.py'] = 7
          #cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Suffixes_ByType.py'] = 12
          #cutoffPerScript['forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Suffixes_ByType_HeldoutClip.py'] = 7
          #cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Prefixes.py'] = 12
-         cutoffPerScript['forWords_Japanese_OptimizeOrder_MorphemeGrammar_Normalized_FullData_HeldoutClip.py'] = 4
+         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Prefixes_HeldoutClip_VarySets.py'] = 4
          #cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Suffixes.py'] = 12
-#         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Suffixes_HeldoutClip.py'] = 4
+         cutoffPerScript['forWords_Sesotho_OptimizeOrder_Normalized_ByType_Suffixes_HeldoutClip_VarySets.py'] = 4
          if opt_script in cutoffPerScript:
            if "cutoff="+str(cutoffPerScript[opt_script]) not in arguments:
              continue
          else:
-             _ = 0
              continue
-
-
-         grammar = dict([x.split(" ") for x in grammar[1:]])
+         grammar = dict([x.split(" ") for x in grammar[3:]])
       #   print(grammar)
-         morphemes = [("suru", ['する'])]
-         if "MorphemeGrammar" not in f:
-           morphemes.append(("causative", ['せる']))
-           morphemes.append(('passive/potential', ['れる', 'られる', '得る', 'える']))
-         else:
-           morphemes.append(("causative", ['CAUSATIVE']))
-           morphemes.append(('passive/potential', ['PASSIVE_POTENTIAL']))
-         morphemes.append(('politeness', ['ます']))
-         morphemes.append(('desiderative', ['たい']))
-         morphemes.append(('negation', ['ない']))
-         morphemes.append(('past', ['た']))
-         morphemes.append(('future', ['う']))
-         morphemes.append(('nonfinite', ['て']))
-     #    print(morphemes)
+ #        print(f)
+         #print(sorted(list(grammar)))
+         morphemes_prefixes = ['ng', 'om', 'sm', 'sr', 't^']
+         morphemes_suffixes = ['ap', 'c', 'nt', 'rv', 'rc', 'p', 't^', 'm^', 'wh', 'rl']
+         morphemes = [(x,[x]) for x in (morphemes_prefixes if "refix" in f else morphemes_suffixes)] 
+         #print(morphemes)
+         #print(morphemes)
          weights = flatten([[(x, y, int(grammar[y])) for y in z] for x, z in morphemes])
          weights.sort(key=lambda x:x[2])
          #print(weights)
          #print(accuracy_full)
          #print(errors[:10])
-         auc = float(arguments[arguments.index(" ")+1:arguments.find(" ", arguments.find(" ")+1)])
-         resultsByOptScript[opt_script].append(((auc, script, opt_script, model, accuracy_pairs.strip(), accuracy_full.strip()), arguments, weights, accuracy_full, errors))
+         #auc = float(arguments[arguments.index(" ")+1:arguments.find(" ", arguments.find(" ")+1)])
+         resultsByOptScript[opt_script].append(((auc, len(convergenceHistory)*50, script, opt_script, model, accuracy_pairs.strip(), accuracy_full.strip()), arguments, weights, accuracy_full, errors[:10]))
 
 print("\n")
 print("\n")
@@ -131,43 +124,20 @@ print("\n")
 print("\n")
 
 names = {}
-morphemes = [x[1][0] for x in morphemes]
-print(morphemes)
-names = {'する' : "suru", 'CAUSATIVE' : "causative", 'PASSIVE_POTENTIAL' : "passive/potential", 'ます' : "politeness", 'たい' : "desiderative", 'ない' : "negation", 'た' : "past", 'う' : "future", 'て' : "nonfinite"}
+print(morphemes_prefixes)
+print(morphemes_suffixes)
+names = {'ng' : "Negation", 'om' : "Object", 'sm' : "Subject", 'sr' : "Subject (relative)", 't^' : "Tense/aspect", 'ap' : "Applicative", 'c' : "Causative", 'nt' : "Neuter", 'rv' : "Reversive", 'rc' : "Reciprocal", 'p' : "Passive", 'm^' : "Mood", 'wh' : "Interrogative", 'rl' : "Relative"}
 for opt_script in sorted(list(resultsByOptScript)):
     print("\n")
     print("\n")
     print("=============  "+opt_script+"  ==================")
-    with open(glob.glob("../extract/output/extracted_*.py_*.tsv")[0], "r") as inFile:
+    morphemes = (morphemes_suffixes if "Suffix" in opt_script else morphemes_prefixes)
+    with open(glob.glob("../extract/output/extracted_forWords_Sesotho_ExtractOrder_"+("Suf" if "Suffix" in opt_script else "Pre")+"fixes2_ByType.py_*.tsv")[0], "r") as inFile:
         real = [x.split("\t") for x in inFile.read().strip().split("\n")]
-    print("REAL", real)
     real = [x[0] for x in real if x[0] in morphemes]
-    optimized = [y[-3] for y in sorted(resultsByOptScript[opt_script], key=lambda x:x[0][0])[-1:]]
-    print("optimized", optimized)
+    print(real)
+    optimized = [y[-3] for y in sorted(resultsByOptScript[opt_script], key=lambda x:x[0][0])[-10:]]
+    print(optimized)
     for i in range(len(morphemes)):
-        print(" & ".join([str(i+1), names[real[i]]] + [names[x[i][1]] for x in optimized]), "\\\\")
-    optimized_errors = [y[-1] for y in sorted(resultsByOptScript[opt_script], key=lambda x:x[0][0])[-1:]]
-    errors = defaultdict(int)
-    print(optimized_errors[0])
-    for error in optimized_errors[0]:
-        left, right, freq = error.strip().split(" ")
-        if left in names and right in names and left != right:
-           key = (names.get(left, "other"), names.get(right, "other"))
-        else:
-          key = "(other)"
-        errors[key] += int(freq)
-    print("======================")
-    errors = sorted(list(errors.items()), key=lambda x:x[1], reverse=True)
-    count = 0
-    for error, count in errors:
-       if error == "(other)":
-          continue
-          print("\\multicolumn{2}{c}{(other)}", "&", count, "\\\\") #  + sum([x[1] for x in errors[5:]])
-       else:
-          count += 1
-          print(error[0], "&", error[1], "&",count, "\\\\")
-       if count == 4:
-          break
-
-
+        print(" & ".join([names[real[i]]] + [names[x[i][0]] for x in optimized]), "\\\\")
 

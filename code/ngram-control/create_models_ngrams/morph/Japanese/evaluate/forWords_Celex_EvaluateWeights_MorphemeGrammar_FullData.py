@@ -152,11 +152,17 @@ else:
   import glob
   PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
   files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
+  if len(files) == 0:
+     files = glob.glob("../extract/output/extracted_*.py_"+args.model+".tsv")
+ 
   assert len(files) == 1
   with open(files[0], "r") as inFile:
      next(inFile)
      for line in inFile:
-        morpheme, weight = line.strip().split(" ")
+        if "extract" in files[0]:
+           morpheme, weight, _ = line.strip().split("\t")
+        else:
+           morpheme, weight = line.strip().split(" ")
         weights[morpheme] = int(weight)
 
 from collections import defaultdict
@@ -183,6 +189,8 @@ def getCorrectOrderCount(weights):
          for j in range(1, i):
              weightI = weights[getRepresentation(verb[i]["lemma"])]
              weightJ = weights[getRepresentation(verb[j]["lemma"])]
+             if weightI == weightJ:
+                continue
              if weightI > weightJ:
                correct+=1
                if not hasSeenThisVerb:
@@ -192,7 +200,7 @@ def getCorrectOrderCount(weights):
                if not hasSeenThisVerb:
                  incorrectTypes += 1
                hasMadeMistake = True
-               print("MISTAKE", verb[i]["lemma"], weights[getRepresentation(verb[i]["lemma"])], verb[j], weights[getRepresentation(verb[j]["lemma"])], [x["lemma"] for x in verb])
+#               print("MISTAKE", verb[i]["lemma"], weights[getRepresentation(verb[i]["lemma"])], verb[j], weights[getRepresentation(verb[j]["lemma"])], [x["lemma"] for x in verb])
                errors[(getRepresentation(verb[j]["lemma"]), getRepresentation(verb[i]["lemma"]))] += 1
       if len(verb) > 2:
         if not hasMadeMistake:
@@ -209,7 +217,6 @@ def getCorrectOrderCount(weights):
 
 result = getCorrectOrderCount(weights)
 print(errors)
-print(result)
 
 with open("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+str(myID)+"_"+args.model+".txt", "w") as outFile:
    print(result[0], file=outFile)
@@ -220,6 +227,10 @@ with open("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+_
    errors.sort(key=lambda x:x[1], reverse=True)
    for x, y in errors:
       print(x[0], x[1], y, file=outFile)
+print("ERRORS")
+print(errors)
+print(result)
+
 print("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+str(myID)+"_"+args.model+".txt")
 
 
