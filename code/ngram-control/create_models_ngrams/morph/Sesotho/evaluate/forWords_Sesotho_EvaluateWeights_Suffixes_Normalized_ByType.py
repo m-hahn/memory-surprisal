@@ -242,15 +242,22 @@ else:
   import glob
   PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
   files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
+  if len(files) == 0:
+     files = glob.glob("../extract/output/extracted_*.py_"+args.model+".tsv")
+  print(files)
   assert len(files) == 1
   assert "Suffixes" in files[0], files
-  assert "Normalized" in files[0]
+  assert "Normalized" in files[0] or "extracted" in files[0]
   with open(files[0], "r") as inFile:
-     next(inFile)
-     next(inFile)
-     next(inFile)
+     if "extract" not in files[0]:
+       next(inFile)
+       next(inFile)
+       next(inFile)
      for line in inFile:
-        morpheme, weight = line.strip().split(" ")
+        if "extract" in files[0]:
+           morpheme, weight, _ = line.strip().split("\t")
+        else:
+           morpheme, weight = line.strip().split(" ")
         weights_sfx[morpheme] = int(weight)
 
 errors = defaultdict(int)
@@ -282,6 +289,8 @@ def getCorrectOrderCount(weights_sfx):
          for j in range(0, i):
              weightI = affixes[i][1]
              weightJ = affixes[j][1]
+             if weightI == weightJ:
+                continue
              if weightI > weightJ:
                correct+=1
                if not hasSeenThisVerb:

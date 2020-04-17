@@ -33,23 +33,6 @@ assert args.gamma >= 1
 def getKey(word):
   return word[header["lemma"]][:2]
 
-def getSegmentedFormsVerb(word):
-   if "/" not in word[header["lemma"]] and "." not in word[header["lemma"]]:
-     return [word]
-   elif "/" in word[header["lemma"]]:
-    lemmas = word[header["lemma"]].split("/")
-    words = [word[::] for _ in lemmas]
-    for i in range(len(lemmas)):
-      words[i][0] = "_"
-      words[i][1] = lemmas[i]
-      words[i][3] = "v" if i == 0 else "sfx"      
-    #print("SPLIT", words, word) # frequent: verb stem + past suffix merged
-    return words
-   else: # 
-    print("TODO", word)
-    assert False
-
-
 def getSegmentedForms(word): # return a list , preprocessing
    if "/" not in word[header["lemma"]] and "." not in word[header["lemma"]]:
      return [word]
@@ -63,25 +46,68 @@ def getSegmentedForms(word): # return a list , preprocessing
 
     word1[0] = "_"
     word2[0] = "_"
-    if lemmas[0] == "t^pf" and lemmas[1] == "m^in": # ~360 cases, mostly -e-. TODO think about the order of the morphemes in the allegedly merged morpheme.
-      _ = 0
-    elif word[header["analysis"]] == "REVERS.CAUS": # os (Doke and Mokofeng, section 345)
-      _ = 0
-    elif word[header["analysis"]] == "APPL.PRF": # ets (cf. Doke and Mokofeng, section 313?). Both APPL and PRF have relatively frequent suffix morphs of the form -ets- in the corpus.
-      _ = 0
-    elif word[header["analysis"]] == "PRF.CAUS": # dits. Also consider Doke and Mokofeng, section 369, rule 4.
-      _ = 0
-    elif word[header["analysis"]] == "DEP.PRF": #  e. DEP = participial mood (Doke and Mokofeng, section 431).
-      _ = 0
-    elif word[header["analysis"]] in ["PRF.PASS", "PRS.APPL", "cl.PRF", "IND.PRS", "PRF.REVERS", "NEG.PRF"]: # rare, together 10 data points
-      _ = 0
+    if lemmas[0].startswith("sm") and lemmas[1].startswith("t^"): # merger between subject and tense/aspect marker (> 100 cases in the corpus)
+        _ = 0
+    elif word[header["analysis"]] == "NEG.POT": #keke, kebe. Compare Doke and Mokofeng, section 424. Seems to be better treated as an auxiliary, as it is followed by subject prefixes in the corpus.
+       return None
+    elif word[header["analysis"]] == "almost.PRF": # batlile = batla+ile. This is an auxiliary, not a prefix. Doke and Mokofeng, section 575.
+       return None
+    elif word[header["analysis"]] == "POT.PRF": # kile. This seems to be a prefix, as it is followed by subject prefixes in the corpus.
+       return None
+    elif word[header["analysis"]] == "be.PRF": # bile . Better treated as an auxiliary, for the same reason.
+       return None
+    elif word[header["analysis"]] == "do.indeed.PRF": # hlile. Same
+       return None
+    elif word[header["analysis"]] == "fill.belly.PRF": # Occurs a single time, excluded.
+       return None
     else:
-      print("SPLIT", word1, word2, word)
+       print("SPLIT", word1, word2, word)
+       assert False
     return [word1, word2]
-   else: # 
-    print("TODO", word)
-    assert word[1] == "m..." # occurs 1 time
-    return None
+   elif word[header["lemma"]] == "a.name" or word[header["lemma"]] == "a.place": #  exclude these data
+     return None
+   elif word[header["lemma"]].startswith("t^p.om"):
+    # print(word)
+     lemma1 = word[1][:3]
+     lemma2 = word[1][4:]
+     #print(lemma2)
+     word1 = word[::]
+     word2 = word[::]
+     word1[1] = lemma1
+     word2[1] = lemma2
+ 
+     word1[0] = "_"
+     word2[0] = "_"
+     if lemma1.startswith("t^") and lemma2.startswith("om"):
+   #      print(word)
+         assert word[2].startswith("PRS")
+         return [word2]
+         _ = 0
+     else:
+        print("SPLIT", word1, word2, word)
+        assert False
+        return [word1, word2]
+   elif word[header["lemma"]].startswith("t^p.rf"):
+     lemma1 = word[1][:3]
+     lemma2 = word[1][4:]
+     #print(lemma2)
+     word1 = word[::]
+     word2 = word[::]
+     word1[1] = lemma1
+     word2[1] = lemma2
+ 
+     word1[0] = "_"
+     word2[0] = "_"
+     if lemma1.startswith("t^") and lemma2.startswith("rf"):
+         assert word[2].startswith("PRS")
+         return [word2]
+         _ = 0
+     else:
+        print("SPLIT", word1, word2, word)
+        assert False
+        return [word1, word2]
+   else: # exclude these data
+     return None
 
 def getNormalizedForm(word): # for prediction
 #   print(word)
@@ -189,19 +215,30 @@ import torch.nn.functional
 
 from collections import defaultdict
 
-assert len(data) > 0
 prefixFrequency = defaultdict(int)
 suffixFrequency = defaultdict(int)
-#dataChosen = []
+dataChosen = []
 for verbWithAff in data:
-  for affix in verbWithAff:
+  prefixesResult = []
+  for x in verbWithAff:
+    if x[header["type1"]] == "pfx":
+       segmented = getSegmentedForms(x)
+       if segmented is None:
+         prefixesResult = None
+         break
+       prefixesResult += segmented
+    else:
+       prefixesResult.append(x)
+  if prefixesResult is None: # remove this datapoint (affects <20 datapoints)
+     continue
+  dataChosen.append(prefixesResult)
+  for affix in prefixesResult:
     affixLemma = getKey(affix) #[header[RELEVANT_KEY]]
     if affix[header["type1"]] == "pfx":
        prefixFrequency[affixLemma] += 1
     elif affix[header["type1"]] == "sfx":
        suffixFrequency[affixLemma] += 1
-#assert len(dataChosen) > 0
-#data = dataChosen
+data = dataChosen
 
 itos_pfx = sorted(list((prefixFrequency)))
 stoi_pfx = dict(list(zip(itos_pfx, range(len(itos_pfx)))))
@@ -215,27 +252,29 @@ print(suffixFrequency)
 print(itos_pfx)
 print(itos_sfx)
 
-itos_sfx_ = itos_sfx[::]
-shuffle(itos_sfx_)
-weights_sfx = dict(list(zip(itos_sfx_, [2*x for x in range(len(itos_sfx_))])))
+itos_pfx_ = itos_pfx[::]
+shuffle(itos_pfx_)
+weights_pfx = dict(list(zip(itos_pfx_, [2*x for x in range(len(itos_pfx_))])))
 
 
-def getCorrectOrderCount(weights_sfx, coordinate, newValue):
+  
+
+def getCorrectOrderCount(weights_pfx, coordinate, newValue):
    correct = 0
    incorrect = 0
-   if len(index_sfx[coordinate]) == 0:
+   if len(index_pfx[coordinate]) == 0:
      return 1.0
-   for verb in index_sfx[coordinate]:
-      #prefixes_keys = [x[header["form"]] for x in verb if x[header["type1"]] == "sfx"]
+   for verb in index_pfx[coordinate]:
+      #prefixes_keys = [x[header["form"]] for x in verb if x[header["type1"]] == "pfx"]
 #      if coordinate not in prefixes_keys:
  #       assert False
   #      continue
    
-      suffixes = [(getKey(x), weights_sfx[getKey(x)]) for x in verb if x[header["type1"]] == "sfx"]
-      assert len(suffixes) > 1, verb
+      prefixes = [(getKey(x), weights_pfx[getKey(x)]) for x in verb if x[header["type1"]] == "pfx"]
+      assert len(prefixes) > 1, verb
 #      suffixes = [(x[header[RELEVANT_KEY]], weights_sfx[x[header[RELEVANT_KEY]]]) for x in verb if x[header["type1"]] == "sfx"]
 
-      for affixes in [suffixes]:    
+      for affixes in [prefixes]:    
         for i in range(0, len(affixes)):
            for j in range(0, i):
                if affixes[i][0] == coordinate:
@@ -264,20 +303,17 @@ def getCorrectOrderCount(weights_sfx, coordinate, newValue):
       return 1.0
    return correct/(correct+incorrect)
 
-index_sfx = defaultdict(list)
+index_pfx = defaultdict(list)
 
 elementsOccurringBeforeSubject = defaultdict(int)
 
 
-print(len(data))
-#quit()
 
 for q in range(len(data)):
    verb = data[q]
- #  print(verb)
-#   prefixes_keys = [getKey(x) for x in verb if x[header["type1"]] == "pfx"]
- #  if len(prefixes_keys) <= 1:
-  #   continue
+   prefixes_keys = [getKey(x) for x in verb if x[header["type1"]] == "pfx"]
+   if len(prefixes_keys) <= 1:
+     continue
 #   print(verb)
    for i in range(len(verb)-1):
       if ".SBJ" in verb[i+1][header["analysis"]]:
@@ -302,7 +338,7 @@ for q in range(len(data)):
    # Restrict to the last verb, chopping off initial auxiliaries and their affixes
    ###############################################################################
 
-#   print(segmentation[-1])
+   #print(segmentation[-1])
 #   if len(segmentation) > 1:
 #    for w in range(len(segmentation)-1):
 #     if len(segmentation[w]) == 2:
@@ -313,19 +349,19 @@ for q in range(len(data)):
 
    verb = segmentation[-1]
 
-   suffixes_keys = [getKey(x) for x in verb if x[header["type1"]] == "sfx"]
+   prefixes_keys = [getKey(x) for x in verb if x[header["type1"]] == "pfx"]
 
-#   print(suffixes_keys)
+
    # It is important to overwrite data[q] before continuing
    data[q] = verb
 
-   if len(suffixes_keys) <= 1:
+   if len(prefixes_keys) <= 1:
      continue
 
 
-   for sfx in suffixes_keys:
-      index_sfx[sfx].append(verb)
-   index_sfx[None].append(verb)
+   for pfx in prefixes_keys:
+      index_pfx[pfx].append(verb)
+   index_pfx[None].append(verb)
 
 
 
@@ -335,33 +371,19 @@ print(sorted(list(elementsOccurringBeforeSubject.items()), key=lambda x:x[1]))
 #quit()
 #quit()
 
-
-for iteration in range(200):
-  coordinate = choice(itos_sfx)
-  while suffixFrequency[coordinate] < 10 and random() < 0.95:
-    coordinate = choice(itos_sfx)
-  mostCorrect, mostCorrectValue = 0, None
-  for newValue in [-1] + [2*x+1 for x in range(len(itos_sfx))]:
-     #if random() > 0.3:
-     #  continue
-     correctCount = getCorrectOrderCount(weights_sfx, coordinate, newValue)
-#     print(coordinate, newValue, iteration, correctCount)
-     if correctCount > mostCorrect:
-        mostCorrectValue = newValue
-        mostCorrect = correctCount
-  assert not (mostCorrectValue is None)
-  weights_sfx[coordinate] = mostCorrectValue
-  itos_sfx_ = sorted(itos_sfx, key=lambda x:weights_sfx[x])
-  weights_sfx = dict(list(zip(itos_sfx_, [2*x for x in range(len(itos_sfx_))])))
-  print(weights_sfx)
-  for x in itos_sfx_:
-     print("\t".join([str(y) for y in [x, weights_sfx[x], suffixFrequency[x], len(index_sfx[x])]]))
-  print(iteration, mostCorrect, suffixFrequency[coordinate], len(index_sfx[coordinate]))
-  print("Total", getCorrectOrderCount(weights_sfx, None, 0))
-with open("output/extracted_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
-  for x in itos_sfx_:
-  #   if affixFrequencies[x] < 10:
-   #    continue
-     print("\t".join([str(y) for y in [x, weights_sfx[x], suffixFrequency[x]]]), file=outFile)
+from collections import defaultdict
+histogram = defaultdict(int)
+for verb in data:
+   histogram[len(verb)] += 1
+print(histogram)
+total = sum([y for _, y in histogram.items()])
+distribution = {x : y/total for x, y in histogram.items()}
+distribution = [distribution.get(x+1, 0) for x in range(max(distribution))]
+print(distribution)
+def mean(x):
+   return sum([x*y for x, y in enumerate(distribution)])
+print("Mean", mean(distribution))
+print("Max", len(distribution))
+print("More than one", sum(distribution[2:]))
 
 
