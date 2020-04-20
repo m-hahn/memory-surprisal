@@ -4,10 +4,10 @@ library(ggplot2)
 
 # Plots CIs for the quantile
 
-fullData = read.csv("../../results/tradeoff/listener-curve-histogram_byMem.tsv", sep="\t") %>% filter(Type != "GROUND")
+fullData = read.csv("../../../results/tradeoff/listener-curve-histogram_byMem.tsv", sep="\t") %>% filter(Type != "GROUND")
 
 memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
-    dataL = read.csv(paste("../../results/raw/word-level/",language,"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", sep=""), sep="\t")
+    dataL = read.csv(paste("../../../results/raw/word-level/",language,"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", sep=""), sep="\t")
     UnigramCE = mean(dataL$UnigramCE)
     data = fullData %>% filter(Language == language)
     barWidth = (max(data$MI) - min(data$MI))/30

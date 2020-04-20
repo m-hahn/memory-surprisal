@@ -8,9 +8,9 @@ library(tidyr)
 
 # Plots medians with confidence intervals
 
-fullData = read.csv("../results/tradeoff/listener-curve-ci-median.tsv", sep="\t") %>% filter(Type != "GROUND")
+fullData = read.csv("../../../results/tradeoff/listener-curve-ci-median.tsv", sep="\t") %>% filter(Type != "GROUND")
 
-randomRuns = read.csv("../results/tradeoff/listener-curve-interpolated.tsv", sep="\t") %>% filter(Type == "RANDOM_BY_TYPE")
+randomRuns = read.csv("../../../results/tradeoff/listener-curve-interpolated.tsv", sep="\t") %>% filter(Type == "RANDOM_BY_TYPE")
 
 library(MASS)
 
@@ -18,7 +18,7 @@ memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
     library(tidyr)
     library(dplyr)
     library(ggplot2)
-    dataL = read.csv(paste("../results/raw/word-level/",language,"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", sep=""), sep="\t")
+    dataL = read.csv(paste("../../../results/raw/word-level/",language,"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", sep=""), sep="\t")
     UnigramCE = mean(dataL$UnigramCE)
 
     dataR = randomRuns %>% filter(Language == language)

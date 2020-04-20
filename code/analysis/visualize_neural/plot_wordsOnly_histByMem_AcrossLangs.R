@@ -1,6 +1,6 @@
 
 
-fullData = read.csv("../results/tradeoff/listener-curve-histogram_byMem.tsv", sep="\t")
+fullData = read.csv("../../../results/tradeoff/listener-curve-histogram_byMem.tsv", sep="\t")
 
     library(tidyr)
     library(dplyr)

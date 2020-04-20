@@ -6,14 +6,14 @@ library(ggplot2)
 
 # Plots medians with confidence intervals
 
-fullData = read.csv("../../results/tradeoff/listener-curve-ci-median.tsv", sep="\t") 
+fullData = read.csv("../../../results/tradeoff/listener-curve-ci-median.tsv", sep="\t") 
 
-randomRuns = read.csv("../../results/tradeoff/listener-curve-interpolated.tsv", sep="\t") %>% filter(Type == "RANDOM_BY_TYPE")
+randomRuns = read.csv("../../../results/tradeoff/listener-curve-interpolated.tsv", sep="\t") %>% filter(Type == "RANDOM_BY_TYPE")
 
 library(MASS)
 
 memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
-    dataL = read.csv(paste("../../results/raw/word-level/",language,"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", sep=""), sep="\t")
+    dataL = read.csv(paste("../../../results/raw/word-level/",language,"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", sep=""), sep="\t")
     UnigramCE = mean(dataL$UnigramCE)
     dataR = randomRuns %>% filter(Language == language)
     data = fullData %>% filter(Language == language)
@@ -39,7 +39,7 @@ memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
 
 languages = read.csv("languages.tsv", sep="\t")
 
-for(language in languages) {
+for(language in languages$Language) {
    memListenerSurpPlot_onlyWordForms_boundedVocab(language)
 }
 
