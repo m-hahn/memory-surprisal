@@ -3,10 +3,10 @@ library(dplyr)
 library(ggplot2)
 
 
-fullData = read.csv("../../results/tradeoff/listener-curve-histogram_byMem.tsv", sep="\t")
+fullData = read.csv("../../../results/tradeoff/listener-curve-histogram_byMem.tsv", sep="\t")
 
 memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
-    dataL = read.csv(paste("../../results/raw/word-level/",language,"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", sep=""), sep="\t")
+    dataL = read.csv(paste("../../../results/raw/word-level/",language,"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", sep=""), sep="\t")
     UnigramCE = mean(dataL$UnigramCE)
     data = fullData %>% filter(Language == language)
     barWidth = (max(data$MI) - min(data$MI))/30
@@ -17,7 +17,7 @@ memListenerSurpPlot_onlyWordForms_boundedVocab = function(language) {
 
 languages = read.csv("languages.tsv", sep="\t")
 
-for(language in languages) {
+for(language in languages$Language) {
    memListenerSurpPlot_onlyWordForms_boundedVocab(language)
 }
 
