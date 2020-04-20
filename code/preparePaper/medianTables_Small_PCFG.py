@@ -50,7 +50,7 @@ for language in languages:
    entries.append(components)
 
 ROWS_PER_PART = 7
-COLUMNS = 9
+COLUMNS = 6
 while len(entries) % COLUMNS != 0:
      entries.append(["",""])
 #entries += [["",""] for x in range((COLUMNS-(len(entries)%COLUMNS))%COLUMNS)]
