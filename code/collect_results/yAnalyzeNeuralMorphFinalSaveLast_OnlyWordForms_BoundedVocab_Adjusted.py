@@ -19,24 +19,24 @@ print(args)
 
 def f(a):
    # Collect surprisals resulting from different context lengths
-   x = list(map(float,a.split(" ")))[:args.horizon]
-   for i in range(1, len(x)):
-      x[i] = min(x[:i+1])
+   surprisals = list(map(float,a.split(" ")))[:args.horizon]
+   for i in range(1, len(surprisals)):
+      surprisals[i] = min(surprisals[:i+1])
    # Collect estimates for It
-   decay = [(x[(i-1 if i>0 else 0)]-x[i]) for i in range(len(x))]
+   decay = [(surprisals[(i-1 if i>0 else 0)]-surprisals[i]) for i in range(len(surprisals))]
    assert len(decay) == args.horizon
 
    # Estimate of the Excess Entropy
-   memory = sum([i*(x[(i-1 if i>0 else 0)]-x[i]) for i in range(len(x))])
+   memory = sum([i*(surprisals[(i-1 if i>0 else 0)]-surprisals[i]) for i in range(len(surprisals))])
    assert memory == sum([i*decay[i] for i in range(len(decay))])
 
-   residual = x[args.horizon-1]
+   residual = surprisals[args.horizon-1]
    balanced = None
 
-   mi = x[0] - x[args.horizon-1]
+   mi = surprisals[0] - surprisals[args.horizon-1]
 
-   unigramCE = x[0]
-   return balanced, memory, residual, mi, decay, unigramCE
+   unigramCE = surprisals[0]
+   return balanced, memory, residual, mi, decay, unigramCE, surprisals
 
 resultsPerType = {}
 
@@ -88,7 +88,7 @@ for fileName in sorted(files):
      if args.restrictToFinished:
        if len(result[1]) == 1 or result[1][-1] < result[1][-2]: # this had not been stopped by early stopping
           continue
-     balanced, memory, residual, mi, decay, unigramCE  = f(result[2])
+     balanced, memory, residual, mi, decay, unigramCE, surprisals  = f(result[2])
      duration = len(result[1])
      uid = float(result[4].split(" ")[1]) if "Exponent" in fileName else "NA"
 
