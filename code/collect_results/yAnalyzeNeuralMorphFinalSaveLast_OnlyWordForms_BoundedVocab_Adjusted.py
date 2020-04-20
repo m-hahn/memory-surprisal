@@ -20,7 +20,8 @@ print(args)
 def f(a):
    # Collect surprisals resulting from different context lengths
    x = list(map(float,a.split(" ")))[:args.horizon]
-
+   for i in range(1, len(x)):
+      x[i] = min(x[:i+1])
    # Collect estimates for It
    decay = [(x[(i-1 if i>0 else 0)]-x[i]) for i in range(len(x))]
    assert len(decay) == args.horizon
@@ -43,6 +44,7 @@ resultsPerType = {}
 from optimizedHyperparameterKeys import parameterKeys
 
 from ud_languages import languages
+#print(set(parameterKeys).difference(set(languages)))
 assert set(parameterKeys) == set(languages)
 
 types = [" REAL ", " REAL_REAL ", "RANDOM_MODEL ", "RANDOM_BY_TYPE ", "RANDOM_MODEL_ST ", "RANDOM_BY_TYPE_ST ", "RANDOM_MODEL_CONS ", "RANDOM_BY_TYPE_CONS ", "RANDOM_MODEL_NONP ", "RANDOM_BY_TYPE_NONP ", " TOTALLY_RANDOM ", " GROUND "]
@@ -51,7 +53,7 @@ types = [" REAL ", " REAL_REAL ", "RANDOM_MODEL ", "RANDOM_BY_TYPE ", "RANDOM_MO
 averageUnigramCE = [0.0,0]
 
 for fileName in sorted(files):
-  if language not in fileName:
+  if args.language not in fileName:
        continue
   if not fileName.startswith("estimates"):
      continue
@@ -63,17 +65,21 @@ for fileName in sorted(files):
        continue
      if not "SaveLast" in result[0]:
          continue
-     if " "+language+" " not in result[0]:
+     if " "+args.language+" " not in result[0]:
         continue
      if args.onlyOptimized:
-       if type(parameterKeys[language]) == type((1,2)):
-         if not all([x in result[0] for x in  parameterKeys[language]]): 
+       if type(parameterKeys[args.language]) == type((1,2)):
+         if not all([x in result[0] for x in  parameterKeys[args.language]]): 
            continue
        else:
-         if not parameterKeys[language] in result[0]: 
+         if not parameterKeys[args.language] in result[0]: 
            continue
-
-     typeOfResult = filter(lambda x:x in result[0], types)[0][:-1]
+#     print(result[0], types)
+ #    print(filter(lambda x:x in result[0], types))
+     try:
+        typeOfResult = filter(lambda x:x in result[0], types)[0][:-1]
+     except IndexError:
+        continue
      if len(result) < 3:
          continue
      if typeOfResult not in resultsPerType:
@@ -95,12 +101,12 @@ for fileName in sorted(files):
      averageUnigramCE[1] += 1
 
 
-     resultsPerType[typeOfResult].append([balanced, memory, residual, result[0], duration, uid, idOfModel, mi, memory/mi, decay, unigramCE])
+     resultsPerType[typeOfResult].append([balanced, memory, residual, result[0], duration, uid, idOfModel, mi, memory/(mi+1e-10), decay, unigramCE])
 
 
 
-outpath1 = "../results/raw/word-level/"+language+"_after_tuning_onlyWordForms_boundedVocab.tsv"
-outpath2 = "../results/raw/word-level/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv"
+outpath1 = "../../results/raw/word-level/"+args.language+"_after_tuning_onlyWordForms_boundedVocab.tsv"
+outpath2 = "../../results/raw/word-level/"+args.language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv"
 
 if averageUnigramCE[1] == 0:
     print("no results")

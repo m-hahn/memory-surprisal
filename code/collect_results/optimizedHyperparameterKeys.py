@@ -1,4 +1,7 @@
-parameterKeys = { "Russian" : " Russian 0.4 150 256 3 0.05 ", "Erzya-Adap" : "Erzya-Adap 0.4 200 128 1 0.05 ", "Bambara-Adap" : " Bambara-Adap 0.4 300 256 1 0.1 ", "Polish-LFG" : "Polish-LFG 0.2 200 512 1 0.05 ", "North_Sami" : " North_Sami 0.4 300 256 1 0.1 ", "Maltese" : (" Maltese 0.35 300 64 1 0.1 ", " 0.1 2 0.0 20"),
+parameterKeys = { "Russian" : " Russian 0.4 150 256 3 0.05 ", "Erzya-Adap" : "Erzya-Adap 0.4 200 128 1 0.05 ", "Bambara-Adap" : " Bambara-Adap 0.4 300 256 1 0.1 ", 
+       #"Polish-LFG" : "Polish-LFG 0.2 200 512 1 0.05 ", 
+       "North_Sami" : " North_Sami 0.4 300 256 1 0.1 ", 
+       "Maltese" : (" Maltese 0.35 300 64 1 0.1 ", " 0.1 2 0.0 20"),
        "Arabic" : " Arabic 0.4 50 512 2 0.05 ",
        "Catalan" : " Catalan 0.45 100 512 1 0.01 ",
        "Czech" : " Czech 0.05 200 256 3 0.05 ",
