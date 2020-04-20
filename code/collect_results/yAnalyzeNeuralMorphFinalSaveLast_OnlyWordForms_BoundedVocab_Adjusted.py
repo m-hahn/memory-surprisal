@@ -101,7 +101,7 @@ for fileName in sorted(files):
      averageUnigramCE[1] += 1
 
 
-     resultsPerType[typeOfResult].append([balanced, memory, residual, result[0], duration, uid, idOfModel, mi, memory/(mi+1e-10), decay, unigramCE])
+     resultsPerType[typeOfResult].append([balanced, memory, residual, result[0], duration, uid, idOfModel, mi, memory/(mi+1e-10), decay, unigramCE, surprisals])
 
 
 
@@ -143,7 +143,11 @@ with open(outpath1, "w") as outFile:
         rand[9][1] += (-unigramCEHere + averageUnigramCE)
         rand[1] += (-unigramCEHere + averageUnigramCE)
         rand[10] = averageUnigramCE
-
+        surprisals = rand[11]
+        surprisals[0] = averageUnigramCE
+        for j in range(len(surprisals)):
+           surprisals[j] = min(surprisals[:j+1])
+        rand[9] = [surprisals[i-1] - surprisals[i] if i > 0 else 0 for i in range(len(surprisals))]
         print >> outFile, "\t".join(map(str,parameters + [rand[0], rand[1], rand[2], rand[4], rand[5], rand[6], rand[7]]))
         for i in range(1,args.horizon):
            print >> outFileDecay, "\t".join(map(str,[parameters[0], parameters[1], parameters[2], parameters[8], i, max(0, rand[9][i]), rand[7], rand[6], rand[10]]))
