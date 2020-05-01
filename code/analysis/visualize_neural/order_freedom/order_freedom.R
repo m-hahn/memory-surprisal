@@ -20,8 +20,22 @@ plot = plot + geom_text(aes(label=Language), hjust=0.8, vjust=1.1)
 plot = plot + xlab("Surprisal Difference")
 plot = plot + ylab("Branching Direction Entropy")
 plot = plot + theme(axis.title=element_text(size=30))
-
+plot = plot + theme(axis.text = element_text(size=20))
 ggsave(plot, file=paste("../figures/surprisal-branching-entropy-REAL.pdf", sep=""), width=15, height=7)
+
+
+
+plot = ggplot(dataReal, aes(y=-MIDiff, x=BranchingEntropy)) + geom_point()
+plot = plot + theme_classic() 
+plot = plot + theme(legend.position="none")   
+plot = plot + geom_smooth(method="lm")
+plot = plot + geom_text(aes(label=Language), hjust=0.8, vjust=1.1)
+plot = plot + ylab("Surprisal Difference")
+plot = plot + xlab("Branching Direction Entropy")
+plot = plot + theme(axis.title=element_text(size=30))
+plot = plot + theme(axis.text = element_text(size=20))
+ggsave(plot, file=paste("../figures/surprisal-branching-entropy-REAL-invert.pdf", sep=""), width=15, height=7)
+
 
 
 
@@ -52,11 +66,26 @@ plot = plot + xlab("Surprisal Difference")
 plot = plot + ylab("Branching Direction Entropy")
 plot = plot + theme(axis.title=element_text(size=30))
 plot = plot + geom_segment(data=data.frame(x=-0.0999, xend=-0.23, y=0.328, yend=0.2), aes(x=x, xend=xend, y=y, yend=yend), size=2, arrow=arrow(), color="red")
+plot = plot + theme(axis.title=element_text(size=30))
+plot = plot + theme(axis.text = element_text(size=20))
 ggsave(plot, file=paste("../figures/surprisal-branching-entropy-REAL-infostruc.pdf", sep=""), width=15, height=7)
 
 #   Language       Type       MI_z MIDiff BranchingEntropy     y
 #14 Czech          REAL_REAL 2.78  0.0999            0.328     1
 
+
+plot = ggplot(dataReal, aes(y=-MIDiff, x=BranchingEntropy)) + geom_point()
+plot = plot + theme_classic() 
+plot = plot + theme(legend.position="none")   
+plot = plot + geom_smooth(method="lm")
+plot = plot + geom_text(aes(label=Language), hjust=0.8, vjust=1.1)
+plot = plot + ylab("Surprisal Difference")
+plot = plot + xlab("Branching Direction Entropy")
+plot = plot + theme(axis.title=element_text(size=30))
+plot = plot + geom_segment(data=data.frame(y=-0.0999, yend=-0.23, x=0.328, xend=0.2), aes(x=x, xend=xend, y=y, yend=yend), size=2, arrow=arrow(), color="red")
+plot = plot + theme(axis.title=element_text(size=30))
+plot = plot + theme(axis.text = element_text(size=20))
+ggsave(plot, file=paste("../figures/surprisal-branching-entropy-REAL-infostruc-invert.pdf", sep=""), width=15, height=7)
 
 
 
