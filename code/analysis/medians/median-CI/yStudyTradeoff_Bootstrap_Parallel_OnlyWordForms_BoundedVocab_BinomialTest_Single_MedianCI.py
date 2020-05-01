@@ -65,14 +65,24 @@ maximalMemory = 0
 for typ, mis in misByType.iteritems():
   mask = torch.FloatTensor([[1 if j <= i else 0 for j in range(19)] for i in range(19)])
   cumulativeMI = torch.matmul(mis, mask.t())
-  #print("MIs", mis[0])
-  #print("Cum MI", cumulativeMI[0])
+  print(typ, mis)
+  
+  print("MIs", mis[0])
+  print("Cum MI", cumulativeMI[0])
   cumulativeMemory = torch.matmul(distance*mis, mask.t())
-  #print("Cum Mem", cumulativeMemory[0])
+  print("Cum Mem", cumulativeMemory[0])
   cumMIs[typ] = cumulativeMI
   cumMems[typ] = cumulativeMemory
+  for line1, line2 in zip(mis, cumulativeMemory):
+      print("--")
+      print(line1)
+      print(line2)
+      if float(torch.max(line2)) > 10:
+          break
   maximalMemory = max(maximalMemory, float(torch.max(cumulativeMemory)))
-
+  print(maximalMemory)
+  assert maximalMemory < 10
+assert False
 #print("MAXIMAL MEMORY", maximalMemory)
 
 
