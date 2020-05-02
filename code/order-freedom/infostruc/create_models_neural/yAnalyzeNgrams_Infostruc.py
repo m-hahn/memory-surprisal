@@ -5,7 +5,8 @@ PATH = "memory-need-neural-wordforms_infostruc"
 path = "/u/scr/mhahn/deps/"+PATH+"/"
 files = os.listdir(path)
 import sys
-
+print(files)
+print(path)
 
 import argparse
 parser = argparse.ArgumentParser()
@@ -21,20 +22,25 @@ print(args)
 
 
 def f(a):
-   x = list(map(float,a.split(" ")))[:args.horizon]
-
-   decay = [(x[(i-1 if i>0 else 0)]-x[i]) for i in range(len(x))]
+   # Collect surprisals resulting from different context lengths
+   surprisals = list(map(float,a.split(" ")))[:args.horizon]
+   for i in range(1, len(surprisals)):
+      surprisals[i] = min(surprisals[:i+1])
+   # Collect estimates for It
+   decay = [(surprisals[(i-1 if i>0 else 0)]-surprisals[i]) for i in range(len(surprisals))]
    assert len(decay) == args.horizon
 
-   memory = sum([i*(x[(i-1 if i>0 else 0)]-x[i]) for i in range(len(x))])
+   # Estimate of the Excess Entropy
+   memory = sum([i*(surprisals[(i-1 if i>0 else 0)]-surprisals[i]) for i in range(len(surprisals))])
+   assert memory == sum([i*decay[i] for i in range(len(decay))])
 
-   residual = x[args.horizon-1]
-   balanced = sum([i*(x[(i-1 if i>0 else 0)]-x[i]) for i in range(args.horizon)]) + args.horizon*x[args.horizon-1]
+   residual = surprisals[args.horizon-1]
+   balanced = None
 
-   mi = x[0] - x[args.horizon-1]
+   mi = surprisals[0] - surprisals[args.horizon-1]
 
-   unigramCE = x[0]
-   return balanced, memory, residual, mi, decay, unigramCE
+   unigramCE = surprisals[0]
+   return balanced, memory, residual, mi, decay, unigramCE, surprisals
 
 resultsPerType = {}
 
@@ -48,27 +54,34 @@ types = [" REAL_REAL ", "RANDOM_BY_TYPE ", " GROUND ", " RANDOM_INFOSTRUC ", " G
 
 averageUnigramCE = [0.0,0]
 
-for fileName in files:
+for fileName in sorted(files):
   if args.language not in fileName:
        continue
   if not fileName.startswith("estimates"):
      continue
+  print(fileName)
   with open(path+fileName, "r") as inFile:
      result = inFile.read().strip().split("\n")
      if len(result) < 4:
+       print(1)
        continue
      if "PARAMETER_SEARCH" in result:
+       print(2)
        continue
      if not "SaveLast" in result[0]:
+         print(3)
          continue
      if " "+args.language+" " not in result[0]:
+        print(4, result[0])
         continue
      if args.onlyOptimized: # changed this line (March 8, 2019)
        if type(finalShib[args.language]) == type((1,2)):
          if not all([x in result[0] for x in  finalShib[args.language]]): # not in result[0] or finalShib[language][1] not in result[0]):
+           print(5)
            continue
        else:
          if not finalShib[args.language] in result[0]: # all([x in result[0] for x in  ]): # not in result[0] or finalShib[language][1] not in result[0]):
+           print(6)
            continue
 
      typeOfResult = filter(lambda x:x in result[0], types)[0][:-1]
@@ -80,7 +93,7 @@ for fileName in files:
      if args.restrictToFinished:
        if len(result[1]) == 1 or result[1][-1] < result[1][-2]: # this had not been stopped by early stopping
           continue
-     balanced, memory, residual, mi, decay, unigramCE  = f(result[2])
+     balanced, memory, residual, mi, decay, unigramCE, surprisals  = f(result[2])
      duration = len(result[1])
      uid = float(result[4].split(" ")[1]) if "Exponent" in fileName else "NA"
 
@@ -93,7 +106,7 @@ for fileName in files:
      averageUnigramCE[1] += 1
 
 
-     resultsPerType[typeOfResult].append([balanced, memory, residual, result[0], duration, uid, idOfModel, mi, memory/mi, decay, unigramCE])
+     resultsPerType[typeOfResult].append([balanced, memory, residual, result[0], duration, uid, idOfModel, mi, memory/(mi+1e-10), decay, unigramCE, surprisals])
 
 
 
@@ -120,6 +133,7 @@ with open(outpath1, "w") as outFile:
   print >> outFileDecay, "\t".join(headerDecay)
   
   for typeOfResult in types:
+     resultsPerType[typeOfResult[:-1]] = sorted(resultsPerType.get(typeOfResult[:-1], []), key=lambda x:x[6])
      if len(resultsPerType.get(typeOfResult[:-1], [])) == 0:
         continue
      print
@@ -135,7 +149,11 @@ with open(outpath1, "w") as outFile:
         rand[9][1] += (-unigramCEHere + averageUnigramCE)
         rand[1] += (-unigramCEHere + averageUnigramCE)
         rand[10] = averageUnigramCE
-
+        surprisals = rand[11]
+        surprisals[0] = averageUnigramCE
+        for j in range(len(surprisals)):
+           surprisals[j] = min(surprisals[:j+1])
+        rand[9] = [surprisals[i-1] - surprisals[i] if i > 0 else 0 for i in range(len(surprisals))]
         print >> outFile, "\t".join(map(str,parameters + [rand[0], rand[1], rand[2], rand[4], rand[5], rand[6], rand[7]]))
         for i in range(1,args.horizon):
            print >> outFileDecay, "\t".join(map(str,[parameters[0], parameters[1], parameters[2], parameters[8], i, max(0, rand[9][i]), rand[7], rand[6], rand[10]]))
