@@ -39,18 +39,18 @@ data2$Process = "B"
 
 data = rbind(data1, data2) 
 
-plot = ggplot(data=data, aes(x=Distance, y=MI, color=Process, group=Process)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18))
+plot = ggplot(data=data, aes(x=Distance, y=MI, color=Process, group=Process)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18)) + xlab("t") + ylab("Conditional Mutual Information (It)")
 
 
 
-ggsave("decay.pdf")
+ggsave("figures/decay.pdf")
 
 
 
-plot = ggplot(data=data, aes(x=Distance, y=Distance * MI, color=Process, group=Process)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18))
+plot = ggplot(data=data, aes(x=Distance, y=Distance * MI, color=Process, group=Process)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18)) + xlab("t") + ylab("t * It")
 
 
-ggsave("memory.pdf")
+ggsave("figures/memory.pdf")
 
 
 
@@ -193,13 +193,13 @@ ggsave("listener-tradeoff-A.pdf")
 
 # Listener's Memory-Surprisal Curve
 
-x1 = (1:10)
+x1 = (1:20)
 y1 = 5.3 * x^(-2.5)
 
 data1 = data.frame(Distance=x1, MI=y1)
 data1$Process = "A"
 
-x2 = (1:10)
+x2 = (1:20)
 y2 = 3.5 * x^(-1.5)
 
 data2 = data.frame(Distance=x2, MI=y2)
@@ -215,11 +215,15 @@ data = data %>% group_by(Process) %>% mutate(Memory = cumsum(MI*Distance))
 
 data = data %>% mutate(Surprisal = 10-CumMI)
 
-plot = ggplot(data=data, aes(x=Memory, y=Surprisal, color=Process, group=Process)) + geom_line(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18))
+data_ = data %>% select(Memory, Surprisal, Process)
+
+data_ = rbind(as.data.frame(data_), data.frame(Memory=c(3.5, 17.573493), Surprisal=c(6.5, 3.0163223), Process=c("A", "A")))
+
+plot = ggplot(data=data_ %>% filter(Surprisal>=3), aes(x=Memory, y=Surprisal, color=Process, group=Process)) + geom_line(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18))
 
 
 
-ggsave("listener-tradeoff.pdf")
+ggsave("figures/listener-tradeoff.pdf")
 
 
 
