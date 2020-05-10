@@ -1,0 +1,13 @@
+* `collectResults.py`
+* `evaluateResults.py`
+* `forWords_Celex_EvaluateWeights_FullData.py`
+* `forWords_Celex_EvaluateWeights_MorphemeGrammar_FullData.py`
+* `printGrammars.py`
+* `printGrammars_Train.py`
+* `printGrammars_VarySets.py`
+* `results.tsv`
+* `run_forWords_Celex_EvaluateWeights_FullData.py`
+* `run_forWords_Celex_EvaluateWeights_MorphemeGrammar_FullData.py`
+* `run_forWords_Celex_EvaluateWeights_MorphemeGrammar_FullData_VarySets.py`
+* `run.sh`
+* `wipeResults.txt`
