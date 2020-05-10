@@ -8,6 +8,6 @@ with open("../../../results/tradeoff/listener-curve-ci-median_infostruc.tsv", "w
   print >> outFile, "\t".join(["Language", "Type", "Position", "Memory", "MedianEmpirical", "MedianLower", "MedianUpper", "Level"])
   for language in languages:
      print(language)
-     print >> outFile, subprocess.check_output(["./python27", "yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_MedianCI.py", language]).strip()
+     print >> outFile, subprocess.check_output(["python2", "yStudyTradeoff_Bootstrap_Parallel_OnlyWordForms_BoundedVocab_BinomialTest_Single_MedianCI.py", language]).strip()
 
 
