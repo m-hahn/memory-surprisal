@@ -39,15 +39,15 @@ data2$Process = "B"
 
 data = rbind(data1, data2) 
 
-plot = ggplot(data=data, aes(x=Distance, y=MI, color=Process, group=Process)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18)) + xlab("t") + ylab("Conditional Mutual Information (It)")
-
+plot = ggplot(data=data, aes(x=Distance, y=MI, color=Process, group=Process)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18)) + xlab("t") + ylab("Conditional Mutual Information (It)") + scale_x_continuous(breaks=c(1,5,10))
 
 
 ggsave("figures/decay.pdf")
 
 
 
-plot = ggplot(data=data, aes(x=Distance, y=Distance * MI, color=Process, group=Process)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18)) + xlab("t") + ylab("t * It")
+plot = ggplot(data=data, aes(x=Distance, y=Distance * MI, color=Process, group=Process)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18)) + xlab("t") + ylab("t * It") + scale_x_continuous(breaks=c(1,5,10))
+
 
 
 ggsave("figures/memory.pdf")
