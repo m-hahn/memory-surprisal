@@ -20,7 +20,7 @@ for(language in languages) {
     plot = plot + geom_line(data=data %>% filter(Type == "RANDOM_BY_TYPE"), aes(x=Memory, y=UnigramCE-MedianLower), linetype="dashed")
     plot = plot + geom_line(data=data %>% filter(Type == "RANDOM_BY_TYPE"), aes(x=Memory, y=UnigramCE-MedianUpper), linetype="dashed")
 #    plot = plot + xlab("Memory") + ylab("Median Surprisal")
-    plot = plot + theme(text = element_text(size=40), axis.title=element_blank())
+    plot = plot + theme(axis.text = element_text(size=50), axis.title=element_blank())
     ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory-MEDIANS_onlyWordForms_boundedVocab-pcfg.pdf", sep=""))
 }
 
