@@ -22,8 +22,13 @@ def readTSV(x):
       for i in range(len(data)):
           data[i][column] = vals[i]
     return (header, data)
-with open("../../../../results/raw/word-level/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", "r") as inFile:
+try:
+  with open("../../../../results/raw/word-level/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", "r") as inFile:
      data = readTSV(inFile)
+except IOError:
+  print >> sys.stderr, ("ERROR nothing for this language? "+language)
+  quit()
+
 #print(len(data))
 
 
@@ -46,21 +51,27 @@ for i in range(len(data[1])):
     if typ not in matrixByType:
         matrixByType[typ] = []
     matrixByType[typ].append(matrix[i])
+MAX_DISTANCE = -1
 for typ in matrixByType:
-   matrixByType[typ] = torch.FloatTensor(matrixByType[typ]).view(-1, 19, 4)
+   tensorized = torch.FloatTensor(matrixByType[typ])
+   MAX_DISTANCE = int(tensorized[:,1].max())
+   assert MAX_DISTANCE == 19
+   matrixByType[typ] = tensorized.view(-1, MAX_DISTANCE, 4)
    #print(matrixByType[typ][0])
    misByType[typ] = matrixByType[typ][:,:,2]
 #print(misByType["RANDOM_BY_TYPE"])
-
+if MAX_DISTANCE == -1:
+  print >> sys.stderr, ("ERROR nothing for this language? "+language)
+  quit()
 #data = data %>% group_by(ModelID) %>% mutate(CumulativeMemory = cumsum(Distance*ConditionalMI), CumulativeMI = cumsum(ConditionalMI))
-distance = torch.FloatTensor(range(1,20))
+distance = torch.FloatTensor(range(1,1+MAX_DISTANCE))
 
 cumMIs = {}
 cumMems = {}
 cumInterpolated = {}
 maximalMemory = 0
 for typ, mis in misByType.iteritems():
-  mask = torch.FloatTensor([[1 if j <= i else 0 for j in range(19)] for i in range(19)])
+  mask = torch.FloatTensor([[1 if j <= i else 0 for j in range(MAX_DISTANCE)] for i in range(MAX_DISTANCE)])
   cumulativeMI = torch.matmul(mis, mask.t())
   #print("MIs", mis[0])
   #print("Cum MI", cumulativeMI[0])
@@ -122,7 +133,7 @@ import statsmodels.stats.proportion
 for typ, interpolated in interpolatedByTypes.iteritems():  
     AUCs = float(xPoints[0]) * (39*(matrixByType[typ][:,0,3]) - interpolated.sum(dim=1))
     for i in range(len(AUCs)):
-       print "\t".join(map(str,[language, typ, int(matrixByType[typ][i,0,0]),  float(AUCs[i])]))
+       print "\t".join(map(str,[language, typ, int(matrixByType[typ][i,0,0]),  round(float(AUCs[i]), 5)]))
 
 
 
