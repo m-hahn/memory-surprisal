@@ -22,7 +22,7 @@ def readTSV(x):
           data[i][column] = vals[i]
     return (header, data)
 try:
-  with open("../../../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv", "r") as inFile:
+  with open("../../../../results/raw/ngrams/"+language+"_ngrams_decay_after_tuning.tsv", "r") as inFile:
      data = readTSV(inFile)
 except IOError:
   print >> sys.stderr, ("ERROR nothing for this language? "+language)
@@ -145,32 +145,8 @@ for typ, interpolated in interpolatedByTypes.iteritems():
              bestCI = (lower, upper, coverage)
 #       print(typ, i, bestCI)
           # median is in [lower, upper]
-
+       empirical_median = float(interpolated[:,i].median())
+       assert bestCI[0] <= empirical_median
        # TODO don't trust the CI
-       print "\t".join(map(str,[language, typ, i, float(xPoints[i]), float(interpolated[:,i].median()), bestCI[0], bestCI[1], bestCI[2]]))
+       print "\t".join(map(str,[language, typ, i, float(xPoints[i]), empirical_median, bestCI[0], bestCI[1], bestCI[2]]))
 
-
-
-
-
-       #quit()
-
-#       comparison = interpolatedByTypes["RANDOM_BY_TYPE"] < minReal.unsqueeze(0)
-#       comparisonReverse = interpolatedByTypes["RANDOM_BY_TYPE"] > minReal.unsqueeze(0)
-#    
-#     #  print(comparison.size())
-#       comparisonMean = comparison.float().sum(dim=0)
-#       comparisonReverseMean = comparisonReverse.float().sum(dim=0)
-#    
-#
-#
-#       p1 = (scipy.stats.binom_test(x=comparisonMean[i], n=comparison.size()[0])) + math.pow(2, -interpolated.size()[0])
-#       p2 = (scipy.stats.binom_test(x=comparisonReverseMean[i], n=comparison.size()[0])) + math.pow(2, -interpolated.size()[0])
-#
-
-
-
-#  mis = list(interpolated[:,-5].numpy())
-#  for i in range(len(mis)):
-#     print("\t".join(map(str,[language, typ, float(xPoints[-5]), mis[i]])))
-#

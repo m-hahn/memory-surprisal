@@ -23,7 +23,7 @@ for(language in languages) {
    plot = ggplot(d2, aes(x=AUC, fill=Type, color=Type))
 #   plot = plot + theme_classic()
    plot = plot + theme_bw()
-   plot = plot + theme(axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text = element_text(size=30))
+   plot = plot + theme(axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text.y = element_blank(), axis.text.x = element_text(size=50))
    plot = plot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), legend.position="none") 
    plot = plot + theme(axis.line = element_line(colour = "black"),
  	      panel.grid.major = element_blank(),
@@ -39,7 +39,7 @@ for(language in languages) {
    plot = ggplot(d2, aes(x=AUC, fill=Type, color=Type))
 #   plot = plot + theme_classic()
    plot = plot + theme_bw()
-   plot = plot + theme(axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text = element_text(size=30))
+   plot = plot + theme(axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text.y = element_blank(), axis.text.x = element_text(size=50))
    plot = plot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), legend.position="none") 
    plot = plot + theme(axis.line = element_line(colour = "black"),
  	      panel.grid.major = element_blank(),

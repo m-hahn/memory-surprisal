@@ -25,8 +25,13 @@ def readTSV(x):
       for i in range(len(data)):
           data[i][column] = vals[i]
     return (header, data)
-with open("../../../../results/raw/word-level/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", "r") as inFile:
+try:
+  with open("../../../../results/raw/word-level/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab.tsv", "r") as inFile:
      data = readTSV(inFile)
+except IOError:
+  print >> sys.stderr, ("ERROR nothing for this language? "+language)
+  quit()
+
 #print(len(data))
 
 
@@ -49,21 +54,27 @@ for i in range(len(data[1])):
     if typ not in matrixByType:
         matrixByType[typ] = []
     matrixByType[typ].append(matrix[i])
+MAX_DISTANCE = -1
 for typ in matrixByType:
-   matrixByType[typ] = torch.FloatTensor(matrixByType[typ]).view(-1, 19, 4)
+   tensorized = torch.FloatTensor(matrixByType[typ])
+   MAX_DISTANCE = int(tensorized[:,1].max())
+   assert MAX_DISTANCE == 19
+   matrixByType[typ] = tensorized.view(-1, MAX_DISTANCE, 4)
    #print(matrixByType[typ][0])
    misByType[typ] = matrixByType[typ][:,:,2]
 #print(misByType["RANDOM_BY_TYPE"])
-
+if MAX_DISTANCE == -1:
+  print >> sys.stderr, ("ERROR nothing for this language? "+language)
+  quit()
 #data = data %>% group_by(ModelID) %>% mutate(CumulativeMemory = cumsum(Distance*ConditionalMI), CumulativeMI = cumsum(ConditionalMI))
-distance = torch.FloatTensor(range(1,20))
+distance = torch.FloatTensor(range(1,1+MAX_DISTANCE))
 
 cumMIs = {}
 cumMems = {}
 cumInterpolated = {}
 maximalMemory = 0
 for typ, mis in misByType.iteritems():
-  mask = torch.FloatTensor([[1 if j <= i else 0 for j in range(19)] for i in range(19)])
+  mask = torch.FloatTensor([[1 if j <= i else 0 for j in range(MAX_DISTANCE)] for i in range(MAX_DISTANCE)])
   cumulativeMI = torch.matmul(mis, mask.t())
   print(typ, mis)
   
@@ -152,8 +163,5 @@ for typ, interpolated in interpolatedByTypes.iteritems():
        empirical_median = float(interpolated[:,i].median())
        assert bestCI[0] <= empirical_median
        # TODO don't trust the CI
-       print "\t".join(map(str,[language, typ, i,                float(xPoints[i]), empirical_median,     bestCI[0], bestCI[1], bestCI[2]]))
-                             # "Language", "Type", "Position",  "Memory",           "MedianEmpirical",    "MedianLower", "MedianUpper", "Level"
-
-
+       print "\t".join(map(str,[language, typ, i, float(xPoints[i]), empirical_median, bestCI[0], bestCI[1], bestCI[2]]))
 
