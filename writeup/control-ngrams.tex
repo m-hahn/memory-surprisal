@@ -1,6 +1,7 @@
+Here we show that the results of Study 2 remain robust when estimating surprisal with a simple n-gram model instead of recurrent neural networks.
 
-\subsection{Method}
-We use a version of Kneser-Ney Smoothing.
+\subsubsection{Method}
+We use a version of Kneser-Ney Smoothing \citep{kneser-improved-1995}.
 For a sequence $w_1\dots w_k$, let $N(w_{1\dots k})$ be the number of times $w_{1\dots k}$ occurs in the training set.
 The unigram probabilities are estimated as
 \begin{equation}
@@ -19,7 +20,7 @@ Otherwise, we interpolate between $t$-th order and lower-order estimates:
 	p_t(w_t|w_{0 \dots t-1}) :=  \frac{\operatorname{max}(N(w_{0\dots t}) - \alpha, 0.0) + \alpha \cdot \#\{w : N(w_{0 \dots t-1}w) > 0\} \cdot p_{t-1}(w_t|w_{1\dots t-1})}{N(w_{0\dots t-1})}
 \end{equation}
 where $\alpha \in [0,1]$ is also a hyperparameter.
-(CITE) show that this definition results in a well-defined probability distribution, i.e., $\sum_{w \in V} p_t(w|w_{0 \dots t-1}) = 1$.
+\citet{kneser-improved-1995} show that this definition results in a well-defined probability distribution, i.e., $\sum_{w \in V} p_t(w|w_{0 \dots t-1}) = 1$.
 
 %Note that this definition guarantees $\sum_{w \in V} p_t(w|w_{0 \dots t-1}) = 1$, because
 %
@@ -32,10 +33,10 @@ where $\alpha \in [0,1]$ is also a hyperparameter.
 %$\sum_{w \in V} : N(w_{0\dots t-1} w) = N(w_{0\dots t-1})$
 
 
-Hyperparameters $\alpha, \gamma, \delta$ are tuned with the same strategy as for the neural network models.
+Hyperparameters $\alpha, \gamma, \delta$ are tuned using the held-out set, with the same strategy as for the neural network models.
 
 
-\subsection{Results}
+\subsubsection{Results}
 
 
 
@@ -46,7 +47,7 @@ Hyperparameters $\alpha, \gamma, \delta$ are tuned with the same strategy as for
 \input{tables/medians_ngrams_2.tex}
 \input{tables/medians_ngrams_3.tex}
 \end{longtable}
-	\captionof{figure}{Medians (estimated using n-gram models): For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians for ngrams, dashed lines indicate 95 \% confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians_ngrams}
+	\captionof{figure}{Memory-surprisal tradeoff curves (estimated using n-gram models): For each memory budget, we provide the median surprisal for real and random languages. Solid lines indicate sample medians for ngrams, dashed lines indicate 95 \% confidence intervals for the population median. Green: Random baselines; blue: real language; red: maximum-likelihood grammars fit to real orderings.}\label{tab:medians_ngrams}
 \end{center}
 
 
