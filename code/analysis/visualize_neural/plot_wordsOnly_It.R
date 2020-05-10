@@ -20,7 +20,7 @@ for(language in languages) {
   
   plot = ggplot(dataL %>% filter(Distance < 5), aes(x=Distance, y=ConditionalMI, color=Type)) + geom_line(size=2)
   plot = plot + theme_bw()
-  plot = plot + theme(axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text = element_text(size=20))
+  plot = plot + theme(axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text = element_text(size=30))
   plot = plot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), legend.position="none") 
   plot = plot + theme(axis.line = element_line(colour = "black"),
 	      panel.grid.major = element_blank(),
