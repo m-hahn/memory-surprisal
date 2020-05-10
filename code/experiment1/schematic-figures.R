@@ -91,7 +91,7 @@ df2 <- rbind(
 
 T = 4
 plot = ggplot(data=df2 %>% filter(Distance >= T), aes(x=Distance, y=MI)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18)) + geom_area() + geom_step(size=2, data=df2 %>% filter(Distance < T+1))
-ggsave("add-surp.pdf")
+#ggsave("add-surp.pdf")
 
 
 data2 = data.frame(Distance=data$Distance, Memory=data$Distance*data$MI)
@@ -104,23 +104,23 @@ df3 <- rbind(
 
 plot = ggplot(data=df3 %>% filter(Distance < T), aes(x=Distance, y=Memory)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18)) + geom_area() + geom_step(size=2, data=df3 %>% filter(Distance >= T))
 
-ggsave("lower-mem.pdf")
+#ggsave("lower-mem.pdf")
 
 
 
 
 
-
-for(T in (1:10)) {
-   plot = ggplot(data=df2 %>% filter(Distance >= T), aes(x=Distance, y=MI)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18)) + geom_area() + geom_step(size=2, data=df2 %>% filter(Distance < T+1))
-   ggsave(paste("add-surp-",T,".pdf", sep=""))
-   
-   plot = ggplot(data=df3 %>% filter(Distance < T), aes(x=Distance, y=Memory)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18)) + geom_area() + geom_step(size=2, data=df3 %>% filter(Distance >= T))
-   
-   ggsave(paste("lower-mem-",T,".pdf", sep=""))
-}
-
-
+#
+#for(T in (1:10)) {
+#   plot = ggplot(data=df2 %>% filter(Distance >= T), aes(x=Distance, y=MI)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18)) + geom_area() + geom_step(size=2, data=df2 %>% filter(Distance < T+1))
+#   ggsave(paste("add-surp-",T,".pdf", sep=""))
+#   
+#   plot = ggplot(data=df3 %>% filter(Distance < T), aes(x=Distance, y=Memory)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18)) + geom_area() + geom_step(size=2, data=df3 %>% filter(Distance >= T))
+#   
+#   ggsave(paste("lower-mem-",T,".pdf", sep=""))
+#}
+#
+#
 
 
 
@@ -140,14 +140,14 @@ plot = ggplot(data=data, aes(x=Distance, y=MI)) + geom_step(size=2) + theme_bw()
 
 
 
-ggsave("decay-A.pdf")
+#ggsave("decay-A.pdf")
 
 
 
 plot = ggplot(data=data, aes(x=Distance, y=Distance * MI)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18))
 
 
-ggsave("memory-A.pdf")
+#ggsave("memory-A.pdf")
 
 
 
@@ -181,7 +181,7 @@ plot = ggplot(data=data, aes(x=Memory, y=Surprisal)) + geom_line(size=2) + theme
 
 
 
-ggsave("listener-tradeoff-A.pdf")
+#ggsave("listener-tradeoff-A.pdf")
 
 
 
