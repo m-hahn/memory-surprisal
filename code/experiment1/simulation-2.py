@@ -25,6 +25,7 @@ for x in productions:
                   vocabulary.add(word)
 itos = list(vocabulary)
 stoi = dict(zip(itos, range(len(itos))))
+print("Itos")
 print(itos)
 
 print(sample("S"))
@@ -95,7 +96,7 @@ wordsWithoutSentinels = 0
 #corpusIterator = corpus.iterator()
 #if corpus.length() == 0:
 #   quit()
-print "Building suffix array"
+print("Building suffix array")
 sentcounter = 0
 #for _ in range(contextLength):
 #   array.append(0)
@@ -145,16 +146,12 @@ lastCrossEntropy = 10000
 memory = 0
 
 
-print "Saving"
+print("Saving")
 save_path = "/juicier/scr120/scr/mhahn/deps/"
 
 my_fileName = __file__.split("/")[-1]
 
-#print save_path+"/memory-need-upos/"+language+"_"+my_fileName+"_model_"+str(myID)+"_"+model+".tsv"
-
-#with open(save_path+"/memory-need-upos/"+language+"_"+my_fileName+"_model_"+str(myID)+"_"+model+".tsv", "w") as outFile:
 if True:
- #  print >> outFile, "\t".join(map(str,["FileName","ModelName","Counter", "Model", "OriginalCounter", "Distance", "Entropy", "ConditionalMI", "Memory", "LengthForPrediction", "ContextLength"]))
 
    for contextLength in range(0, contextLength-1):
       crossEntropy = 0
@@ -236,31 +233,10 @@ if True:
       assert i-lengthsOfSuffixes == contextLength
       #assert lastCrossEntropy >= crossEntropy
    
-      print countTowardsSurprisal
+      print(countTowardsSurprisal)
       memory += min(lengthForPrediction, contextLength) * (lastCrossEntropy-crossEntropy)
-      print "CONTEXT LENGTH "+str(contextLength)+"   "+str( crossEntropy)+"  "+str((lastCrossEntropy-crossEntropy))+"   "+str(memory)
+      print("CONTEXT LENGTH "+str(contextLength)+"   "+str( crossEntropy)+"  "+str((lastCrossEntropy-crossEntropy))+"   "+str(memory))
       assert abs(totalSum - 1.0) < 0.00001, totalSum
    
- #   print >> outFile, "\t".join(map(str,["FileName","ModelName","Counter", "Model", "Distance", "Entropy", "ConditionalMI", "Memory"]))
-  
-#      print >> outFile, "\t".join(map(str,[myID, my_fileName, 100000, model, originalCounter, contextLength, crossEntropy, (lastCrossEntropy-crossEntropy) if contextLength > 0 else crossEntropy, memory, lengthForPrediction, contextLength ]))
       lastCrossEntropy = crossEntropy
-#  lengthForPrediction = int(sys.argv[4]) #20
-#contextLength = int(sys.argv[5]) #20
-
-
-   
-   #dhWeights = Variable(torch.FloatTensor([0.0] * len(itos_deps)), requires_grad=True)
-   #distanceWeights = Variable(torch.FloatTensor([0.0] * len(itos_deps)), requires_grad=True)
-   #for i, key in enumerate(itos_deps):
-   #
-   #   # take from treebank, or randomize
-   #   dhLogits[key] = 2*(random()-0.5)
-   #   dhWeights.data[i] = dhLogits[key]
-   #
-   #   originalDistanceWeights[key] = random()  
-   #   distanceWeights.data[i] = originalDistanceWeights[key]
-   #
-   #
-   #
 
