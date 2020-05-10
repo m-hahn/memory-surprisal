@@ -63,7 +63,10 @@ with open("results.tsv", "w") as outFile:
      if model != "RANDOM":
        relevantModelFiles = glob.glob("/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/*"+model+"*")
        #print(relevantModelFiles)
-       assert len(relevantModelFiles) == 1
+       if len(relevantModelFiles) == 0:
+           print("WARNING: Model doesn't exist")
+           continue
+       assert len(relevantModelFiles) == 1, relevantModelFiles
        opt_script = relevantModelFiles[0]
        opt_script = opt_script[opt_script.index("forWords"):opt_script.index(".py")+3]
        if "Heldout.py" in opt_script:
