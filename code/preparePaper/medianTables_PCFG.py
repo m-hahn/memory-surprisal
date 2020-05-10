@@ -1,4 +1,6 @@
 # ./python27 tradeoffPrepareTable_OnlyWordForms_BoundedVocab.py > ../results-table-word-level.tex
+import sys
+import os
 
 with open("../ud_languages.txt", "r") as inFile:
    languages = inFile.read().strip().split("\n")
@@ -45,14 +47,12 @@ for language in languages:
 #   line = languageKey[language]
    components = [language.replace("_"," ").replace("-Adap", "")]
    #components.append( "\\multirow{4}{*}{\includegraphics[width=0.25\\textwidth]{neural/figures/"+language+"-entropy-memory.pdf}}")
-   components.append( "\includegraphics[width=0.1\\textwidth]{../code/pcfg/analyze_pcfg/figures/"+language+"-listener-surprisal-memory-MEDIANS_onlyWordForms_boundedVocab-pcfg.pdf}" )
+   components.append( "\includegraphics[width=0.25\\textwidth]{../code/pcfg/analyze_pcfg/figures/"+language+"-listener-surprisal-memory-MEDIANS_onlyWordForms_boundedVocab-pcfg.pdf}" )
    entries.append(components)
 
-ROWS_PER_PART = 7
-COLUMNS = 6
-while len(entries) % COLUMNS != 0:
-     entries.append(["",""])
-#entries += [["",""] for x in range((COLUMNS-(len(entries)%COLUMNS))%COLUMNS)]
+ROWS_PER_PART = 4
+COLUMNS = 4
+entries += [["",""] for x in range((COLUMNS-(len(entries)%COLUMNS))%COLUMNS)]
 
 outputRows = []
 if True:
@@ -65,13 +65,15 @@ if True:
        outputRows.append( " & ".join(images[i*COLUMNS:(i+1)*COLUMNS]))
        outputRows.append( " \\\\ ")
 
-part=0
-with open("output/medians_small_pcfg.tex", "w") as outFile:
-      for row in range(len(outputRows)):
-#          if COLUMNS*(row) >= len(outputRows):
- #             break
-  #        for i in range(COLUMNS):
-   #          print(COLUMNS, row, i, COLUMNS*row+i, COLUMNS*row, len(outputRows))
-             print >> outFile, outputRows[row]
+for part in range(len(entries)/(COLUMNS*ROWS_PER_PART)+1):
+  with open("../../writeup/tables/medians_pcfg_"+str(part)+".tex", "w") as outFile:
+      for row in range(part*ROWS_PER_PART, (part+1)*ROWS_PER_PART):
+          if 4*row >= len(outputRows):
+              break
+          print >> outFile, outputRows[4*row]
+          print >> outFile, outputRows[4*row+1]
+          print >> outFile, outputRows[4*row+2]
+          print >> outFile, outputRows[4*row+3]
+
 
 
