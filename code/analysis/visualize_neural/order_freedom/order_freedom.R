@@ -10,6 +10,10 @@ fullData = read.csv("../../../../results/tradeoff/listener-curve-histogram_byMem
 branching = read.csv("../../../order-freedom/branching_entropy/branching_entropy.tsv", sep="\t")
 data = merge(data, branching, by=c("Language"))
 
+library(stringr)
+data = data %>% mutate(Language = str_replace(Language, "-Adap", ""))
+
+
 dataReal = data %>% filter(Type %in% c("REAL_REAL")) %>% group_by(Language, Type) %>% summarise(MI_z=mean(MI_z), MIDiff = mean(MI-mean), BranchingEntropy=mean(BranchingEntropy)) %>% mutate(y=1)
 #cor.test(dataReal$MI_z, dataReal$BranchingEntropy, method="spearman")
 cor.test(dataReal$MIDiff, dataReal$BranchingEntropy, method="spearman")

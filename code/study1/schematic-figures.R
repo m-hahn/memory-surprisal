@@ -28,25 +28,25 @@ x1 = (1:10)
 y1 = 5 * x^(-2.5)
 
 data1 = data.frame(Distance=x1, MI=y1)
-data1$Process = "A"
+data1$Language = "MoreEfficient"
 
 x2 = (1:10)
 y2 = 3.5 * x^(-1.5)
 
 data2 = data.frame(Distance=x2, MI=y2)
-data2$Process = "B"
+data2$Language = "LessEfficient"
 
 
 data = rbind(data1, data2) 
 
-plot = ggplot(data=data, aes(x=Distance, y=MI, color=Process, group=Process)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18)) + xlab("t") + ylab("Conditional Mutual Information (It)") + scale_x_continuous(breaks=c(1,5,10))
+plot = ggplot(data=data, aes(x=Distance, y=MI, color=Language, group=Language)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18)) + xlab("t") + ylab("Conditional Mutual Information (It)") + scale_x_continuous(breaks=c(1,5,10))
 
 
 ggsave("figures/decay.pdf")
 
 
 
-plot = ggplot(data=data, aes(x=Distance, y=Distance * MI, color=Process, group=Process)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18)) + xlab("t") + ylab("t * It") + scale_x_continuous(breaks=c(1,5,10))
+plot = ggplot(data=data, aes(x=Distance, y=Distance * MI, color=Language, group=Language)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18)) + xlab("t") + ylab("t * It") + scale_x_continuous(breaks=c(1,5,10))
 
 
 
@@ -132,7 +132,7 @@ x1 = (1:10)
 y1 = 5 * x^(-2.5)
 
 data1 = data.frame(Distance=x1, MI=y1)
-data1$Process = "A"
+data1$Language = "MoreEfficient"
 
 data = rbind(data1) 
 
@@ -140,14 +140,14 @@ plot = ggplot(data=data, aes(x=Distance, y=MI)) + geom_step(size=2) + theme_bw()
 
 
 
-#ggsave("decay-A.pdf")
+#ggsave("decay-MoreEfficient.pdf")
 
 
 
 plot = ggplot(data=data, aes(x=Distance, y=Distance * MI)) + geom_step(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18))
 
 
-#ggsave("memory-A.pdf")
+#ggsave("memory-MoreEfficient.pdf")
 
 
 
@@ -166,14 +166,14 @@ x1 = (1:10)
 y1 = 5.3 * x^(-2.5)
 
 data1 = data.frame(Distance=x1, MI=y1)
-data1$Process = "A"
+data1$Language = "MoreEfficient"
 
 data = rbind(data1) 
 
 library(tidyr)
 
-data = data %>% group_by(Process) %>% mutate(CumMI = cumsum(MI))
-data = data %>% group_by(Process) %>% mutate(Memory = cumsum(MI*Distance))
+data = data %>% group_by(Language) %>% mutate(CumMI = cumsum(MI))
+data = data %>% group_by(Language) %>% mutate(Memory = cumsum(MI*Distance))
 
 data = data %>% mutate(Surprisal = 10-CumMI)
 
@@ -181,7 +181,7 @@ plot = ggplot(data=data, aes(x=Memory, y=Surprisal)) + geom_line(size=2) + theme
 
 
 
-#ggsave("listener-tradeoff-A.pdf")
+#ggsave("listener-tradeoff-MoreEfficient.pdf")
 
 
 
@@ -197,29 +197,29 @@ x1 = (1:20)
 y1 = 5.3 * x^(-2.5)
 
 data1 = data.frame(Distance=x1, MI=y1)
-data1$Process = "A"
+data1$Language = "MoreEfficient"
 
 x2 = (1:20)
 y2 = 3.5 * x^(-1.5)
 
 data2 = data.frame(Distance=x2, MI=y2)
-data2$Process = "B"
+data2$Language = "LessEfficient"
 
 
 data = rbind(data1, data2) 
 
 library(tidyr)
 
-data = data %>% group_by(Process) %>% mutate(CumMI = cumsum(MI))
-data = data %>% group_by(Process) %>% mutate(Memory = cumsum(MI*Distance))
+data = data %>% group_by(Language) %>% mutate(CumMI = cumsum(MI))
+data = data %>% group_by(Language) %>% mutate(Memory = cumsum(MI*Distance))
 
 data = data %>% mutate(Surprisal = 10-CumMI)
 
-data_ = data %>% select(Memory, Surprisal, Process)
+data_ = data %>% select(Memory, Surprisal, Language)
 
-data_ = rbind(as.data.frame(data_), data.frame(Memory=c(3.5, 17.573493), Surprisal=c(6.5, 3.0163223), Process=c("A", "A")))
+data_ = rbind(as.data.frame(data_), data.frame(Memory=c(3.5, 17.573493), Surprisal=c(6.5, 3.0163223), Language=c("MoreEfficient", "MoreEfficient")))
 
-plot = ggplot(data=data_ %>% filter(Surprisal>=3), aes(x=Memory, y=Surprisal, color=Process, group=Process)) + geom_line(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18))
+plot = ggplot(data=data_ %>% filter(Surprisal>=3), aes(x=Memory, y=Surprisal, color=Language, group=Language)) + geom_line(size=2) + theme_bw() + theme(axis.text=element_text(size=18), axis.title=element_text(size=18), legend.title=element_text(size=18), legend.text=element_text(size=18))
 
 
 

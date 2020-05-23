@@ -76,24 +76,24 @@ maximalMemory = 0
 for typ, mis in misByType.iteritems():
   mask = torch.FloatTensor([[1 if j <= i else 0 for j in range(MAX_DISTANCE)] for i in range(MAX_DISTANCE)])
   cumulativeMI = torch.matmul(mis, mask.t())
-  print(typ, mis)
+  #print(typ, mis)
   
-  print("MIs", mis[0])
-  print("Cum MI", cumulativeMI[0])
+  #print("MIs", mis[0])
+  #print("Cum MI", cumulativeMI[0])
   cumulativeMemory = torch.matmul(distance*mis, mask.t())
-  print("Cum Mem", cumulativeMemory[0])
+  #print("Cum Mem", cumulativeMemory[0])
   cumMIs[typ] = cumulativeMI
   cumMems[typ] = cumulativeMemory
-  for line1, line2 in zip(mis, cumulativeMemory):
-      print("--")
-      print(line1)
-      print(line2)
-      if float(torch.max(line2)) > 10:
-          break
+#  for line1, line2 in zip(mis, cumulativeMemory):
+#      print("--")
+#      print(line1)
+#      print(line2)
+#      if float(torch.max(line2)) > 10:
+#          break
   maximalMemory = max(maximalMemory, float(torch.max(cumulativeMemory)))
-  print(maximalMemory)
-  assert maximalMemory < 10
-assert False
+#  print(maximalMemory)
+#  assert maximalMemory < 10
+#assert False
 #print("MAXIMAL MEMORY", maximalMemory)
 
 
@@ -163,5 +163,5 @@ for typ, interpolated in interpolatedByTypes.iteritems():
        empirical_median = float(interpolated[:,i].median())
        assert bestCI[0] <= empirical_median
        # TODO don't trust the CI
-       print "\t".join(map(str,[language, typ, i, float(xPoints[i]), empirical_median, bestCI[0], bestCI[1], bestCI[2]]))
+       print "\t".join(map(str,[language, typ, i, round(float(xPoints[i]), 5), round(empirical_median, 5), round(bestCI[0], 5), round(bestCI[1], 5), round(bestCI[2], 5)]))
 
