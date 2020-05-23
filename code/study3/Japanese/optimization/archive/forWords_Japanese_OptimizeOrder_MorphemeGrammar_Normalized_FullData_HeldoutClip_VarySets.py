@@ -7,12 +7,12 @@ objectiveName = "LM"
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument("--language", dest="language", type=str, default="Japanese_2.4")
+parser.add_argument("--language", dest="language", type=str, default="Japanese-GSD_2.4")
 parser.add_argument("--model", dest="model", type=str)
-parser.add_argument("--alpha", dest="alpha", type=float, default=0.0)
+parser.add_argument("--alpha", dest="alpha", type=float, default=1.0)
 parser.add_argument("--gamma", dest="gamma", type=int, default=1)
 parser.add_argument("--delta", dest="delta", type=float, default=1.0)
-parser.add_argument("--cutoff", dest="cutoff", type=int, default=3)
+parser.add_argument("--cutoff", dest="cutoff", type=int, default=4)
 parser.add_argument("--idForProcess", dest="idForProcess", type=int, default=random.randint(0,10000000))
 import random
 
@@ -34,7 +34,7 @@ assert args.gamma >= 1
 myID = args.idForProcess
 
 
-TARGET_DIR = "results/"+__file__.replace(".py", "")
+TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/"
 
 
 
@@ -69,42 +69,54 @@ morphKeyValuePairs = set()
 vocab_lemmas = {}
 
 
-def processVerb(verb):
+def processVerb(verb, data_):
     if len(verb) > 0:
       if "VERB" in [x["posUni"] for x in verb[1:]]:
         print([x["word"] for x in verb])
-      data.append(verb)
+      data_.append(verb)
 
-corpusTrain = CorpusIterator_V(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
+corpusTrain = list(CorpusIterator_V(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False))
+corpusDev = list(CorpusIterator_V(args.language,"dev", storeMorph=True).iterator(rejectShortSentences = False))
+
+
+fullCorpus = list(corpusTrain) + list(corpusDev)
+shuffle(fullCorpus)
+devSize = len(corpusDev)
+corpusDev = fullCorpus[:devSize]
+corpusTrain = fullCorpus[devSize:]
+
+
 pairs = set()
 counter = 0
-data = []
-for sentence in corpusTrain:
+data_train = []
+data_dev = []
+for corpus, data_ in [(corpusTrain, data_train), (corpusDev, data_dev)]:
+ for sentence in corpus:
 #    print(len(sentence))
     verb = []
     for line in sentence:
        if line["posUni"] == "PUNCT":
-          processVerb(verb)
+          processVerb(verb, data_)
           verb = []
           continue
        elif line["posUni"] == "VERB":
-          processVerb(verb)
+          processVerb(verb, data_)
           verb = []
           verb.append(line)
        elif line["posUni"] == "AUX" and len(verb) > 0:
           verb.append(line)
        elif line["posUni"] == "SCONJ" and line["word"] == 'て':
           verb.append(line)
-          processVerb(verb)
+          processVerb(verb, data_)
           verb = []
        else:
-          processVerb(verb)
+          processVerb(verb, data_)
           verb = []
-print(len(data))
-#quit()
-print(counter)
-#print(data)
-print(len(data))
+ print("len(data_)", len(data_))
+ #quit()
+ print(counter)
+ #print(data)
+ print(len(data_))
 
 #quit()
 import torch.nn as nn
@@ -123,17 +135,18 @@ import torch.nn.functional
 words = []
 
 affixFrequency = {}
-for verbWithAff in data:
+for verbWithAff in data_train:
   for affix in verbWithAff[1:]:
     affixLemma = getRepresentation(affix["lemma"])
     affixFrequency[affixLemma] = affixFrequency.get(affixLemma, 0)+1
 
 
 itos = set()
-for verbWithAff in data:
-  for affix in verbWithAff[1:]:
-    affixLemma = getRepresentation(affix["lemma"])
-    itos.add(affixLemma)
+for data_ in [data_train, data_dev]:
+  for verbWithAff in data_:
+    for affix in verbWithAff[1:]:
+      affixLemma = getRepresentation(affix["lemma"])
+      itos.add(affixLemma)
 itos = sorted(list(itos))
 stoi = dict(list(zip(itos, range(len(itos)))))
 
@@ -147,20 +160,22 @@ weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
 
 
 def calculateTradeoffForWeights(weights):
+    train = []
     dev = []
-    for verb in data:
-       affixes = verb[1:]
-       affixes = sorted(affixes, key=lambda x:weights[getRepresentation(x["lemma"])])
-       for ch in [verb[0]] + affixes:
-          dev.append(getRepresentation(ch["lemma"]))
-       #    print(char)
-       dev.append("EOS")
-       for _ in range(args.cutoff+2):
-         dev.append("PAD")
-       dev.append("SOS")
-    
-    itos = list(set(dev))
-    
+    for data, processed in [(data_train, train), (data_dev, dev)]:
+      for verb in data:
+         affixes = verb[1:]
+         affixes = sorted(affixes, key=lambda x:weights.get(getRepresentation(x["lemma"]), 0))
+         for ch in [verb[0]] + affixes:
+            processed.append(getRepresentation(ch["lemma"]))
+         #    print(char)
+         processed.append("EOS")
+         for _ in range(args.cutoff+2):
+           processed.append("PAD")
+         processed.append("SOS")
+      
+    itos = list(set(train) | set(dev))
+      
     
     dev = dev[::-1]
     #dev = list(createStreamContinuous(corpusDev))[::-1]
@@ -168,7 +183,7 @@ def calculateTradeoffForWeights(weights):
     
     #corpusTrain = CorpusIterator(args.language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
     #train = list(createStreamContinuous(corpusTrain))[::-1]
-    train = dev
+    train = train[::-1]
     
     idev = range(len(dev))
     itrain = range(len(train))
@@ -273,7 +288,7 @@ def calculateTradeoffForWeights(weights):
                   if followingCount == 0:
                       newProbability[j] = lastProbability[j]
                   else:
-                      assert countNgram > 0
+                      #assert countNgram > 0
                       probability = log(max(countNgram - args.alpha, 0.0) + args.alpha * followingCount * exp(lastProbability[j])) -  log(countPrefix)
                       newProbability[j] = probability
              else:
@@ -294,7 +309,10 @@ def calculateTradeoffForWeights(weights):
        devSurprisalTable.append(surprisal)
      #  print("Surprisal", surprisal, len(itos))
     #print(devSurprisalTable)
+    for k in range(len(devSurprisalTable)):
+        devSurprisalTable[k] = min(devSurprisalTable[:k+1])
     mis = [devSurprisalTable[i] - devSurprisalTable[i+1] for i in range(len(devSurprisalTable)-1)]
+    print(mis)
     tmis = [mis[x]*(x+1) for x in range(len(mis))]
     #print(mis)
     #print(tmis)
@@ -309,7 +327,7 @@ def calculateTradeoffForWeights(weights):
     assert 7>memory
     auc += mi * (7-memory)
     #print("AUC", auc)
-    return auc
+    return auc, devSurprisalTable
     #assert False
     
     #outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model+".txt"
@@ -336,9 +354,9 @@ for iteration in range(1000):
    #     break
      if random() < 0.9 and newValue != weights[coordinate]:
         continue
-     print(newValue, mostCorrect, coordinate, affixFrequency[coordinate])
+     print(newValue, mostCorrect, coordinate, affixFrequency.get(coordinate,0))
      weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}
-     correctCount = calculateTradeoffForWeights(weights_)
+     correctCount, _ = calculateTradeoffForWeights(weights_)
 #     print(weights_)
 #     print(coordinate, newValue, iteration, correctCount)
      if correctCount > mostCorrect:
@@ -352,12 +370,14 @@ for iteration in range(1000):
   weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
   print(weights)
   for x in itos_:
-     if affixFrequency[x] < 10:
+     if affixFrequency.get(x,0) < 10:
        continue
-     print("\t".join([str(y) for y in [x, weights[x], affixFrequency[x]]]))
+     print("\t".join([str(y) for y in [x, weights[x], affixFrequency.get(x,0)]]))
   if (iteration + 1) % 50 == 0:
+     _, surprisals = calculateTradeoffForWeights(weights_)
+
      with open(TARGET_DIR+"/optimized_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
-        print(iteration, mostCorrect, str(args), file=outFile)
+        print(iteration, mostCorrect, str(args), surprisals, file=outFile)
         for key in itos_:
            print(key, weights[key], file=outFile)
 

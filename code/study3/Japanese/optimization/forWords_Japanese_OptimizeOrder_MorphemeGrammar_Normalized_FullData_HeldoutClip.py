@@ -34,7 +34,7 @@ assert args.gamma >= 1
 myID = args.idForProcess
 
 
-TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/"
+TARGET_DIR = "results/"+__file__.replace(".py", "")
 
 
 
