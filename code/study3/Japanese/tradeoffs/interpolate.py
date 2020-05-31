@@ -28,7 +28,7 @@ script = "forWords_Japanese_RandomOrder_Normalized_FullData_Heldout.py"
 
 
 try:
-  with open("results.tsv", "r") as inFile:
+  with open("analyze/results.tsv", "r") as inFile:
      data_ = readTSV(inFile)
 except IOError:
   print >> sys.stderr, ("ERROR nothing for this language? "+script)
@@ -42,7 +42,7 @@ def g(frame, name, i):
 
 
 scripts = set([g(data_, "Script", i) for i in range(len(data_[1]))])
-with open("results_interpolated.tsv", "w") as outFile:
+with open("analyze/results_interpolated.tsv", "w") as outFile:
  print >> outFile, "\t".join(map(str, ["Script", "Type", "Run", "InterpPoint", "Memory", "MI"]))
 
  for script in scripts:
