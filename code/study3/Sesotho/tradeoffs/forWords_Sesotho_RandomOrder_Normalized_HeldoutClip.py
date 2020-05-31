@@ -169,7 +169,7 @@ def getNormalizedForm(word): # for prediction
 myID = args.idForProcess
 
 
-TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-morphology/"
+TARGET_DIR = "estimates/"
 
 words = []
 
@@ -338,7 +338,7 @@ import glob
 PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
 
 if args.model_sfx not in ["REAL", "RANDOM", "REVERSE"]:
-  files = glob.glob(PATH+"/optimized_*.py_"+args.model_sfx+".tsv")
+  files = glob.glob(args.model_sfx)
   print(files, args.model_sfx)
   assert len(files) == 1
   assert "Suffixes" in files[0], files
@@ -352,7 +352,7 @@ if args.model_sfx not in ["REAL", "RANDOM", "REVERSE"]:
         weights_sfx[morpheme] = int(weight)
 #
 if args.model_pfx not in ["REAL", "RANDOM", "REVERSE"]:
-  files = glob.glob(PATH+"/optimized_*.py_"+args.model_pfx+".tsv")
+  files = glob.glob(args.model_pfx)
   assert len(files) == 1
   assert "Suffixes" not in files[0], files
   assert "Normalized" in files[0]
@@ -550,8 +550,16 @@ def calculateTradeoffForWeights(weights_pfx, weights_sfx):
     auc += mi * (7-memory)
     print("AUC", auc)
     #assert False
-    
-    outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model_pfx+"_"+args.model_sfx+".txt"
+
+    if args.model_pfx.endswith(".tsv"):
+       model_pfx = args.model_pfx[args.model_pfx.rfind("_")+1:-4]
+    else:
+       model_pfx = args.model_pfx
+    if args.model_sfx.endswith(".tsv"):
+       model_sfx = args.model_sfx[args.model_sfx.rfind("_")+1:-4]
+    else:
+       model_sfx = args.model_sfx
+    outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+model_pfx+"_"+model_sfx+".txt"
     print(outpath)
     with open(outpath, "w") as outFile:
        print(str(args), file=outFile)
