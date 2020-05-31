@@ -150,11 +150,7 @@ else:
   weights = {}
   weights = {}
   import glob
-  PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
-  files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
-  if len(files) == 0:
-     files = glob.glob("../extract/output/extracted_*.py_"+args.model+".tsv")
- 
+  files = glob.glob(args.model)
   assert len(files) == 1
   with open(files[0], "r") as inFile:
      next(inFile)
@@ -217,8 +213,10 @@ def getCorrectOrderCount(weights):
 
 result = getCorrectOrderCount(weights)
 print(errors)
+print(result)
 
-with open("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+str(myID)+"_"+args.model+".txt", "w") as outFile:
+model = args.model[args.model.rfind("_")+1:-4]   
+with open("results/accuracy_"+__file__+"_"+str(myID)+"_"+model+".txt", "w") as outFile:
    print(result[0], file=outFile)
    print(result[1], file=outFile)
    print(result[2], file=outFile)
@@ -231,6 +229,6 @@ print("ERRORS")
 print(errors)
 print(result)
 
-print("/u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_"+__file__+"_"+str(myID)+"_"+args.model+".txt")
+print("results/accuracy_"+__file__+"_"+str(myID)+"_"+args.model+".txt")
 
 
