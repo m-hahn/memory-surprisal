@@ -1,7 +1,7 @@
 import sys
 import os
 
-PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology"
+PATH = "estimates/"
 
 files = sorted([x for x in os.listdir(PATH) if "forWords_Japanese" in x])
 
