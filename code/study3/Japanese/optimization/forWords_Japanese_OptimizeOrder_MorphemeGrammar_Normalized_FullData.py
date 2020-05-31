@@ -69,42 +69,44 @@ morphKeyValuePairs = set()
 vocab_lemmas = {}
 
 
-def processVerb(verb):
+def processVerb(verb, data_):
     if len(verb) > 0:
       if "VERB" in [x["posUni"] for x in verb[1:]]:
         print([x["word"] for x in verb])
-      data.append(verb)
+      data_.append(verb)
 
 corpusTrain = CorpusIterator_V(args.language,"train", storeMorph=True).iterator(rejectShortSentences = False)
 pairs = set()
 counter = 0
-data = []
-for sentence in corpusTrain:
+data_train = []
+
+for corpus, data_ in [(corpusTrain, data)]:
+ for sentence in corpus:
 #    print(len(sentence))
     verb = []
     for line in sentence:
        if line["posUni"] == "PUNCT":
-          processVerb(verb)
+          processVerb(verb, data_)
           verb = []
           continue
        elif line["posUni"] == "VERB":
-          processVerb(verb)
+          processVerb(verb, data_)
           verb = []
           verb.append(line)
        elif line["posUni"] == "AUX" and len(verb) > 0:
           verb.append(line)
        elif line["posUni"] == "SCONJ" and line["word"] == 'て':
           verb.append(line)
-          processVerb(verb)
+          processVerb(verb, data_)
           verb = []
        else:
-          processVerb(verb)
+          processVerb(verb, data_)
           verb = []
-print(len(data))
-#quit()
-print(counter)
-#print(data)
-print(len(data))
+ print("len(data_)", len(data_))
+ #quit()
+ print(counter)
+ #print(data)
+ print(len(data_))
 
 #quit()
 import torch.nn as nn
@@ -123,17 +125,18 @@ import torch.nn.functional
 words = []
 
 affixFrequency = {}
-for verbWithAff in data:
+for verbWithAff in data_train:
   for affix in verbWithAff[1:]:
     affixLemma = getRepresentation(affix["lemma"])
     affixFrequency[affixLemma] = affixFrequency.get(affixLemma, 0)+1
 
 
 itos = set()
-for verbWithAff in data:
-  for affix in verbWithAff[1:]:
-    affixLemma = getRepresentation(affix["lemma"])
-    itos.add(affixLemma)
+for data_ in [data_train]:
+  for verbWithAff in data_:
+    for affix in verbWithAff[1:]:
+      affixLemma = getRepresentation(affix["lemma"])
+      itos.add(affixLemma)
 itos = sorted(list(itos))
 stoi = dict(list(zip(itos, range(len(itos)))))
 
@@ -147,28 +150,28 @@ weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
 
 
 def calculateTradeoffForWeights(weights):
-    dev = []
-    for verb in data:
-       affixes = verb[1:]
-       affixes = sorted(affixes, key=lambda x:weights[getRepresentation(x["lemma"])])
-       for ch in [verb[0]] + affixes:
-          dev.append(getRepresentation(ch["lemma"]))
-       #    print(char)
-       dev.append("EOS")
-       for _ in range(args.cutoff+2):
-         dev.append("PAD")
-       dev.append("SOS")
-    
-    itos = list(set(dev))
-    
-    
-    dev = dev[::-1]
-    #dev = list(createStreamContinuous(corpusDev))[::-1]
-    
-    
-    #corpusTrain = CorpusIterator(args.language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
-    #train = list(createStreamContinuous(corpusTrain))[::-1]
-    train = dev
+    # Order the datasets based on the given weights
+    train = []
+
+    for data, processed in [(data_train, train)]:
+      for verb in data:
+         affixes = verb[1:]
+         affixes = sorted(affixes, key=lambda x:weights[getRepresentation(x["lemma"])])
+         for ch in [verb[0]] + affixes:
+            processed.append(getRepresentation(ch["lemma"]))
+         #    print(char)
+         processed.append("EOS")
+         for _ in range(args.cutoff+2):
+           processed.append("PAD")
+         processed.append("SOS")
+      
+    itos = list(set(train))
+      
+    # For the algorithm, we will need to reverse the corpora
+    train = train[::-1]
+
+    # For the naive estimator, the train set will replace the held-out (`dev`) set
+    dev = train
     
     idev = range(len(dev))
     itrain = range(len(train))
@@ -176,16 +179,16 @@ def calculateTradeoffForWeights(weights):
     idev = sorted(idev, key=lambda i:dev[i:i+20])
     itrain = sorted(itrain, key=lambda i:train[i:i+20])
     
-#    print(idev)
-    
+    # The inverse map of idev/itrain: For each position in the texts, indicates its position in those lists.    
     idevInv = [x[1] for x in sorted(zip(idev, range(len(idev))), key=lambda x:x[0])]
     itrainInv = [x[1] for x in sorted(zip(itrain, range(len(itrain))), key=lambda x:x[0])]
     
+    # Basic sanity check
     assert idev[idevInv[5]] == 5
     assert itrain[itrainInv[5]] == 5
     
     
-    
+    # Helper function. For a given span length k (>= 0), computes for each position in the heldout set (`dev`), the location of the first and last entries in itrain where the same string of length k starts as after the given position in idev.
     def getStartEnd(k):
        start = [0 for _ in dev]
        end = [len(train)-1 for _ in dev]
@@ -273,7 +276,7 @@ def calculateTradeoffForWeights(weights):
                   if followingCount == 0:
                       newProbability[j] = lastProbability[j]
                   else:
-                      assert countNgram > 0
+                      assert countNgram > 0 # Sanity check: Since dev == train, this has to be true.
                       probability = log(max(countNgram - args.alpha, 0.0) + args.alpha * followingCount * exp(lastProbability[j])) -  log(countPrefix)
                       newProbability[j] = probability
              else:
@@ -294,7 +297,10 @@ def calculateTradeoffForWeights(weights):
        devSurprisalTable.append(surprisal)
      #  print("Surprisal", surprisal, len(itos))
     #print(devSurprisalTable)
+    for k in range(len(devSurprisalTable)):
+        devSurprisalTable[k] = min(devSurprisalTable[:k+1])
     mis = [devSurprisalTable[i] - devSurprisalTable[i+1] for i in range(len(devSurprisalTable)-1)]
+    print(mis)
     tmis = [mis[x]*(x+1) for x in range(len(mis))]
     #print(mis)
     #print(tmis)
@@ -309,7 +315,7 @@ def calculateTradeoffForWeights(weights):
     assert 7>memory
     auc += mi * (7-memory)
     #print("AUC", auc)
-    return auc
+    return auc, devSurprisalTable
     #assert False
     
     #outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model+".txt"
@@ -324,28 +330,34 @@ def calculateTradeoffForWeights(weights):
 
 
 for iteration in range(1000):
+  # Randomly select a morpheme whose position to update
   coordinate=choice(itos)
-#  if coordinate == 'する' and weights[coordinate] == 0: # Force suru to be at the beginning
- #     continue
 
+  # Stochastically filter out rare morphemes
   while affixFrequency.get(coordinate, 0) < 10 and random() < 0.95:
      coordinate = choice(itos)
+
+  # This will store the maximal AOC found so far and the corresponding position
   mostCorrect, mostCorrectValue = 0, None
+
+  # Iterate over possible new positions
   for newValue in [-1] + [2*x+1 for x in range(len(itos))] + [weights[coordinate]]:
-  #   if coordinate == 'する':
-   #     break
+
+     # Stochastically exclude positions to save compute time
      if random() < 0.9 and newValue != weights[coordinate]:
         continue
+
      print(newValue, mostCorrect, coordinate, affixFrequency[coordinate])
+     # Updated weights, assuming the selected morpheme is moved to the position indicated by `newValue`.
      weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}
-     correctCount = calculateTradeoffForWeights(weights_)
-#     print(weights_)
-#     print(coordinate, newValue, iteration, correctCount)
-     if correctCount > mostCorrect:
+
+     # Calculate AOC for this updated assignment
+     resultingAOC, _ = calculateTradeoffForWeights(weights_)
+
+     # Update variables if AOC is larger than maximum AOC found so far
+     if resultingAOC > mostCorrect:
         mostCorrectValue = newValue
-        mostCorrect = correctCount
-  #if coordinate == 'する':
-   #  mostCorrectValue = -1
+        mostCorrect = resultingAOC
   print(iteration, mostCorrect)
   weights[coordinate] = mostCorrectValue
   itos_ = sorted(itos, key=lambda x:weights[x])
@@ -356,8 +368,10 @@ for iteration in range(1000):
        continue
      print("\t".join([str(y) for y in [x, weights[x], affixFrequency[x]]]))
   if (iteration + 1) % 50 == 0:
+     _, surprisals = calculateTradeoffForWeights(weights_)
+
      with open(TARGET_DIR+"/optimized_"+__file__+"_"+str(myID)+".tsv", "w") as outFile:
-        print(iteration, mostCorrect, str(args), file=outFile)
+        print(iteration, mostCorrect, str(args), surprisals, file=outFile)
         for key in itos_:
            print(key, weights[key], file=outFile)
 
