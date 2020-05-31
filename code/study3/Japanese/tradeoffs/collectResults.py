@@ -10,7 +10,7 @@ def find_second_last(text, pattern):
    return text.rfind(pattern, 0, text.rfind(pattern))
 
 
-with open("results.tsv", "w") as outFile:
+with open("analyze/results.tsv", "w") as outFile:
  print("\t".join([str(x) for x in ["Script", "Run", "Model", "Distance", "Surprisal", "MI", "Memory", "UnigramCE", "Type"]]), file=outFile)
  for f in files:
   with open(PATH+"/"+f, "r") as inFile:
