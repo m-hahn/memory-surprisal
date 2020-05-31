@@ -215,7 +215,11 @@ result = getCorrectOrderCount(weights)
 print(errors)
 print(result)
 
-model = args.model[args.model.rfind("_")+1:-4]   
+if args.model.endswith(".tsv"):
+   model = args.model[args.model.rfind("_")+1:-4]   
+else:
+   model = args.model
+
 with open("results/accuracy_"+__file__+"_"+str(myID)+"_"+model+".txt", "w") as outFile:
    print(result[0], file=outFile)
    print(result[1], file=outFile)
