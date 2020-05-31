@@ -35,7 +35,7 @@ assert args.gamma >= 1
 myID = args.idForProcess
 
 
-TARGET_DIR = "/u/scr/mhahn/deps/memory-need-ngrams-morphology/"
+TARGET_DIR = "estimates/"
 
 
 
@@ -148,8 +148,7 @@ elif args.model in ["REAL", "REVERSE"]:
 elif args.model != "REAL":
   weights = {}
   import glob
-  PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized"
-  files = glob.glob(PATH+"/optimized_*.py_"+args.model+".tsv")
+  files = glob.glob(args.model)
   assert len(files) == 1
   assert "_FormsPhonemesFull_" in files[0]
   with open(files[0], "r") as inFile:
@@ -386,8 +385,12 @@ def calculateTradeoffForWeights(weights):
     auc += mi * (7-memory)
     print("AUC", auc)
     #assert False
-    
-    outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+args.model+".txt"
+  
+    if args.model.endswith(".tsv"):
+       model = args.model[args.model.rfind("_")+1:-4]
+    else:
+       model = args.model
+    outpath = TARGET_DIR+"/estimates-"+args.language+"_"+__file__+"_model_"+str(myID)+"_"+model+".txt"
     print(outpath)
     with open(outpath, "w") as outFile:
        print(str(args), file=outFile)
