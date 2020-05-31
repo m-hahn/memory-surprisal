@@ -1,1 +1,0 @@
-rm /u/scr/mhahn/deps/memory-need-ngrams-morphology-accuracy/accuracy_forWords_Sesotho_EvaluateWeights_*.txt
