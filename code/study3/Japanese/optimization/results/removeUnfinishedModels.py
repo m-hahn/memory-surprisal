@@ -7,6 +7,8 @@ for dir in dirs:
      continue
   foundModels = 0
   for filename in files:
+    if filename == "ARCHIVE":
+       continue
     with open(dir+"/"+filename, "r") as inFile:
       iterations = int(next(inFile).strip().split(" ")[0])
     if iterations == 999:
