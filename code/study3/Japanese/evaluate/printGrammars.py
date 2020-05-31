@@ -71,8 +71,8 @@ with open("results.tsv", "w") as outFile:
          morphemes.append(('nonfinite', ['て']))
          weights = flatten([[(x, y, int(grammar[y])) for y in z] for x, z in morphemes])
          weights.sort(key=lambda x:x[2])
-         auc = float(arguments[arguments.index(" ")+1:arguments.find(" ", arguments.find(" ")+1)])
-         resultsByOptScript[opt_script].append(((auc, script, opt_script, model, accuracy_pairs.strip(), accuracy_full.strip()), arguments, weights, accuracy_full, errors[:10]))
+         aoc = float(arguments[arguments.index(" ")+1:arguments.find(" ", arguments.find(" ")+1)])
+         resultsByOptScript[opt_script].append(((aoc, script, opt_script, model, accuracy_pairs.strip(), accuracy_full.strip()), arguments, weights, accuracy_full, errors[:10]))
 
 print("\n")
 print("\n")
@@ -96,13 +96,13 @@ for opt_script in sorted(list(resultsByOptScript)):
         real = [x.split("\t") for x in inFile.read().strip().split("\n")]
     print("REAL", real)
     real = [x[0] for x in real if x[0] in morphemes]
-    optimized = [y[-3] for y in sorted(resultsByOptScript[opt_script], key=lambda x:x[0][0])[:1]]
+    optimized = [y[-3] for y in sorted(resultsByOptScript[opt_script], key=lambda x:x[0][0])[-1:]]
     print("optimized", optimized)
     for i in range(len(morphemes)):
         print(" & ".join([str(i+1), names[real[i]]] + [names[x[i][1]] for x in optimized]), "\\\\")
     print([x[0][0] for x in resultsByOptScript[opt_script]])
-    optimized_errors = [y[-1] for y in sorted(resultsByOptScript[opt_script], key=lambda x:x[0][0])]
-    print("From lowest AUC to highest AUC")
+    optimized_errors = [y[-1] for y in sorted(resultsByOptScript[opt_script], key=lambda x:x[0][0])[-1:]]
+    print("From worst AOC to best AOC. Note that, in optimization, the area *ABOVE* the curve is *MAXIMIZED*. We call this AOC for Area-Over-Curve here.")
     for i in range(len(optimized_errors)):
       errors = defaultdict(int)
       print(optimized_errors[i])
