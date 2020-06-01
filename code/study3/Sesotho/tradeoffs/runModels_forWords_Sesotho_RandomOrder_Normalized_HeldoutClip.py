@@ -22,7 +22,7 @@ for model in ["REAL", "REVERSE"]:
   model_pfx = model
   model_sfx = model
   subprocess.call(["/u/nlp/anaconda/main/anaconda3/envs/py37-mhahn/bin/python", "forWords_Sesotho_RandomOrder_Normalized_HeldoutClip.py", "--model_pfx", model_pfx, "--model_sfx", model_sfx])
-for _ in range(20):
+for _ in range(40):
   model_pfx = "RANDOM"
   model_sfx = "RANDOM"
   subprocess.call(["/u/nlp/anaconda/main/anaconda3/envs/py37-mhahn/bin/python", "forWords_Sesotho_RandomOrder_Normalized_HeldoutClip.py", "--model_pfx", model_pfx, "--model_sfx", model_sfx])
