@@ -1,7 +1,7 @@
 import sys
 import os
 
-PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology"
+PATH = "estimates/"
 
 files = sorted([x for x in os.listdir(PATH) if "forWords_Sesotho" in x])
 
@@ -12,7 +12,7 @@ def find_third_last(text, pattern):
    return text.rfind(pattern, 0, text.rfind(pattern, 0, text.rfind(pattern)))
 
 
-with open("results.tsv", "w") as outFile:
+with open("analyze/results.tsv", "w") as outFile:
  print("\t".join([str(x) for x in ["Script", "Run", "Model", "Distance", "Surprisal", "MI", "Memory", "UnigramCE", "Type"]]), file=outFile)
  for f in files:
   with open(PATH+"/"+f, "r") as inFile:
@@ -44,6 +44,8 @@ with open("results.tsv", "w") as outFile:
      for i in range(len(mis)):
         surprisals.append(surprisals[-1]-mis[i])
         memories.append(memories[-1] + tmis[i])
+     print("...")
+     print(surps)
      print(surprisals)
      print(memories)
      for i in range(len(mis)):

@@ -20,7 +20,6 @@ scripts = sorted(list(set([x[header["Script"]] for x in data])))
 print(scripts)
 
 for line in data:
-#    print(line[header["Model"]])
     line.append("RANDOM" if line[header["Model"]] == "RANDOM" else "OPTIM")
 
 def mean(x):

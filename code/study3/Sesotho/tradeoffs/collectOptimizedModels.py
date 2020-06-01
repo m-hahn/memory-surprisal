@@ -1,7 +1,6 @@
-PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology-optimized/"
 
 import glob
-models = glob.glob(PATH+"optimized_Sesotho_Acqdiv_forWords_Sesotho_OptimizeOrder*.py_*.tsv")
+models = glob.glob("../optimization/results/*/*.tsv")
 
 models.sort()
 

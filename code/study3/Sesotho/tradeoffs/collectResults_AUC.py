@@ -1,7 +1,7 @@
 import sys
 import os
 
-PATH = "/u/scr/mhahn/deps/memory-need-ngrams-morphology"
+PATH = "estimates/"
 
 files = sorted([x for x in os.listdir(PATH) if "forWords_Sesotho" in x])
 
@@ -12,7 +12,7 @@ def find_third_last(text, pattern):
    return text.rfind(pattern, 0, text.rfind(pattern, 0, text.rfind(pattern)))
 
 
-with open("results_auc.tsv", "w") as outFile:
+with open("analyze/results_auc.tsv", "w") as outFile:
  print("\t".join([str(x) for x in ["Script", "Run", "Model", "AUC"]]), file=outFile)
  for f in files:
   with open(PATH+"/"+f, "r") as inFile:
