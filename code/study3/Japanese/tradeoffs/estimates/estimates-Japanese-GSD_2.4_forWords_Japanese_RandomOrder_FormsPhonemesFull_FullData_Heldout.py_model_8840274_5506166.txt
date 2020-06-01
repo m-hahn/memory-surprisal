@@ -1,0 +1,2 @@
+Namespace(alpha=1.0, cutoff=7, delta=1.0, gamma=1, idForProcess=8840274, language='Japanese-GSD_2.4', model='../optimization/results/forWords_Japanese_OptimizeOrder_MorphemeGrammar_FormsPhonemesFull_FullData_HeldoutClip/optimized_forWords_Japanese_OptimizeOrder_MorphemeGrammar_FormsPhonemesFull_FullData_HeldoutClip.py_5506166.tsv')
+3.53990565512539 1.9133109427004267 1.5642673430121672 1.3614246415663076 1.2756225702863377 1.2756225702863377 1.2756225702863377
