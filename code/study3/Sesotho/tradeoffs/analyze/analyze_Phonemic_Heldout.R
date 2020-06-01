@@ -26,7 +26,7 @@ plot = plot + theme(axis.line = element_line(colour = "black"),
                 panel.grid.minor = element_blank(),
                 panel.border = element_blank(),
                     panel.background = element_blank())
-ggsave(plot, file=paste("figures/Sesotho-suffixes-byPhonemes-it-heldout.pdf", sep=""), height=4, width=4)
+ggsave(plot, file=paste("../figures/Sesotho-suffixes-byPhonemes-it-heldout.pdf", sep=""), height=4, width=4)
 
 
 
@@ -49,7 +49,7 @@ plot = plot + theme(axis.line = element_line(colour = "black"),
                 panel.grid.minor = element_blank(),
                 panel.border = element_blank(),
                     panel.background = element_blank())
-ggsave(plot, file=paste("figures/Sesotho-suffixes-byPhonemes-memsurp-heldout.pdf", sep=""), height=4, width=4)
+ggsave(plot, file=paste("../figures/Sesotho-suffixes-byPhonemes-memsurp-heldout.pdf", sep=""), height=4, width=4)
 
 
 ######################################
@@ -85,7 +85,7 @@ plot = plot + theme_classic()
 #plot = plot + theme(legend.position="none")
 plot = plot + geom_density(data= data_%>%filter(Type == "Random"), aes(y=..scaled..)) 
 plot = plot + geom_bar(data = data_ %>% filter(!(Type %in% c("Random"))) %>% group_by(Type) %>% summarise(AUC=mean(AUC)) %>% mutate(y=1),  aes(y=y, group=Type), width=barWidth, stat="identity", position = position_dodge())
-ggsave(plot, file=paste("figures/Sesotho-suffixes-byPhonemes-auc-hist-heldout.pdf", sep=""), height=4, width=4)
+ggsave(plot, file=paste("../figures/Sesotho-suffixes-byPhonemes-auc-hist-heldout.pdf", sep=""), height=4, width=4)
 
 
 

@@ -54,12 +54,17 @@ ggsave(plot, file=paste("../figures/Both-suffixes-byMorphemes-auc-hist-heldout.p
 
 
 
+1-mean(((data_ %>% filter(Language=="Japanese", (Type %in% c("Random"))))$AUC) < max(((data_ %>% filter(Language=="Japanese", (Type %in% c("Optimized"))))$AUC)))
+1-mean(((data_ %>% filter(Language=="Japanese", (Type %in% c("Random"))))$AUC) < max(((data_ %>% filter(Language=="Japanese", (Type %in% c("Real"))))$AUC)))
+1-mean(((data_ %>% filter(Language=="Sesotho", (Type %in% c("Random"))))$AUC) < max(((data_ %>% filter(Language=="Sesotho", (Type %in% c("Optimized"))))$AUC)))
+1-mean(((data_ %>% filter(Language=="Sesotho", (Type %in% c("Random"))))$AUC) < max(((data_ %>% filter(Language=="Sesotho", (Type %in% c("Real"))))$AUC)))
+
+# Variation in AUC for Optimized Grammars
+sd(((data_ %>% filter(Language=="Japanese", (Type %in% c("Optimized"))))$AUC))
 
 
-
-
-
-
+# Variation in AUC for Optimized Grammars
+sd(((data_ %>% filter(Language=="Sesotho", (Type %in% c("Optimized"))))$AUC))
 
 
 
