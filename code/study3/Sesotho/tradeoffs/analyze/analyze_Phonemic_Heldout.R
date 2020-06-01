@@ -16,7 +16,6 @@ data$Type = ifelse(data$Type %in% c("REVERSE"), "Reverse", as.character(data$Typ
 
 data_ = data %>% group_by(Distance, Type) %>% summarise(MI=median(MI))
 data_ = data_ %>% filter(Distance <= 7)
-data_ = data_ %>% filter(Type %in% c("REAL", "RANDOM"))
 plot = ggplot(data_, aes(x=1+Distance, y=MI, color=Type)) + geom_line() #size=2)
 plot = plot + theme_bw()
 plot = plot + xlab("Distance") + ylab("Mutual Information")
@@ -39,9 +38,7 @@ data = data %>% filter(Script == "forWords_Sesotho_RandomOrder_FormsWordsGraphem
 
 data = data %>% group_by(Type, Memory) %>% summarise(Surprisal=unigramCE-median(MI))
 
-data_ = data %>% filter(Type %in% c("REAL", "RANDOM"))
-
-plot = ggplot(data_, aes(x=Memory, y=Surprisal, color=Type)) + geom_line() #size=2)
+plot = ggplot(data, aes(x=Memory, y=Surprisal, color=Type)) + geom_line() #size=2)
 plot = plot + theme_bw()
 plot = plot + theme(axis.title.x=element_text(size=20), axis.title.y=element_text(size=20), axis.text = element_text(size=20))
 plot = plot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), legend.position="none")
@@ -67,16 +64,6 @@ data$Type = ifelse(data$Type %in% c("REVERSE"), "Reverse", as.character(data$Typ
 data_ = data %>% filter(Type %in% c("Real", "Random", "Optimized", "Reverse"))
 
 
-#plot = ggplot(data_, aes(x=AUC, y=1, color=Type, fill=Type)) + geom_bar(stat="identity") #size=2)
-#plot = plot + theme_bw()
-#plot = plot + theme(axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text = element_text(size=20))
-#plot = plot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), legend.position="none")
-#plot = plot + theme(axis.line = element_line(colour = "black"),
-#            panel.grid.major = element_blank(),
-#                panel.grid.minor = element_blank(),
-#                panel.border = element_blank(),
-#                    panel.background = element_blank())
-#ggsave(plot, file=paste("figures/Sesotho-suffixes-byPhonemes-auc-heldout.pdf", sep=""), height=4, width=4)
 
 barWidth = (max(data$AUC) - min(data$AUC))/30
 
