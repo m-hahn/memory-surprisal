@@ -102,9 +102,9 @@ plot = plot + ylab("Surprisal Difference")
 plot = plot + xlab("Branching Direction Entropy")
 #plot = plot + theme(axis.title=element_text(size=30))
 plot = plot + geom_point(data=data.frame(y=c(0.0999, 0.23), x=c(0.328, 0.2), Type=c("Without Information Structure", "With Information Structure")), aes(x=x, y=y, color=Type), size=5)
-plot = plot + theme(axis.title=element_text(size=20))
-plot = plot + theme(axis.text = element_text(size=20))
-ggsave(plot, file=paste("../figures/surprisal-branching-entropy-REAL-infostruc-invert.pdf", sep=""), width=15, height=7)
+#plot = plot + theme(axis.title=element_text(size=20))
+#plot = plot + theme(axis.text = element_text(size=20))
+ggsave(plot, file=paste("../figures/surprisal-branching-entropy-REAL-infostruc-invert.pdf", sep=""), width=10, height=5)
 
 
 
