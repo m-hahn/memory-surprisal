@@ -1,0 +1,39 @@
+0.7801881657724905
+0.6840065403015806
+0.7538865940668419
+0.639902379499695
+t^ om 3994
+sm rf 705
+sm ng 306
+t^ rf 297
+t^ if 91
+sr om 84
+t^ t^ 53
+if rf 31
+sr ng 22
+sr rf 16
+cp if 14
+cp om 9
+2a a. 4
+wh om 3
+rl om 3
+t^ ng 2
+ij om 2
+av di 1
+sm 2 1
+cp 2 1
+2a 2a 1
+a. a. 1
+t^ wo 1
+cp 1s 1
+10 om 1
+6 6 1
+7 di 1
+wo di 1
+om ng 1
+9 av 1
+cp 17 1
+.. om 1
+om om 1
+sr if 1
+rl if 1

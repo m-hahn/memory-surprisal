@@ -1,0 +1,25 @@
+0.9901884137284028
+0.9916778034260721
+0.9840012189547463
+0.9856506679861454
+sm if 104
+t^ if 91
+cp if 14
+ng t^ 11
+ng rf 10
+t^ rl 4
+sr rl 3
+av di 1
+sm 2 1
+cp 2 1
+t^ wo 1
+cp 1s 1
+lo 1s 1
+7 di 1
+wo di 1
+om ng 1
+3 wh 1
+t^ ij 1
+cp 17 1
+sr if 1
+rl if 1

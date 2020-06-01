@@ -1,0 +1,54 @@
+0.6019682886823401
+0.5885870666936955
+0.566583467919542
+0.5395846185482213
+c m^ 1341
+p m^ 1145
+m^ rl 836
+nt m^ 228
+rv m^ 214
+t^ rl 205
+p t^ 173
+nt t^ 105
+p wh 93
+rc m^ 85
+c t^ 82
+p rl 70
+cl m^ 66
+c/ m^ 60
+c ap 49
+ap t^ 49
+ap rl 47
+c p 40
+ap ap 38
+c rl 31
+rv t^ 26
+c wh 19
+rc t^ 17
+nt rl 12
+cl t^ 7
+rv p 6
+c/ p 6
+rv ap 5
+c rc 5
+cl p 4
+cl wh 4
+rv rl 4
+ps t^ 3
+rv c 2
+m^ lc 2
+rc wh 2
+rc p 2
+p/ m^ 1
+wh m^ 1
+rc rl 1
+rc rc 1
+rc ap 1
+ap lc 1
+cp t^ 1
+c/ wh 1
+c mi 1
+nt ap 1
+rv wh 1
+c/ rl 1
+cl ap 1
