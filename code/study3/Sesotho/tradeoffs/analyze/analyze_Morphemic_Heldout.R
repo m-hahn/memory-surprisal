@@ -16,7 +16,7 @@ data$Type = ifelse(data$Type %in% c("REVERSE"), "Reverse", as.character(data$Typ
 
 data_ = data %>% group_by(Distance, Type) %>% summarise(MI=median(MI))
 data_ = data_ %>% filter(Distance <= 7)
-plot = ggplot(data_, aes(x=1+Distance, y=MI, color=Type)) + geom_line() #size=2)
+plot = ggplot(data_, aes(x=1+Distance, y=MI, color=Type)) + geom_line()
 plot = plot + theme_bw()
 plot = plot + xlab("Distance") + ylab("Mutual Information")
 plot = plot + theme(axis.title.x=element_text(size=20), axis.title.y=element_text(size=20), axis.text = element_text(size=20))
