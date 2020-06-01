@@ -69,5 +69,7 @@ plot = plot + xlab("Area under Curve") + ylab("Density")
 plot = plot + theme(text=element_text(size=30))
 plot = plot + geom_density(data= data_%>%filter(Type == "Random"), aes(y=..scaled..)) 
 plot = plot + geom_bar(data = data_ %>% filter(!(Type %in% c("Random"))) %>% group_by(Type) %>% summarise(AUC=mean(AUC), barWidth=0.1) %>% mutate(y=1),  aes(y=y, group=Type), width=0.01, stat="identity", position = position_dodge())
-ggsave(plot, file=paste("../figures/Sesotho-suffixes-byMorphemes-it-heldout.pdf", sep=""), height=4, width=6)
+ggsave(plot, file=paste("../figures/Sesotho-suffixes-byMorphemes-auc-hist-heldout.pdf", sep=""), height=4, width=6)
+
+
 
