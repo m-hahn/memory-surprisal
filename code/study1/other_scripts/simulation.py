@@ -2,10 +2,11 @@
 
 productions = {}
 
-#productions["S"] = [(0.5, ("NP-heavy", "di", "N_a", "V", ".")), (0.5, ("NP-heavy", "N_a", "di", "V", "."))]
-productions["S"] = [(0.5, ("N_a", "di", "NP-heavy", "V", ".")), (0.5, ("N_a", "NP-heavy", "di", "V", "."))]
-
-productions["NP-heavy"] = [(1.0, ("Adj", "N_i", "P", "N_a"))]
+productions["S"] = [(0.5, ("Obj", "Subj", "V", ".")), (0.5, ("Subj", "Obj", "V", "."))]
+productions["Obj"] = [(1.0, ("NP", "di"))]
+productions["Subj"] = [(1.0, ("NP"))]
+productions["NP"] = [(0.75, ("N")), (0.125, ("PP", "NP")), (0.125, ("Adj", "NP"))]
+productions["PP"] = [(1.0, ("NP", "P"))]
 
 
 import numpy as np
@@ -21,7 +22,7 @@ vocabulary = set()
 for x in productions:
       for _, rhs in productions[x]:
           for word in rhs:
-              if word not in productions:
+              if word not in vocabulary:
                   vocabulary.add(word)
 itos = list(vocabulary)
 stoi = dict(zip(itos, range(len(itos))))
@@ -104,7 +105,10 @@ sentcounter = 0
 
 def corpusIterator():
    for _ in range(10000):
-       yield sample("S").split(" ")
+       sampl = sample("S")
+       if random() < 0.05:
+           print(sampl)
+       yield sampl.split(" ")
 
 for sentence in corpusIterator():
      sentcounter += 1
