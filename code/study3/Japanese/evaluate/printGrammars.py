@@ -71,8 +71,8 @@ with open("results.tsv", "w") as outFile:
          morphemes.append(('nonfinite', ['て']))
          weights = flatten([[(x, y, int(grammar[y])) for y in z] for x, z in morphemes])
          weights.sort(key=lambda x:x[2])
-         auc = float(arguments[arguments.index(" ")+1:arguments.find(" ", arguments.find(" ")+1)])
-         resultsByOptScript[opt_script].append(((auc, script, opt_script, model, accuracy_pairs.strip(), accuracy_full.strip()), arguments, weights, accuracy_full, errors[:10]))
+         aoc = float(arguments[arguments.index(" ")+1:arguments.find(" ", arguments.find(" ")+1)])
+         resultsByOptScript[opt_script].append(((aoc, script, opt_script, model, accuracy_pairs.strip(), accuracy_full.strip()), arguments, weights, accuracy_full, errors[:10]))
 
 print("\n")
 print("\n")
@@ -100,28 +100,32 @@ for opt_script in sorted(list(resultsByOptScript)):
     print("optimized", optimized)
     for i in range(len(morphemes)):
         print(" & ".join([str(i+1), names[real[i]]] + [names[x[i][1]] for x in optimized]), "\\\\")
+    print([x[0][0] for x in resultsByOptScript[opt_script]])
     optimized_errors = [y[-1] for y in sorted(resultsByOptScript[opt_script], key=lambda x:x[0][0])[-1:]]
-    errors = defaultdict(int)
-    print(optimized_errors[0])
-    for error in optimized_errors[0]:
-        left, right, freq = error.strip().split(" ")
-        if left in names and right in names and left != right:
-           key = (names.get(left, "other"), names.get(right, "other"))
-        else:
-          key = "(other)"
-        errors[key] += int(freq)
-    print("======================")
-    errors = sorted(list(errors.items()), key=lambda x:x[1], reverse=True)
-    count = 0
-    for error, count in errors:
-       if error == "(other)":
-          continue
-          print("\\multicolumn{2}{c}{(other)}", "&", count, "\\\\") #  + sum([x[1] for x in errors[5:]])
-       else:
-          count += 1
-          print(error[0], "&", error[1], "&",count, "\\\\")
-       if count == 4:
-          break
+    print("From worst AOC to best AOC. Note that, in optimization, the area *ABOVE* the curve is *MAXIMIZED*. We call this AOC for Area-Over-Curve here.")
+    for i in range(len(optimized_errors)):
+      errors = defaultdict(int)
+      print(optimized_errors[i])
+  
+      for error in optimized_errors[i]:
+          left, right, freq = error.strip().split(" ")
+          if left in names and right in names and left != right:
+             key = (names.get(left, "other"), names.get(right, "other"))
+          else:
+            key = "(other)"
+          errors[key] += int(freq)
+      print("======================")
+      errors = sorted(list(errors.items()), key=lambda x:x[1], reverse=True)
+      count = 0
+      for error, count in errors:
+         if error == "(other)":
+            continue
+  #          print("\\multicolumn{2}{c}{(other)}", "&", count, "\\\\") #  + sum([x[1] for x in errors[5:]])
+         else:
+            count += 1
+            print(error[0], "&", error[1], "&",count, "\\\\")
+         if count == 4:
+            break
 
 
 

@@ -152,6 +152,7 @@ weights = dict(list(zip(itos_, [2*x for x in range(len(itos_))])))
 
 
 def calculateTradeoffForWeights(weights):
+    # Order the datasets based on the given weights
     train = []
     dev = []
     for data, processed in [(data_train, train), (data_dev, dev)]:
@@ -168,31 +169,27 @@ def calculateTradeoffForWeights(weights):
       
     itos = list(set(train) | set(dev))
       
-    
+    # For the algorithm, we will need to reverse the corpora
     dev = dev[::-1]
-    #dev = list(createStreamContinuous(corpusDev))[::-1]
-    
-    
-    #corpusTrain = CorpusIterator(args.language,"dev", storeMorph=True).iterator(rejectShortSentences = False)
-    #train = list(createStreamContinuous(corpusTrain))[::-1]
     train = train[::-1]
-    
+
+    # idev and itrain are suffix arrays: They contain indices to positions in the text, ordered by the alphabetical position of the suffixes starting at them.
     idev = range(len(dev))
     itrain = range(len(train))
     
     idev = sorted(idev, key=lambda i:dev[i:i+20])
     itrain = sorted(itrain, key=lambda i:train[i:i+20])
     
-#    print(idev)
-    
+    # The inverse map of idev/itrain: For each position in the texts, indicates its position in those lists.    
     idevInv = [x[1] for x in sorted(zip(idev, range(len(idev))), key=lambda x:x[0])]
     itrainInv = [x[1] for x in sorted(zip(itrain, range(len(itrain))), key=lambda x:x[0])]
     
+    # Basic sanity check
     assert idev[idevInv[5]] == 5
     assert itrain[itrainInv[5]] == 5
     
     
-    
+    # Helper function. For a given span length k (>= 0), computes for each position in the heldout set (`dev`), the location of the first and last entries in itrain where the same string of length k starts as after the given position in idev.
     def getStartEnd(k):
        start = [0 for _ in dev]
        end = [len(train)-1 for _ in dev]
@@ -280,7 +277,7 @@ def calculateTradeoffForWeights(weights):
                   if followingCount == 0:
                       newProbability[j] = lastProbability[j]
                   else:
-                      #assert countNgram > 0
+                      #assert countNgram > 0 # Sanity check when using the naive estimator only.
                       probability = log(max(countNgram - args.alpha, 0.0) + args.alpha * followingCount * exp(lastProbability[j])) -  log(countPrefix)
                       newProbability[j] = probability
              else:
@@ -334,28 +331,35 @@ def calculateTradeoffForWeights(weights):
 
 
 for iteration in range(1000):
+  # Randomly select a morpheme whose position to update
   coordinate=choice(itos)
-#  if coordinate == 'する' and weights[coordinate] == 0: # Force suru to be at the beginning
- #     continue
 
+  # Stochastically filter out rare morphemes
   while affixFrequency.get(coordinate, 0) < 10 and random() < 0.95:
      coordinate = choice(itos)
+
+  # This will store the maximal AOC found so far and the corresponding position
   mostCorrect, mostCorrectValue = 0, None
+
+  # Iterate over possible new positions
   for newValue in [-1] + [2*x+1 for x in range(len(itos))] + [weights[coordinate]]:
-  #   if coordinate == 'する':
-   #     break
+
+     # Stochastically exclude positions to save compute time
      if random() < 0.9 and newValue != weights[coordinate]:
         continue
+
      print(newValue, mostCorrect, coordinate, affixFrequency.get(coordinate,0))
+
+     # Updated weights, assuming the selected morpheme is moved to the position indicated by `newValue`.
      weights_ = {x : y if x != coordinate else newValue for x, y in weights.items()}
-     correctCount, _ = calculateTradeoffForWeights(weights_)
-#     print(weights_)
-#     print(coordinate, newValue, iteration, correctCount)
-     if correctCount > mostCorrect:
+
+     # Calculate AOC for this updated assignment
+     resultingAOC, _ = calculateTradeoffForWeights(weights_)
+
+     # Update variables if AOC is larger than maximum AOC found so far
+     if resultingAOC > mostCorrect:
         mostCorrectValue = newValue
-        mostCorrect = correctCount
-  #if coordinate == 'する':
-   #  mostCorrectValue = -1
+        mostCorrect = resultingAOC
   print(iteration, mostCorrect)
   weights[coordinate] = mostCorrectValue
   itos_ = sorted(itos, key=lambda x:weights[x])
