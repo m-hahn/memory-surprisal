@@ -3,6 +3,9 @@ library(dplyr)
 library(ggplot2)
 
 
+GREEN = "#009E73"
+BLUE  = "#0072B2"
+RED   = "#D55E00"
 
 
 data = read.csv("../../../../results/tradeoff/listener-curve-auc.tsv", sep="\t")
@@ -33,22 +36,22 @@ for(language in languages) {
  
    plot = plot + theme(legend.position="none")  
    plot = plot + geom_density(data= d2 %>% filter(Type == "RANDOM_BY_TYPE"), aes(y=..scaled..))     
-   plot = plot + geom_bar(data = d2 %>% filter(Type %in% c("REAL_REAL", "GROUND")) %>% group_by(Type) %>% summarise(AUC=mean(AUC)) %>% mutate(y=1),  aes(y=y, group=Type), width=barWidth, stat="identity", position = position_dodge()) 
+   plot = plot + geom_bar(data = d2 %>% filter(Type %in% c("REAL_REAL", "GROUND")) %>% group_by(Type) %>% summarise(AUC=mean(AUC)) %>% mutate(y=1),  aes(y=y, group=Type), width=barWidth, stat="identity", position = position_dodge()) + scale_colour_manual(values=c( GREEN, RED, BLUE)) + scale_fill_manual(values=c( GREEN, RED, BLUE))
     ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory-HIST_AUC_onlyWordForms_boundedVocab.pdf", sep=""))
 
-   plot = ggplot(d2, aes(x=AUC, fill=Type, color=Type))
-#   plot = plot + theme_classic()
-   plot = plot + theme_bw()
-   plot = plot + theme(axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text.y = element_blank(), axis.text.x = element_text(size=50))
-   plot = plot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), legend.position="none") 
-   plot = plot + theme(axis.line = element_line(colour = "black"),
- 	      panel.grid.major = element_blank(),
- 	          panel.grid.minor = element_blank(),
- 	          panel.border = element_blank(),
- 		      panel.background = element_blank()) 
-   plot = plot + theme(legend.position="none")  
-   plot = plot + geom_density(data= d2 %>% filter(Type == "RANDOM_BY_TYPE"), aes(y=..scaled..))     
-   plot = plot + geom_bar(data = d2 %>% filter(Type %in% c("REAL_REAL")) %>% group_by(Type) %>% summarise(AUC=mean(AUC)) %>% mutate(y=1),  aes(y=y, group=Type), width=barWidth, stat="identity", position = position_dodge()) 
-    ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory-HIST_AUC_onlyWordForms_boundedVocab_REAL.pdf", sep=""))
+#   plot = ggplot(d2, aes(x=AUC, fill=Type, color=Type))
+##   plot = plot + theme_classic()
+#   plot = plot + theme_bw()
+#   plot = plot + theme(axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text.y = element_blank(), axis.text.x = element_text(size=50))
+#   plot = plot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), legend.position="none") 
+#   plot = plot + theme(axis.line = element_line(colour = "black"),
+# 	      panel.grid.major = element_blank(),
+# 	          panel.grid.minor = element_blank(),
+# 	          panel.border = element_blank(),
+# 		      panel.background = element_blank()) 
+#   plot = plot + theme(legend.position="none")  
+#   plot = plot + geom_density(data= d2 %>% filter(Type == "RANDOM_BY_TYPE"), aes(y=..scaled..))     
+#   plot = plot + geom_bar(data = d2 %>% filter(Type %in% c("REAL_REAL")) %>% group_by(Type) %>% summarise(AUC=mean(AUC)) %>% mutate(y=1),  aes(y=y, group=Type), width=barWidth, stat="identity", position = position_dodge()) + scale_colour_manual(values=c( RED, BLUE)) + scale_fill_manual(values=c( RED, BLUE))
+#    ggsave(plot, file=paste("figures/",language,"-listener-surprisal-memory-HIST_AUC_onlyWordForms_boundedVocab_REAL.pdf", sep=""))
 }
 

@@ -66,7 +66,7 @@ with open("results.tsv", "w") as outFile:
          morphemes = [(x,[x]) for x in (morphemes_prefixes if "refix" in f else morphemes_suffixes)] 
          weights = flatten([[(x, y, int(grammar[y])) for y in z] for x, z in morphemes])
          weights.sort(key=lambda x:x[2])
-         resultsByOptScript[opt_script].append(((aoc, script, opt_script, model, accuracy_pairs.strip(), accuracy_full.strip()), arguments, weights, accuracy_full, errors[:10]))
+         resultsByOptScript[opt_script].append(((aoc, script, opt_script, model, accuracy_pairs.strip(), accuracy_full.strip()), arguments, weights, accuracy_full, errors[:20]))
 
 print("\n")
 print("\n")

@@ -2,6 +2,12 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 
+
+RED = "#F8766D"
+GREEN = "#7CAE00"
+BLUE = "#00BFC4"
+PURPLE = "#C77CFF"
+SCALE = c( GREEN, RED, BLUE, PURPLE)
 ######################################
 
 data = read.csv("results.tsv", sep="\t")
@@ -25,11 +31,8 @@ plot = plot + theme(axis.line = element_line(colour = "black"),
             panel.grid.major = element_blank(),
                 panel.grid.minor = element_blank(),
                 panel.border = element_blank(),
-                    panel.background = element_blank())
+                    panel.background = element_blank()) + scale_colour_manual(values=SCALE) + scale_fill_manual(values=SCALE)
 ggsave(plot, file=paste("../figures/Japanese-suffixes-byPhonemes-it-heldout.pdf", sep=""), height=4, width=4)
-
-
-
 
 data = read.csv("results_interpolated.tsv", sep="\t")
 
@@ -46,7 +49,7 @@ plot = plot + theme(axis.line = element_line(colour = "black"),
             panel.grid.major = element_blank(),
                 panel.grid.minor = element_blank(),
                 panel.border = element_blank(),
-                    panel.background = element_blank())
+                    panel.background = element_blank()) + scale_colour_manual(values=SCALE) + scale_fill_manual(values=SCALE)
 ggsave(plot, file=paste("../figures/Japanese-suffixes-byPhonemes-memsurp-heldout.pdf", sep=""), height=4, width=4)
 
 
@@ -72,8 +75,8 @@ plot = plot + theme_classic()
 plot = plot + xlab("Area under Curve") + ylab("Density")
 plot = plot + theme(text=element_text(size=30))
 plot = plot + geom_density(data= data_%>%filter(Type == "Random"), aes(y=..scaled..)) 
-plot = plot + geom_bar(data = data_ %>% filter(!(Type %in% c("Random"))) %>% group_by(Type) %>% summarise(AUC=mean(AUC)) %>% mutate(y=1),  aes(y=y, group=Type), width=barWidth, stat="identity", position = position_dodge())
-ggsave(plot, file=paste("../figures/Japanese-suffixes-byPhonemes-auc-hist-heldout.pdf", sep=""), height=4, width=6)
+plot = plot + geom_bar(data = data_ %>% filter(!(Type %in% c("Random"))) %>% group_by(Type) %>% summarise(AUC=mean(AUC)) %>% mutate(y=1),  aes(y=y, group=Type), width=barWidth, stat="identity", position = position_dodge()) + scale_colour_manual(values=SCALE) + scale_fill_manual(values=SCALE)
+ggsave(plot, file=paste("../figures/Japanese-suffixes-byPhonemes-auc-hist-heldout.pdf", sep=""), height=4, width=8)
 
 
 
