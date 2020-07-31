@@ -77,29 +77,43 @@ optimPhonPref_HeldoutClip = "forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_
 optimPhonSuff_HeldoutClip = "forWords_Sesotho_OptimizeOrder_FormsWordsGraphemes_Suffixes_ByType_HeldoutClip.py"
 optimMorphPref_HeldoutClip = "forWords_Sesotho_OptimizeOrder_Normalized_ByType_Prefixes_HeldoutClip.py"
 optimMorphSuff_HeldoutClip = "forWords_Sesotho_OptimizeOrder_Normalized_ByType_Suffixes_HeldoutClip.py"
-print("Phonemes   &   Optimized  &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_ByType.py", optimPhonPref)]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_ByType.py", optimPhonSuff)]+" \\\\")
-print("           &   Random  &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_ByType.py", "RANDOM")]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_ByType.py", "RANDOM")]+" \\\\")
-print("Morphemes  &   Optimized  &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", optimMorphPref)]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", optimMorphSuff)]+" \\\\")
-print("           &   Random  &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", "RANDOM")]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", "RANDOM")]+" \\\\")
+
+
+ 
+print("")      
+print("")      
+print("")      
+print("")      
+print("")      
+
+     
+
+
+
+print("For main paper:")
+print("Sesotho &   Optimized  &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", optimMorphPref)]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", optimMorphSuff)]+" \\\\")
+print("           &   Baseline  &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", "RANDOM")]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", "RANDOM")]+" \\\\")
+
 print("")
 print("")
 print("")
-print("Phonemes   &   Optimized  &  "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Prefixes_ByType.py", optimPhonPref)]+" & "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Suffixes_ByType.py", optimPhonSuff)]+" \\\\")
-print("           &   Random  &  "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Prefixes_ByType.py", "RANDOM")]+" & "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Suffixes_ByType.py", "RANDOM")]+" \\\\")
-print("Morphemes  &   Optimized  &  "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", optimMorphPref)]+" & "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", optimMorphSuff)]+" \\\\")
-print("           &   Random  &  "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", "RANDOM")]+" & "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", "RANDOM")]+" \\\\")
 print("")
 print("")
-print("")
-print("Phonemes   &   Optimized  &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_ByType.py", optimPhonPref_HeldoutClip)]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_ByType.py", optimPhonSuff_HeldoutClip)]+" \\\\")
-print("           &   Random  &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_ByType.py", "RANDOM")]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_ByType.py", "RANDOM")]+" \\\\")
-print("Morphemes  &   Optimized  &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", optimMorphPref_HeldoutClip)]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", optimMorphSuff_HeldoutClip)]+" \\\\")
-print("           &   Random  &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", "RANDOM")]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", "RANDOM")]+" \\\\")
-print("")
-print("")
-print("")
-print("Phonemes   &   Optimized  &  "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Prefixes_ByType.py", optimPhonPref_HeldoutClip)]+" & "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Suffixes_ByType.py", optimPhonSuff_HeldoutClip)]+" \\\\")
-print("           &   Random  &  "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Prefixes_ByType.py", "RANDOM")]+" & "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Suffixes_ByType.py", "RANDOM")]+" \\\\")
-print("Morphemes  &   Optimized  &  "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", optimMorphPref_HeldoutClip)]+" & "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", optimMorphSuff_HeldoutClip)]+" \\\\")
-print("           &   Random  &  "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", "RANDOM")]+" & "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", "RANDOM")]+" \\\\")
+print("For SI:")
+print("Tok. & Naive & Phon. &   Opt.  &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_ByType.py", optimPhonPref)]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_ByType.py", optimPhonSuff)]+" \\\\")
+print("     &       &       &   Rand. &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_ByType.py", "RANDOM")]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_ByType.py", "RANDOM")]+" \\\\")
+print("     &       & Morph.&   Opt.  &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", optimMorphPref)]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", optimMorphSuff)]+" \\\\")
+print("     &       &       &   Rand.  &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", "RANDOM")]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", "RANDOM")]+" \\\\ \\hline")
+print("     & Heldout & Phon.   &   Opt.  &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_ByType.py", optimPhonPref_HeldoutClip)]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_ByType.py", optimPhonSuff_HeldoutClip)]+" \\\\")
+print("     &         &         &   Rand.  &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_ByType.py", "RANDOM")]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_ByType.py", "RANDOM")]+" \\\\")
+print("     &          & Morph. &   Opt.  &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", optimMorphPref_HeldoutClip)]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", optimMorphSuff_HeldoutClip)]+" \\\\")
+print("     &          &        &   Rand.  &  "+results[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", "RANDOM")]+" & "+results[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", "RANDOM")]+" \\\\ \\hline \\hline")
+print("Typ. & Naive   & Phon. &   Opt.&  "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Prefixes_ByType.py", optimPhonPref)]+" & "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Suffixes_ByType.py", optimPhonSuff)]+" \\\\")
+print("     &       &       &  Rand.  &  "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Prefixes_ByType.py", "RANDOM")]+" & "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Suffixes_ByType.py", "RANDOM")]+" \\\\")
+print("     &       & Morph.&   Opt.  &  "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", optimMorphPref)]+" & "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", optimMorphSuff)]+" \\\\")
+print("     &       &       &   Rand.  &  "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", "RANDOM")]+" & "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", "RANDOM")]+" \\\\ \\hline")
+print("     &Heldout  & Phon.   &   Opt.  &  "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Prefixes_ByType.py", optimPhonPref_HeldoutClip)]+" & "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Suffixes_ByType.py", optimPhonSuff_HeldoutClip)]+" \\\\")
+print("     &         &         &   Rand.  &  "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Prefixes_ByType.py", "RANDOM")]+" & "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Suffixes_ByType.py", "RANDOM")]+" \\\\")
+print("     &         &Morph.  &   Opt.  &  "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", optimMorphPref_HeldoutClip)]+" & "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", optimMorphSuff_HeldoutClip)]+" \\\\")
+print("     &         &           &   Rand.  &  "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Prefixes_Normalized_ByType.py", "RANDOM")]+" & "+resultsTypes[("forWords_Sesotho_EvaluateWeights_Suffixes_Normalized_ByType.py", "RANDOM")]+" \\\\")
 

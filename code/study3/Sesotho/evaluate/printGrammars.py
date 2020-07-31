@@ -55,8 +55,8 @@ with open("results.tsv", "w") as outFile:
        assert len(optimizedRelevant) == 1
        with open(optimizedRelevant[0], "r") as inFileG:
          grammar = inFileG.read().strip().split("\n")
-         iterations, auc = grammar[0].split(" ")
-         auc = float(auc)
+         iterations, aoc = grammar[0].split(" ")
+         aoc = float(aoc)
          convergenceHistory = grammar[1].split(" ")
          arguments = grammar[2]
          cutoffPerScript = {}
@@ -66,7 +66,7 @@ with open("results.tsv", "w") as outFile:
          morphemes = [(x,[x]) for x in (morphemes_prefixes if "refix" in f else morphemes_suffixes)] 
          weights = flatten([[(x, y, int(grammar[y])) for y in z] for x, z in morphemes])
          weights.sort(key=lambda x:x[2])
-         resultsByOptScript[opt_script].append(((auc, len(convergenceHistory)*50, script, opt_script, model, accuracy_pairs.strip(), accuracy_full.strip()), arguments, weights, accuracy_full, errors))
+         resultsByOptScript[opt_script].append(((aoc, script, opt_script, model, accuracy_pairs.strip(), accuracy_full.strip()), arguments, weights, accuracy_full, errors[:20]))
 
 print("\n")
 print("\n")
@@ -89,34 +89,37 @@ for opt_script in sorted(list(resultsByOptScript)):
     morphemes = (morphemes_suffixes if "Suffix" in opt_script else morphemes_prefixes)
     with open(glob.glob("../extract/output/extracted_forWords_Sesotho_ExtractOrder_"+("Suf" if "Suffix" in opt_script else "Pre")+"fixes2_ByType.py_*.tsv")[0], "r") as inFile:
         real = [x.split("\t") for x in inFile.read().strip().split("\n")]
+    print("REAL", real)
     real = [x[0] for x in real if x[0] in morphemes]
-    print(real)
     optimized = [y[-3] for y in sorted(resultsByOptScript[opt_script], key=lambda x:x[0][0])[-1:]]
-    print(optimized)
+    print("optimized", optimized)
     for i in range(len(morphemes)):
         print(" & ".join([str(i+1), names[real[i]]] + [names[x[i][0]] for x in optimized]), "\\\\")
     optimized_errors = [y[-1] for y in sorted(resultsByOptScript[opt_script], key=lambda x:x[0][0])[-1:]]
-    errors = defaultdict(int)
-    print(optimized_errors[0])
-    for error in optimized_errors[0]:
-        left, right, freq = error.strip().split(" ")
-        if left in names and right in names and left != right:
-           key = (names.get(left, "other"), names.get(right, "other"))
-        else:
-          key = "(other)"
-        errors[key] += int(freq)
-    print("======================")
-    errors = sorted(list(errors.items()), key=lambda x:x[1], reverse=True)
-    count = 0
-    for error, count in errors:
-       if error == "(other)":
-          continue
-          print("\\multicolumn{2}{c}{(other)}", "&", count, "\\\\") #  + sum([x[1] for x in errors[5:]])
-       else:
-          count += 1
-          print(error[0], "&", error[1], "&",count, "\\\\")
-       if count == 4:
-          break
+    print("From worst AOC to best AOC. Note that, in optimization, the area *ABOVE* the curve is *MAXIMIZED*. We call this AOC for Area-Over-Curve here.")
+    for i in range(len(optimized_errors)):
+      errors = defaultdict(int)
+      print(optimized_errors[i])
+
+      for error in optimized_errors[i]:
+          left, right, freq = error.strip().split(" ")
+          if left in names and right in names and left != right:
+             key = (names.get(left, "other"), names.get(right, "other"))
+          else:
+            key = "(other)"
+          errors[key] += int(freq)
+      print("======================")
+      errors = sorted(list(errors.items()), key=lambda x:x[1], reverse=True)
+      count = 0
+      for error, count in errors:
+         if error == "(other)":
+            continue
+  #          print("\\multicolumn{2}{c}{(other)}", "&", count, "\\\\") #  + sum([x[1] for x in errors[5:]])
+         else:
+            count += 1
+            print(error[0], "&", error[1], "&",count, "\\\\")
+         if count == 4:
+            break
 
 
 

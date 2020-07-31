@@ -27,6 +27,18 @@ resultsByOptScript = defaultdict(list)
 
 hasSeenModels = set()
 
+
+morphemes = [("suru", ['する'])]
+morphemes.append(("causative", ['CAUSATIVE']))
+morphemes.append(('passive/potential', ['PASSIVE_POTENTIAL']))
+morphemes.append(('politeness', ['ます']))
+morphemes.append(('desiderative', ['たい']))
+morphemes.append(('negation', ['ない']))
+morphemes.append(('past', ['た']))
+morphemes.append(('future', ['う']))
+morphemes.append(('nonfinite', ['て']))
+
+
 #print(files)
 with open("results.tsv", "w") as outFile:
  print("\t".join([str(x) for x in ["Script", "Run", "Model", "Accuracy_Pairs", "Accuracy_Full", "Accuracy_Pairs_Types", "Accuracy_Full_Types"]]), file=outFile)
@@ -55,20 +67,6 @@ with open("results.tsv", "w") as outFile:
          grammar = inFileG.read().strip().split("\n")
          arguments = grammar[0]
          grammar = dict([x.split(" ") for x in grammar[1:]])
-         morphemes = [("suru", ['する'])]
-         if "MorphemeGrammar" not in f:
-           assert False
-           morphemes.append(("causative", ['せる']))
-           morphemes.append(('passive/potential', ['れる', 'られる', '得る', 'える']))
-         else:
-           morphemes.append(("causative", ['CAUSATIVE']))
-           morphemes.append(('passive/potential', ['PASSIVE_POTENTIAL']))
-         morphemes.append(('politeness', ['ます']))
-         morphemes.append(('desiderative', ['たい']))
-         morphemes.append(('negation', ['ない']))
-         morphemes.append(('past', ['た']))
-         morphemes.append(('future', ['う']))
-         morphemes.append(('nonfinite', ['て']))
          weights = flatten([[(x, y, int(grammar[y])) for y in z] for x, z in morphemes])
          weights.sort(key=lambda x:x[2])
          aoc = float(arguments[arguments.index(" ")+1:arguments.find(" ", arguments.find(" ")+1)])
@@ -106,7 +104,7 @@ for opt_script in sorted(list(resultsByOptScript)):
     for i in range(len(optimized_errors)):
       errors = defaultdict(int)
       print(optimized_errors[i])
-  
+
       for error in optimized_errors[i]:
           left, right, freq = error.strip().split(" ")
           if left in names and right in names and left != right:

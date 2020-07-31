@@ -2,13 +2,19 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 
+
+RED = "#F8766D"
+GREEN = "#7CAE00"
+BLUE = "#00BFC4"
+PURPLE = "#C77CFF"
+SCALE = c( GREEN, RED, BLUE, PURPLE)
 ######################################
 
 dataSesotho = read.csv("results_auc.tsv", sep="\t")
 dataSesotho = dataSesotho %>% filter(Script == "forWords_Sesotho_RandomOrder_Normalized_HeldoutClip.py") %>% mutate(Language="Sesotho")
 
 
-dataJapanese = read.csv("../../Japanese/tradeoffs/results_auc.tsv", sep="\t")
+dataJapanese = read.csv("../../../Japanese/tradeoffs/analyze/results_auc.tsv", sep="\t")
 dataJapanese = dataJapanese %>% filter(Script == "forWords_Japanese_RandomOrder_Normalized_FullData_Heldout.py") %>% mutate(Language="Japanese")
 
 #dataJapanese$barWidth = (max(dataJapanese$AUC) - min(dataJapanese$AUC))/5
@@ -46,7 +52,8 @@ plot = plot + geom_errorbarh(data = data_ %>% filter(Language=="Japanese", (Type
 plot = plot + geom_bar(data = data_ %>% filter(Language=="Sesotho", !(Type %in% c("Random"))) %>% group_by(Language, Type) %>% summarise(AUC=mean(AUC), barWidth=0.08) %>% mutate(y=1),  aes(y=y, group=Type), width=0.01, stat="identity", position = position_dodge())
 plot = plot + geom_errorbarh(data = data_ %>% filter(Language=="Sesotho", (Type %in% c("Optimized"))) %>% group_by(Language, Type) %>% summarise(AUC_min=min(AUC), AUC_max=max(AUC), AUC_sd=sd(AUC), AUC=mean(AUC), barWidth=0.1) %>% mutate(y=0.5), aes(y=y, xmin=AUC_min, xmax=AUC_max))
 plot = plot + facet_wrap(~Language, scales = "free")
-ggsave(plot, file=paste("figures/Both-suffixes-byMorphemes-auc-hist-heldout.pdf", sep=""), height=4, width=12)
+plot = plot + scale_colour_manual(values=SCALE) + scale_fill_manual(values=SCALE)
+ggsave(plot, file=paste("../figures/Both-suffixes-byMorphemes-auc-hist-heldout.pdf", sep=""), height=4, width=12)
 
 
 
@@ -54,12 +61,17 @@ ggsave(plot, file=paste("figures/Both-suffixes-byMorphemes-auc-hist-heldout.pdf"
 
 
 
+1-mean(((data_ %>% filter(Language=="Japanese", (Type %in% c("Random"))))$AUC) < max(((data_ %>% filter(Language=="Japanese", (Type %in% c("Optimized"))))$AUC)))
+1-mean(((data_ %>% filter(Language=="Japanese", (Type %in% c("Random"))))$AUC) < max(((data_ %>% filter(Language=="Japanese", (Type %in% c("Real"))))$AUC)))
+1-mean(((data_ %>% filter(Language=="Sesotho", (Type %in% c("Random"))))$AUC) < max(((data_ %>% filter(Language=="Sesotho", (Type %in% c("Optimized"))))$AUC)))
+1-mean(((data_ %>% filter(Language=="Sesotho", (Type %in% c("Random"))))$AUC) < max(((data_ %>% filter(Language=="Sesotho", (Type %in% c("Real"))))$AUC)))
+
+# Variation in AUC for Optimized Grammars
+sd(((data_ %>% filter(Language=="Japanese", (Type %in% c("Optimized"))))$AUC))
 
 
-
-
-
-
+# Variation in AUC for Optimized Grammars
+sd(((data_ %>% filter(Language=="Sesotho", (Type %in% c("Optimized"))))$AUC))
 
 
 
