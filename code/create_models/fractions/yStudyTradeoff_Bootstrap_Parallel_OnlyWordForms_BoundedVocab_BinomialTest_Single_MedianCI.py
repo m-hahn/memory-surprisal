@@ -7,6 +7,7 @@
 import sys
 
 language = sys.argv[1]
+trainingSize = sys.argv[2]
 
 def readTSV(x):
     header = next(x).strip().split("\t")
@@ -26,7 +27,7 @@ def readTSV(x):
           data[i][column] = vals[i]
     return (header, data)
 #try:
-with open("/u/scr/mhahn/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab_fraction5000.tsv", "r") as inFile:
+with open("/u/scr/mhahn/"+language+"_decay_after_tuning_onlyWordForms_boundedVocab_fraction"+trainingSize+".tsv", "r") as inFile:
      data = readTSV(inFile)
 #except IOError:
 #  print >> sys.stderr, ("ERROR nothing for this language? "+language)
