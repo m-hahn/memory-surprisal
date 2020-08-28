@@ -17,8 +17,8 @@ def readUDCorpus(language, partition):
            raise IOError
         basePath = basePaths[0]
         del basePaths[0]
-        files = os.listdir(basePath)
-        files = filter(lambda x:x.startswith("UD_"+language.replace("-Adap", "")), files)
+        files = sorted(os.listdir(basePath))
+        files = filter(lambda x:x.startswith("UD_"+language.replace("-Adap", "")), files) # add a "sorted()"
       data = []
       for name in files:
 

@@ -15,31 +15,32 @@ input_dropoutRate = float(sys.argv[9]) # 0.33
 batchSize = int(sys.argv[10])
 replaceWordsProbability = float(sys.argv[11])
 horizon = int(sys.argv[12]) if len(sys.argv) > 12 else 20
-trainingSize = int(sys.argv[13]) # 500, 5000
-devSize = 2000
-prescripedID = None
-gpuNumber = "GPU0"
+prescripedID = sys.argv[13] if len(sys.argv)> 13 else None
+gpuNumber = sys.argv[14] if len(sys.argv) > 14 else "GPU0"
 assert gpuNumber.startswith("GPU")
 gpuNumber = int(gpuNumber[3:])
-DOING_PARAMETER_SEARCH = False
+DOING_PARAMETER_SEARCH = (sys.argv[15] == "True") if len(sys.argv) > 15 else False
+
+trainingSize = int(sys.argv[16]) # 500, 5000
+devSize = 2000
 
 #########################################
 
-assert len(sys.argv) in [12,13,14, 15]
+assert len(sys.argv) == 17
 assert dropout_rate <= 0.5
 assert input_dropoutRate <= 0.5
 
 #########################################
 
 devSurprisalTable = [None] * horizon
-if prescripedID is not None:
+if prescripedID is not None and prescripedID != "None":
   myID = int(prescripedID)
 else:
   myID = random.randint(0,10000000)
 
 import sys
 print  >> sys.stderr, ("DOING PARAMETER SEARCH?", DOING_PARAMETER_SEARCH)
-assert not DOING_PARAMETER_SEARCH
+#assert not DOING_PARAMETER_SEARCH
 
 TARGET_DIR = "/u/scr/mhahn/deps/memory-need-neural-wordforms-fractions/"
 
