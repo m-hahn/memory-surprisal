@@ -20,7 +20,7 @@ data = data %>% mutate(Distance_ = ifelse(Order == "A (Short)" & Distance == 1.0
 
 data = data %>% mutate(colors=ifelse(Order != "A (Short)", "#F8766D", "#00BFC4"))
 
-plot = ggplot(data=data, aes(x=Distance_, y=MI, color=Order)) + 
+plot = ggplot(data=data, aes(x=Distance_, y=1.44*MI, color=Order)) + 
 	geom_step(data=data %>% filter(Order == "A (Short)"), size=2, linetype=2) + 
 	geom_step(data=data %>% filter(Order == "B (Long)"), size=2, linetype=2) + 
 	geom_step(data=data %>% filter(Distance_==2 | Distance_==3), size=2, linetype=1) + 
@@ -34,7 +34,7 @@ ggsave("figures/toy-mis.pdf")
 
 
 
-plot = ggplot(data=data, aes(x=Distance_, y=Distance * MI, color=Order)) + 
+plot = ggplot(data=data, aes(x=Distance_, y=Distance * 1.44 * MI, color=Order)) + 
 	geom_step(size=2, linetype=2) + 
 	geom_step(data=data %>% filter(Distance_==2 | Distance_==3), size=2, linetype=1) + 
 	geom_step(data=data %>% filter(Distance_==5 | Distance_==6), size=2, linetype=1) + 
@@ -60,7 +60,7 @@ data_ = data %>% select(Surprisal_, Memory_, Order)
 data_ = rbind(as.data.frame(data_), data.frame(Memory_=c(2.12, 2.35), Surprisal_=c(0.077, 0.077), Order=c("A (Short)", "A (Short)")))
 
 
-plot = ggplot(data=data_ %>% filter(Surprisal_ < 1.0), aes(x=Memory_, y=Surprisal_, color=Order)) + 
+plot = ggplot(data=data_ %>% filter(Surprisal_ < 1.0), aes(x=1.44*Memory_, y=1.44*Surprisal_, color=Order)) + 
 	geom_line(size=2, linetype=1) + 
 	geom_line(data=data_%>%filter(Memory_>1.7), size=2, linetype=1) + 
 	theme_bw() + 

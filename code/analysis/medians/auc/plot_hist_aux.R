@@ -3,9 +3,11 @@ library(dplyr)
 library(ggplot2)
 
 
-GREEN = "#009E73"
-BLUE  = "#0072B2"
-RED   = "#D55E00"
+ 
+
+RED = "#F8766D"
+GREEN  = "#00BA38"
+BLUE   = "#619CFF"
 
 
 data = read.csv("../../../../results/tradeoff/listener-curve-auc.tsv", sep="\t")
