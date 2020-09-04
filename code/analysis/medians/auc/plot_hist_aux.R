@@ -25,7 +25,7 @@ for(language in languages) {
    random = d2[d2$Type == "RANDOM_BY_TYPE",]
     barWidth = (max(d2$AUC) - min(d2$AUC))/30
 
-   plot = ggplot(d2, aes(x=AUC, fill=Type, color=Type))
+   plot = ggplot(d2, aes(x=1.442695*1.442695*AUC, fill=Type, color=Type))
 #   plot = plot + theme_classic()
    plot = plot + theme_bw()
    plot = plot + theme(axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text.y = element_blank(), axis.text.x = element_text(size=50))

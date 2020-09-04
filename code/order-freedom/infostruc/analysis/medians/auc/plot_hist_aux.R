@@ -27,7 +27,7 @@ for(language in languages) {
    random_infostruc = d2[d2$Type == "RANDOM_INFOSTRUC",]
    barWidth = (max(d2$AUC) - min(d2$AUC))/30
 
-   plot = ggplot(d2, aes(x=AUC, color=Type))
+   plot = ggplot(d2, aes(x=1.442695*1.442695*AUC, color=Type))
    plot = plot + theme_classic()
    plot = plot + theme(legend.position="none", axis.text=element_text(size=20), axis.title=element_text(size=20))
    plot = plot + geom_density(data= d2 %>% filter(Type == "RANDOM_INFOSTRUC"), aes(y=..scaled..), size=2, color="#00BFC4")     
