@@ -23,10 +23,9 @@ print(args)
 
 def f(a):
    x = list(map(float,a.split(" ")))[:args.horizon]
-
+   x = [min(x[:i+1]) for i in range(len(x))]
    decay = [(x[(i-1 if i>0 else 0)]-x[i]) for i in range(len(x))]
    assert len(decay) == args.horizon
-
    memory = sum([i*(x[(i-1 if i>0 else 0)]-x[i]) for i in range(len(x))])
 
    residual = x[args.horizon-1]
@@ -55,6 +54,8 @@ for fileName in files:
        continue
   if not fileName.startswith("estimates"):
      continue
+  if args.language not in fileName:
+      continue
   with open(path+fileName, "r") as inFile:
      result = inFile.read().strip().split("\n")
      if len(result) < 4:
