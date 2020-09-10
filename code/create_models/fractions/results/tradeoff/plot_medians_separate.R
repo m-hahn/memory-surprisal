@@ -6,8 +6,7 @@ library(ggplot2)
 
 # Plots medians with confidence intervals
 
-language="Russian"
-
+for(language in c("Czech", "English", "Russian", "Spanish")) {
 for(fraction in c(500, 2000)) {
 
   fullData = read.csv(paste(language, "_", "listener-curve-ci-median_", fraction, ".tsv", sep=""), sep="\t")
@@ -28,6 +27,7 @@ for(fraction in c(500, 2000)) {
 	  geom_line(aes(x=1.44*Memory, y=1.44*(UnigramCE-MedianLower)), linetype="dashed") +
 	  geom_line(aes(x=1.44*Memory, y=1.44*(UnigramCE-MedianUpper)), linetype="dashed") +
 	  theme(axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text = element_text(size=30), legend.position="none")
-  ggsave(plot, file=paste("figures/",language,"_", fraction, "-listener-surprisal-memory-MEDIANS_onlyWordForms_boundedVocab.pdf", sep=""), height=20, width=20)
+  ggsave(plot, file=paste("figures/",language,"_", fraction, "-listener-surprisal-memory-MEDIANS_onlyWordForms_boundedVocab.pdf", sep=""), height=4, width=4)
 
+}
 }
