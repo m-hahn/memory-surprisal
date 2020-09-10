@@ -17,8 +17,8 @@ import sys
 
 searchPath = "/u/scr/mhahn/deps/memory-need-neural-wordforms-fractions/"
 
-for language in ["Czech"]:
- for fraction in [500, 1000, 2000, 5000, 10000, 20000]:
+for language in ["English", "Russian", "Spanish"]:
+ for fraction in [500, 2000]:
    scriptName = "yCreateRandomModels_"+language+"_OnlyWordForms_BoundedVocab_Fraction_"+str(fraction)+".py"
 
    files = [x for x in os.listdir("/u/scr/mhahn/CODE/deps/") if x == scriptName]
