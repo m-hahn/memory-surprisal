@@ -6,5 +6,4 @@ pdflatex quantiles-table.tex
 pdflatex results-table-mle.tex
 pdflatex results-table-pcfg.tex
 pdflatex results-table.tex
-pdflatex results-table-word-level.tex
 

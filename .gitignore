@@ -12,3 +12,4 @@ commands
 *.out
 *.toc
 Rplots.pdf
+*.swn

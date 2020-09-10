@@ -22,7 +22,7 @@ data$Type = ifelse(data$Type %in% c("REVERSE"), "Reverse", as.character(data$Typ
 
 data_ = data %>% group_by(Distance, Type) %>% summarise(MI=median(MI))
 data_ = data_ %>% filter(Distance < 5)
-plot = ggplot(data_, aes(x=1+Distance, y=MI, color=Type)) + geom_line()
+plot = ggplot(data_, aes(x=1+Distance, y=1.44*MI, color=Type)) + geom_line()
 plot = plot + theme_bw()
 plot = plot + xlab("Distance") + ylab("Mutual Information")
 plot = plot + theme(axis.title.x=element_text(size=20), axis.title.y=element_text(size=20), axis.text = element_text(size=20))
@@ -41,7 +41,7 @@ data = data %>% filter(Script == "forWords_Japanese_RandomOrder_Normalized_FullD
 
 data = data %>% group_by(Type, Memory) %>% summarise(Surprisal=unigramCE-median(MI))
 
-plot = ggplot(data, aes(x=Memory, y=Surprisal, color=Type)) + geom_line() #size=2)
+plot = ggplot(data, aes(x=1.44*Memory, y=1.44*Surprisal, color=Type)) + geom_line() #size=2)
 plot = plot + theme_bw()
 plot = plot + theme(axis.title.x=element_text(size=20), axis.title.y=element_text(size=20), axis.text = element_text(size=20))
 plot = plot + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), legend.position="none")
